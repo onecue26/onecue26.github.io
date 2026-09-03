@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>광고 의뢰하기 — onecue</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="style.css">
+<style>
+/* 의뢰 화면 — 광고주가 보는 유일한 입력 화면이라 최대한 단순하게 */
+.form{display:grid;gap:22px;max-width:640px}
+.field label{display:block;font-weight:700;font-size:15px;margin-bottom:3px}
+.field .hint{display:block;color:var(--muted);font-size:13px;margin-bottom:9px}
+.field input[type=text], .field textarea, .field select{
+  width:100%;padding:11px 13px;border:1px solid var(--rule);border-radius:9px;
+  background:var(--panel);color:var(--ink);font-family:inherit;font-size:15px;
+  line-height:1.6}
+.field textarea{min-height:150px;resize:vertical}
+.field input:focus, .field textarea:focus, .field select:focus{
+  outline:2px solid var(--cue);outline-offset:1px;border-color:var(--cue)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:560px){.row{grid-template-columns:1fr}}
+.example{background:var(--sunk);border:1px solid var(--rule);border-radius:9px;
+  padding:13px 15px;font-size:13.5px;color:var(--muted);margin-top:9px}
+.example b{color:var(--ink);display:block;margin-bottom:3px;font-size:12.5px;
+  font-family:"JetBrains Mono",monospace;letter-spacing:.06em}
+.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.msg{font-size:14px}
+.msg.err{color:var(--cue)}
+.msg.ok{color:var(--live)}
+.after{background:var(--live-soft);border:1px solid var(--live);border-radius:11px;
+  padding:22px 24px;display:none}
+.after.on{display:block}
+.after h3{margin:0 0 6px;font-size:18px}
+.after p{margin:0 0 14px;color:var(--muted);font-size:14.5px}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="topbar-in">
+  <a class="mark" href="index.html"><span class="lamp"></span>onecue
+    <span class="sub">광고 기획 · 제작</span></a>
+  <div class="spacer"></div>
+  <span class="pill" id="conn"><span class="dot"></span>연결 확인 중</span>
+</div></div>
+
+<main>
+  <h2>광고 의뢰</h2>
+  <p class="lede"><b>제품과 하고 싶은 말만 적어주세요.</b>
+    전략·컨셉·콘티·영상은 저희가 만듭니다. 며칠 안에 <b>컨셉 5안</b>을 보내드리고,
+    마음에 드는 걸 고르시면 그대로 광고가 됩니다.</p>
+
+  <form class="form" id="form">
+    <div class="row">
+      <div class="field">
+        <label for="brand">브랜드 이름</label>
+        <span class="hint">제품에 적힌 이름 그대로</span>
+        <input type="text" id="brand" required placeholder="예 · 파도">
+      </div>
+      <div class="field">
+        <label for="product">제품 이름</label>
+        <span class="hint">무엇을 파시나요</span>
+        <input type="text" id="product" required placeholder="예 · 자몽 스파클링">
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="item">제품 설명</label>
+      <span class="hint">아는 대로 편하게 적어주세요. 문장이 아니어도 됩니다.</span>
+      <textarea id="item" required
+        placeholder="어떤 제품인지 · 뭐가 다른지 · 누가 마시면 좋은지 · 포장에 뭐라고 적혀 있는지"></textarea>
+      <div class="example"><b>이렇게 적으시면 됩니다</b>
+        250ml 슬림캔 자몽 탄산수. 무가당이라 뒷맛이 안 남는다.
+        여름에 시원하게 마시는 용도. 캔에 파도 그림이 그려져 있음.</div>
+    </div>
+
+    <div class="field">
+      <label for="goal">이 광고로 하고 싶은 것</label>
+      <span class="hint">한 줄이면 충분합니다</span>
+      <input type="text" id="goal" placeholder="예 · 여름 성수기에 신제품을 알리고 싶다">
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for="target">누구에게</label>
+        <span class="hint">비워두시면 저희가 정합니다</span>
+        <input type="text" id="target" placeholder="예 · 20~40대 직장인">
+      </div>
+      <div class="field">
+        <label for="runtime">길이</label>
+        <span class="hint">보통 15초 또는 30초입니다</span>
+        <select id="runtime">
+          <option value="15">15초 — 숏폼·디지털</option>
+          <option value="30" selected>30초 — TV·온라인 본편</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" type="submit" id="go">의뢰하기</button>
+      <a class="btn ghost" href="index.html">취소</a>
+      <span class="msg" id="msg"></span>
+    </div>
+  </form>
+
+  <div class="after" id="after">
+    <h3>의뢰가 접수됐습니다</h3>
+    <p>제품 설명을 읽고 전략과 컨셉 5안을 만듭니다.
+      진행 상황은 아래 주소에서 계속 확인하실 수 있습니다.</p>
+    <a class="btn" id="afterLink" href="#">진행 상황 보기 →</a>
+  </div>
+
+  <footer><span>onecue · 데모</span><span class="mono" id="stamp"></span></footer>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+(function () {
+  "use strict";
+  var cfg = window.ONECUE || {}, db = null;
+  function el(id){ return document.getElementById(id); }
+  function setConn(k,t){ var p=el("conn"); p.className="pill"+(k?" "+k:"");
+    p.innerHTML='<span class="dot"></span>'+t; }
+
+  el("stamp").textContent = new Date().toISOString().slice(0,16).replace("T"," ");
+
+  if (!window.supabase || !cfg.supabaseUrl) { setConn("bad","연결 설정 없음"); }
+  else { db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+         setConn("ok","연결됨"); }
+
+  // slug — 날짜 + 브랜드 + 제품. 사람이 읽을 수 있게 만든다
+  function slugify(brand, product) {
+    var d = new Date(), p = function(n){ return String(n).padStart(2,"0"); };
+    var stamp = String(d.getFullYear()).slice(2) + p(d.getMonth()+1) + p(d.getDate());
+    var name = (brand + "_" + product).trim().replace(/\s+/g, "_").slice(0, 40);
+    return stamp + "_" + name;
+  }
+
+  el("form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (!db) { el("msg").className="msg err"; el("msg").textContent="연결이 안 돼 있습니다"; return; }
+
+    var brand = el("brand").value.trim();
+    var product = el("product").value.trim();
+    var item = el("item").value.trim();
+    var runtime = parseInt(el("runtime").value, 10);
+    // 컷 수는 러닝타임에서 도출한다. 광고주가 정하는 값이 아니다
+    var cuts = runtime === 15 ? 12 : 16;
+    var slug = slugify(brand, product);
+
+    el("go").disabled = true;
+    el("msg").className = "msg";
+    el("msg").textContent = "보내는 중…";
+
+    db.from("clients").select("id").eq("name", brand).maybeSingle()
+      .then(function (r) {
+        if (r.data) return r.data;
+        return db.from("clients").insert({ name: brand }).select("id").single()
+          .then(function (x) { return x.data; });
+      })
+      .then(function (client) {
+        return db.from("projects").insert({
+          client_id: client.id, slug: slug, brand: brand, product: product,
+          running_sec: runtime, cut_count: cuts, aspect: runtime === 15 ? "9:16" : "16:9",
+          step: "brief", state: "pending"
+        }).select("id,slug").single();
+      })
+      .then(function (r) {
+        if (r.error) throw r.error;
+        var pid = r.data.id;
+        return db.from("briefs").insert({
+          project_id: pid, raw: item, goal: el("goal").value.trim() || null,
+          target: el("target").value.trim() || null,
+          format: runtime === 15 ? "숏폼 15초" : "TVC 30초"
+        }).then(function () {
+          // 작업 큐에 넣는다 — 이걸 보고 우리가 전략·컨셉을 만든다
+          return db.from("jobs").insert({
+            project_id: pid, step: "facts", kind: "text",
+            request: { note: "새 의뢰", brand: brand, product: product, item: item }
+          });
+        }).then(function () { return r.data.slug; });
+      })
+      .then(function (slug) {
+        el("form").style.display = "none";
+        el("after").classList.add("on");
+        el("afterLink").href = "project.html?slug=" + encodeURIComponent(slug);
+      })
+      .catch(function (err) {
+        el("go").disabled = false;
+        el("msg").className = "msg err";
+        el("msg").textContent = "보내지 못했습니다 — " + (err.message || err);
+      });
+  });
+})();
+</script>
+</body>
+</html>

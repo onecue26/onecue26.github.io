@@ -1,11 +1,7 @@
-// onecue — 첫 화면
+// onecue — 목록 화면
 //
-// 하는 일은 셋뿐이다.
-//   1. Supabase 에 실제로 붙는지 확인해서 상단에 표시한다
-//   2. 진행 중인 건(projects)을 불러와 보여준다
-//   3. 표 12개가 살아 있는지 하나씩 찔러보고 표시한다
-//
-// 빌드 도구를 쓰지 않는다. 이 파일이 그대로 브라우저에서 돈다.
+// 진행 중인 건을 불러와 「지금 어느 단계인지 · 누가 움직일 차례인지」를 보여준다.
+// 파이프라인 그림만 있고 데이터가 없으면 전시물이지 도구가 아니다.
 
 (function () {
   "use strict";
@@ -13,53 +9,20 @@
   var cfg = window.ONECUE || {};
   var db = null;
 
-  // 스키마에 있는 표. 순서는 파이프라인이 흐르는 순서에 맞췄다
-  var TABLES = [
-    "clients", "projects", "briefs", "product_facts", "strategies",
-    "concepts", "developments", "cuts", "assets", "jobs",
-    "approvals", "events",
+  var STEPS = [
+    ["brief", "브리프 접수"], ["facts", "제품 팩트"], ["strategy", "전략"],
+    ["concepts", "컨셉 5안"], ["develop", "전개·연출"], ["storyboard", "콘티"],
+    ["anchors", "앵커 이미지"], ["video", "영상"], ["deliver", "수선·납품"],
   ];
+  var STEP_IDX = {};
+  STEPS.forEach(function (s, i) { STEP_IDX[s[0]] = i; });
+  var STEP_NAME = {};
+  STEPS.forEach(function (s) { STEP_NAME[s[0]] = s[1]; });
 
-  var STEP_LABEL = {
-    brief: "브리프 접수", facts: "제품 팩트", strategy: "전략",
-    concepts: "컨셉 5안", develop: "전개·연출", storyboard: "콘티",
-    anchors: "앵커 이미지", video: "영상", deliver: "수선·납품",
-  };
-  var STATE_LABEL = {
-    idle: "대기", pending: "진행 중", ready: "검토 대기",
-    timeout: "시간 초과", error: "오류",
-  };
+  // 사람이 반드시 개입하는 자리
+  var GATES = { strategy: "전략 검토", concepts: "5안 선택", storyboard: "콘티 승인" };
 
   function el(id) { return document.getElementById(id); }
-
-  function setConn(kind, text) {
-    var p = el("conn");
-    p.className = "pill" + (kind ? " " + kind : "");
-    p.innerHTML = '<span class="dot"></span>' + text;
-  }
-
-  // ── 진행 중인 건 ────────────────────────────────────────────────────────
-  function renderProjects(rows) {
-    var box = el("projects");
-    if (!rows || !rows.length) {
-      box.innerHTML =
-        '<div class="empty"><span class="big">아직 등록된 건이 없습니다</span>' +
-        "브리프가 들어오면 여기에 쌓입니다.</div>";
-      return;
-    }
-    box.innerHTML = rows.map(function (r) {
-      var title = [r.brand, r.product].filter(Boolean).join(" ") || r.slug;
-      var meta = [
-        STEP_LABEL[r.step] || r.step,
-        STATE_LABEL[r.state] || r.state,
-        (r.running_sec || 0) + "초",
-        (r.cut_count || 0) + "컷",
-      ].join(" · ");
-      return '<div class="proj"><div><div class="name">' + esc(title) +
-        '</div><div class="meta mono">' + esc(meta) +
-        '</div></div><span class="pill">' + esc(r.aspect || "") + "</span></div>";
-    }).join("");
-  }
 
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
@@ -67,59 +30,72 @@
     });
   }
 
-  // ── 표가 살아 있는지 ────────────────────────────────────────────────────
-  // RLS 로 막힌 표는 빈 배열이 오고, 없는 표는 오류가 온다. 그래서 존재 확인용으로만 쓴다
-  function renderTables(results) {
-    el("tables").innerHTML = results.map(function (r) {
-      return '<span class="tbl ' + (r.ok ? "ok" : "bad") + '">' + esc(r.name) +
-        (r.ok ? "" : " ✕") + "</span>";
-    }).join("");
+  function setConn(kind, text) {
+    var p = el("conn");
+    p.className = "pill" + (kind ? " " + kind : "");
+    p.innerHTML = '<span class="dot"></span>' + esc(text);
   }
 
-  function probe(name) {
-    return db.from(name).select("*", { count: "exact", head: true })
-      .then(function (res) { return { name: name, ok: !res.error }; })
-      .catch(function () { return { name: name, ok: false }; });
+  // 진행 막대 — 9칸 중 몇 칸까지 왔나
+  function bar(step) {
+    var at = STEP_IDX[step] == null ? 0 : STEP_IDX[step];
+    return '<span class="bar">' + STEPS.map(function (s, i) {
+      var cls = i < at ? "done" : (i === at ? "now" : "");
+      return '<i class="' + cls + '" title="' + esc(s[1]) + '"></i>';
+    }).join("") + "</span>";
   }
 
-  // ── 시작 ────────────────────────────────────────────────────────────────
+  function card(r) {
+    var title = [r.brand, r.product].filter(Boolean).join(" ") || r.slug;
+    var waiting = r.state === "ready" && GATES[r.step];
+    var badge = waiting
+      ? '<span class="tag hold">' + esc(GATES[r.step]) + " 대기</span>"
+      : '<span class="tag calm">' + esc(STEP_NAME[r.step] || r.step) + "</span>";
+    var meta = [
+      (r.running_sec || 0) + "초",
+      (r.cut_count || 0) + "컷",
+      r.aspect || "",
+    ].filter(Boolean).join(" · ");
+
+    return '<a class="proj" href="project.html?slug=' + encodeURIComponent(r.slug) + '">' +
+      '<div class="proj-main"><div class="name">' + esc(title) + "</div>" +
+      '<div class="meta mono">' + esc(meta) + "</div>" +
+      bar(r.step) + "</div>" +
+      '<div class="proj-side">' + badge + '<span class="go">열기 →</span></div></a>';
+  }
+
   function boot() {
     el("stamp").textContent = new Date().toISOString().slice(0, 16).replace("T", " ");
 
-    if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) {
-      setConn("bad", "설정 없음");
-      renderProjects([]);
+    if (!cfg.supabaseUrl || !window.supabase) {
+      setConn("bad", "연결 설정 없음");
       return;
     }
-    if (!window.supabase || !window.supabase.createClient) {
-      setConn("bad", "라이브러리 로드 실패");
-      renderProjects([]);
-      return;
-    }
-
     db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    window.ONECUE_DB = db;
 
     db.from("projects")
       .select("slug,brand,product,step,state,running_sec,cut_count,aspect")
       .order("updated_at", { ascending: false })
       .then(function (res) {
+        var box = el("projects");
         if (res.error) {
           setConn("bad", "연결 실패");
-          el("projects").innerHTML =
-            '<div class="empty"><span class="big">불러오지 못했습니다</span>' +
+          box.innerHTML = '<div class="empty"><span class="big">불러오지 못했습니다</span>' +
             esc(res.error.message) + "</div>";
           return;
         }
-        setConn("ok", "연결됨 · " + res.data.length + "건");
-        renderProjects(res.data);
+        setConn("ok", "연결됨");
+        if (!res.data.length) {
+          box.innerHTML = '<div class="empty"><span class="big">아직 등록된 건이 없습니다</span>' +
+            "광고주 요청이 들어오면 <b>새 건 등록</b>으로 시작하세요.</div>";
+          return;
+        }
+        box.innerHTML = res.data.map(card).join("");
       });
-
-    Promise.all(TABLES.map(probe)).then(renderTables);
   }
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", boot);
-  } else {
-    boot();
-  }
+  } else { boot(); }
 })();
