@@ -225,7 +225,10 @@
           el("main").innerHTML =
             '<div class="hero"><div><h1>' + esc(title) + "</h1>" +
               '<div class="sub mono">' + esc(P.slug) + " · " + P.running_sec +
-              "초 · " + P.cut_count + "컷 · " + esc(P.aspect) + "</div>" +
+              "초 · " + P.cut_count + "컷 · " +
+              esc((P.aspects && P.aspects.length) ? P.aspects.join(" / ") : P.aspect) +
+              ((P.channels && P.channels.length) ? " · " + esc(P.channels.join(" ")) : "") +
+              "</div>" +
               bar(P.step) + "</div></div>" +
             secGate(P, x[5].data) +
             secConcepts(x[2].data, P.step === "concepts" && P.state === "ready") +

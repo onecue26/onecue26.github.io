@@ -51,10 +51,11 @@
     var badge = waiting
       ? '<span class="tag hold">' + esc(GATES[r.step]) + " 대기</span>"
       : '<span class="tag calm">' + esc(STEP_NAME[r.step] || r.step) + "</span>";
+    var asp = (r.aspects && r.aspects.length) ? r.aspects.join(" / ") : (r.aspect || "");
     var meta = [
       (r.running_sec || 0) + "초",
       (r.cut_count || 0) + "컷",
-      r.aspect || "",
+      asp,
     ].filter(Boolean).join(" · ");
 
     return '<a class="proj" href="project.html?slug=' + encodeURIComponent(r.slug) + '">' +
@@ -75,7 +76,7 @@
     window.ONECUE_DB = db;
 
     db.from("projects")
-      .select("slug,brand,product,step,state,running_sec,cut_count,aspect")
+      .select("slug,brand,product,step,state,running_sec,cut_count,aspect,aspects")
       .order("updated_at", { ascending: false })
       .then(function (res) {
         var box = el("projects");
