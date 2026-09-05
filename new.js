@@ -6,7 +6,7 @@
 (function () {
   "use strict";
 
-  var cfg = window.ONECUE || {}, db = null;
+  var cfg = window.ONECUE || {}, db = null, ME = null;
 
   // 길이 → 컷 수. ad-playbook _LENGTH_MAP (MONF 11편 실측) 에서 가져온 값이라
   // 임의로 정하지 않는다. DB 의 cuts_for() 함수와 같은 규칙이다
@@ -135,6 +135,25 @@
     return stamp + "_" + name + "_" + Math.random().toString(36).slice(2, 5);
   }
 
+  // 의뢰는 단발성 문의가 아니다. 광고주는 5안을 고르고 콘티를 승인하러 반드시 돌아온다.
+  // 그래서 로그인을 먼저 받는다 — 대신 계정 이메일이 곧 연락처라 폼이 짧아진다
+  function gate() {
+    return db.auth.getUser().then(function (r) {
+      var user = r.data && r.data.user;
+      if (!user) {
+        location.replace("login.html?next=new.html");
+        return null;
+      }
+      var f = el("email");
+      f.value = user.email;
+      f.readOnly = true;
+      f.title = "로그인한 계정의 이메일입니다";
+      el("emailHint").textContent = "로그인한 계정 — 여기로 결과를 보냅니다";
+      setConn("ok", user.email);
+      return user;
+    });
+  }
+
   function boot() {
     el("stamp").textContent = new Date().toISOString().slice(0, 16).replace("T", " ");
     showDerived();
@@ -146,9 +165,13 @@
 
     if (!window.supabase || !cfg.supabaseUrl) { setConn("bad", "연결 설정 없음"); return; }
     db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
-    setConn("ok", "연결됨");
+    setConn("ok", "확인 중");
 
-    el("form").addEventListener("submit", submit);
+    gate().then(function (user) {
+      if (!user) return;
+      ME = user;
+      el("form").addEventListener("submit", submit);
+    });
   }
 
   function submit(e) {
@@ -173,7 +196,8 @@
     db.from("clients").select("id").eq("name", company).maybeSingle()
       .then(function (r) {
         if (r.data) return r.data;
-        return db.from("clients").insert({ name: company, company: company })
+        return db.from("clients")
+          .insert({ name: company, company: company, owner_id: ME ? ME.id : null })
           .select("id").single().then(function (x) { return x.data; });
       })
       .then(function (client) {

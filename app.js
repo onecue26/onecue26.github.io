@@ -82,9 +82,45 @@
     }).join("");
   }
 
+  // 로그인했으면 계정 기준으로 내 건을 찾는다. 브라우저를 바꿔도 따라온다.
+  // 로그인 전이라면 이 브라우저에 남겨둔 기록(localStorage)으로 대신한다
+  function loadMine(user) {
+    if (!user) { renderMine(); return; }
+    db.from("contacts").select("project_id,projects(slug,brand,product,step,state)")
+      .eq("email", user.email)
+      .then(function (r) {
+        var rows = (r.data || []).map(function (c) { return c.projects; }).filter(Boolean);
+        if (!rows.length) { renderMine(); return; }
+        el("mineWrap").hidden = false;
+        el("mine").innerHTML = rows.map(function (p) {
+          var waiting = p.state === "ready" && GATES[p.step];
+          return '<a class="proj" href="project.html?slug=' + encodeURIComponent(p.slug) + '">' +
+            '<div class="proj-main"><div class="name">' +
+            esc([p.brand, p.product].filter(Boolean).join(" ")) + "</div>" +
+            '<div class="meta mono">' + esc(STEP_NAME[p.step] || p.step) + "</div>" +
+            bar(p.step) + "</div><div class=\"proj-side\">" +
+            (waiting ? '<span class="tag hold">' + esc(GATES[p.step]) + " 대기</span>" : "") +
+            '<span class="go">열기 →</span></div></a>';
+        }).join("");
+      });
+  }
+
+  function whoami() {
+    return db.auth.getUser().then(function (r) {
+      var user = r.data && r.data.user;
+      if (!user) return null;
+      el("me").textContent = user.email;
+      el("me").href = "login.html";
+      db.from("profiles").select("is_admin").eq("id", user.id).maybeSingle()
+        .then(function (p) {
+          if (p.data && p.data.is_admin) el("adminBtn").hidden = false;
+        });
+      return user;
+    });
+  }
+
   function boot() {
     el("stamp").textContent = new Date().toISOString().slice(0, 16).replace("T", " ");
-    renderMine();
 
     if (!cfg.supabaseUrl || !window.supabase) {
       setConn("bad", "연결 설정 없음");
@@ -92,6 +128,7 @@
     }
     db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
     window.ONECUE_DB = db;
+    whoami().then(loadMine);
 
     db.from("projects")
       .select("slug,brand,product,step,state,running_sec,cut_count,aspect,aspects")
