@@ -17,6 +17,33 @@
   // 이 단계로 옮기면 광고주가 판단할 차례가 된다
   var GATE = { strategy: "검토", concepts: "선택", storyboard: "승인" };
 
+  // 단계별로 회신 메일 문구가 다르다. 지금은 자동 발송이 없어 초안만 열어준다
+  var MAIL = {
+    strategy: ["전략 방향을 보내드립니다", "정리한 전략을 아래에서 확인해 주세요."],
+    concepts: ["컨셉 5안이 준비됐습니다", "다섯 가지 방향을 준비했습니다. 아래에서 보시고 하나를 골라 주세요."],
+    storyboard: ["콘티가 준비됐습니다", "컷 구성을 아래에서 확인하시고 승인해 주세요."],
+    anchors: ["제작에 들어갑니다", "승인해 주신 콘티대로 제작을 시작했습니다."],
+    deliver: ["완성본을 보내드립니다", "작업이 끝났습니다. 아래에서 확인해 주세요."],
+  };
+
+  function mailto(p, link) {
+    var m = MAIL[p.step] || ["진행 상황을 알려드립니다", "아래에서 확인하실 수 있습니다."];
+    var name = [p.brand, p.product].filter(Boolean).join(" ");
+    var body = [
+      (p.who ? p.who.name + "님, " : "") + "안녕하세요. onecue 입니다.",
+      "",
+      "「" + name + "」 " + m[1],
+      "",
+      link,
+      "",
+      "확인하시고 회신 주시면 이어서 진행하겠습니다.",
+      "감사합니다.",
+    ].join("\n");
+    return "mailto:" + encodeURIComponent(p.who ? p.who.email : "") +
+      "?subject=" + encodeURIComponent("[onecue] " + name + " — " + m[0]) +
+      "&body=" + encodeURIComponent(body);
+  }
+
   function el(id) { return document.getElementById(id); }
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
@@ -90,13 +117,23 @@
           }).join("") + "</div>"
         : "";
 
+      // 회신은 아직 자동이 아니다 — 누르면 메일 앱이 제목·본문까지 채워진 채로 열린다
+      var link = location.href.replace(/admin\.html.*$/, "") +
+        "project.html?slug=" + encodeURIComponent(p.slug);
+      var who = p.who ? '<div class="who">' +
+        "<b>" + esc(p.who.name) + "</b> " + esc(p.who.title || "") +
+        ' · <a href="mailto:' + esc(p.who.email) + '">' + esc(p.who.email) + "</a>" +
+        (p.who.phone ? " · " + esc(p.who.phone) : "") +
+        ' <a class="btn ghost mailbtn" href="' + mailto(p, link) + '">회신 메일 쓰기</a>' +
+        "</div>" : "";
+
       return '<div class="wrk"><div class="top"><div>' +
         '<div class="name">' + esc([p.brand, p.product].filter(Boolean).join(" ")) + "</div>" +
         '<div class="meta">' + esc(p.slug) + " · " + p.running_sec + "초 · " +
         p.cut_count + "컷 · " + esc((p.aspects || []).join("/")) + "</div>" +
         '<div class="have">' + have + "</div></div>" +
         '<a class="btn ghost" href="project.html?slug=' + encodeURIComponent(p.slug) +
-        '">광고주 화면 →</a></div>' + files +
+        '">광고주 화면 →</a></div>' + who + files +
         '<div class="steps"><span class="lbl">단계를 옮긴다</span>' + buttons + "</div></div>";
     }).join("") || '<div class="empty">진행 중인 건이 없습니다</div>';
 
@@ -161,17 +198,46 @@
         // 광고주가 올린 파일은 개수만이 아니라 실물을 봐야 한다
         db.from("assets").select("project_id,role,url,mime,bytes")
           .eq("kind", "product_ref").in("project_id", ids),
+        // 회신을 보내려면 연락처가 보여야 한다. 로그인한 관리자만 읽힌다
+        db.from("contacts").select("project_id,name,email,phone,title")
+          .in("project_id", ids),
       ]).then(function (out) {
-        var counts = out[0], files = out[1].data || [];
+        var counts = out[0], files = out[1].data || [], people = out[2].data || [];
         rows.forEach(function (r) {
           tables.forEach(function (t, i) {
             var d = counts[i].data || [];
             r[t[1]] = d.filter(function (x) { return x.project_id === r.id; }).length;
           });
           r.files = files.filter(function (f) { return f.project_id === r.id; });
+          r.who = people.filter(function (c) { return c.project_id === r.id; })[0] || null;
         });
         renderWork(rows);
       });
+    });
+  }
+
+  // 이 화면은 관리자만 본다. 주소만 알면 아무나 단계를 바꿀 수 있으면 안 된다
+  function gate() {
+    return db.auth.getUser().then(function (r) {
+      var user = r.data && r.data.user;
+      if (!user) {
+        location.replace("login.html?next=admin.html");
+        return false;
+      }
+      return db.from("profiles").select("is_admin,email").eq("id", user.id).maybeSingle()
+        .then(function (p) {
+          if (!p.data || !p.data.is_admin) {
+            document.querySelector("main").innerHTML =
+              '<div class="empty"><span class="big">관리자만 볼 수 있는 화면입니다</span>' +
+              esc(user.email) + " 계정에는 권한이 없습니다.<br><br>" +
+              '<a class="btn ghost" href="index.html">첫 화면으로</a> ' +
+              '<a class="btn ghost" href="login.html">다른 계정으로 로그인</a></div>';
+            setConn("bad", "권한 없음");
+            return false;
+          }
+          setConn("ok", esc(p.data.email));
+          return true;
+        });
     });
   }
 
@@ -179,7 +245,10 @@
     if (!window.supabase || !cfg.supabaseUrl) { setConn("bad", "연결 설정 없음"); return; }
     db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
     el("reload").addEventListener("click", load);
-    load();
+    el("logout").addEventListener("click", function () {
+      db.auth.signOut().then(function () { location.replace("login.html"); });
+    });
+    gate().then(function (ok) { if (ok) load(); });
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);

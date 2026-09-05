@@ -41,6 +41,13 @@
 .steps .lbl{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--faint);
   align-self:center;margin-right:2px}
 
+/* 연락처 — 로그인한 관리자에게만 보인다 */
+.wrk .who{border-top:1px solid var(--rule);padding-top:11px;font-size:13.5px;
+  color:var(--muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.wrk .who b{color:var(--ink)}
+.wrk .who a{color:var(--cue)}
+.wrk .who .mailbtn{margin-left:auto;font-size:12.5px;padding:5px 11px}
+
 /* 광고주가 올린 파일 — 눌러서 받는다 */
 .files{display:flex;flex-wrap:wrap;gap:9px;align-items:center;
   border-top:1px solid var(--rule);padding-top:11px}
@@ -68,6 +75,7 @@
   <div class="spacer"></div>
   <span class="pill" id="conn"><span class="dot"></span>연결 확인 중</span>
   <button class="btn ghost" id="reload">새로고침</button>
+  <button class="btn ghost" id="logout">로그아웃</button>
 </div></div>
 
 <main>
@@ -81,8 +89,9 @@
   <p class="note">광고주가 <b>의뢰하기</b>를 누르면 이메일이 아니라 <b>여기로 들어옵니다.</b>
     단계 버튼을 누르면 광고주 화면이 바로 바뀝니다 —
     <b>전략·5안·콘티</b>는 광고주가 판단할 자리라 그 단계로 옮기면 광고주 쪽에 버튼이 뜹니다.<br><br>
-    <b>연락처는 여기 안 보입니다.</b> 개인정보라 공개 키로는 못 읽게 막아뒀습니다.
-    로그인을 붙이면 그때 이 화면에 나옵니다.</p>
+    <b>회신은 아직 자동이 아닙니다.</b> <b>회신 메일 쓰기</b>를 누르면 메일 앱이 열리고
+    제목·본문·링크가 단계에 맞게 채워져 있습니다. 확인하고 보내시면 됩니다.<br><br>
+    연락처는 <b>로그인한 관리자에게만</b> 보입니다. 공개 키로는 여전히 못 읽습니다.</p>
 
   <footer><span>onecue · 관리자</span><span class="mono" id="stamp"></span></footer>
 </main>
