@@ -1,10 +1,17 @@
-// onecue — 건 상세
+﻿// onecue — 건 상세
 //
 // 광고주가 보는 화면이다. 지금 어디까지 왔는지 보여주고,
 // 판단할 자리(5안 선택 · 콘티 승인)에서만 버튼을 띄운다.
 
 (function () {
   "use strict";
+
+  // 접속은 한 페이지에 하나만 만든다. 두 개면 로그인 상태를 서로 다르게 본다
+  function shared() {
+    return window.ONECUE_DB ||
+      (window.ONECUE_DB = window.supabase.createClient(
+        window.ONECUE.supabaseUrl, window.ONECUE.supabaseAnonKey));
+  }
 
   var cfg = window.ONECUE || {}, db = null, P = null;
 
@@ -323,7 +330,7 @@
 
   function boot() {
     if (!window.supabase || !cfg.supabaseUrl) { setConn("bad", "연결 설정 없음"); return; }
-    db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    db = shared();
     load();
   }
 

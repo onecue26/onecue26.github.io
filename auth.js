@@ -1,4 +1,4 @@
-// onecue — 상단 바의 계정 표시 (모든 화면 공통)
+﻿// onecue — 상단 바의 계정 표시 (모든 화면 공통)
 //
 // 로그아웃 상태면 [로그인] 버튼 하나.
 // 로그인 상태면 계정 이메일과 [로그아웃] 버튼, 관리자면 [관리자] 링크까지.
@@ -12,8 +12,8 @@
   var slot = document.getElementById("acct");
   if (!slot || !window.supabase || !window.ONECUE) return;
 
-  var db = window.ONECUE_AUTH ||
-    (window.ONECUE_AUTH = window.supabase.createClient(
+  var db = window.ONECUE_DB ||
+    (window.ONECUE_DB = window.supabase.createClient(
       window.ONECUE.supabaseUrl, window.ONECUE.supabaseAnonKey));
 
   function esc(s) {

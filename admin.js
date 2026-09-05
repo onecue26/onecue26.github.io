@@ -1,4 +1,4 @@
-// onecue — 관리자 화면
+﻿// onecue — 관리자 화면
 //
 // 광고주가 「의뢰하기」를 누르면 이메일이 아니라 여기로 들어온다.
 // 하는 일은 둘 — ①새 의뢰를 본다 ②건의 단계를 옮긴다.
@@ -6,6 +6,13 @@
 
 (function () {
   "use strict";
+
+  // 접속은 한 페이지에 하나만 만든다. 두 개면 로그인 상태를 서로 다르게 본다
+  function shared() {
+    return window.ONECUE_DB ||
+      (window.ONECUE_DB = window.supabase.createClient(
+        window.ONECUE.supabaseUrl, window.ONECUE.supabaseAnonKey));
+  }
 
   var cfg = window.ONECUE || {}, db = null;
 
@@ -243,7 +250,7 @@
 
   function boot() {
     if (!window.supabase || !cfg.supabaseUrl) { setConn("bad", "연결 설정 없음"); return; }
-    db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    db = shared();
     // 로그아웃은 상단 바(auth.js)가 그린다. 여기서 또 붙잡지 않는다
     el("reload").addEventListener("click", load);
     gate().then(function (ok) { if (ok) load(); });

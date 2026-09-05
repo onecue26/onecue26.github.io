@@ -1,10 +1,17 @@
-// onecue — 목록 화면
+﻿// onecue — 목록 화면
 //
 // 진행 중인 건을 불러와 「지금 어느 단계인지 · 누가 움직일 차례인지」를 보여준다.
 // 파이프라인 그림만 있고 데이터가 없으면 전시물이지 도구가 아니다.
 
 (function () {
   "use strict";
+
+  // 접속은 한 페이지에 하나만 만든다. 두 개면 로그인 상태를 서로 다르게 본다
+  function shared() {
+    return window.ONECUE_DB ||
+      (window.ONECUE_DB = window.supabase.createClient(
+        window.ONECUE.supabaseUrl, window.ONECUE.supabaseAnonKey));
+  }
 
   var cfg = window.ONECUE || {};
   var db = null;
@@ -119,7 +126,7 @@
       setConn("bad", "연결 설정 없음");
       return;
     }
-    db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    db = shared();
     window.ONECUE_DB = db;
     whoami().then(loadMine);
 
