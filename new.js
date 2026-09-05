@@ -80,6 +80,54 @@
     return Promise.resolve(false);
   }
 
+  // ── 파일 ──────────────────────────────────────────────────────────────────
+  // 제품 실물 사진이 팩트를 교정한다 — PADO 에서 캔에 적힌 「무가당」을 읽고
+  // USP 가 추측에서 사실로 바뀌었다. 텍스트 브리프만으로는 못 잡던 것이다.
+  function previewFiles() {
+    var box = el("picked"), files = el("files").files;
+    box.innerHTML = "";
+    Array.prototype.forEach.call(files, function (f) {
+      var fig = document.createElement("figure");
+      var img = document.createElement("img");
+      if (f.type.indexOf("image/") === 0) {
+        img.src = URL.createObjectURL(f);
+        img.onload = function () { URL.revokeObjectURL(img.src); };
+      }
+      var cap = document.createElement("figcaption");
+      cap.textContent = f.name;
+      fig.appendChild(img); fig.appendChild(cap); box.appendChild(fig);
+    });
+  }
+
+  // 파일 이름은 추측 못 하게 무작위로 짓는다. 버킷이 공개라 이름이 곧 자물쇠다
+  function upload(projectId, file) {
+    var ext = (file.name.split(".").pop() || "bin").toLowerCase().slice(0, 8);
+    var key = projectId + "/" + Date.now().toString(36) +
+      Math.random().toString(36).slice(2, 10) + "." + ext;
+    return db.storage.from("uploads").upload(key, file, { contentType: file.type })
+      .then(function (r) {
+        if (r.error) throw r.error;
+        var url = db.storage.from("uploads").getPublicUrl(key).data.publicUrl;
+        return db.from("assets").insert({
+          project_id: projectId, kind: "product_ref", role: file.name,
+          storage_path: key, url: url, mime: file.type, bytes: file.size,
+          meta: { by: "client" },
+        });
+      });
+  }
+
+  function uploadAll(projectId) {
+    var files = Array.prototype.slice.call(el("files").files);
+    if (!files.length) return Promise.resolve(0);
+    var okCount = 0;
+    return files.reduce(function (chain, f, i) {
+      return chain.then(function () {
+        el("msg").textContent = "사진 올리는 중… (" + (i + 1) + "/" + files.length + ")";
+        return upload(projectId, f).then(function () { okCount++; });
+      });
+    }, Promise.resolve()).then(function () { return okCount; });
+  }
+
   function slugify(brand, product) {
     var d = new Date(), p = function (n) { return String(n).padStart(2, "0"); };
     var stamp = String(d.getFullYear()).slice(2) + p(d.getMonth() + 1) + p(d.getDate());
@@ -91,6 +139,7 @@
     el("stamp").textContent = new Date().toISOString().slice(0, 16).replace("T", " ");
     showDerived();
 
+    el("files").addEventListener("change", previewFiles);
     el("channels").addEventListener("change", syncAspects);
     el("runtimes").addEventListener("change", showDerived);
     el("aspects").addEventListener("change", showDerived);
@@ -162,7 +211,9 @@
         ]).then(function (res) {
           var bad = res.filter(function (r) { return r.error; })[0];
           if (bad) throw bad.error;
-          return ctx.project.slug;
+          // 사진은 마지막에. 실패해도 의뢰 자체는 이미 접수된 상태로 둔다
+          return uploadAll(pid).then(function () { return ctx.project.slug; },
+                                     function () { return ctx.project.slug; });
         });
       })
       .then(function (slug) {
