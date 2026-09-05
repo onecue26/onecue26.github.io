@@ -62,6 +62,17 @@ a{color:inherit;text-decoration:none}
 .btn:disabled{opacity:.5;cursor:default}
 .btn:focus-visible,a:focus-visible{outline:2px solid var(--cue);outline-offset:2px}
 
+/* 상단 바 계정 — 로그인 전엔 버튼 하나, 로그인하면 이름과 로그아웃 */
+.acct{display:inline-flex;align-items:center;gap:8px}
+.acct-em{font-size:13.5px;font-weight:700;color:var(--ink);max-width:170px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-decoration:none;
+  display:inline-flex;align-items:center;gap:6px}
+.acct-em:hover{color:var(--cue)}
+.acct-em em{font-style:normal;font-family:"JetBrains Mono",monospace;font-size:10px;
+  font-weight:700;letter-spacing:.06em;background:var(--cue);color:#fff;
+  padding:2px 6px;border-radius:4px}
+@media(max-width:640px){.acct-em{max-width:110px}}
+
 main{max-width:1080px;margin:0 auto;padding:30px 24px 96px}
 .lede{max-width:60ch;margin:0 0 30px;color:var(--muted);font-size:15.5px}
 .lede b{color:var(--ink);font-weight:700}
