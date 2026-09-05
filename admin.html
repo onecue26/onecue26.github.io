@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>관리자 — onecue</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="style.css">
+<style>
+/* 관리자 화면 — 훑고 조작하는 곳이라 정보 밀도를 우선한다 */
+.inbox{display:grid;gap:10px}
+.job{background:var(--panel);border:1px solid var(--rule);border-left:4px solid var(--cue);
+  border-radius:10px;padding:14px 16px;display:grid;
+  grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center}
+.job .who{font-weight:700;font-size:15.5px}
+.job .say{color:var(--muted);font-size:13.5px;margin-top:3px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.job .when{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--faint);
+  margin-top:5px}
+
+.wrk{background:var(--panel);border:1px solid var(--rule);border-radius:10px;
+  padding:14px 16px;display:grid;gap:12px}
+.wrk .top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:start}
+.wrk .name{font-weight:700;font-size:16px}
+.wrk .meta{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--muted);
+  margin-top:2px}
+.wrk .have{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.wrk .have span{font-family:"JetBrains Mono",monospace;font-size:11px;padding:2px 7px;
+  border-radius:5px;background:var(--sunk);border:1px solid var(--rule);color:var(--faint)}
+.wrk .have span.on{background:var(--live-soft);border-color:transparent;color:var(--live)}
+.steps{display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid var(--rule);padding-top:11px}
+.steps button{font-family:"JetBrains Mono",monospace;font-size:11.5px;padding:5px 10px;
+  border-radius:6px;border:1px solid var(--rule);background:var(--sunk);color:var(--muted);
+  cursor:pointer}
+.steps button:hover{border-color:var(--cue);color:var(--ink)}
+.steps button.at{background:var(--cue);border-color:var(--cue);color:#fff;font-weight:700}
+.steps button:disabled{opacity:.45;cursor:default}
+.steps .lbl{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--faint);
+  align-self:center;margin-right:2px}
+.note{font-size:13px;color:var(--muted);background:var(--sunk);border:1px solid var(--rule);
+  border-radius:9px;padding:12px 14px}
+.note b{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="topbar-in">
+  <a class="mark" href="index.html"><span class="lamp"></span>onecue
+    <span class="sub">관리자</span></a>
+  <div class="spacer"></div>
+  <span class="pill" id="conn"><span class="dot"></span>연결 확인 중</span>
+  <button class="btn ghost" id="reload">새로고침</button>
+</div></div>
+
+<main>
+  <h2>새로 들어온 의뢰</h2>
+  <div class="inbox" id="inbox"><div class="empty">불러오는 중</div></div>
+
+  <h2>진행 중</h2>
+  <div class="inbox" id="work"></div>
+
+  <h2>이 화면에 대해</h2>
+  <p class="note">광고주가 <b>의뢰하기</b>를 누르면 이메일이 아니라 <b>여기로 들어옵니다.</b>
+    단계 버튼을 누르면 광고주 화면이 바로 바뀝니다 —
+    <b>전략·5안·콘티</b>는 광고주가 판단할 자리라 그 단계로 옮기면 광고주 쪽에 버튼이 뜹니다.<br><br>
+    <b>연락처는 여기 안 보입니다.</b> 개인정보라 공개 키로는 못 읽게 막아뒀습니다.
+    로그인을 붙이면 그때 이 화면에 나옵니다.</p>
+
+  <footer><span>onecue · 관리자</span><span class="mono" id="stamp"></span></footer>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>
