@@ -63,6 +63,17 @@
 .after p b{color:var(--ink)}
 .myurl{background:var(--panel);border:1px solid var(--rule);border-radius:8px;
   padding:11px 13px;font-size:12.5px;word-break:break-all;color:var(--ink)}
+.field .hint b{color:var(--ink)}
+input[type=file]{width:100%;padding:10px 12px;border:1px dashed var(--rule);
+  border-radius:9px;background:var(--panel);color:var(--muted);font-family:inherit;
+  font-size:13.5px;cursor:pointer}
+input[type=file]:focus{outline:2px solid var(--cue);outline-offset:1px}
+.picked{display:flex;flex-wrap:wrap;gap:8px;margin-top:9px}
+.picked figure{margin:0;width:88px}
+.picked img{width:88px;height:88px;object-fit:cover;border-radius:8px;
+  border:1px solid var(--rule);display:block;background:var(--sunk)}
+.picked figcaption{font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--faint);
+  margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -106,6 +117,14 @@
           250ml 슬림캔 자몽 탄산수. 무가당이라 뒷맛이 안 남는다.
           여름에 시원하게 마시는 용도. 캔에 파도 그림이 그려져 있음.</div>
       </div>
+      <div class="field">
+        <label for="files">제품 사진 · 참고 이미지</label>
+        <span class="hint"><b>제품 실물 사진이 있으면 꼭 넣어주세요.</b>
+          포장에 적힌 문구까지 읽고 반영합니다. 여러 장 가능 · 장당 10MB 까지</span>
+        <input type="file" id="files" multiple accept="image/*,application/pdf">
+        <div class="picked" id="picked"></div>
+      </div>
+
       <div class="field">
         <label for="goal">이 광고로 하고 싶은 것</label>
         <span class="hint">한 줄이면 충분합니다</span>

@@ -79,13 +79,24 @@
           (at ? ' class="at" disabled' : "") + ">" + s[1] + g + "</button>";
       }).join("");
 
+      var files = (p.files || []).length
+        ? '<div class="files"><span class="lbl">광고주가 올린 것 ' + p.files.length + "</span>" +
+          p.files.map(function (f) {
+            var img = (f.mime || "").indexOf("image/") === 0;
+            return '<a href="' + esc(f.url) + '" target="_blank" rel="noopener" download>' +
+              (img ? '<img src="' + esc(f.url) + '" alt="' + esc(f.role) + '">'
+                   : '<span class="doc">PDF</span>') +
+              '<em>' + esc(f.role) + "</em></a>";
+          }).join("") + "</div>"
+        : "";
+
       return '<div class="wrk"><div class="top"><div>' +
         '<div class="name">' + esc([p.brand, p.product].filter(Boolean).join(" ")) + "</div>" +
         '<div class="meta">' + esc(p.slug) + " · " + p.running_sec + "초 · " +
         p.cut_count + "컷 · " + esc((p.aspects || []).join("/")) + "</div>" +
         '<div class="have">' + have + "</div></div>" +
         '<a class="btn ghost" href="project.html?slug=' + encodeURIComponent(p.slug) +
-        '">광고주 화면 →</a></div>' +
+        '">광고주 화면 →</a></div>' + files +
         '<div class="steps"><span class="lbl">단계를 옮긴다</span>' + buttons + "</div></div>";
     }).join("") || '<div class="empty">진행 중인 건이 없습니다</div>';
 
@@ -143,14 +154,21 @@
         ["briefs", "n_brief"], ["product_facts", "n_facts"], ["strategies", "n_strategy"],
         ["concepts", "n_concepts"], ["cuts", "n_cuts"], ["assets", "n_assets"],
       ];
-      return Promise.all(tables.map(function (t) {
-        return db.from(t[0]).select("project_id").in("project_id", ids);
-      })).then(function (counts) {
+      return Promise.all([
+        Promise.all(tables.map(function (t) {
+          return db.from(t[0]).select("project_id").in("project_id", ids);
+        })),
+        // 광고주가 올린 파일은 개수만이 아니라 실물을 봐야 한다
+        db.from("assets").select("project_id,role,url,mime,bytes")
+          .eq("kind", "product_ref").in("project_id", ids),
+      ]).then(function (out) {
+        var counts = out[0], files = out[1].data || [];
         rows.forEach(function (r) {
           tables.forEach(function (t, i) {
             var d = counts[i].data || [];
             r[t[1]] = d.filter(function (x) { return x.project_id === r.id; }).length;
           });
+          r.files = files.filter(function (f) { return f.project_id === r.id; });
         });
         renderWork(rows);
       });

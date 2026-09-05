@@ -104,6 +104,20 @@
     });
   }
 
+  // 광고주가 보낸 자료 — 잘 도착했는지 본인이 확인할 수 있어야 한다
+  function secFiles(assets) {
+    var f = (assets || []).filter(function (a) { return a.kind === "product_ref"; });
+    if (!f.length) return "";
+    return "<h2>보내주신 자료 " + f.length + "</h2><div class=\"files\">" +
+      f.map(function (a) {
+        var img = (a.mime || "").indexOf("image/") === 0;
+        return '<a href="' + esc(a.url) + '" target="_blank" rel="noopener">' +
+          (img ? '<img src="' + esc(a.url) + '" alt="' + esc(a.role) + '" loading="lazy">'
+               : '<span class="doc">PDF</span>') +
+          "<em>" + esc(a.role) + "</em></a>";
+      }).join("") + "</div>";
+  }
+
   function secStrategy(s) {
     if (!s) return "";
     return "<h2>전략</h2><div class=\"panel\"><dl class=\"kv\">" +
@@ -290,6 +304,7 @@
             secCuts(x[3].data, x[4].data) +
             secStrategy(x[1].data) +
             secBrief(x[0].data, canEditBrief(P)) +
+            secFiles(x[4].data) +
             '<footer><span><a href="index.html">← 목록</a></span>' +
             '<span class="mono">' + new Date().toISOString().slice(0, 16).replace("T", " ") +
             "</span></footer>";
