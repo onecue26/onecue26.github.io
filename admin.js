@@ -244,10 +244,8 @@
   function boot() {
     if (!window.supabase || !cfg.supabaseUrl) { setConn("bad", "연결 설정 없음"); return; }
     db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    // 로그아웃은 상단 바(auth.js)가 그린다. 여기서 또 붙잡지 않는다
     el("reload").addEventListener("click", load);
-    el("logout").addEventListener("click", function () {
-      db.auth.signOut().then(function () { location.replace("login.html"); });
-    });
     gate().then(function (ok) { if (ok) load(); });
   }
 
