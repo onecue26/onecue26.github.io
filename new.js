@@ -1,10 +1,17 @@
-// onecue — 광고 의뢰 화면
+﻿// onecue — 광고 의뢰 화면
 //
 // 광고주는 「아이템과 설명」만 넣는다. 전략·컨셉·콘티는 우리가 만든다.
 // 그래서 이 화면은 전문용어를 쓰지 않는다 — 컷 수·아크·앵글 같은 건 묻지 않는다.
 
 (function () {
   "use strict";
+
+  // 접속은 한 페이지에 하나만 만든다. 두 개면 로그인 상태를 서로 다르게 본다
+  function shared() {
+    return window.ONECUE_DB ||
+      (window.ONECUE_DB = window.supabase.createClient(
+        window.ONECUE.supabaseUrl, window.ONECUE.supabaseAnonKey));
+  }
 
   var cfg = window.ONECUE || {}, db = null, ME = null;
 
@@ -164,7 +171,7 @@
     el("aspects").addEventListener("change", showDerived);
 
     if (!window.supabase || !cfg.supabaseUrl) { setConn("bad", "연결 설정 없음"); return; }
-    db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    db = shared();
     setConn("ok", "확인 중");
 
     gate().then(function (user) {

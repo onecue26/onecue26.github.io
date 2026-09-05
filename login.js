@@ -1,4 +1,4 @@
-// onecue — 로그인
+﻿// onecue — 로그인
 //
 // 이메일 주소가 곧 아이디다. 별도 아이디를 만들지 않는다.
 // 「이메일 확인」을 꺼뒀기 때문에 가입하면 확인 메일 없이 바로 로그인된다
@@ -6,6 +6,13 @@
 
 (function () {
   "use strict";
+
+  // 접속은 한 페이지에 하나만 만든다. 두 개면 로그인 상태를 서로 다르게 본다
+  function shared() {
+    return window.ONECUE_DB ||
+      (window.ONECUE_DB = window.supabase.createClient(
+        window.ONECUE.supabaseUrl, window.ONECUE.supabaseAnonKey));
+  }
 
   var cfg = window.ONECUE || {}, db = null, mode = "in";
 
@@ -85,7 +92,7 @@
     el("stamp").textContent = new Date().toISOString().slice(0, 16).replace("T", " ");
 
     if (!window.supabase || !cfg.supabaseUrl) { setConn("bad", "연결 설정 없음"); return; }
-    db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    db = shared();
     setConn("ok", "연결됨");
 
     el("tabIn").addEventListener("click", function () { setMode("in"); });
