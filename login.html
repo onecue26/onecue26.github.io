@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>로그인 — onecue</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="style.css">
+<style>
+.box{max-width:400px;margin:0 auto}
+.tabs{display:flex;gap:0;border:1px solid var(--rule);border-radius:9px;overflow:hidden;
+  margin-bottom:22px}
+.tabs button{flex:1;padding:10px;border:0;background:var(--panel);color:var(--muted);
+  font-family:inherit;font-size:14px;font-weight:500;cursor:pointer}
+.tabs button.on{background:var(--cue);color:#fff;font-weight:700}
+.f{margin-bottom:16px}
+.f label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:5px;
+  font-family:"JetBrains Mono",monospace}
+.f input{width:100%;padding:11px 13px;border:1px solid var(--rule);border-radius:9px;
+  background:var(--panel);color:var(--ink);font-family:inherit;font-size:15px}
+.f input:focus{outline:2px solid var(--cue);outline-offset:1px;border-color:var(--cue)}
+.msg{font-size:13.5px;margin-top:12px;min-height:20px}
+.msg.err{color:var(--cue)}
+.msg.ok{color:var(--live)}
+.who{background:var(--panel);border:1px solid var(--rule);border-radius:11px;
+  padding:18px 20px;display:none}
+.who.on{display:block}
+.who .em{font-weight:700;font-size:16px}
+.who .rl{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--muted);
+  margin-top:2px}
+.who .actions{margin-top:14px}
+.hintbox{font-size:12.5px;color:var(--muted);background:var(--sunk);
+  border:1px solid var(--rule);border-radius:9px;padding:12px 14px;margin-top:18px}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="topbar-in">
+  <a class="mark" href="index.html"><span class="lamp"></span>onecue
+    <span class="sub">광고 기획 · 제작</span></a>
+  <div class="spacer"></div>
+  <span class="pill" id="conn"><span class="dot"></span>확인 중</span>
+</div></div>
+
+<main>
+  <div class="box">
+
+    <!-- 이미 로그인돼 있으면 이쪽만 보인다 -->
+    <div class="who" id="who">
+      <h2 style="margin-top:0">로그인됨</h2>
+      <div class="em" id="whoEmail"></div>
+      <div class="rl" id="whoRole"></div>
+      <div class="actions">
+        <a class="btn" id="goAdmin" href="admin.html" hidden>관리자 화면 →</a>
+        <a class="btn ghost" href="index.html">첫 화면</a>
+        <button class="btn ghost" id="logout">로그아웃</button>
+      </div>
+    </div>
+
+    <form id="form">
+      <h2>로그인</h2>
+      <div class="tabs">
+        <button type="button" id="tabIn" class="on">로그인</button>
+        <button type="button" id="tabUp">처음이신가요</button>
+      </div>
+      <div class="f">
+        <label for="email">이메일 — 이게 아이디입니다</label>
+        <input type="email" id="email" required autocomplete="email" placeholder="name@company.com">
+      </div>
+      <div class="f">
+        <label for="pw">비밀번호 — 6자 이상</label>
+        <input type="password" id="pw" required minlength="6" autocomplete="current-password">
+      </div>
+      <button class="btn" type="submit" id="go" style="width:100%;justify-content:center">
+        로그인</button>
+      <div class="msg" id="msg"></div>
+
+      <p class="hintbox"><b>광고 의뢰는 로그인 없이도 됩니다.</b>
+        로그인하면 넣으신 의뢰가 <b>기기를 바꿔도 그대로 보입니다.</b><br>
+        의뢰할 때 적으신 이메일과 같은 주소로 로그인하시면 자동으로 연결됩니다.</p>
+    </form>
+  </div>
+
+  <footer><span>onecue</span><span class="mono" id="stamp"></span></footer>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="login.js"></script>
+</body>
+</html>
