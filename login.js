@@ -30,6 +30,9 @@
     el("tabUp").className = m === "up" ? "on" : "";
     el("go").textContent = m === "in" ? "로그인" : "가입하고 시작하기";
     el("pw").setAttribute("autocomplete", m === "in" ? "current-password" : "new-password");
+    // 닉네임은 가입할 때만 묻는다. 이메일은 길어서 화면에 그대로 띄우기 나쁘다
+    el("nickWrap").hidden = (m !== "up");
+    el("nick").required = (m === "up");
     say("", "");
   }
 
@@ -44,14 +47,38 @@
     el("who").classList.add("on");
     el("whoEmail").textContent = user.email;
 
-    db.from("profiles").select("is_admin").eq("id", user.id).maybeSingle()
+    db.from("profiles").select("is_admin,name").eq("id", user.id).maybeSingle()
       .then(function (r) {
         var admin = r.data && r.data.is_admin;
+        var nick = (r.data && r.data.name) || "";
+        el("whoNick").textContent = nick || user.email;
+        el("nick2").value = nick;
         el("whoRole").textContent = admin ? "관리자" : "광고주";
         el("goAdmin").hidden = !admin;
         var n = nextUrl();
         if (n && (admin || n !== "admin.html")) location.replace(n);
       });
+
+    el("saveNick").addEventListener("click", function () {
+      var v = el("nick2").value.trim();
+      if (!v) {
+        el("nickMsg").className = "msg err";
+        el("nickMsg").textContent = "닉네임을 비울 수는 없습니다";
+        return;
+      }
+      el("nickMsg").className = "msg";
+      el("nickMsg").textContent = "저장 중…";
+      db.from("profiles").update({ name: v }).eq("id", user.id).then(function (r) {
+        if (r.error) {
+          el("nickMsg").className = "msg err";
+          el("nickMsg").textContent = "저장 실패 — " + r.error.message;
+          return;
+        }
+        el("nickMsg").className = "msg ok";
+        el("nickMsg").textContent = "바꿨습니다";
+        el("whoNick").textContent = v;
+      });
+    });
   }
 
   function boot() {
@@ -75,6 +102,9 @@
     el("form").addEventListener("submit", function (e) {
       e.preventDefault();
       var email = el("email").value.trim(), pw = el("pw").value;
+      var nick = el("nick").value.trim();
+      if (mode === "up" && !nick) { say("err", "닉네임을 넣어주세요."); return; }
+
       el("go").disabled = true;
       say("", mode === "in" ? "확인 중…" : "만드는 중…");
 
@@ -93,8 +123,14 @@
           say("ok", "메일함을 확인해 주세요. 확인 링크를 눌러야 로그인됩니다.");
           return;
         }
-        say("ok", "됐습니다.");
-        showWho(r.data.user);
+        var user = r.data.user;
+        var after = function () { say("ok", "됐습니다."); showWho(user); };
+        if (mode === "up") {
+          // 가입 직후엔 트리거가 방금 만든 profiles 행에 닉네임을 얹는다
+          db.from("profiles").update({ name: nick }).eq("id", user.id).then(after, after);
+        } else {
+          after();
+        }
       });
     });
 

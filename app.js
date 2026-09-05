@@ -105,18 +105,11 @@
       });
   }
 
+  // 상단 바의 계정 표시는 auth.js 가 그린다. 여기서는 누구인지만 알면 된다
   function whoami() {
     return db.auth.getUser().then(function (r) {
-      var user = r.data && r.data.user;
-      if (!user) return null;
-      el("me").textContent = user.email;
-      el("me").href = "login.html";
-      db.from("profiles").select("is_admin").eq("id", user.id).maybeSingle()
-        .then(function (p) {
-          if (p.data && p.data.is_admin) el("adminBtn").hidden = false;
-        });
-      return user;
-    });
+      return (r.data && r.data.user) || null;
+    }, function () { return null; });
   }
 
   function boot() {
