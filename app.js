@@ -65,8 +65,26 @@
       '<div class="proj-side">' + badge + '<span class="go">열기 →</span></div></a>';
   }
 
+  // 이 브라우저에서 넣은 의뢰를 되찾아 준다.
+  // 로그인이 없어서, 주소를 잃어버리면 다시 못 들어가는 문제를 이걸로 막는다
+  function renderMine() {
+    var list = [];
+    try { list = JSON.parse(localStorage.getItem("onecue.mine") || "[]"); } catch (e) { list = []; }
+    if (!list.length) return;
+    el("mineWrap").hidden = false;
+    el("mine").innerHTML = list.map(function (m) {
+      var when = new Date(m.at || Date.now());
+      return '<a class="proj" href="project.html?slug=' + encodeURIComponent(m.slug) + '">' +
+        '<div class="proj-main"><div class="name">' +
+        esc([m.brand, m.product].filter(Boolean).join(" ")) + "</div>" +
+        '<div class="meta mono">' + esc(when.toISOString().slice(0, 10)) + " 접수</div></div>" +
+        '<div class="proj-side"><span class="go">진행 상황 →</span></div></a>';
+    }).join("");
+  }
+
   function boot() {
     el("stamp").textContent = new Date().toISOString().slice(0, 16).replace("T", " ");
+    renderMine();
 
     if (!cfg.supabaseUrl || !window.supabase) {
       setConn("bad", "연결 설정 없음");

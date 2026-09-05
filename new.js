@@ -61,6 +61,25 @@
       (as.length > 1 ? "   ·   " + as.length + "개 버전으로 만듭니다" : "");
   }
 
+  // 내가 넣은 의뢰를 이 브라우저에 기억해 둔다 — 첫 화면에서 다시 찾아 들어갈 수 있게
+  function remember(entry) {
+    try {
+      var k = "onecue.mine";
+      var list = JSON.parse(localStorage.getItem(k) || "[]");
+      list = list.filter(function (x) { return x.slug !== entry.slug; });
+      list.unshift(entry);
+      localStorage.setItem(k, JSON.stringify(list.slice(0, 30)));
+    } catch (e) { /* 사생활 보호 모드 등 — 기억 못 해도 진행에는 지장 없다 */ }
+  }
+
+  function copy(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text)
+        .then(function () { return true; }, function () { return false; });
+    }
+    return Promise.resolve(false);
+  }
+
   function slugify(brand, product) {
     var d = new Date(), p = function (n) { return String(n).padStart(2, "0"); };
     var stamp = String(d.getFullYear()).slice(2) + p(d.getMonth() + 1) + p(d.getDate());
@@ -147,9 +166,22 @@
         });
       })
       .then(function (slug) {
+        // 뒤로 가거나 창을 닫아도 다시 찾을 수 있어야 한다.
+        // 이 브라우저에만 남는 기록이라 완전하진 않지만, 계정 없이 되는 최선이다
+        remember({ slug: slug, brand: brand, product: product, at: Date.now() });
+
+        var url = location.href.replace(/new\.html.*$/, "") +
+          "project.html?slug=" + encodeURIComponent(slug);
         el("form").style.display = "none";
         el("after").classList.add("on");
-        el("afterLink").href = "project.html?slug=" + encodeURIComponent(slug);
+        el("afterLink").href = url;
+        el("myurl").textContent = url;
+        el("copyLink").addEventListener("click", function () {
+          copy(url).then(function (ok) {
+            el("copied").className = "msg" + (ok ? "" : " err");
+            el("copied").textContent = ok ? "복사했습니다" : "복사가 안 됩니다 — 위 주소를 직접 선택하세요";
+          });
+        });
         window.scrollTo({ top: 0, behavior: "smooth" });
       })
       .catch(function (err) {

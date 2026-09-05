@@ -30,6 +30,17 @@
     return new URLSearchParams(location.search).get(k);
   }
 
+  // 이 건을 이 브라우저에 기억해 둔다 — 주소를 잃어버려도 첫 화면에서 다시 찾도록
+  function remember(p) {
+    try {
+      var k = "onecue.mine";
+      var list = JSON.parse(localStorage.getItem(k) || "[]");
+      if (list.some(function (x) { return x.slug === p.slug; })) return;
+      list.unshift({ slug: p.slug, brand: p.brand, product: p.product, at: Date.now() });
+      localStorage.setItem(k, JSON.stringify(list.slice(0, 30)));
+    } catch (e) { /* 사생활 보호 모드 — 기억 못 해도 진행에 지장 없다 */ }
+  }
+
   function bar(step) {
     var at = IDX[step] == null ? 0 : IDX[step];
     return '<div class="bar">' + STEPS.map(function (s, i) {
@@ -39,14 +50,58 @@
   }
 
   // ── 각 구역 ───────────────────────────────────────────────────────────────
-  function secBrief(b) {
+  // 아직 작업을 시작하기 전이면 광고주가 스스로 고칠 수 있어야 한다.
+  // 전략을 짜기 시작한 뒤에 내용이 바뀌면 앞뒤가 어긋나므로 그때는 잠근다
+  function canEditBrief(p) {
+    return p.step === "brief" || p.step === "facts";
+  }
+
+  function secBrief(b, editable) {
     if (!b) return "";
-    return "<h2>의뢰 내용</h2><div class=\"panel\"><dl class=\"kv\">" +
+    var head = "<h2>의뢰 내용" + (editable
+      ? ' <button class="btn ghost" id="editBrief" style="margin-left:auto">고치기</button>'
+      : "") + "</h2>";
+    return head + '<div class="panel" id="briefPanel"><dl class="kv">' +
       (b.raw ? "<dt>제품 설명</dt><dd>" + nl(b.raw) + "</dd>" : "") +
       (b.goal ? "<dt>목표</dt><dd>" + esc(b.goal) + "</dd>" : "") +
       (b.target ? "<dt>대상</dt><dd>" + esc(b.target) + "</dd>" : "") +
       (b.format ? "<dt>형식</dt><dd>" + esc(b.format) + "</dd>" : "") +
       "</dl></div>";
+  }
+
+  function openBriefEditor(b) {
+    el("briefPanel").innerHTML =
+      '<label class="ed-l">제품 설명</label>' +
+      '<textarea id="edRaw" class="ed-t">' + esc(b.raw || "") + "</textarea>" +
+      '<label class="ed-l">목표</label>' +
+      '<input id="edGoal" class="ed-i" value="' + esc(b.goal || "") + '">' +
+      '<label class="ed-l">대상</label>' +
+      '<input id="edTarget" class="ed-i" value="' + esc(b.target || "") + '">' +
+      '<div class="actions" style="margin-top:14px">' +
+      '<button class="btn" id="saveBrief">저장</button>' +
+      '<button class="btn ghost" id="cancelBrief">취소</button>' +
+      '<span class="msg" id="edMsg"></span></div>';
+
+    el("cancelBrief").addEventListener("click", load);
+    el("saveBrief").addEventListener("click", function () {
+      el("saveBrief").disabled = true;
+      el("edMsg").textContent = "저장 중…";
+      db.from("briefs").update({
+        raw: el("edRaw").value.trim(),
+        goal: el("edGoal").value.trim() || null,
+        target: el("edTarget").value.trim() || null,
+      }).eq("project_id", P.id).then(function (r) {
+        if (r.error) {
+          el("saveBrief").disabled = false;
+          el("edMsg").className = "msg err";
+          el("edMsg").textContent = "저장 실패 — " + r.error.message;
+          return;
+        }
+        db.from("events").insert({
+          project_id: P.id, kind: "brief_edit", payload: { by: "client" },
+        }).then(load);
+      });
+    });
   }
 
   function secStrategy(s) {
@@ -234,11 +289,14 @@
             secConcepts(x[2].data, P.step === "concepts" && P.state === "ready") +
             secCuts(x[3].data, x[4].data) +
             secStrategy(x[1].data) +
-            secBrief(x[0].data) +
+            secBrief(x[0].data, canEditBrief(P)) +
             '<footer><span><a href="index.html">← 목록</a></span>' +
             '<span class="mono">' + new Date().toISOString().slice(0, 16).replace("T", " ") +
             "</span></footer>";
           wire();
+          remember(P);
+          var eb = el("editBrief");
+          if (eb) eb.addEventListener("click", function () { openBriefEditor(x[0].data || {}); });
         });
       })
       .catch(function (e) {
