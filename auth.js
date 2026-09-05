@@ -29,9 +29,10 @@
   function loggedIn(user, prof) {
     var isAdmin = !!(prof && prof.is_admin);
     var label = (prof && prof.name) || user.email;
+    // 관리자 버튼이 있는 것 자체가 이미 관리자라는 표시다. 라벨을 또 붙이지 않는다
     slot.innerHTML =
       '<a class="acct-em" href="login.html" title="' + esc(user.email) + '">' +
-      esc(label) + (isAdmin ? '<em>관리자</em>' : "") + "</a>" +
+      esc(label) + "</a>" +
       (isAdmin ? '<a class="btn ghost" href="admin.html">관리자</a>' : "") +
       '<button class="btn ghost" type="button" id="acctOut">로그아웃</button>';
 
