@@ -37,9 +37,8 @@
     el("tabUp").className = m === "up" ? "on" : "";
     el("go").textContent = m === "in" ? "로그인" : "가입하고 시작하기";
     el("pw").setAttribute("autocomplete", m === "in" ? "current-password" : "new-password");
-    // 닉네임은 가입할 때만 묻는다. 이메일은 길어서 화면에 그대로 띄우기 나쁘다
+    // 닉네임은 선택이다. 안 정하면 이메일이 그대로 뜬다
     el("nickWrap").hidden = (m !== "up");
-    el("nick").required = (m === "up");
     say("", "");
   }
 
@@ -110,8 +109,6 @@
       e.preventDefault();
       var email = el("email").value.trim(), pw = el("pw").value;
       var nick = el("nick").value.trim();
-      if (mode === "up" && !nick) { say("err", "닉네임을 넣어주세요."); return; }
-
       el("go").disabled = true;
       say("", mode === "in" ? "확인 중…" : "만드는 중…");
 
@@ -132,7 +129,7 @@
         }
         var user = r.data.user;
         var after = function () { say("ok", "됐습니다."); showWho(user); };
-        if (mode === "up") {
+        if (mode === "up" && nick) {
           // 가입 직후엔 트리거가 방금 만든 profiles 행에 닉네임을 얹는다
           db.from("profiles").update({ name: nick }).eq("id", user.id).then(after, after);
         } else {
