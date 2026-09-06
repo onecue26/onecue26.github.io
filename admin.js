@@ -202,6 +202,12 @@
         "</div>"
       : "";
 
+    // 「다시 만들어 주세요」 — 제일 위에 둔다. 못 보고 지나가면 안 되는 것이다
+    var redo = p.redo
+      ? '<div class="said redo"><span class="lbl">다시 만들어 달라고 하셨습니다 · ' +
+        ago(p.redo.decided_at) + "</span>" + esc(p.redo.note || "") + "</div>"
+      : "";
+
     return '<div class="wrk' + (isNew ? " fresh" : "") + '">' +
       '<div class="top"><div>' +
       '<div class="name">' + (isNew ? '<span class="new">NEW</span>' : "") +
@@ -212,7 +218,7 @@
       '<div class="have">' + have + "</div></div>" +
       '<a class="btn ghost" href="' + esc(siteUrl(p.slug)) +
       '" target="_blank" rel="noopener">광고주에게 보이는 화면 ↗</a></div>' +
-      said + who +
+      redo + said + who +
       '<div class="mailbox" id="mail-' + esc(p.slug) + '" hidden></div>' +
       files +
       '<div class="steps"><span class="lbl">단계를 옮긴다</span>' + buttons + "</div></div>";
@@ -288,12 +294,18 @@
           db.from("assets").select("project_id,role,url,mime")
             .eq("kind", "product_ref").in("project_id", ids),
           db.from("contacts").select("project_id,name,email,phone,title").in("project_id", ids),
-          db.from("jobs").select("project_id").eq("state", "queued").in("project_id", ids),
+          db.from("jobs").select("project_id,step,request").eq("state", "queued")
+            .in("project_id", ids),
           db.from("briefs").select("project_id,raw,goal,target").in("project_id", ids),
+          db.from("approvals").select("project_id,gate,decision,note,decided_at")
+            .eq("decision", "revise").in("project_id", ids)
+            .order("decided_at", { ascending: false }),
         ]).then(function (out) {
           var cs = out[0], files = out[1].data || [], people = out[2].data || [];
-          var queued = (out[3].data || []).map(function (j) { return j.project_id; });
+          var jobs = out[3].data || [];
+          var queued = jobs.map(function (j) { return j.project_id; });
           var briefs = out[4].data || [];
+          var revises = out[5].data || [];
 
           ROWS.forEach(function (p) {
             counts.forEach(function (t, i) {
@@ -304,6 +316,9 @@
             p.who = people.filter(function (c) { return c.project_id === p.id; })[0] || null;
             // 「새 의뢰」 = 아직 우리가 손대지 않은 것. 처리하면 표시가 사라진다
             p.isNew = queued.indexOf(p.id) >= 0;
+            p.job = jobs.filter(function (j) { return j.project_id === p.id; })[0] || null;
+            // 다시 만들어 달라는 요청 — 가장 최근 것만
+            p.redo = revises.filter(function (a) { return a.project_id === p.id; })[0] || null;
             var b = briefs.filter(function (x) { return x.project_id === p.id; })[0];
             if (b) { p.brief_raw = b.raw; p.brief_goal = b.goal; p.brief_target = b.target; }
           });

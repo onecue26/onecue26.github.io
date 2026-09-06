@@ -133,6 +133,32 @@ h2::after{content:"";flex:1;height:1px;background:var(--rule)}
 .cc .t{font-weight:700;font-size:15.5px;line-height:1.4}
 .cc .b{font-size:13.5px;color:var(--muted)}
 
+/* 추천 배지 — 카드 오른쪽 위. 이유는 올려놓거나 눌러야 펼쳐진다 */
+.cc{position:relative}
+.cc.reco-on{border-color:var(--cue)}
+.reco{position:absolute;top:11px;right:12px;font-family:"JetBrains Mono",monospace;
+  font-size:10.5px;font-weight:700;letter-spacing:.08em;background:var(--cue);color:#fff;
+  padding:3px 8px;border-radius:5px;cursor:help;outline:none}
+.reco .why{position:absolute;top:calc(100% + 7px);right:0;width:min(280px,72vw);
+  background:var(--ink);color:var(--ground);font-family:inherit;font-weight:400;
+  font-size:12.5px;line-height:1.6;letter-spacing:0;padding:10px 12px;border-radius:8px;
+  box-shadow:0 6px 20px rgba(0,0,0,.25);z-index:5;
+  opacity:0;visibility:hidden;transform:translateY(-3px);
+  transition:opacity .12s,transform .12s,visibility .12s}
+.reco:hover .why,.reco:focus .why{opacity:1;visibility:visible;transform:translateY(0)}
+/* 카드 제목이 배지 아래로 파고들지 않게 자리를 비운다 */
+.cc.reco-on .k{padding-right:52px}
+
+/* 여섯 번째 카드 — 다섯 개가 다 아닐 때. 골라야만 넘어가는 화면은 함정이다 */
+.cc.redo{border-style:dashed;background:var(--sunk)}
+.cc.redo .k{color:var(--faint)}
+.cc.redo textarea{width:100%;box-sizing:border-box;margin-top:4px;min-height:88px;
+  resize:vertical;background:var(--panel);border:1px solid var(--rule);border-radius:9px;
+  padding:10px 12px;font-family:inherit;font-size:13.5px;line-height:1.6;color:var(--ink)}
+.cc.redo textarea:focus{outline:2px solid var(--cue);outline-offset:1px;border-color:var(--cue)}
+.cc.redo .hint{font-size:12px;color:var(--faint)}
+.cc button{margin-top:auto}
+
 /* 콘티 */
 .cuts{display:grid;gap:10px}
 .cut{background:var(--panel);border:1px solid var(--rule);border-radius:11px;

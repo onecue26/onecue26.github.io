@@ -143,14 +143,54 @@
       var pick = (canPick && !c.is_chosen)
         ? '<button class="btn ghost pickbtn" data-pick="' + esc(c.key) + '">이걸로 하겠습니다</button>'
         : "";
-      return '<div class="cc' + (c.is_chosen ? " chosen" : "") + '">' +
+      // 추천은 의견이지 결정이 아니다. 그래서 이유를 같이 달아둔다 —
+      // 올려놓거나(마우스) 눌러야(폰) 펼쳐지므로 카드를 어지럽히지 않는다
+      var reco = c.is_recommended
+        ? '<span class="reco" tabindex="0">추천' +
+          (c.reco_reason ? '<span class="why">' + esc(c.reco_reason) + "</span>" : "") +
+          "</span>"
+        : "";
+      return '<div class="cc' + (c.is_chosen ? " chosen" : "") +
+        (c.is_recommended ? " reco-on" : "") + '">' + reco +
         '<span class="k">' + esc(c.key) + "안 · " + esc(c.axis || "") + "</span>" +
         '<span class="t">' + esc(c.title || "") + "</span>" +
         '<span class="b">' + esc(c.body || "") + "</span>" +
         (c.hook ? '<span class="b">훅 · ' + esc(c.hook) + "</span>" : "") +
         pick + "</div>";
-    }).join("") + "</div>";
+    }).join("") + redoCard(canPick) + "</div>";
     return head + body;
+  }
+
+  // 여섯 번째 카드 — 다섯 개가 다 아닐 수 있다.
+  // 골라야만 넘어가는 화면은 마음에 안 드는 안을 억지로 고르게 만든다.
+  // 메모는 비워도 된다. 비면 우리가 축을 바꿔 다시 잡는다
+  function redoCard(canPick) {
+    if (!canPick) return "";
+    return '<div class="cc redo">' +
+      '<span class="k">다시</span>' +
+      '<span class="t">다섯 개 다 아니면</span>' +
+      '<span class="b">억지로 고르지 않으셔도 됩니다. 다른 다섯 가지를 새로 만들어 드립니다.</span>' +
+      '<textarea id="redoNote" maxlength="500" ' +
+      'placeholder="원하시는 방향이 있으면 적어주세요 — 안 적으셔도 됩니다&#10;&#10;예 · 아이가 나오는 건 피하고 싶습니다&#10;예 · 하와이를 더 보여주면 좋겠습니다&#10;예 · B안 방향은 좋은데 더 밝았으면"></textarea>' +
+      '<span class="hint">비워두시면 저희가 축을 바꿔 다시 잡습니다.</span>' +
+      '<button class="btn ghost" id="redoBtn">다시 부탁드립니다</button>' +
+      '<span class="hint" id="redoMsg"></span>' +
+      "</div>";
+  }
+
+  function askRedo(note) {
+    return db.from("approvals").insert({
+      project_id: P.id, gate: "concepts", decision: "revise",
+      note: note || "방향 지정 없음 — 축을 바꿔 다시",
+    }).then(function () {
+      // 광고주 차례가 끝났다. 다시 우리 차례라 ready 를 내린다
+      return db.from("projects").update({ step: "concepts", state: "idle" }).eq("id", P.id);
+    }).then(function () {
+      return db.from("jobs").insert({
+        project_id: P.id, step: "concepts", kind: "text",
+        request: { note: "5안 재요청", direction: note || null },
+      });
+    });
   }
 
   function secCuts(cuts, assets) {
@@ -181,7 +221,24 @@
 
   // 지금 광고주가 무엇을 해야 하나
   function secGate(p, approvals) {
-    var done = {}; (approvals || []).forEach(function (a) { done[a.gate] = a; });
+    // 「고쳐주세요」도 approvals 에 남는다. 그걸 통과로 세면
+    // 다시 만들어 올린 뒤에도 「승인 완료」라고 뜬다 — 통과는 ok 만이다
+    var done = {};
+    (approvals || []).forEach(function (a) { if (a.decision === "ok") done[a.gate] = a; });
+
+    // 다시 만들어 달라고 하셨으면, 그 말이 접수됐다는 걸 보여준다.
+    // 버튼을 눌렀는데 화면이 그대로면 눌린 건지 알 수 없다
+    var redos = (approvals || []).filter(function (a) {
+      return a.gate === "concepts" && a.decision === "revise";
+    });
+    if (redos.length && p.step === "concepts" && p.state !== "ready") {
+      var last = redos[redos.length - 1];
+      return '<div class="gate"><div class="txt"><b>다시 만들고 있습니다</b>' +
+        "<small>새 다섯 가지가 준비되면 이 화면에 올라옵니다." +
+        (last.note && last.note.indexOf("방향 지정 없음") !== 0
+          ? "<br>주신 말씀 · " + esc(last.note) : "") +
+        "</small></div></div>";
+    }
 
     if (p.step === "concepts" && p.state === "ready" && !done.concepts) {
       return '<div class="gate"><div class="txt"><b>컨셉을 골라주세요</b>' +
@@ -255,6 +312,16 @@
         });
       });
     });
+    var rd = el("redoBtn");
+    if (rd) rd.addEventListener("click", function () {
+      var note = (el("redoNote").value || "").trim();
+      rd.disabled = true; rd.textContent = "보내는 중…";
+      askRedo(note).then(load).catch(function (e) {
+        rd.disabled = false; rd.textContent = "다시 부탁드립니다";
+        var m = el("redoMsg"); if (m) m.textContent = "실패 — " + e.message;
+      });
+    });
+
     var ap = el("approveBoard"), rv = el("reviseBoard");
     if (ap) ap.addEventListener("click", function () {
       ap.disabled = true; ap.textContent = "처리 중…";
