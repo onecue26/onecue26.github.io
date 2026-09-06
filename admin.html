@@ -56,9 +56,14 @@
   color:var(--faint);margin-top:10px}
 .mail-h:first-child{margin-top:0}
 .mail-v{font-size:14px;margin-top:2px}
-.mail-b{margin:4px 0 0;background:var(--panel);border:1px solid var(--rule);
-  border-radius:7px;padding:11px 13px;font-family:inherit;font-size:13.5px;
-  line-height:1.7;white-space:pre-wrap;color:var(--ink)}
+/* 제목·본문은 읽기만 하는 게 아니라 고쳐 쓰는 칸이다 */
+.mail-i,.mail-b{width:100%;box-sizing:border-box;margin:4px 0 0;
+  background:var(--panel);border:1px solid var(--rule);border-radius:7px;
+  padding:11px 13px;font-family:inherit;font-size:13.5px;line-height:1.7;
+  color:var(--ink);display:block}
+.mail-b{resize:vertical;min-height:150px;overflow:hidden}
+.mail-i:focus,.mail-b:focus{outline:2px solid var(--cue);outline-offset:1px;
+  border-color:var(--cue)}
 .mail-act{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:12px}
 .mail-act .msg{font-size:13px}
 .mail-act .msg.ok{color:var(--live)}
@@ -118,8 +123,12 @@
     <b>단계 버튼</b>을 누르면 광고주 화면이 바로 바뀝니다.
     <b>★</b> 가 붙은 세 곳(전략·5안·콘티)은 광고주가 판단할 자리라, 그 단계로 옮기면
     광고주 쪽에 버튼이 뜹니다.<br><br>
-    <b>회신은 아직 자동이 아닙니다.</b> <b>회신 문구</b>를 누르면 단계에 맞는 제목과 본문이
-    펼쳐집니다. 복사해서 보내시거나 메일 앱으로 여시면 됩니다.<br><br>
+    <b>회신은 아직 자동이 아닙니다.</b> <b>회신 문구</b>를 누르면 단계에 맞는 초안이 뜨는데,
+    <b>제목과 본문 모두 그 자리에서 고쳐 쓰실 수 있습니다.</b> 고친 내용은 이 브라우저에
+    남아 있다가 다음에 열 때 그대로 나옵니다. 처음 문구로 되돌리려면 <b>기본 문구로</b>를
+    누르시면 됩니다.<br><br>
+    본문 가운데 들어가는 주소는 <b>그 광고주의 진행 페이지</b>입니다. 이 링크로 들어와
+    5안을 고르고 콘티를 승인합니다.<br><br>
     연락처는 <b>로그인한 관리자에게만</b> 보입니다.</p>
 
   <footer><span>onecue · 관리자</span><span class="mono" id="stamp"></span></footer>

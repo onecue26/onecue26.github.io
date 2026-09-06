@@ -83,32 +83,55 @@
     };
   }
 
+  // 아래 MAIL 은 초안일 뿐이다. 건마다 할 말이 다르므로 화면에서 고쳐 쓴다.
+  // 고친 내용은 이 브라우저에 남는다 — 새로고침해도 방금 쓴 문구가 그대로 있다
+  function draftKey(slug, p) { return "onecue.mail." + slug + "." + p.step; }
+
   function toggleMail(slug) {
     var box = el("mail-" + slug);
     if (!box) return;
     if (!box.hidden) { box.hidden = true; return; }
     var p = ROWS.filter(function (x) { return x.slug === slug; })[0];
     var t = mailText(p);
+    var key = draftKey(slug, p);
+    try {
+      var saved = JSON.parse(localStorage.getItem(key) || "null");
+      if (saved && saved.subject) t = saved;
+    } catch (e) { /* 저장된 게 깨졌으면 초안으로 간다 */ }
+
     box.hidden = false;
     box.innerHTML =
       '<div class="mail-h">받는 사람</div>' +
       '<div class="mail-v">' + esc((p.who && p.who.email) || "연락처 없음") + "</div>" +
-      '<div class="mail-h">제목</div>' +
-      '<div class="mail-v">' + esc(t.subject) + "</div>" +
-      '<div class="mail-h">본문</div>' +
-      '<pre class="mail-b">' + esc(t.body) + "</pre>" +
+      '<div class="mail-h">제목 — 고쳐 쓰셔도 됩니다</div>' +
+      '<input class="mail-i" id="ms-' + esc(slug) + '" value="' + esc(t.subject) + '">' +
+      '<div class="mail-h">본문 — 고쳐 쓰셔도 됩니다</div>' +
+      '<textarea class="mail-b" id="mb-' + esc(slug) + '" rows="10">' + esc(t.body) + "</textarea>" +
       '<div class="mail-act">' +
       '<button class="btn" type="button" data-copy="' + esc(slug) + '">본문 복사</button>' +
       (p.who && p.who.email
-        ? '<a class="btn ghost" href="mailto:' + encodeURIComponent(p.who.email) +
-          "?subject=" + encodeURIComponent(t.subject) +
-          "&body=" + encodeURIComponent(t.body) + '">메일 앱으로 열기</a>'
+        ? '<button class="btn ghost" type="button" data-open="' + esc(slug) + '">메일 앱으로 열기</button>'
         : "") +
+      '<button class="btn ghost" type="button" data-reset="' + esc(slug) + '">기본 문구로</button>' +
       '<span class="msg" id="mailmsg-' + esc(slug) + '"></span></div>';
 
+    var subEl = el("ms-" + slug), bodyEl = el("mb-" + slug), msg = el("mailmsg-" + slug);
+
+    function now() { return { subject: subEl.value, body: bodyEl.value }; }
+    function keep() {
+      try { localStorage.setItem(key, JSON.stringify(now())); } catch (e) { /* 꽉 찼으면 그냥 넘어간다 */ }
+      msg.className = "msg"; msg.textContent = "";
+    }
+    subEl.addEventListener("input", keep);
+    bodyEl.addEventListener("input", keep);
+
+    // 본문이 길어지면 칸도 같이 늘린다
+    function grow() { bodyEl.style.height = "auto"; bodyEl.style.height = bodyEl.scrollHeight + "px"; }
+    bodyEl.addEventListener("input", grow);
+    grow();
+
     box.querySelector("[data-copy]").addEventListener("click", function () {
-      var msg = el("mailmsg-" + slug);
-      var text = t.subject + "\n\n" + t.body;
+      var v = now(), text = v.subject + "\n\n" + v.body;
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(
           function () { msg.className = "msg ok"; msg.textContent = "복사했습니다"; },
@@ -116,6 +139,21 @@
       } else {
         msg.className = "msg err"; msg.textContent = "이 브라우저에서는 직접 선택해 주세요";
       }
+    });
+
+    var openBtn = box.querySelector("[data-open]");
+    if (openBtn) openBtn.addEventListener("click", function () {
+      // 고친 내용으로 열어야 하므로 누르는 순간에 주소를 만든다
+      var v = now();
+      location.href = "mailto:" + encodeURIComponent(p.who.email) +
+        "?subject=" + encodeURIComponent(v.subject) +
+        "&body=" + encodeURIComponent(v.body);
+    });
+
+    box.querySelector("[data-reset]").addEventListener("click", function () {
+      try { localStorage.removeItem(key); } catch (e) { /* 없으면 그만이다 */ }
+      box.hidden = false; box.innerHTML = ""; box.hidden = true;
+      toggleMail(slug);
     });
   }
 
