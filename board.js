@@ -34,6 +34,18 @@
   }
 
   // ── 그리기 ────────────────────────────────────────────────────────────────
+  function clips() {
+    var v = ASSETS.filter(function (a) { return a.kind === "clip"; });
+    if (!v.length) return "";
+    return "<h2>영상 " + v.length + "판</h2><div class=\"clips\">" + v.map(function (c) {
+      return '<figure class="clip"><video src="' + esc(c.url) +
+        '" controls playsinline preload="metadata"></video>' +
+        "<figcaption>" + esc(c.role || "") +
+        ' · <a href="' + esc(c.url) + '" target="_blank" rel="noopener">새 창</a>' +
+        "</figcaption></figure>";
+    }).join("") + "</div>";
+  }
+
   function board() {
     var sheet = ASSETS.filter(function (a) {
       return a.kind === "board" && a.cut_n == null;
@@ -108,6 +120,7 @@
       '<textarea id="whole" maxlength="2000" placeholder="예 · 아이 얼굴이 나오는 쪽으로 다시 짜자&#10;예 · 슬로건 컷을 하나 더 넣자">' +
       esc(P.admin_note || "") + "</textarea></div>" +
 
+      clips() +
       board() +
 
       "<h2>컷 " + CUTS.length + "개" +
