@@ -202,6 +202,22 @@
         "</div>"
       : "";
 
+    // 1차 검수 — 정지점에 와 있으면 우리가 먼저 보고 광고주에게 넘긴다.
+    // 이 버튼을 누르기 전까지 광고주 화면에는 판단 버튼이 안 뜬다
+    var g = GATE[p.step];
+    var check = "";
+    if (g && p.state === "pending") {
+      check = '<div class="check"><div class="txt"><b>1차 검수 — ' + esc(g) +
+        " 요청 전</b><span>광고주에게 보이는 화면에서 내용을 확인하신 뒤 넘기세요. " +
+        "지금은 광고주 쪽에 버튼이 없습니다.</span></div>" +
+        '<button class="btn" type="button" data-send="' + esc(p.slug) +
+        '">광고주에게 보내기</button></div>';
+    } else if (g && p.state === "ready") {
+      check = '<div class="check sent"><div class="txt"><b>광고주 ' + esc(g) +
+        " 대기 중</b><span>넘겼습니다. 광고주가 누르면 다음 단계로 넘어갑니다.</span>" +
+        "</div></div>";
+    }
+
     // 「다시 만들어 주세요」 — 제일 위에 둔다. 못 보고 지나가면 안 되는 것이다
     var redo = p.redo
       ? '<div class="said redo"><span class="lbl">다시 만들어 달라고 하셨습니다 · ' +
@@ -218,7 +234,7 @@
       '<div class="have">' + have + "</div></div>" +
       '<a class="btn ghost" href="' + esc(siteUrl(p.slug)) +
       '" target="_blank" rel="noopener">광고주에게 보이는 화면 ↗</a></div>' +
-      redo + said + who +
+      check + redo + said + who +
       '<div class="mailbox" id="mail-' + esc(p.slug) + '" hidden></div>' +
       files +
       '<div class="steps"><span class="lbl">단계를 옮긴다</span>' + buttons + "</div></div>";
@@ -250,11 +266,34 @@
     document.querySelectorAll("[data-mail]").forEach(function (b) {
       b.addEventListener("click", function () { toggleMail(b.dataset.mail); });
     });
+    document.querySelectorAll("[data-send]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        b.disabled = true; b.textContent = "보내는 중…";
+        send(b.dataset.send).then(load);
+      });
+    });
   }
 
-  // 정지점으로 옮기면 state=ready (광고주가 판단할 차례), 그 밖에는 pending
+  // 1차 검수를 마쳤다 → 광고주 차례로 넘긴다. 이때 비로소 광고주 화면에 버튼이 뜬다
+  function send(slug) {
+    return db.from("projects").update({ state: "ready", updated_at: new Date() })
+      .eq("slug", slug)
+      .then(function () {
+        return db.from("projects").select("id,step").eq("slug", slug).single();
+      })
+      .then(function (r) {
+        return db.from("events").insert({
+          project_id: r.data.id, kind: "sent", to_step: r.data.step,
+          payload: { by: "admin", note: "1차 검수 완료 — 광고주에게 넘김" },
+        });
+      });
+  }
+
+  // 단계를 옮기면 언제나 pending — 「우리 차례」다.
+  // 정지점이라 해도 곧바로 광고주에게 넘기지 않는다. 우리가 먼저 보고 나서
+  // 「광고주에게 보내기」를 눌러야 ready 가 되고, 그때 광고주 화면에 버튼이 뜬다
   function move(slug, step) {
-    var state = GATE[step] ? "ready" : "pending";
+    var state = "pending";
     return db.from("projects").update({ step: step, state: state, updated_at: new Date() })
       .eq("slug", slug)
       .then(function () {
