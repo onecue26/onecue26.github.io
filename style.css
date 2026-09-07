@@ -159,6 +159,14 @@ h2::after{content:"";flex:1;height:1px;background:var(--rule)}
 .cc.redo .hint{font-size:12px;color:var(--faint)}
 .cc button{margin-top:auto}
 
+/* 만든 영상 — 세로라 나란히 놓는다 */
+.clips{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,300px));gap:14px}
+.clip{margin:0;background:var(--panel);border:1px solid var(--rule);border-radius:11px;
+  padding:10px;overflow:hidden}
+.clip video{width:100%;display:block;border-radius:8px;background:#000;aspect-ratio:9/16}
+.clip figcaption{font-size:12.5px;color:var(--muted);margin-top:8px;padding:0 2px}
+.clip figcaption a{color:var(--cue);text-decoration:underline;text-underline-offset:2px}
+
 /* 콘티 시트 한 장 */
 .board{background:var(--panel);border:1px solid var(--rule);border-radius:11px;
   padding:14px;overflow:hidden}

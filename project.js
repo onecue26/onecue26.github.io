@@ -1,4 +1,4 @@
-﻿// onecue — 건 상세
+// onecue — 건 상세
 //
 // 광고주가 보는 화면이다. 지금 어디까지 왔는지 보여주고,
 // 판단할 자리(5안 선택 · 콘티 승인)에서만 버튼을 띄운다.
@@ -208,6 +208,19 @@
         request: { note: "5안 재요청", direction: note || null },
       });
     });
+  }
+
+  // 만든 영상 — 제일 위에 둔다. 이걸 보려고 들어오는 것이다
+  function secClips(assets) {
+    var v = (assets || []).filter(function (a) { return a.kind === "clip"; });
+    if (!v.length) return "";
+    return "<h2>영상 " + v.length + "판</h2><div class=\"clips\">" + v.map(function (c) {
+      return '<figure class="clip"><video src="' + esc(c.url) +
+        '" controls playsinline preload="metadata"></video>' +
+        "<figcaption>" + esc(c.role || "") +
+        ' · <a href="' + esc(c.url) + '" target="_blank" rel="noopener">새 창</a>' +
+        "</figcaption></figure>";
+    }).join("") + "</div>";
   }
 
   // 콘티 시트 한 장 — 컷을 하나씩 보기 전에 전체를 먼저 본다
@@ -468,6 +481,7 @@
               "</div>" +
               bar(P.step) + "</div></div>" +
             secGate(P, x[5].data) +
+            secClips(x[4].data) +
             (shown("concepts")
               ? secConcepts(x[2].data, MINE && P.step === "concepts" && P.state === "ready")
               : "") +
