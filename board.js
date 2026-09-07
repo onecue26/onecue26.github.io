@@ -43,14 +43,28 @@
       '" alt="콘티 시트" loading="lazy"></div>';
   }
 
-  function cutCard(c) {
-    var img = null;
-    ["anchor", "board"].forEach(function (kind) {
-      if (img) return;
-      img = ASSETS.filter(function (a) {
-        return a.kind === kind && a.cut_n === c.n;
+  // 왼쪽은 콘티에서 자른 칸, 오른쪽은 실제로 만든 컷. 나란히 둬야 비교가 된다
+  function shots(n) {
+    function pick(kind) {
+      return ASSETS.filter(function (a) {
+        return a.kind === kind && a.cut_n === n;
       })[0] || null;
-    });
+    }
+    var b = pick("board"), a = pick("anchor");
+    if (!b && !a) return '<div class="noimg-n">' + n + "</div>";
+    function one(label, x, cls) {
+      return '<figure class="' + cls + '">' +
+        (x ? '<img src="' + esc(x.url) + '" alt="컷 ' + n + " " + label + '" loading="lazy">'
+           : '<div class="none">아직</div>') +
+        "<figcaption>" + label + "</figcaption></figure>";
+    }
+    return '<div class="shots">' + one("콘티", b, "plan") + one("완성", a, "made") + "</div>";
+  }
+
+  function cutCard(c) {
+    var img = ASSETS.filter(function (a) {
+      return (a.kind === "board" || a.kind === "anchor") && a.cut_n === c.n;
+    })[0] || null;
     var t = (c.t_start != null ? c.t_start + "–" + c.t_end + "초" : "");
     var spec = [c.size, c.angle, c.move, c.lens].filter(Boolean)
       .map(function (x) { return "<span>" + esc(x) + "</span>"; }).join("");
@@ -58,8 +72,7 @@
 
     return '<div class="cut' + (img ? "" : " noimg") + (note ? " marked" : "") +
       '" data-cut="' + c.n + '">' +
-      (img ? '<img src="' + esc(img.url) + '" alt="컷 ' + c.n + '" loading="lazy">'
-           : '<div class="noimg-n">' + c.n + "</div>") +
+      shots(c.n) +
       '<div class="body"><div class="head">' +
         '<span class="n">' + c.n + "</span>" +
         '<span class="tt">' + esc(t) + "</span>" +

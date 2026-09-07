@@ -222,24 +222,38 @@
       "실제 영상은 승인 후 컷마다 다시 만들기 때문에 그림이 이것과 똑같지는 않습니다.</p></div>";
   }
 
+  // 컷 하나에 그림이 둘이다 — 왼쪽은 콘티에서 자른 칸, 오른쪽은 실제로 만든 컷.
+  // 갈아 끼우면 원래 무엇을 하려던 컷인지가 사라진다. 나란히 둬야 비교가 된다
+  function shots(n, board, anchor) {
+    var b = board[n], a = anchor[n];
+    if (!b && !a) return '<div class="noimg-n">' + n + "</div>";
+    function one(label, x, cls) {
+      return '<figure class="' + cls + '">' +
+        (x ? '<img src="' + esc(x.url) + '" alt="컷 ' + n + " " + label + '" loading="lazy">'
+           : '<div class="none">아직</div>') +
+        "<figcaption>" + label + "</figcaption></figure>";
+    }
+    return '<div class="shots">' + one("콘티", b, "plan") + one("완성", a, "made") + "</div>";
+  }
+
   function secCuts(cuts, assets) {
     if (!cuts || !cuts.length) return "";
-    // 앵커가 있으면 앵커를, 없으면 콘티 시트에서 잘라낸 칸을 쓴다
-    var byCut = {};
-    ["anchor", "board"].forEach(function (kind) {
-      (assets || []).forEach(function (a) {
-        if (a.kind === kind && a.cut_n != null && !byCut[a.cut_n]) byCut[a.cut_n] = a;
-      });
+    var board = {}, anchor = {};
+    (assets || []).forEach(function (a) {
+      if (a.cut_n == null) return;
+      if (a.kind === "board" && !board[a.cut_n]) board[a.cut_n] = a;
+      if (a.kind === "anchor" && !anchor[a.cut_n]) anchor[a.cut_n] = a;
     });
-    return "<h2>콘티 " + cuts.length + "컷</h2><div class=\"cuts\">" + cuts.map(function (c) {
-      var img = byCut[c.n];
+    var made = Object.keys(anchor).length;
+    return "<h2>콘티 " + cuts.length + "컷" +
+      (made ? " — 만든 컷 " + made + "개" : "") + "</h2>" +
+      "<div class=\"cuts\">" + cuts.map(function (c) {
+      var has = board[c.n] || anchor[c.n];
       var t = (c.t_start != null ? c.t_start + "–" + c.t_end + "초" : "");
       var spec = [c.size, c.angle, c.move, c.lens].filter(Boolean)
         .map(function (x) { return "<span>" + esc(x) + "</span>"; }).join("");
-      return '<div class="cut' + (img ? "" : " noimg") + '">' +
-        (img
-          ? '<img src="' + esc(img.url) + '" alt="컷 ' + c.n + '" loading="lazy">'
-          : '<div class="noimg-n">' + c.n + "</div>") +
+      return '<div class="cut' + (has ? "" : " noimg") + '">' +
+        shots(c.n, board, anchor) +
         '<div class="body"><div class="head">' +
           '<span class="n">' + c.n + "</span>" +
           '<span class="tt">' + esc(t) + "</span>" +
