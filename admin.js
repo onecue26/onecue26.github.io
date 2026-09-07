@@ -206,10 +206,16 @@
     // 이 버튼을 누르기 전까지 광고주 화면에는 판단 버튼이 안 뜬다
     var g = GATE[p.step];
     var check = "";
+    // 광고주가 되돌려보낸 건인가 — 그러면 「아직 안 보낸 것」과 다른 말을 해야 한다
+    var back = p.redo && p.redo.gate === p.step && p.redo.decision === "revise";
     if (g && p.state === "pending") {
-      check = '<div class="check"><div class="txt"><b>1차 검수 — ' + esc(g) +
-        " 요청 전</b><span>광고주에게 보이는 화면에서 내용을 확인하신 뒤 넘기세요. " +
-        "지금은 광고주 쪽에 버튼이 없습니다.</span></div>" +
+      check = '<div class="check' + (back ? " back" : "") + '"><div class="txt"><b>' +
+        (back ? "광고주가 되돌려보냈습니다 — 고쳐서 다시 보내세요"
+              : "1차 검수 — " + esc(g) + " 요청 전") +
+        "</b><span>" +
+        (back ? "아래 남긴 말을 보고 고친 뒤에 다시 넘기세요."
+              : "광고주에게 보이는 화면에서 내용을 확인하신 뒤 넘기세요.") +
+        " 지금은 광고주 쪽에 버튼이 없습니다.</span></div>" +
         (p.n_cuts
           ? '<a class="btn" href="board.html?slug=' + encodeURIComponent(p.slug) +
             '">콘티 검수 →</a>'
