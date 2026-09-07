@@ -207,7 +207,8 @@
     var g = GATE[p.step];
     var check = "";
     // 광고주가 되돌려보낸 건인가 — 그러면 「아직 안 보낸 것」과 다른 말을 해야 한다
-    var back = p.redo && p.redo.gate === p.step && p.redo.decision === "revise";
+    var back = p.redo && p.redo.gate === p.step && p.redo.decision === "revise" &&
+      !p.redoDone;
     if (g && p.state === "pending") {
       check = '<div class="check' + (back ? " back" : "") + '"><div class="txt"><b>' +
         (back ? "광고주가 되돌려보냈습니다 — 고쳐서 다시 보내세요"
@@ -231,9 +232,11 @@
     // 「다시 만들어 주세요」 — 제일 위에 둔다. 못 보고 지나가면 안 되는 것이다
     var GNAME = { strategy: "전략", concepts: "5안", storyboard: "콘티" };
     var redo = p.redo
-      ? '<div class="said redo"><span class="lbl">' +
+      ? '<div class="said redo' + (p.redoDone ? " ok" : "") + '"><span class="lbl">' +
         esc(GNAME[p.redo.gate] || p.redo.gate) + " — 광고주가 남긴 말 · " +
-        ago(p.redo.decided_at) + "</span>" + esc(p.redo.note || "") + "</div>"
+        ago(p.redo.decided_at) +
+        (p.redoDone ? " · 처리 완료 (" + ago(p.sentAt) + " 다시 보냄)" : " · 처리 전") +
+        "</span>" + esc(p.redo.note || "") + "</div>"
       : "";
 
     return '<div class="wrk' + (isNew ? " fresh" : "") + '">' +
@@ -356,12 +359,16 @@
           // 승인하면서 남긴 말도 놓치면 안 된다. 반려만 보면 반쪽이다
           db.from("approvals").select("project_id,gate,decision,note,decided_at")
             .in("project_id", ids).order("decided_at", { ascending: false }),
+          // 우리가 마지막으로 넘긴 시각 — 광고주 말을 처리했는지 가르는 기준
+          db.from("events").select("project_id,ts").eq("kind", "sent")
+            .in("project_id", ids).order("ts", { ascending: false }),
         ]).then(function (out) {
           var cs = out[0], files = out[1].data || [], people = out[2].data || [];
           var jobs = out[3].data || [];
           var queued = jobs.map(function (j) { return j.project_id; });
           var briefs = out[4].data || [];
           var revises = out[5].data || [];
+          var sents = out[6].data || [];
 
           ROWS.forEach(function (p) {
             counts.forEach(function (t, i) {
@@ -380,6 +387,12 @@
               var n = a.note || "";
               return n && !/없음|안 선택$/.test(n);
             })[0] || null;
+            // 그 말이 온 뒤에 우리가 다시 넘겼으면 처리된 것이다.
+            // 처리해도 계속 빨갛게 떠 있으면 무엇이 남았는지 알 수 없다
+            var last = sents.filter(function (e) { return e.project_id === p.id; })[0];
+            p.sentAt = last ? last.ts : null;
+            p.redoDone = !!(p.redo && p.sentAt &&
+              new Date(p.sentAt) > new Date(p.redo.decided_at));
             var b = briefs.filter(function (x) { return x.project_id === p.id; })[0];
             if (b) { p.brief_raw = b.raw; p.brief_goal = b.goal; p.brief_target = b.target; }
           });
