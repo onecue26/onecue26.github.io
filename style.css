@@ -159,13 +159,21 @@ h2::after{content:"";flex:1;height:1px;background:var(--rule)}
 .cc.redo .hint{font-size:12px;color:var(--faint)}
 .cc button{margin-top:auto}
 
+/* 콘티 시트 한 장 */
+.board{background:var(--panel);border:1px solid var(--rule);border-radius:11px;
+  padding:14px;overflow:hidden}
+.board img{width:100%;display:block;border-radius:8px;cursor:zoom-in;background:var(--sunk)}
+.board p{margin:12px 2px 0;font-size:13px;color:var(--muted);line-height:1.6}
+.board p b{color:var(--ink)}
+
 /* 콘티 */
 .cuts{display:grid;gap:10px}
 .cut{background:var(--panel);border:1px solid var(--rule);border-radius:11px;
   overflow:hidden;display:grid;grid-template-columns:200px minmax(0,1fr)}
 .cut.noimg{grid-template-columns:52px minmax(0,1fr)}
-.cut img{width:100%;height:100%;object-fit:cover;display:block;background:var(--sunk);
-  cursor:zoom-in;aspect-ratio:16/9}
+/* 시트에서 잘라낸 칸은 세로가 길다. cover 로 두면 번호와 글자가 잘려 나간다 */
+.cut img{width:100%;height:100%;object-fit:contain;display:block;background:var(--sunk);
+  cursor:zoom-in;aspect-ratio:4/5}
 .cut .noimg-n{display:flex;align-items:center;justify-content:center;
   background:var(--sunk);font-family:"JetBrains Mono",monospace;color:var(--faint);
   font-size:14px}
