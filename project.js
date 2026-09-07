@@ -200,8 +200,8 @@
       project_id: P.id, gate: "concepts", decision: "revise",
       note: note || "방향 지정 없음 — 축을 바꿔 다시",
     }).then(function () {
-      // 광고주 차례가 끝났다. 다시 우리 차례라 ready 를 내린다
-      return db.from("projects").update({ step: "concepts", state: "idle" }).eq("id", P.id);
+      // 광고주 차례가 끝났다. 다시 우리 차례라 pending 으로 내린다
+      return db.from("projects").update({ step: "concepts", state: "pending" }).eq("id", P.id);
     }).then(function () {
       return db.from("jobs").insert({
         project_id: P.id, step: "concepts", kind: "text",
@@ -347,17 +347,22 @@
       project_id: P.id, gate: "storyboard", decision: decision,
       note: note || (decision === "ok" ? "콘티 승인 (남기신 말씀 없음)" : "콘티 수정 요청 (내용 없음)"),
     }).then(function () {
+      // 반려도 pending 이다 — 「우리 차례」라는 뜻이고,
+      // idle 로 두면 관리자 화면에 1차 검수 칸이 안 돌아온다
       return db.from("projects").update(
         decision === "ok"
           ? { step: "anchors", state: "pending" }
-          : { step: "storyboard", state: "idle" }
+          : { step: "storyboard", state: "pending" }
       ).eq("id", P.id);
     }).then(function () {
-      if (decision !== "ok") return null;
-      return db.from("jobs").insert({
-        project_id: P.id, step: "anchors", kind: "image",
-        request: { note: "콘티 승인 — 앵커 이미지 생성" },
-      });
+      // 반려도 할 일이다. 작업을 안 만들면 우리가 온 줄을 모른다
+      return db.from("jobs").insert(
+        decision === "ok"
+          ? { project_id: P.id, step: "anchors", kind: "image",
+              request: { note: "콘티 승인 — 앵커 이미지 생성", said: note || null } }
+          : { project_id: P.id, step: "storyboard", kind: "text",
+              request: { note: "콘티 수정 요청", said: note || null } }
+      );
     });
   }
 
