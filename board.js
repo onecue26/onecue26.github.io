@@ -55,7 +55,7 @@
       '" alt="콘티 시트" loading="lazy"></div>';
   }
 
-  // 왼쪽은 콘티에서 자른 칸, 오른쪽은 실제로 만든 컷. 나란히 둬야 비교가 된다
+  // 컷 한 줄에 그림 셋 — 콘티(계획) · 완성(이미지) · 영상(움직임)
   function shots(n) {
     function pick(kind) {
       return ASSETS.filter(function (a) {
@@ -63,21 +63,30 @@
       })[0] || null;
     }
     var b = pick("board"), a = pick("anchor");
-    if (!b && !a) return '<div class="noimg-n">' + n + "</div>";
-    // 비어 있는데 「완성」이라 적으면 다 된 것처럼 읽힌다. 채워질 때 바뀐다
-    function one(label, x, cls) {
+    var v = ASSETS.filter(function (c) {
+      if (c.kind !== "clip") return false;
+      var m = (c.meta && c.meta.cuts) || [];
+      return m.indexOf(n) >= 0;
+    })[0];
+    if (!b && !a && !v) return '<div class="noimg-n">' + n + "</div>";
+    function pic(label, x, cls) {
       return '<figure class="' + cls + (x ? " on" : "") + '">' +
-        (x ? '<img src="' + esc(x.url) + '" alt="컷 ' + n + " " + label + '" loading="lazy">'
+        (x ? '<img src="' + esc(x.url) + '" alt="컷 ' + n + '" loading="lazy">'
            : '<div class="none">—</div>') +
         "<figcaption>" + (x ? label : "대기") + "</figcaption></figure>";
     }
-    return '<div class="shots">' + one("콘티", b, "plan") + one("완성", a, "made") + "</div>";
+    function vid(x) {
+      return '<figure class="made' + (x ? " on" : "") + '">' +
+        (x ? '<video src="' + esc(x.url) + '" controls playsinline preload="metadata"></video>'
+           : '<div class="none">—</div>') +
+        "<figcaption>" + (x ? "영상" : "대기") + "</figcaption></figure>";
+    }
+    return '<div class="shots three">' + pic("콘티", b, "plan") +
+      pic("완성", a, "made") + vid(v) + "</div>";
   }
 
   function cutCard(c) {
-    var img = ASSETS.filter(function (a) {
-      return (a.kind === "board" || a.kind === "anchor") && a.cut_n === c.n;
-    })[0] || null;
+    var img = true;
     var t = (c.t_start != null ? c.t_start + "–" + c.t_end + "초" : "");
     var spec = [c.size, c.angle, c.move, c.lens].filter(Boolean)
       .map(function (x) { return "<span>" + esc(x) + "</span>"; }).join("");

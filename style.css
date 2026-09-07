@@ -177,12 +177,14 @@ h2::after{content:"";flex:1;height:1px;background:var(--rule)}
 /* 콘티 */
 .cuts{display:grid;gap:10px}
 .cut{background:var(--panel);border:1px solid var(--rule);border-radius:11px;
-  overflow:hidden;display:grid;grid-template-columns:288px minmax(0,1fr)}
+  overflow:hidden;display:grid;grid-template-columns:396px minmax(0,1fr)}
 .cut.noimg{grid-template-columns:52px minmax(0,1fr)}
 
 /* 그림이 둘이다 — 왼쪽 「콘티」(계획) · 오른쪽 「완성」(실제로 만든 것).
    갈아 끼우면 원래 무엇을 하려던 컷인지가 사라져서 비교가 안 된다 */
 .shots{display:grid;grid-template-columns:1fr 1fr;background:var(--sunk)}
+.shots.three{grid-template-columns:1fr 1fr 1fr}
+.shots video{width:100%;display:block;background:#000;aspect-ratio:4/5;object-fit:contain}
 .shots figure{margin:0;min-width:0;display:flex;flex-direction:column;
   border-right:1px solid var(--rule)}
 .shots figure:last-child{border-right:0}

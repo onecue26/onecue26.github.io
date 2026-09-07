@@ -235,25 +235,36 @@
       "실제 영상은 승인 후 컷마다 다시 만들기 때문에 그림이 이것과 똑같지는 않습니다.</p></div>";
   }
 
-  // 컷 하나에 그림이 둘이다 — 왼쪽은 콘티에서 자른 칸, 오른쪽은 실제로 만든 컷.
-  // 갈아 끼우면 원래 무엇을 하려던 컷인지가 사라진다. 나란히 둬야 비교가 된다
-  function shots(n, board, anchor) {
+  // 컷 한 줄에 그림 셋 — 콘티(계획) · 완성(이미지) · 영상(움직임).
+  // 영상 한 판은 컷 여러 개를 덮으므로 meta.cuts 로 어느 줄에 붙을지 정한다
+  function shots(n, board, anchor, clips) {
     var b = board[n], a = anchor[n];
-    if (!b && !a) return '<div class="noimg-n">' + n + "</div>";
-    // 비어 있는데 「완성」이라 적으면 다 된 것처럼 읽힌다. 채워질 때 바뀐다
-    function one(label, x, cls) {
+    var v = (clips || []).filter(function (c) {
+      var m = (c.meta && c.meta.cuts) || [];
+      return m.indexOf(n) >= 0;
+    })[0];
+    if (!b && !a && !v) return '<div class="noimg-n">' + n + "</div>";
+    function pic(label, x, cls) {
       return '<figure class="' + cls + (x ? " on" : "") + '">' +
-        (x ? '<img src="' + esc(x.url) + '" alt="컷 ' + n + " " + label + '" loading="lazy">'
+        (x ? '<img src="' + esc(x.url) + '" alt="컷 ' + n + '" loading="lazy">'
            : '<div class="none">—</div>') +
         "<figcaption>" + (x ? label : "대기") + "</figcaption></figure>";
     }
-    return '<div class="shots">' + one("콘티", b, "plan") + one("완성", a, "made") + "</div>";
+    function vid(x) {
+      return '<figure class="made' + (x ? " on" : "") + '">' +
+        (x ? '<video src="' + esc(x.url) + '" controls playsinline preload="metadata"></video>'
+           : '<div class="none">—</div>') +
+        "<figcaption>" + (x ? "영상" : "대기") + "</figcaption></figure>";
+    }
+    return '<div class="shots three">' + pic("콘티", b, "plan") +
+      pic("완성", a, "made") + vid(v) + "</div>";
   }
 
   function secCuts(cuts, assets) {
     if (!cuts || !cuts.length) return "";
-    var board = {}, anchor = {};
+    var board = {}, anchor = {}, clips = [];
     (assets || []).forEach(function (a) {
+      if (a.kind === "clip") { clips.push(a); return; }
       if (a.cut_n == null) return;
       if (a.kind === "board" && !board[a.cut_n]) board[a.cut_n] = a;
       if (a.kind === "anchor" && !anchor[a.cut_n]) anchor[a.cut_n] = a;
@@ -262,12 +273,12 @@
     return "<h2>콘티 " + cuts.length + "컷" +
       (made ? " — 만든 컷 " + made + "개" : "") + "</h2>" +
       "<div class=\"cuts\">" + cuts.map(function (c) {
-      var has = board[c.n] || anchor[c.n];
+      var has = true;
       var t = (c.t_start != null ? c.t_start + "–" + c.t_end + "초" : "");
       var spec = [c.size, c.angle, c.move, c.lens].filter(Boolean)
         .map(function (x) { return "<span>" + esc(x) + "</span>"; }).join("");
       return '<div class="cut' + (has ? "" : " noimg") + '">' +
-        shots(c.n, board, anchor) +
+        shots(c.n, board, anchor, clips) +
         '<div class="body"><div class="head">' +
           '<span class="n">' + c.n + "</span>" +
           '<span class="tt">' + esc(t) + "</span>" +
