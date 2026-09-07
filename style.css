@@ -196,6 +196,8 @@ h2::after{content:"";flex:1;height:1px;background:var(--rule)}
 .gate .txt b{display:block;font-size:16px;margin-bottom:2px}
 .gate .txt small{color:var(--muted);font-size:13px}
 .gate.done{background:var(--live-soft);border-color:var(--live)}
+/* 광고주 본인이 아닐 때 — 내용은 다 보이되 버튼은 없다 */
+.gate.look{background:var(--sunk);border-color:var(--rule)}
 
 .zoom{position:fixed;inset:0;background:rgba(0,0,0,.94);display:none;z-index:20;
   align-items:center;justify-content:center;cursor:zoom-out;padding:20px}

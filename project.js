@@ -13,7 +13,9 @@
         window.ONECUE.supabaseUrl, window.ONECUE.supabaseAnonKey));
   }
 
-  var cfg = window.ONECUE || {}, db = null, P = null;
+  // MINE — 이 건을 넣은 광고주 본인인가.
+  // 판단하는 자리(5안 선택·콘티 승인)는 광고주의 것이다. 관리자가 대신 누르면 안 된다
+  var cfg = window.ONECUE || {}, db = null, P = null, MINE = false;
 
   var STEPS = [
     ["brief", "의뢰"], ["facts", "팩트"], ["strategy", "전략"],
@@ -255,12 +257,19 @@
         "</small></div></div>";
     }
 
+    // 광고주 본인이 아니면 버튼을 주지 않는다. 판단은 대신 눌러 줄 수 없다
+    var look = '<div class="gate look"><div class="txt"><b>광고주가 판단할 차례입니다</b>' +
+      "<small>이 자리의 버튼은 의뢰하신 분에게만 보입니다. 관리자는 내용만 확인합니다." +
+      "</small></div></div>";
+
     if (p.step === "concepts" && p.state === "ready" && !done.concepts) {
+      if (!MINE) return look;
       return '<div class="gate"><div class="txt"><b>컨셉을 골라주세요</b>' +
         "<small>다섯 가지 방향을 준비했습니다. 하나를 고르시면 그 방향으로 콘티를 만듭니다.</small>" +
         "</div></div>";
     }
     if (p.step === "storyboard" && p.state === "ready" && !done.storyboard) {
+      if (!MINE) return look;
       return '<div class="gate"><div class="txt"><b>콘티를 확인해주세요</b>' +
         "<small>아래 컷 구성대로 촬영·생성합니다. 승인하시면 제작에 들어갑니다.</small></div>" +
         '<button class="btn" id="approveBoard">콘티 승인</button>' +
@@ -378,7 +387,15 @@
           db.from("cuts").select("*").eq("project_id", id).order("n"),
           db.from("assets").select("*").eq("project_id", id),
           db.from("approvals").select("*").eq("project_id", id),
+          // 판단하는 자리는 광고주의 것이다. 이 건을 넣은 사람인지 확인한다
+          db.from("contacts").select("email").eq("project_id", id),
+          db.auth.getUser(),
         ]).then(function (x) {
+          var me = (x[7].data && x[7].data.user) || null;
+          var owners = (x[6].data || []).map(function (c) {
+            return (c.email || "").trim().toLowerCase();
+          });
+          MINE = !!(me && owners.indexOf((me.email || "").toLowerCase()) >= 0);
           var title = [P.brand, P.product].filter(Boolean).join(" ") || P.slug;
           el("main").innerHTML =
             '<div class="hero"><div><h1>' + esc(title) + "</h1>" +
@@ -389,7 +406,7 @@
               "</div>" +
               bar(P.step) + "</div></div>" +
             secGate(P, x[5].data) +
-            secConcepts(x[2].data, P.step === "concepts" && P.state === "ready") +
+            secConcepts(x[2].data, MINE && P.step === "concepts" && P.state === "ready") +
             secBoard(x[4].data) +
             secCuts(x[3].data, x[4].data) +
             secStrategy(x[1].data) +
