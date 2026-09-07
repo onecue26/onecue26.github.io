@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>콘티 검수 — onecue</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="style.css">
+<style>
+/* 관리자 전용 검수 화면.
+   광고주 화면과 같은 그림을 보되, 고칠 데를 그 자리에서 적는다.
+   대화창으로 흘러가면 콘티 옆에 안 남는다 — 그래서 콘티에 붙여 둔다 */
+
+/* 건 전체 요구사항 — 컷보다 먼저 온다. 판을 뒤집는 말은 여기 적힌다 */
+.whole{background:var(--panel);border:1px solid var(--rule);border-radius:11px;
+  padding:16px 18px;margin-bottom:18px}
+.whole h3{margin:0 0 3px;font-size:15.5px}
+.whole p{margin:0 0 10px;font-size:13px;color:var(--muted)}
+.whole textarea{width:100%;box-sizing:border-box;min-height:96px;resize:vertical;
+  background:var(--sunk);border:1px solid var(--rule);border-radius:9px;
+  padding:11px 13px;font-family:inherit;font-size:14px;line-height:1.65;color:var(--ink)}
+.whole textarea:focus{outline:2px solid var(--cue);outline-offset:1px;border-color:var(--cue)}
+
+/* 저장 줄 — 화면이 길어서 아래에 붙여 둔다 */
+.dock{position:sticky;bottom:0;z-index:6;background:var(--ground);
+  border-top:1px solid var(--rule);padding:12px 0;margin-top:18px;
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.dock .msg{font-size:13px}
+.dock .msg.ok{color:var(--live)}
+.dock .msg.err{color:var(--cue)}
+.dock .spacer{flex:1}
+
+/* 컷 — 광고주 화면의 .cut 을 쓰되 메모 칸을 덧댄다 */
+.cut .memo{border-top:1px dashed var(--rule);margin-top:10px;padding-top:10px}
+.cut .memo textarea{width:100%;box-sizing:border-box;min-height:52px;resize:vertical;
+  background:var(--sunk);border:1px solid var(--rule);border-radius:8px;
+  padding:8px 10px;font-family:inherit;font-size:13px;line-height:1.6;color:var(--ink)}
+.cut .memo textarea:focus{outline:2px solid var(--cue);outline-offset:1px;
+  border-color:var(--cue)}
+.cut .memo textarea.has{border-color:var(--cue);background:var(--cue-soft)}
+.cut .memo .lbl{font-family:"JetBrains Mono",monospace;font-size:10.5px;
+  letter-spacing:.08em;color:var(--faint);display:block;margin-bottom:4px}
+
+/* 메모가 달린 컷은 목록에서 바로 눈에 띄어야 한다 */
+.cut.marked{border-color:var(--cue)}
+
+.filt{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;
+  font-size:13px;color:var(--muted)}
+.filt button{font-family:"JetBrains Mono",monospace;font-size:11.5px;padding:5px 10px;
+  border-radius:6px;border:1px solid var(--rule);background:var(--panel);
+  color:var(--muted);cursor:pointer}
+.filt button.on{background:var(--cue);border-color:var(--cue);color:#fff;font-weight:700}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="topbar-in">
+  <a class="mark" href="admin.html"><span class="lamp"></span>onecue
+    <span class="sub">콘티 검수</span></a>
+  <div class="spacer"></div>
+  <span class="pill" id="conn"><span class="dot"></span>확인 중</span>
+  <a class="btn ghost" href="admin.html">← 목록</a>
+  <span class="acct" id="acct"></span>
+</div></div>
+
+<main id="main"><div class="empty">불러오는 중</div></main>
+
+<div class="zoom" id="zoom"><img id="zoomImg" alt=""></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="auth.js"></script>
+<script src="board.js"></script>
+</body>
+</html>

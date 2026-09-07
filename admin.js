@@ -210,7 +210,11 @@
       check = '<div class="check"><div class="txt"><b>1차 검수 — ' + esc(g) +
         " 요청 전</b><span>광고주에게 보이는 화면에서 내용을 확인하신 뒤 넘기세요. " +
         "지금은 광고주 쪽에 버튼이 없습니다.</span></div>" +
-        '<button class="btn" type="button" data-send="' + esc(p.slug) +
+        (p.n_cuts
+          ? '<a class="btn" href="board.html?slug=' + encodeURIComponent(p.slug) +
+            '">콘티 검수 →</a>'
+          : "") +
+        '<button class="btn ghost" type="button" data-send="' + esc(p.slug) +
         '">광고주에게 보내기</button></div>';
     } else if (g && p.state === "ready") {
       check = '<div class="check sent"><div class="txt"><b>광고주 ' + esc(g) +
@@ -234,8 +238,13 @@
       esc((p.aspects || []).join("/")) +
       (p.created_at ? " · " + ago(p.created_at) : "") + "</div>" +
       '<div class="have">' + have + "</div></div>" +
+      '<div class="ways">' +
+      (p.n_cuts
+        ? '<a class="btn ghost" href="board.html?slug=' + encodeURIComponent(p.slug) +
+          '">콘티 검수</a>'
+        : "") +
       '<a class="btn ghost" href="' + esc(siteUrl(p.slug)) +
-      '" target="_blank" rel="noopener">광고주에게 보이는 화면 ↗</a></div>' +
+      '" target="_blank" rel="noopener">광고주 화면 ↗</a></div></div>' +
       check + redo + said + who +
       '<div class="mailbox" id="mail-' + esc(p.slug) + '" hidden></div>' +
       files +

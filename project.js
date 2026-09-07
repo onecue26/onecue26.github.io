@@ -26,6 +26,17 @@
   // 광고주가 판단하는 자리 — 여기서만 버튼이 뜬다
   var GATES = { strategy: "검토", concepts: "선택", storyboard: "승인" };
 
+  // ★ 광고주는 자기에게 넘어온 것까지만 본다.
+  //   전에는 DB 에 있는 걸 그냥 다 그렸다. 그래서 우리가 아직 검수도 안 한 콘티가
+  //   광고주 화면에 떴다 — 1차 검수를 넣은 의미가 없어진다.
+  //   지나간 단계는 보이고, 지금 단계는 「광고주에게 보내기」를 눌러야 보인다.
+  function shown(step) {
+    if (!P) return false;
+    if (IDX[P.step] > IDX[step]) return true;      // 이미 지나간 단계
+    if (P.step !== step) return false;             // 아직 오지 않은 단계
+    return P.state === "ready";                    // 지금 단계 — 넘겼는가
+  }
+
   function el(id) { return document.getElementById(id); }
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
@@ -437,10 +448,11 @@
               "</div>" +
               bar(P.step) + "</div></div>" +
             secGate(P, x[5].data) +
-            secConcepts(x[2].data, MINE && P.step === "concepts" && P.state === "ready") +
-            secBoard(x[4].data) +
-            secCuts(x[3].data, x[4].data) +
-            secStrategy(x[1].data) +
+            (shown("concepts")
+              ? secConcepts(x[2].data, MINE && P.step === "concepts" && P.state === "ready")
+              : "") +
+            (shown("storyboard") ? secBoard(x[4].data) + secCuts(x[3].data, x[4].data) : "") +
+            (shown("strategy") ? secStrategy(x[1].data) : "") +
             secBrief(x[0].data, canEditBrief(P)) +
             secFiles(x[4].data) +
             '<footer><span><a href="index.html">← 목록</a></span>' +
