@@ -193,11 +193,26 @@
     });
   }
 
+  // 콘티 시트 한 장 — 컷을 하나씩 보기 전에 전체를 먼저 본다
+  function secBoard(assets) {
+    var sheet = (assets || []).filter(function (a) {
+      return a.kind === "board" && a.cut_n == null;
+    })[0];
+    if (!sheet) return "";
+    return "<h2>콘티 시트</h2>" +
+      '<div class="board"><img src="' + esc(sheet.url) + '" alt="콘티 시트" loading="lazy">' +
+      "<p>이 시트는 <b>컷 순서와 구도를 정하는 자료</b>입니다. " +
+      "실제 영상은 승인 후 컷마다 다시 만들기 때문에 그림이 이것과 똑같지는 않습니다.</p></div>";
+  }
+
   function secCuts(cuts, assets) {
     if (!cuts || !cuts.length) return "";
+    // 앵커가 있으면 앵커를, 없으면 콘티 시트에서 잘라낸 칸을 쓴다
     var byCut = {};
-    (assets || []).forEach(function (a) {
-      if (a.kind === "anchor" && a.cut_n != null && !byCut[a.cut_n]) byCut[a.cut_n] = a;
+    ["anchor", "board"].forEach(function (kind) {
+      (assets || []).forEach(function (a) {
+        if (a.kind === kind && a.cut_n != null && !byCut[a.cut_n]) byCut[a.cut_n] = a;
+      });
     });
     return "<h2>콘티 " + cuts.length + "컷</h2><div class=\"cuts\">" + cuts.map(function (c) {
       var img = byCut[c.n];
@@ -335,7 +350,7 @@
     });
 
     var z = el("zoom"), zi = el("zoomImg");
-    document.querySelectorAll(".cut img").forEach(function (i) {
+    document.querySelectorAll(".cut img, .board img").forEach(function (i) {
       i.addEventListener("click", function () { zi.src = i.src; z.classList.add("on"); });
     });
     z.addEventListener("click", function () { z.classList.remove("on"); });
@@ -375,6 +390,7 @@
               bar(P.step) + "</div></div>" +
             secGate(P, x[5].data) +
             secConcepts(x[2].data, P.step === "concepts" && P.state === "ready") +
+            secBoard(x[4].data) +
             secCuts(x[3].data, x[4].data) +
             secStrategy(x[1].data) +
             secBrief(x[0].data, canEditBrief(P)) +
