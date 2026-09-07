@@ -180,7 +180,7 @@ h2::after{content:"";flex:1;height:1px;background:var(--rule)}
 .shots figure:last-child{border-right:0}
 .shots figcaption{font-family:"JetBrains Mono",monospace;font-size:9.5px;
   letter-spacing:.08em;color:var(--faint);text-align:center;padding:3px 0 4px}
-.shots .made figcaption{color:var(--live)}
+.shots .made.on figcaption{color:var(--live);font-weight:700}
 .shots .none{flex:1;aspect-ratio:4/5;display:flex;align-items:center;justify-content:center;
   font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--faint)}
 /* 시트에서 잘라낸 칸은 세로가 길다. cover 로 두면 번호와 글자가 잘려 나간다 */

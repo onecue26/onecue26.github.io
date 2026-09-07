@@ -52,11 +52,12 @@
     }
     var b = pick("board"), a = pick("anchor");
     if (!b && !a) return '<div class="noimg-n">' + n + "</div>";
+    // 비어 있는데 「완성」이라 적으면 다 된 것처럼 읽힌다. 채워질 때 바뀐다
     function one(label, x, cls) {
-      return '<figure class="' + cls + '">' +
+      return '<figure class="' + cls + (x ? " on" : "") + '">' +
         (x ? '<img src="' + esc(x.url) + '" alt="컷 ' + n + " " + label + '" loading="lazy">'
-           : '<div class="none">아직</div>') +
-        "<figcaption>" + label + "</figcaption></figure>";
+           : '<div class="none">—</div>') +
+        "<figcaption>" + (x ? label : "대기") + "</figcaption></figure>";
     }
     return '<div class="shots">' + one("콘티", b, "plan") + one("완성", a, "made") + "</div>";
   }
