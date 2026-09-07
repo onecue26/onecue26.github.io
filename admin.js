@@ -219,8 +219,10 @@
     }
 
     // 「다시 만들어 주세요」 — 제일 위에 둔다. 못 보고 지나가면 안 되는 것이다
+    var GNAME = { strategy: "전략", concepts: "5안", storyboard: "콘티" };
     var redo = p.redo
-      ? '<div class="said redo"><span class="lbl">다시 만들어 달라고 하셨습니다 · ' +
+      ? '<div class="said redo"><span class="lbl">' +
+        esc(GNAME[p.redo.gate] || p.redo.gate) + " — 광고주가 남긴 말 · " +
         ago(p.redo.decided_at) + "</span>" + esc(p.redo.note || "") + "</div>"
       : "";
 
@@ -336,9 +338,9 @@
           db.from("jobs").select("project_id,step,request").eq("state", "queued")
             .in("project_id", ids),
           db.from("briefs").select("project_id,raw,goal,target").in("project_id", ids),
+          // 승인하면서 남긴 말도 놓치면 안 된다. 반려만 보면 반쪽이다
           db.from("approvals").select("project_id,gate,decision,note,decided_at")
-            .eq("decision", "revise").in("project_id", ids)
-            .order("decided_at", { ascending: false }),
+            .in("project_id", ids).order("decided_at", { ascending: false }),
         ]).then(function (out) {
           var cs = out[0], files = out[1].data || [], people = out[2].data || [];
           var jobs = out[3].data || [];
@@ -356,8 +358,13 @@
             // 「새 의뢰」 = 아직 우리가 손대지 않은 것. 처리하면 표시가 사라진다
             p.isNew = queued.indexOf(p.id) >= 0;
             p.job = jobs.filter(function (j) { return j.project_id === p.id; })[0] || null;
-            // 다시 만들어 달라는 요청 — 가장 최근 것만
-            p.redo = revises.filter(function (a) { return a.project_id === p.id; })[0] || null;
+            // 광고주가 실제로 남긴 말 중 가장 최근 것.
+            // 자동으로 채워 넣은 문구(「…선택」·「남기신 말씀 없음」)는 말이 아니다
+            p.redo = revises.filter(function (a) {
+              if (a.project_id !== p.id) return false;
+              var n = a.note || "";
+              return n && !/없음|안 선택$/.test(n);
+            })[0] || null;
             var b = briefs.filter(function (x) { return x.project_id === p.id; })[0];
             if (b) { p.brief_raw = b.raw; p.brief_goal = b.goal; p.brief_target = b.target; }
           });

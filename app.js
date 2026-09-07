@@ -92,12 +92,15 @@
   // 로그인했으면 계정 기준으로 내 건을 찾는다. 브라우저를 바꿔도 따라온다.
   // 로그인 전이라면 이 브라우저에 남겨둔 기록(localStorage)으로 대신한다
   function loadMine(user) {
+    // ⚠️ 로그인했으면 localStorage 로 물러서지 않는다.
+    //    같은 브라우저에서 광고주 계정으로 넣은 건이 관리자 계정 화면에
+    //    「내가 넣은 의뢰」로 떴다. 남의 의뢰다. 계정이 있으면 계정만 믿는다
     if (!user) { renderMine(); return; }
     db.from("contacts").select("project_id,projects(slug,brand,product,step,state)")
       .eq("email", user.email)
       .then(function (r) {
         var rows = (r.data || []).map(function (c) { return c.projects; }).filter(Boolean);
-        if (!rows.length) { renderMine(); return; }
+        if (!rows.length) { el("mineWrap").hidden = true; return; }
         el("mineWrap").hidden = false;
         el("mine").innerHTML = rows.map(function (p) {
           var waiting = p.state === "ready" && GATES[p.step];

@@ -15,7 +15,7 @@
 
   // MINE — 이 건을 넣은 광고주 본인인가.
   // 판단하는 자리(5안 선택·콘티 승인)는 광고주의 것이다. 관리자가 대신 누르면 안 된다
-  var cfg = window.ONECUE || {}, db = null, P = null, MINE = false;
+  var cfg = window.ONECUE || {}, db = null, P = null, MINE = false, LOGGED_IN = false;
 
   var STEPS = [
     ["brief", "의뢰"], ["facts", "팩트"], ["strategy", "전략"],
@@ -23,6 +23,8 @@
     ["anchors", "앵커"], ["video", "영상"], ["deliver", "납품"],
   ];
   var IDX = {}; STEPS.forEach(function (s, i) { IDX[s[0]] = i; });
+  // 광고주가 판단하는 자리 — 여기서만 버튼이 뜬다
+  var GATES = { strategy: "검토", concepts: "선택", storyboard: "승인" };
 
   function el(id) { return document.getElementById(id); }
   function esc(s) {
@@ -39,8 +41,10 @@
     return new URLSearchParams(location.search).get(k);
   }
 
-  // 이 건을 이 브라우저에 기억해 둔다 — 주소를 잃어버려도 첫 화면에서 다시 찾도록
+  // 이 건을 이 브라우저에 기억해 둔다 — 주소를 잃어버려도 첫 화면에서 다시 찾도록.
+  // 단 내 건일 때만. 남의 건을 열어봤다고 「내가 넣은 의뢰」에 쌓이면 안 된다
   function remember(p) {
+    if (!MINE && LOGGED_IN) return;
     try {
       var k = "onecue.mine";
       var list = JSON.parse(localStorage.getItem(k) || "[]");
@@ -246,14 +250,16 @@
     // 다시 만들어 달라고 하셨으면, 그 말이 접수됐다는 걸 보여준다.
     // 버튼을 눌렀는데 화면이 그대로면 눌린 건지 알 수 없다
     var redos = (approvals || []).filter(function (a) {
-      return a.gate === "concepts" && a.decision === "revise";
+      return a.gate === p.step && a.decision === "revise";
     });
-    if (redos.length && p.step === "concepts" && p.state !== "ready") {
+    if (redos.length && GATES[p.step] && p.state !== "ready") {
       var last = redos[redos.length - 1];
+      var said = last.note || "";
+      var blank = said.indexOf("방향 지정 없음") === 0 || said.indexOf("내용 없음") >= 0;
       return '<div class="gate"><div class="txt"><b>다시 만들고 있습니다</b>' +
-        "<small>새 다섯 가지가 준비되면 이 화면에 올라옵니다." +
-        (last.note && last.note.indexOf("방향 지정 없음") !== 0
-          ? "<br>주신 말씀 · " + esc(last.note) : "") +
+        "<small>" + (p.step === "concepts"
+          ? "새 다섯 가지가" : "고친 콘티가") + " 준비되면 이 화면에 올라옵니다." +
+        (blank ? "" : "<br>주신 말씀 · " + esc(said)) +
         "</small></div></div>";
     }
 
@@ -268,12 +274,27 @@
         "<small>다섯 가지 방향을 준비했습니다. 하나를 고르시면 그 방향으로 콘티를 만듭니다.</small>" +
         "</div></div>";
     }
+    // 콘티에 「고쳐주세요」만 있고 무엇을 고칠지 적을 데가 없었다.
+    // 승인이냐 반려냐만 받으면 우리는 어디가 틀렸는지 모른 채 다시 짜게 된다
     if (p.step === "storyboard" && p.state === "ready" && !done.storyboard) {
       if (!MINE) return look;
-      return '<div class="gate"><div class="txt"><b>콘티를 확인해주세요</b>' +
-        "<small>아래 컷 구성대로 촬영·생성합니다. 승인하시면 제작에 들어갑니다.</small></div>" +
+      var rev = (approvals || []).filter(function (a) {
+        return a.gate === "storyboard" && a.decision === "revise";
+      });
+      return '<div class="gate col"><div class="txt"><b>콘티를 확인해주세요</b>' +
+        "<small>아래 컷 구성대로 만듭니다. 승인하시면 제작에 들어갑니다." +
+        (rev.length ? " 앞서 주신 말씀은 반영해서 다시 올렸습니다." : "") +
+        "</small></div>" +
+        '<textarea id="boardNote" maxlength="1000" ' +
+        'placeholder="고치실 곳이나 하고 싶은 말씀을 적어주세요 — 안 적으셔도 됩니다&#10;&#10;' +
+        '예 · 4번 컷 봉지 글자가 이상합니다&#10;' +
+        '예 · 아이 얼굴이 나왔으면 좋겠습니다&#10;' +
+        '예 · 마지막 자막을 「이름 그대로」로 줄여주세요"></textarea>' +
+        '<div class="acts">' +
         '<button class="btn" id="approveBoard">콘티 승인</button>' +
-        '<button class="btn ghost" id="reviseBoard">고쳐주세요</button></div>';
+        '<button class="btn ghost" id="reviseBoard">고쳐주세요</button>' +
+        '<span class="hint">적으신 내용은 승인하실 때도 같이 전달됩니다.</span>' +
+        "</div></div>";
     }
     if (done.storyboard) {
       return '<div class="gate done"><div class="txt"><b>콘티 승인 완료</b>' +
@@ -309,9 +330,11 @@
   }
 
   function decideBoard(decision) {
+    var box = el("boardNote");
+    var note = box ? (box.value || "").trim() : "";
     return db.from("approvals").insert({
       project_id: P.id, gate: "storyboard", decision: decision,
-      note: decision === "ok" ? "콘티 승인" : "콘티 수정 요청",
+      note: note || (decision === "ok" ? "콘티 승인 (남기신 말씀 없음)" : "콘티 수정 요청 (내용 없음)"),
     }).then(function () {
       return db.from("projects").update(
         decision === "ok"
@@ -395,7 +418,15 @@
           var owners = (x[6].data || []).map(function (c) {
             return (c.email || "").trim().toLowerCase();
           });
+          LOGGED_IN = !!me;
           MINE = !!(me && owners.indexOf((me.email || "").toLowerCase()) >= 0);
+          // 로그인 전이라면 이 브라우저에 남긴 기록으로 본인 여부를 대신한다
+          if (!me) {
+            try {
+              MINE = JSON.parse(localStorage.getItem("onecue.mine") || "[]")
+                .some(function (x) { return x.slug === P.slug; });
+            } catch (e) { MINE = false; }
+          }
           var title = [P.brand, P.product].filter(Boolean).join(" ") || P.slug;
           el("main").innerHTML =
             '<div class="hero"><div><h1>' + esc(title) + "</h1>" +

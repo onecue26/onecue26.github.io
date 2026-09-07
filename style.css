@@ -198,6 +198,14 @@ h2::after{content:"";flex:1;height:1px;background:var(--rule)}
 .gate.done{background:var(--live-soft);border-color:var(--live)}
 /* 광고주 본인이 아닐 때 — 내용은 다 보이되 버튼은 없다 */
 .gate.look{background:var(--sunk);border-color:var(--rule)}
+/* 수정사항을 적는 칸이 있는 정지점 — 가로로 늘어놓으면 칸이 좁다 */
+.gate.col{display:block}
+.gate.col textarea{width:100%;box-sizing:border-box;margin-top:12px;min-height:96px;
+  resize:vertical;background:var(--panel);border:1px solid var(--rule);border-radius:9px;
+  padding:11px 13px;font-family:inherit;font-size:14px;line-height:1.65;color:var(--ink)}
+.gate.col textarea:focus{outline:2px solid var(--cue);outline-offset:1px;border-color:var(--cue)}
+.gate.col .acts{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.gate.col .hint{font-size:12.5px;color:var(--muted)}
 
 .zoom{position:fixed;inset:0;background:rgba(0,0,0,.94);display:none;z-index:20;
   align-items:center;justify-content:center;cursor:zoom-out;padding:20px}
