@@ -129,6 +129,21 @@
   }
 
   // 광고주가 보낸 자료 — 잘 도착했는지 본인이 확인할 수 있어야 한다
+  // 완성본 — ★관리자가 검수해 넘긴 것만 뜬다 (approved).
+  // 여태 만들자마자 이 화면에 올라갔다. 순서가 거꾸로였다 (Dan 2026-09-08)
+  function secFinal(assets) {
+    var v = (assets || []).filter(function (a) {
+      return a.kind === "final" && a.approved;
+    });
+    if (!v.length) return "";
+    return "<h2>완성본</h2><div class=\"clips\">" + v.map(function (c) {
+      return '<figure class="clip"><video src="' + esc(c.url) +
+        '" controls playsinline preload="metadata" data-big="' + esc(c.url) +
+        '" data-kind="vid"></video><figcaption>' + esc(c.role || "완성본") +
+        "</figcaption></figure>";
+    }).join("") + "</div>";
+  }
+
   function secFiles(assets) {
     var f = (assets || []).filter(function (a) { return a.kind === "product_ref"; });
     if (!f.length) return "";
@@ -526,6 +541,7 @@
               "</div>" +
               bar(P.step) + "</div></div>" +
             secGate(P, x[5].data) +
+            secFinal(x[4].data) +
             (shown("concepts")
               ? secConcepts(x[2].data, MINE && P.step === "concepts" && P.state === "ready")
               : "") +

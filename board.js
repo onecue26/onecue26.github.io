@@ -46,6 +46,27 @@
     }).join("") + "</div>";
   }
 
+  // ★완성본 검수 — 여기서 넘겨야 광고주 화면에 뜬다.
+  // 만들자마자 광고주에게 보이던 것을 막았다 (Dan 2026-09-08)
+  function finals() {
+    var v = ASSETS.filter(function (a) { return a.kind === "final"; });
+    if (!v.length) return "";
+    return "<h2>완성본 " + v.length + "개 — 검수</h2>" +
+      '<p class="hint">여기서 <b>넘기기</b>를 눌러야 광고주 화면에 뜹니다. ' +
+      "누르기 전에는 광고주에게 안 보입니다.</p>" +
+      '<div class="clips">' + v.map(function (c) {
+        return '<figure class="clip"><video src="' + esc(c.url) +
+          '" controls playsinline preload="metadata"></video>' +
+          "<figcaption>" + esc(c.role || "") +
+          ' · <a href="' + esc(c.url) + '" target="_blank" rel="noopener">새 창</a>' +
+          '<br><button type="button" class="btn' + (c.approved ? " ghost" : "") +
+          '" data-final="' + esc(c.id) + '" data-to="' + (c.approved ? "0" : "1") + '">' +
+          (c.approved ? "광고주 화면에서 내리기" : "★ 광고주에게 넘기기") + "</button>" +
+          '<span class="st">' + (c.approved ? "광고주에게 보이는 중" : "아직 안 넘김") +
+          "</span></figcaption></figure>";
+      }).join("") + "</div>";
+  }
+
   function board() {
     var sheet = ASSETS.filter(function (a) {
       return a.kind === "board" && a.cut_n == null;
@@ -129,6 +150,7 @@
       '<textarea id="whole" maxlength="2000" placeholder="예 · 아이 얼굴이 나오는 쪽으로 다시 짜자&#10;예 · 슬로건 컷을 하나 더 넣자">' +
       esc(P.admin_note || "") + "</textarea></div>" +
 
+      finals() +
       clips() +
       board() +
 
@@ -152,6 +174,21 @@
 
   // ── 동작 ──────────────────────────────────────────────────────────────────
   function wire() {
+    // 완성본 넘기기/내리기 — 누르는 즉시 광고주 화면이 바뀐다
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-final]"), function (b) {
+        b.addEventListener("click", function () {
+          var id = b.getAttribute("data-final"), to = b.getAttribute("data-to") === "1";
+          b.disabled = true;
+          db.from("assets").update({ approved: to }).eq("id", id)
+            .then(function (r) {
+              if (r.error) throw r.error;
+              say("ok", to ? "광고주 화면에 올렸습니다" : "광고주 화면에서 내렸습니다");
+              return load();
+            })
+            .catch(function (e) { b.disabled = false; fail(e); });
+        });
+      });
     el("fAll").addEventListener("click", function () {
       if (!ONLY_MARKED) return;
       pull(); ONLY_MARKED = false; render();
