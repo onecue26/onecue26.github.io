@@ -252,3 +252,9 @@ footer{border-top:1px solid var(--rule);margin-top:56px;padding-top:18px;
   display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
   font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--faint)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* 완성본 검수 — 넘기기 전에는 광고주에게 안 보인다 */
+.clips figcaption .btn{margin-top:6px;font-size:12px;padding:5px 10px}
+.clips figcaption .st{display:block;margin-top:4px;font-size:10.5px;
+  font-family:"JetBrains Mono",monospace;color:var(--faint)}
+p.hint{margin:-6px 0 10px;font-size:12.5px;color:var(--muted)}
