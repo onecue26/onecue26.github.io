@@ -193,6 +193,15 @@ h2::after{content:"";flex:1;height:1px;background:var(--rule)}
 .shots .made.on figcaption{color:var(--live);font-weight:700}
 .shots .none{flex:1;aspect-ratio:4/5;display:flex;align-items:center;justify-content:center;
   font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--faint)}
+/* 한 컷이 여러 조각으로 나뉘면 세로로 쌓는다 — 자른 앞·뒤가 둘 다 쓸 것일 때가 있다 */
+.vidcol{display:flex;flex-direction:column;min-width:0}
+.vidcol figure{border-right:0}
+.vidcol figure + figure{border-top:1px solid var(--rule)}
+.shots video{cursor:zoom-in}
+/* 눌러서 크게 보기 — 작은 칸에서는 판정이 안 된다 */
+.big{position:fixed;inset:0;z-index:99;background:rgba(0,0,0,.88);
+  display:flex;align-items:center;justify-content:center;padding:24px;cursor:zoom-out}
+.big video,.big img{max-width:100%;max-height:100%;display:block;background:#000}
 /* 시트에서 잘라낸 칸은 세로가 길다. cover 로 두면 번호와 글자가 잘려 나간다 */
 .cut img{width:100%;height:100%;object-fit:contain;display:block;background:var(--sunk);
   cursor:zoom-in;aspect-ratio:4/5}
