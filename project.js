@@ -210,18 +210,10 @@
     });
   }
 
-  // 만든 영상 — 제일 위에 둔다. 이걸 보려고 들어오는 것이다
-  function secClips(assets) {
-    var v = (assets || []).filter(function (a) { return a.kind === "clip"; });
-    if (!v.length) return "";
-    return "<h2>영상 " + v.length + "판</h2><div class=\"clips\">" + v.map(function (c) {
-      return '<figure class="clip"><video src="' + esc(c.url) +
-        '" controls playsinline preload="metadata"></video>' +
-        "<figcaption>" + esc(c.role || "") +
-        ' · <a href="' + esc(c.url) + '" target="_blank" rel="noopener">새 창</a>' +
-        "</figcaption></figure>";
-    }).join("") + "</div>";
-  }
+  // ⚠️ 영상을 맨 위에 따로 나열하던 절은 **없앴다** (Dan 2026-09-08).
+  //    컷 줄에도 같은 영상이 붙으므로 같은 것이 두 번 보였고,
+  //    판이 늘수록 위쪽이 이름만 잔뜩 늘어선 목록이 되어 알아볼 수 없었다.
+  //    영상은 **컷 줄에서만** 본다. 크게 보려면 눌러서 연다(openBig).
 
   // 콘티 시트 한 장 — 컷을 하나씩 보기 전에 전체를 먼저 본다
   function secBoard(assets) {
@@ -239,26 +231,68 @@
   // 영상 한 판은 컷 여러 개를 덮으므로 meta.cuts 로 어느 줄에 붙을지 정한다
   function shots(n, board, anchor, clips) {
     var b = board[n], a = anchor[n];
-    var v = (clips || []).filter(function (c) {
+    // ⚠️ 한 컷이 **여러 조각**으로 나뉠 수 있다 — 자른 앞·뒤가 둘 다 쓸 것이면 둘 다 보여야 한다.
+    //    예전에는 [0] 하나만 그려서 나머지가 화면에서 사라졌다 (Dan 2026-09-08)
+    var vs = (clips || []).filter(function (c) {
       var m = (c.meta && c.meta.cuts) || [];
       return m.indexOf(n) >= 0;
-    })[0];
-    if (!b && !a && !v) return '<div class="noimg-n">' + n + "</div>";
+    });
+    if (!b && !a && !vs.length) return '<div class="noimg-n">' + n + "</div>";
     function pic(label, x, cls) {
       return '<figure class="' + cls + (x ? " on" : "") + '">' +
-        (x ? '<img src="' + esc(x.url) + '" alt="컷 ' + n + '" loading="lazy">'
+        (x ? '<img src="' + esc(x.url) + '" alt="컷 ' + n + '" loading="lazy"' +
+             ' data-big="' + esc(x.url) + '" data-kind="img">'
            : '<div class="none">—</div>') +
         "<figcaption>" + (x ? label : "대기") + "</figcaption></figure>";
     }
-    function vid(x) {
-      return '<figure class="made' + (x ? " on" : "") + '">' +
-        (x ? '<video src="' + esc(x.url) + '" controls playsinline preload="metadata"></video>'
-           : '<div class="none">—</div>') +
-        "<figcaption>" + (x ? "영상" : "대기") + "</figcaption></figure>";
+    // 영상 칸 — 조각이 여럿이면 세로로 쌓는다. 이름(role)을 밑에 적어야 무엇인지 안다
+    function vids() {
+      if (!vs.length) {
+        return '<figure class="made"><div class="none">—</div>' +
+          "<figcaption>대기</figcaption></figure>";
+      }
+      return vs.map(function (x) {
+        return '<figure class="made on"><video src="' + esc(x.url) +
+          '" controls playsinline preload="metadata" data-big="' + esc(x.url) +
+          '" data-kind="vid"></video><figcaption>' +
+          esc(x.role || "영상") + "</figcaption></figure>";
+      }).join("");
     }
     return '<div class="shots three">' + pic("콘티", b, "plan") +
-      pic("완성", a, "made") + vid(v) + "</div>";
+      pic("완성", a, "made") + '<div class="vidcol">' + vids() + "</div></div>";
   }
+
+  // 눌러서 크게 보기 — 작은 칸에서는 판정이 안 된다.
+  // 화면 전체를 덮고, 아무 데나 누르거나 ESC 로 닫는다
+  function openBig(url, kind) {
+    var w = document.createElement("div");
+    w.className = "big";
+    w.innerHTML = kind === "vid"
+      ? '<video src="' + esc(url) + '" controls autoplay playsinline></video>'
+      : '<img src="' + esc(url) + '" alt="크게 보기">';
+    function close() {
+      w.remove();
+      document.removeEventListener("keydown", onKey);
+    }
+    function onKey(e) { if (e.key === "Escape") close(); }
+    w.addEventListener("click", function (e) {
+      // 영상 조작(재생·탐색)은 닫지 않는다 — 바깥을 눌러야 닫힌다
+      if (e.target === w) close();
+    });
+    document.addEventListener("keydown", onKey);
+    document.body.appendChild(w);
+  }
+
+  // 컷 줄은 다시 그려지므로 개별 요소가 아니라 문서에 한 번만 건다
+  document.addEventListener("dblclick", function (e) {
+    var t = e.target.closest && e.target.closest("[data-big]");
+    if (t) { e.preventDefault(); openBig(t.getAttribute("data-big"), t.getAttribute("data-kind")); }
+  });
+  document.addEventListener("click", function (e) {
+    // 그림은 한 번 눌러 연다. 영상은 재생 버튼과 겹치므로 두 번 눌러 연다
+    var t = e.target.closest && e.target.closest('img[data-big]');
+    if (t) openBig(t.getAttribute("data-big"), "img");
+  });
 
   function secCuts(cuts, assets) {
     if (!cuts || !cuts.length) return "";
@@ -492,7 +526,6 @@
               "</div>" +
               bar(P.step) + "</div></div>" +
             secGate(P, x[5].data) +
-            secClips(x[4].data) +
             (shown("concepts")
               ? secConcepts(x[2].data, MINE && P.step === "concepts" && P.state === "ready")
               : "") +
