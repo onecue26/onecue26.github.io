@@ -2,9 +2,9 @@
 <div class="topbar"><div class="topbar-in"><a class="mark" href="index.html">프로젝트</a><div class="spacer"></div><span class="pill" id="conn">연결 확인 중</span><span class="acct" id="acct"></span></div></div>
 <main><div class="studio-heading"><div><div class="studio-eyebrow">YOUR CREATIVE WORKSPACE</div><h1>ONECUE 스튜디오</h1><p id="greeting">다음 이야기를 시작할 시간.</p></div><a class="btn" href="new.html">＋ 새 프로젝트</a></div>
 <div class="studio-stats"><div><span>전체 프로젝트</span><strong id="total">—</strong></div><div><span>제작 진행</span><strong id="working">—</strong></div><div><span>검토 대기</span><strong id="waiting">—</strong></div><div><span>납품 완료</span><strong id="finished">—</strong></div></div>
-<section class="studio-visual" aria-label="ONECUE 비주얼 아카이브"><img src="img/a01.jpg" alt="도시의 여름 장면"><img src="img/a02.jpg" alt="ONECUE 비주얼 아카이브 두 번째 장면"><img src="img/a03.jpg" alt="ONECUE 비주얼 아카이브 세 번째 장면"><span>ONECUE / VISUAL ARCHIVE</span></section>
+<section id="private-showcase" aria-label="관리자 제작 결과물" hidden></section>
 <div class="studio-listhead"><div class="studio-filters" role="group" aria-label="프로젝트 상태"><button class="active" data-filter="all">전체</button><button data-filter="pending">제작 진행</button><button data-filter="ready">검토 대기</button><button data-filter="done">납품 완료</button></div><input id="project-search" type="search" aria-label="프로젝트 검색" placeholder="브랜드 · 제품 검색"></div>
 <div id="dashboard-projects" class="studio-tablewrap"><p class="empty">프로젝트를 불러오고 있습니다.</p></div>
 <section class="studio-retrieve"><div><h3>받아두신 진행 주소가 있나요?</h3><p>프로젝트 주소 또는 프로젝트 코드를 입력해 주세요.</p></div><form id="find-project"><input name="slug" aria-label="프로젝트 주소 또는 코드" placeholder="프로젝트 주소 또는 코드" required><button class="btn ghost">열기 →</button></form></section>
 <footer><span>ONECUE STUDIO</span><a href="old/index.html">이전 사이트</a></footer></main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="auth.js"></script><script src="dashboard.js?v=2"></script></body></html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="auth.js"></script><script src="private-showcase.js?v=1"></script><script src="dashboard.js?v=2"></script></body></html>
