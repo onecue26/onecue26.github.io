@@ -17,7 +17,7 @@
         window.ONECUE.supabaseUrl, window.ONECUE.supabaseAnonKey));
   }
 
-  var cfg = window.ONECUE || {}, db = null, ROWS = [];
+  var cfg = window.ONECUE || {}, db = null, ROWS = [], authorized = false;
 
   var STEPS = [
     ["brief", "의뢰"], ["facts", "팩트"], ["strategy", "전략"],
@@ -331,6 +331,7 @@
 
   // ── 불러오기 ──────────────────────────────────────────────────────────────
   function load() {
+    if (!authorized) return Promise.resolve();
     el("stamp").textContent = new Date().toISOString().slice(0, 16).replace("T", " ");
 
     return db.from("projects")
@@ -403,31 +404,50 @@
   }
 
   // 이 화면은 관리자만 본다
+  function accessNotice(title, message, login) {
+    authorized = false;
+    ROWS = [];
+    el('reload').disabled = true;
+    document.querySelector('main').innerHTML = '<section role="status" style="max-width:560px;margin:48px auto;overflow-wrap:anywhere">' +
+      '<h1 style="font-size:24px">' + esc(title) + '</h1><p>' + esc(message) + '</p>' +
+      '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px">' +
+      '<a class="btn" href="index.html">프로젝트로 돌아가기</a>' +
+      '<a class="btn ghost" href="login.html' + (login ? '?next=admin.html' : '') + '">계정 확인</a></div></section>';
+    setConn('bad', title);
+  }
   function gate() {
+    authorized = false;
     return db.auth.getUser().then(function (r) {
+      if (r.error) throw r.error;
       var user = r.data && r.data.user;
-      if (!user) { location.replace("login.html?next=admin.html"); return false; }
-      return db.from("profiles").select("is_admin,email").eq("id", user.id).maybeSingle()
+      if (!user) { accessNotice('로그인이 필요합니다', '관리자 계정으로 로그인해 주세요.', true); return false; }
+      return db.from("profiles").select("is_admin").eq("id", user.id).maybeSingle()
         .then(function (p) {
+          if (p.error) throw p.error;
           if (!p.data || !p.data.is_admin) {
-            document.querySelector("main").innerHTML =
-              '<div class="empty"><span class="big">관리자만 볼 수 있는 화면입니다</span>' +
-              esc(user.email) + " 계정에는 권한이 없습니다.<br><br>" +
-              '<a class="btn ghost" href="index.html">첫 화면으로</a> ' +
-              '<a class="btn ghost" href="login.html">다른 계정으로 로그인</a></div>';
-            setConn("bad", "권한 없음");
+            accessNotice('관리자 전용 화면입니다', '현재 로그인한 계정은 관리자가 아닙니다. 의뢰와 진행 상황은 프로젝트 화면에서 확인해 주세요.', false);
             return false;
           }
+          authorized = true;
           return true;
         });
     });
   }
 
   function boot() {
-    if (!window.supabase || !cfg.supabaseUrl) { setConn("bad", "연결 설정 없음"); return; }
+    if (!window.supabase || !cfg.supabaseUrl) { accessNotice('연결을 확인해 주세요', '로그인 서비스를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.', false); return; }
     db = shared();
-    el("reload").addEventListener("click", load);
-    gate().then(function (ok) { if (ok) load(); });
+    function refresh() {
+      el('reload').disabled = true;
+      return gate().then(function (ok) { if (ok) return load(); })
+        .catch(function () { accessNotice('권한을 확인하지 못했습니다', '잠시 후 새로고침해 주세요.', false); })
+        .finally(function () { el('reload').disabled = !authorized; });
+    }
+    el("reload").addEventListener("click", refresh);
+    db.auth.onAuthStateChange(function (event) {
+      if (event === 'SIGNED_OUT') accessNotice('로그인이 필요합니다', '관리자 계정으로 로그인해 주세요.', true);
+    });
+    refresh();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
