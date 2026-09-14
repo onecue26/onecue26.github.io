@@ -16,7 +16,6 @@ async function load(){try{
   if(authError||!user){document.querySelector('#detail').innerHTML='<div class="empty">관리자 로그인이 필요합니다. <a href="login.html">로그인</a></div>';status.textContent='로그인 대기';return;}
   const {data:profile,error:profileError}=await db.from('profiles').select('is_admin').eq('id',user.id).maybeSingle();
   if(profileError||!profile?.is_admin)throw Error('관리자 계정만 볼 수 있습니다.');
-  document.querySelectorAll('[data-studio-admin]').forEach(a=>a.hidden=false);
   rows=[];let start=0;
   while(true){const {data,error}=await db.from('production_results').select('*').order('work_id').order('revision').range(start,start+499);if(error)throw Error('결과물 조회에 실패했습니다. 테이블과 접근 권한을 확인해 주세요.');rows.push(...data);if(data.length<500)break;start+=500;}
  }
