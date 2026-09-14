@@ -31,6 +31,19 @@
     el("msg").textContent = text;
   }
 
+  function resetSay(kind, text) {
+    el("resetMsg").className = "msg" + (kind ? " " + kind : "");
+    el("resetMsg").textContent = text;
+  }
+
+  function showReset() {
+    el("form").hidden = true;
+    el("form").style.display = "none";
+    el("who").classList.remove("on");
+    el("resetForm").hidden = false;
+    el("newPw").focus();
+  }
+
   function setMode(m) {
     mode = m;
     el("tabIn").className = m === "in" ? "on" : "";
@@ -101,7 +114,47 @@
       db.auth.signOut().then(function () { location.reload(); });
     });
 
+    el("forgot").addEventListener("click", function () {
+      var email = el("email").value.trim();
+      if (!email || !el("email").checkValidity()) {
+        say("err", "먼저 광고주 계정 이메일을 입력해 주세요.");
+        el("email").focus();
+        return;
+      }
+      el("forgot").disabled = true;
+      say("", "재설정 메일을 보내고 있습니다…");
+      var redirect = location.origin + location.pathname + "?mode=recovery";
+      db.auth.resetPasswordForEmail(email, { redirectTo: redirect }).then(function (r) {
+        el("forgot").disabled = false;
+        if (r.error) { say("err", translate(r.error.message)); return; }
+        say("ok", "재설정 메일을 보냈습니다. 메일의 링크를 눌러 주세요.");
+      });
+    });
+
+    db.auth.onAuthStateChange(function (event) {
+      if (event === "PASSWORD_RECOVERY") showReset();
+    });
+
+    el("resetForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var first = el("newPw").value, second = el("newPw2").value;
+      if (first !== second) { resetSay("err", "새 비밀번호가 서로 다릅니다."); return; }
+      el("savePw").disabled = true;
+      resetSay("", "변경하고 있습니다…");
+      db.auth.updateUser({ password: first }).then(function (r) {
+        el("savePw").disabled = false;
+        if (r.error) { resetSay("err", translate(r.error.message)); return; }
+        resetSay("ok", "비밀번호를 변경했습니다. 잠시 후 프로젝트 화면으로 이동합니다.");
+        setTimeout(function () { location.replace("index.html"); }, 900);
+      });
+    });
+
     db.auth.getUser().then(function (r) {
+      if (new URLSearchParams(location.search).get("mode") === "recovery") {
+        if (r.data && r.data.user) showReset();
+        else say("err", "재설정 링크가 만료됐습니다. 비밀번호 찾기를 다시 진행해 주세요.");
+        return;
+      }
       if (r.data && r.data.user) showWho(r.data.user);
     });
 
