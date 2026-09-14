@@ -1,0 +1,260 @@
+/* onecue — 공용 스타일
+   큐 램프(방송 온에어 등)의 주홍을 유일한 강조색으로 쓴다. 나머지는 종이. */
+
+:root{
+  --ground:#FAF9F7; --panel:#FFFFFF; --sunk:#F1EFEC;
+  --ink:#17150F; --muted:#6B6558; --faint:#95907F; --rule:#E2DED6;
+  --cue:#C93B22;  --cue-soft:#FBEDE9;
+  --live:#2E7D52; --live-soft:#E6F1EA;
+  --hold:#9A6A12; --hold-soft:#F7EFDD;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#121110; --panel:#1A1918; --sunk:#232120;
+    --ink:#EDEAE4; --muted:#9C968A; --faint:#6E6A61; --rule:#2E2C29;
+    --cue:#F26B4E;  --cue-soft:#2A1A15;
+    --live:#5DBE8A; --live-soft:#152620;
+    --hold:#D9A64A; --hold-soft:#282016;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#121110; --panel:#1A1918; --sunk:#232120;
+  --ink:#EDEAE4; --muted:#9C968A; --faint:#6E6A61; --rule:#2E2C29;
+  --cue:#F26B4E;  --cue-soft:#2A1A15;
+  --live:#5DBE8A; --live-soft:#152620;
+  --hold:#D9A64A; --hold-soft:#282016;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--ground);color:var(--ink);
+  font-family:"Gothic A1","Malgun Gothic",system-ui,sans-serif;
+  font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased}
+.mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+a{color:inherit;text-decoration:none}
+
+/* 상단 바 */
+.topbar{position:sticky;top:0;z-index:5;background:var(--panel);
+  border-bottom:1px solid var(--rule)}
+.topbar-in{max-width:1080px;margin:0 auto;padding:13px 24px;
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.mark{display:flex;align-items:center;gap:9px;font-weight:800;font-size:19px;
+  letter-spacing:-.02em}
+.lamp{width:9px;height:9px;border-radius:50%;background:var(--cue);flex:none;
+  box-shadow:0 0 0 3px var(--cue-soft)}
+.mark .sub{font-weight:400;font-size:12.5px;color:var(--muted);letter-spacing:0}
+.spacer{flex:1}
+
+.pill{display:inline-flex;align-items:center;gap:7px;padding:5px 11px;
+  border-radius:999px;font-size:12px;font-weight:500;border:1px solid var(--rule);
+  background:var(--sunk);color:var(--muted);white-space:nowrap}
+.pill .dot{width:7px;height:7px;border-radius:50%;background:var(--faint);flex:none}
+.pill.ok{background:var(--live-soft);border-color:transparent;color:var(--live)}
+.pill.ok .dot{background:var(--live)}
+.pill.bad{background:var(--cue-soft);border-color:transparent;color:var(--cue)}
+.pill.bad .dot{background:var(--cue)}
+
+.btn{display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border-radius:8px;
+  font-size:13.5px;font-weight:700;border:1px solid var(--cue);background:var(--cue);
+  color:#fff;cursor:pointer;font-family:inherit}
+.btn:hover{filter:brightness(1.06)}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--rule);font-weight:500}
+.btn:disabled{opacity:.5;cursor:default}
+.btn:focus-visible,a:focus-visible{outline:2px solid var(--cue);outline-offset:2px}
+
+/* 상단 바 계정 — 로그인 전엔 버튼 하나, 로그인하면 이름과 로그아웃 */
+.acct{display:inline-flex;align-items:center;gap:8px}
+.acct-em{font-size:13.5px;font-weight:700;color:var(--ink);max-width:170px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-decoration:none;
+  display:inline-flex;align-items:center;gap:6px}
+.acct-em:hover{color:var(--cue)}
+.acct-em em{font-style:normal;font-family:"JetBrains Mono",monospace;font-size:10px;
+  font-weight:700;letter-spacing:.06em;background:var(--cue);color:#fff;
+  padding:2px 6px;border-radius:4px}
+@media(max-width:640px){.acct-em{max-width:110px}}
+
+main{max-width:1080px;margin:0 auto;padding:30px 24px 96px}
+.lede{max-width:60ch;margin:0 0 30px;color:var(--muted);font-size:15.5px}
+.lede b{color:var(--ink);font-weight:700}
+
+h2{font-size:12px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--faint);margin:44px 0 14px;font-family:"JetBrains Mono",monospace;
+  display:flex;align-items:center;gap:12px}
+h2:first-of-type{margin-top:0}
+h2::after{content:"";flex:1;height:1px;background:var(--rule)}
+
+/* 목록 카드 */
+.projects{display:grid;gap:12px}
+.proj{background:var(--panel);border:1px solid var(--rule);border-radius:11px;
+  padding:16px 18px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;
+  align-items:center}
+.proj:hover{border-color:var(--cue)}
+.proj .name{font-weight:700;font-size:16.5px}
+.proj .meta{font-size:12px;color:var(--muted);margin:1px 0 9px}
+.proj-side{display:flex;flex-direction:column;align-items:flex-end;gap:7px}
+.go{font-size:12.5px;color:var(--muted)}
+@media(max-width:560px){
+  .proj{grid-template-columns:1fr}
+  .proj-side{flex-direction:row;align-items:center}
+}
+
+/* 진행 막대 */
+.bar{display:flex;gap:3px}
+.bar i{width:22px;height:5px;border-radius:2px;background:var(--rule);display:block}
+.bar i.done{background:var(--live)}
+.bar i.now{background:var(--cue)}
+
+.tag{font-family:"JetBrains Mono",monospace;font-size:10.5px;font-weight:700;
+  letter-spacing:.06em;padding:4px 9px;border-radius:5px;white-space:nowrap}
+.tag.hold{background:var(--hold);color:#fff}
+.tag.calm{background:var(--sunk);color:var(--muted);border:1px solid var(--rule)}
+.tag.ok{background:var(--live);color:#fff}
+
+.empty{background:var(--panel);border:1px dashed var(--rule);border-radius:11px;
+  padding:34px 24px;text-align:center;color:var(--muted)}
+.empty .big{display:block;color:var(--ink);font-weight:700;font-size:16px;margin-bottom:5px}
+
+/* 패널 */
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:11px;
+  padding:18px 20px}
+.kv{display:grid;grid-template-columns:110px minmax(0,1fr);gap:8px 16px;font-size:14.5px}
+.kv dt{color:var(--muted);font-size:12.5px;font-family:"JetBrains Mono",monospace}
+.kv dd{margin:0}
+@media(max-width:560px){.kv{grid-template-columns:1fr;gap:2px 0}.kv dd{margin-bottom:10px}}
+
+/* 컨셉 5안 */
+.concepts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.cc{background:var(--panel);border:1px solid var(--rule);border-radius:11px;padding:15px 17px;
+  display:flex;flex-direction:column;gap:6px}
+.cc.chosen{border-color:var(--cue);border-width:2px;background:var(--cue-soft)}
+.cc .k{font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;
+  letter-spacing:.1em;color:var(--muted)}
+.cc.chosen .k{color:var(--cue)}
+.cc .t{font-weight:700;font-size:15.5px;line-height:1.4}
+.cc .b{font-size:13.5px;color:var(--muted)}
+
+/* 추천 배지 — 카드 오른쪽 위. 이유는 올려놓거나 눌러야 펼쳐진다 */
+.cc{position:relative}
+.cc.reco-on{border-color:var(--cue)}
+.reco{position:absolute;top:11px;right:12px;font-family:"JetBrains Mono",monospace;
+  font-size:10.5px;font-weight:700;letter-spacing:.08em;background:var(--cue);color:#fff;
+  padding:3px 8px;border-radius:5px;cursor:help;outline:none}
+.reco .why{position:absolute;top:calc(100% + 7px);right:0;width:min(280px,72vw);
+  background:var(--ink);color:var(--ground);font-family:inherit;font-weight:400;
+  font-size:12.5px;line-height:1.6;letter-spacing:0;padding:10px 12px;border-radius:8px;
+  box-shadow:0 6px 20px rgba(0,0,0,.25);z-index:5;
+  opacity:0;visibility:hidden;transform:translateY(-3px);
+  transition:opacity .12s,transform .12s,visibility .12s}
+.reco:hover .why,.reco:focus .why{opacity:1;visibility:visible;transform:translateY(0)}
+/* 카드 제목이 배지 아래로 파고들지 않게 자리를 비운다 */
+.cc.reco-on .k{padding-right:52px}
+
+/* 여섯 번째 카드 — 다섯 개가 다 아닐 때. 골라야만 넘어가는 화면은 함정이다 */
+.cc.redo{border-style:dashed;background:var(--sunk)}
+.cc.redo .k{color:var(--faint)}
+.cc.redo textarea{width:100%;box-sizing:border-box;margin-top:4px;min-height:88px;
+  resize:vertical;background:var(--panel);border:1px solid var(--rule);border-radius:9px;
+  padding:10px 12px;font-family:inherit;font-size:13.5px;line-height:1.6;color:var(--ink)}
+.cc.redo textarea:focus{outline:2px solid var(--cue);outline-offset:1px;border-color:var(--cue)}
+.cc.redo .hint{font-size:12px;color:var(--faint)}
+.cc button{margin-top:auto}
+
+/* 만든 영상 — 세로라 나란히 놓는다 */
+.clips{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,300px));gap:14px}
+.clip{margin:0;background:var(--panel);border:1px solid var(--rule);border-radius:11px;
+  padding:10px;overflow:hidden}
+.clip video{width:100%;display:block;border-radius:8px;background:#000;aspect-ratio:9/16}
+.clip figcaption{font-size:12.5px;color:var(--muted);margin-top:8px;padding:0 2px}
+.clip figcaption a{color:var(--cue);text-decoration:underline;text-underline-offset:2px}
+
+/* 콘티 시트 한 장 */
+.board{background:var(--panel);border:1px solid var(--rule);border-radius:11px;
+  padding:14px;overflow:hidden}
+.board img{width:100%;display:block;border-radius:8px;cursor:zoom-in;background:var(--sunk)}
+.board p{margin:12px 2px 0;font-size:13px;color:var(--muted);line-height:1.6}
+.board p b{color:var(--ink)}
+
+/* 콘티 */
+.cuts{display:grid;gap:10px}
+.cut{background:var(--panel);border:1px solid var(--rule);border-radius:11px;
+  overflow:hidden;display:grid;grid-template-columns:396px minmax(0,1fr)}
+.cut.noimg{grid-template-columns:52px minmax(0,1fr)}
+
+/* 그림이 둘이다 — 왼쪽 「콘티」(계획) · 오른쪽 「완성」(실제로 만든 것).
+   갈아 끼우면 원래 무엇을 하려던 컷인지가 사라져서 비교가 안 된다 */
+.shots{display:grid;grid-template-columns:1fr 1fr;background:var(--sunk)}
+.shots.three{grid-template-columns:1fr 1fr 1fr}
+.shots video{width:100%;display:block;background:#000;aspect-ratio:4/5;object-fit:contain}
+.shots figure{margin:0;min-width:0;display:flex;flex-direction:column;
+  border-right:1px solid var(--rule)}
+.shots figure:last-child{border-right:0}
+.shots figcaption{font-family:"JetBrains Mono",monospace;font-size:9.5px;
+  letter-spacing:.08em;color:var(--faint);text-align:center;padding:3px 0 4px}
+.shots .made.on figcaption{color:var(--live);font-weight:700}
+.shots .none{flex:1;aspect-ratio:4/5;display:flex;align-items:center;justify-content:center;
+  font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--faint)}
+/* 한 컷이 여러 조각으로 나뉘면 세로로 쌓는다 — 자른 앞·뒤가 둘 다 쓸 것일 때가 있다 */
+.vidcol{display:flex;flex-direction:column;min-width:0}
+.vidcol figure{border-right:0}
+.vidcol figure + figure{border-top:1px solid var(--rule)}
+.shots video{cursor:zoom-in}
+/* 눌러서 크게 보기 — 작은 칸에서는 판정이 안 된다 */
+.big{position:fixed;inset:0;z-index:99;background:rgba(0,0,0,.88);
+  display:flex;align-items:center;justify-content:center;padding:24px;cursor:zoom-out}
+.big video,.big img{max-width:100%;max-height:100%;display:block;background:#000}
+/* 시트에서 잘라낸 칸은 세로가 길다. cover 로 두면 번호와 글자가 잘려 나간다 */
+.cut img{width:100%;height:100%;object-fit:contain;display:block;background:var(--sunk);
+  cursor:zoom-in;aspect-ratio:4/5}
+@media(max-width:600px){
+  .cut{grid-template-columns:1fr}
+  .shots figure{border-right:0}
+  .shots figure:first-child{border-right:1px solid var(--rule)}
+}
+.cut .noimg-n{display:flex;align-items:center;justify-content:center;
+  background:var(--sunk);font-family:"JetBrains Mono",monospace;color:var(--faint);
+  font-size:14px}
+.cut .body{padding:14px 17px;min-width:0}
+.cut .head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:5px}
+.cut .n{font-family:"JetBrains Mono",monospace;font-weight:700;color:var(--cue);font-size:14px}
+.cut .tt{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--muted)}
+.cut .blk{font-size:12px;color:var(--faint)}
+.cut .what{font-size:14.5px}
+.cut .why{font-size:12.5px;color:var(--muted);margin-top:5px}
+.cut .spec{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.cut .spec span{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--muted);
+  background:var(--sunk);border:1px solid var(--rule);border-radius:5px;padding:2px 7px}
+@media(max-width:640px){.cut,.cut.noimg{grid-template-columns:1fr}.cut img{aspect-ratio:16/9}}
+
+/* 정지점 */
+.gate{background:var(--hold-soft);border:1px solid var(--hold);border-radius:11px;
+  padding:18px 20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.gate .txt{flex:1;min-width:240px}
+.gate .txt b{display:block;font-size:16px;margin-bottom:2px}
+.gate .txt small{color:var(--muted);font-size:13px}
+.gate.done{background:var(--live-soft);border-color:var(--live)}
+/* 광고주 본인이 아닐 때 — 내용은 다 보이되 버튼은 없다 */
+.gate.look{background:var(--sunk);border-color:var(--rule)}
+/* 수정사항을 적는 칸이 있는 정지점 — 가로로 늘어놓으면 칸이 좁다 */
+.gate.col{display:block}
+.gate.col textarea{width:100%;box-sizing:border-box;margin-top:12px;min-height:96px;
+  resize:vertical;background:var(--panel);border:1px solid var(--rule);border-radius:9px;
+  padding:11px 13px;font-family:inherit;font-size:14px;line-height:1.65;color:var(--ink)}
+.gate.col textarea:focus{outline:2px solid var(--cue);outline-offset:1px;border-color:var(--cue)}
+.gate.col .acts{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.gate.col .hint{font-size:12.5px;color:var(--muted)}
+
+.zoom{position:fixed;inset:0;background:rgba(0,0,0,.94);display:none;z-index:20;
+  align-items:center;justify-content:center;cursor:zoom-out;padding:20px}
+.zoom img{max-width:100%;max-height:100%;object-fit:contain}
+.zoom.on{display:flex}
+
+footer{border-top:1px solid var(--rule);margin-top:56px;padding-top:18px;
+  display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--faint)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* 완성본 검수 — 넘기기 전에는 광고주에게 안 보인다 */
+.clips figcaption .btn{margin-top:6px;font-size:12px;padding:5px 10px}
+.clips figcaption .st{display:block;margin-top:4px;font-size:10.5px;
+  font-family:"JetBrains Mono",monospace;color:var(--faint)}
+p.hint{margin:-6px 0 10px;font-size:12.5px;color:var(--muted)}

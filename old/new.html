@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>광고 의뢰하기 — onecue</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="style.css?v=1f228d76">
+<style>
+.form{display:grid;gap:26px;max-width:680px}
+.sec{display:grid;gap:18px;padding-bottom:24px;border-bottom:1px solid var(--rule)}
+.sec:last-of-type{border-bottom:0}
+.sec > h3{margin:0;font-size:12px;font-weight:700;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--faint);font-family:"JetBrains Mono",monospace}
+.field label{display:block;font-weight:700;font-size:15px;margin-bottom:2px}
+.field label .req{color:var(--cue);margin-left:3px}
+.field .hint{display:block;color:var(--muted);font-size:13px;margin-bottom:9px}
+.field input[type=text],.field input[type=email],.field input[type=tel],
+.field textarea,.field select{
+  width:100%;padding:11px 13px;border:1px solid var(--rule);border-radius:9px;
+  background:var(--panel);color:var(--ink);font-family:inherit;font-size:15px;line-height:1.6}
+.field textarea{min-height:150px;resize:vertical}
+.field input:focus,.field textarea:focus,.field select:focus{
+  outline:2px solid var(--cue);outline-offset:1px;border-color:var(--cue)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+@media(max-width:600px){.row,.row3{grid-template-columns:1fr}}
+
+/* 고르는 칩 */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;pointer-events:none}
+.chip span{display:block;border:1px solid var(--rule);background:var(--panel);
+  border-radius:9px;padding:9px 13px;cursor:pointer;font-size:14px;line-height:1.35}
+.chip span b{display:block;font-weight:700;font-size:14.5px}
+.chip span small{display:block;color:var(--muted);font-size:11.5px;
+  font-family:"JetBrains Mono",monospace;margin-top:1px}
+.chip input:checked + span{border-color:var(--cue);background:var(--cue-soft);
+  box-shadow:inset 0 0 0 1px var(--cue)}
+.chip input:focus-visible + span{outline:2px solid var(--cue);outline-offset:2px}
+.chip span:hover{border-color:var(--muted)}
+
+.example{background:var(--sunk);border:1px solid var(--rule);border-radius:9px;
+  padding:13px 15px;font-size:13.5px;color:var(--muted);margin-top:9px}
+.example b{color:var(--ink);display:block;margin-bottom:3px;font-size:12px;
+  font-family:"JetBrains Mono",monospace;letter-spacing:.06em}
+.derived{font-family:"JetBrains Mono",monospace;font-size:12.5px;color:var(--muted);
+  background:var(--sunk);border:1px solid var(--rule);border-radius:8px;padding:10px 13px}
+.derived b{color:var(--ink)}
+.privacy{font-size:12.5px;color:var(--muted);background:var(--sunk);
+  border:1px solid var(--rule);border-radius:9px;padding:12px 14px}
+.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.msg{font-size:14px}
+.msg.err{color:var(--cue)}
+.after{background:var(--live-soft);border:1px solid var(--live);border-radius:11px;
+  padding:22px 24px;display:none}
+.after.on{display:block}
+.after h3{margin:0 0 6px;font-size:18px}
+.after p{margin:0 0 14px;color:var(--muted);font-size:14.5px}
+.after p b{color:var(--ink)}
+.myurl{background:var(--panel);border:1px solid var(--rule);border-radius:8px;
+  padding:11px 13px;font-size:12.5px;word-break:break-all;color:var(--ink)}
+.field .hint b{color:var(--ink)}
+input[type=file]{width:100%;padding:10px 12px;border:1px dashed var(--rule);
+  border-radius:9px;background:var(--panel);color:var(--muted);font-family:inherit;
+  font-size:13.5px;cursor:pointer}
+input[type=file]:focus{outline:2px solid var(--cue);outline-offset:1px}
+.picked{display:flex;flex-wrap:wrap;gap:8px;margin-top:9px}
+.picked figure{margin:0;width:88px}
+.picked img{width:88px;height:88px;object-fit:cover;border-radius:8px;
+  border:1px solid var(--rule);display:block;background:var(--sunk)}
+.picked figcaption{font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--faint);
+  margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="topbar-in">
+  <a class="mark" href="index.html"><span class="lamp"></span>onecue
+    <span class="sub">광고 기획 · 제작</span></a>
+  <div class="spacer"></div>
+  <span class="pill" id="conn"><span class="dot"></span>연결 확인 중</span>
+  <span class="acct" id="acct"></span>
+</div></div>
+
+<main>
+  <h2>광고 의뢰</h2>
+  <p class="lede"><b>제품과 하고 싶은 말만 적어주세요.</b>
+    전략·컨셉·콘티·영상은 저희가 만듭니다. <b>컨셉 5안</b>을 보내드리면
+    마음에 드는 걸 고르시면 됩니다.</p>
+
+  <form class="form" id="form">
+
+    <!-- ── 1. 제품 ─────────────────────────────────── -->
+    <div class="sec">
+      <h3>무엇을 알리시나요</h3>
+      <div class="row">
+        <div class="field">
+          <label for="brand">브랜드 이름<span class="req">*</span></label>
+          <span class="hint">제품에 적힌 이름 그대로</span>
+          <input type="text" id="brand" required placeholder="예 · 파도">
+        </div>
+        <div class="field">
+          <label for="product">제품 이름<span class="req">*</span></label>
+          <span class="hint">무엇을 파시나요</span>
+          <input type="text" id="product" required placeholder="예 · 자몽 스파클링">
+        </div>
+      </div>
+      <div class="field">
+        <label for="item">제품 설명<span class="req">*</span></label>
+        <span class="hint">아는 대로 편하게. 문장이 아니어도 됩니다.</span>
+        <textarea id="item" required
+          placeholder="어떤 제품인지 · 뭐가 다른지 · 누가 쓰면 좋은지 · 포장에 뭐라고 적혀 있는지"></textarea>
+        <div class="example"><b>이렇게 적으시면 됩니다</b>
+          250ml 슬림캔 자몽 탄산수. 무가당이라 뒷맛이 안 남는다.
+          여름에 시원하게 마시는 용도. 캔에 파도 그림이 그려져 있음.</div>
+      </div>
+      <div class="field">
+        <label for="files">제품 사진 · 참고 이미지</label>
+        <span class="hint"><b>제품 실물 사진이 있으면 꼭 넣어주세요.</b>
+          포장에 적힌 문구까지 읽고 반영합니다. 여러 장 가능 · 장당 10MB 까지</span>
+        <input type="file" id="files" multiple accept="image/*,application/pdf">
+        <div class="picked" id="picked"></div>
+      </div>
+
+      <div class="field">
+        <label for="goal">이 광고로 하고 싶은 것</label>
+        <span class="hint">한 줄이면 충분합니다</span>
+        <input type="text" id="goal" placeholder="예 · 여름 성수기에 신제품을 알리고 싶다">
+      </div>
+      <div class="field">
+        <label for="target">누구에게</label>
+        <span class="hint">비워두시면 저희가 정합니다</span>
+        <input type="text" id="target" placeholder="예 · 20~40대 직장인">
+      </div>
+    </div>
+
+    <!-- ── 2. 어디에 · 얼마나 ──────────────────────── -->
+    <div class="sec">
+      <h3>어디에 · 얼마나</h3>
+
+      <div class="field">
+        <label>어디에 트나요</label>
+        <span class="hint">고르시면 아래 규격이 자동으로 맞춰집니다. 여러 개 고르셔도 됩니다.</span>
+        <div class="chips" id="channels">
+          <label class="chip"><input type="checkbox" value="tv" data-aspects="16:9">
+            <span><b>TV · CTV</b><small>지상파 · 케이블 · 스마트TV</small></span></label>
+          <label class="chip"><input type="checkbox" value="youtube" data-aspects="16:9,9:16">
+            <span><b>유튜브</b><small>인스트림 · 쇼츠</small></span></label>
+          <label class="chip"><input type="checkbox" value="meta" data-aspects="4:5,9:16,1:1">
+            <span><b>인스타 · 페북</b><small>피드 · 릴스 · 스토리</small></span></label>
+          <label class="chip"><input type="checkbox" value="tiktok" data-aspects="9:16">
+            <span><b>틱톡</b><small>세로 전용</small></span></label>
+          <label class="chip"><input type="checkbox" value="ooh" data-aspects="16:9,1:1">
+            <span><b>옥외 · 매장</b><small>전광판 · 사이니지</small></span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>길이<span class="req">*</span></label>
+        <span class="hint">실제로 많이 쓰는 초수입니다. 하나만 고르세요.</span>
+        <div class="chips" id="runtimes">
+          <label class="chip"><input type="radio" name="rt" value="6">
+            <span><b>6초</b><small>유튜브 범퍼</small></span></label>
+          <label class="chip"><input type="radio" name="rt" value="10">
+            <span><b>10초</b><small>지상파 짧은 유형</small></span></label>
+          <label class="chip"><input type="radio" name="rt" value="15" checked>
+            <span><b>15초</b><small>국내 방송 기본 단위</small></span></label>
+          <label class="chip"><input type="radio" name="rt" value="20">
+            <span><b>20초</b><small>지상파</small></span></label>
+          <label class="chip"><input type="radio" name="rt" value="30">
+            <span><b>30초</b><small>본편 · TV · 온라인</small></span></label>
+          <label class="chip"><input type="radio" name="rt" value="60">
+            <span><b>60초</b><small>브랜드 필름</small></span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>화면 규격<span class="req">*</span></label>
+        <span class="hint">같은 광고를 여러 규격으로 만드는 게 보통입니다.</span>
+        <div class="chips" id="aspects">
+          <label class="chip"><input type="checkbox" value="16:9" checked>
+            <span><b>16:9 가로</b><small>TV · 유튜브 · PC</small></span></label>
+          <label class="chip"><input type="checkbox" value="9:16">
+            <span><b>9:16 세로</b><small>쇼츠 · 릴스 · 틱톡</small></span></label>
+          <label class="chip"><input type="checkbox" value="1:1">
+            <span><b>1:1 정사각</b><small>피드 · 사이니지</small></span></label>
+          <label class="chip"><input type="checkbox" value="4:5">
+            <span><b>4:5 세로피드</b><small>인스타 · 페북 피드</small></span></label>
+        </div>
+      </div>
+
+      <div class="derived" id="derived"></div>
+    </div>
+
+    <!-- ── 3. 연락처 ───────────────────────────────── -->
+    <div class="sec">
+      <h3>어디로 보내드릴까요</h3>
+      <div class="row">
+        <div class="field">
+          <label for="company">회사명<span class="req">*</span></label>
+          <span class="hint">브랜드와 다를 수 있습니다</span>
+          <input type="text" id="company" required placeholder="예 · 파도음료 주식회사">
+        </div>
+        <div class="field">
+          <label for="cname">담당자 성명<span class="req">*</span></label>
+          <span class="hint"></span>
+          <input type="text" id="cname" required placeholder="예 · 김담당">
+        </div>
+      </div>
+      <div class="row3">
+        <div class="field">
+          <label for="email">이메일<span class="req">*</span></label>
+          <span class="hint" id="emailHint">결과를 여기로 보냅니다</span>
+          <input type="email" id="email" required placeholder="name@company.com">
+        </div>
+        <div class="field">
+          <label for="phone">연락처</label>
+          <span class="hint">선택</span>
+          <input type="tel" id="phone" placeholder="010-0000-0000">
+        </div>
+        <div class="field">
+          <label for="title">직함</label>
+          <span class="hint">선택</span>
+          <input type="text" id="title" placeholder="마케팅팀 과장">
+        </div>
+      </div>
+      <p class="privacy">연락처는 이 광고 건을 진행하는 데에만 씁니다.
+        <b>다른 사람에게 보이지 않도록 따로 보관</b>합니다.</p>
+    </div>
+
+    <div class="actions">
+      <button class="btn" type="submit" id="go">의뢰하기</button>
+      <a class="btn ghost" href="index.html">취소</a>
+      <span class="msg" id="msg"></span>
+    </div>
+  </form>
+
+  <div class="after" id="after">
+    <h3>의뢰가 접수됐습니다</h3>
+    <p>제품 설명을 읽고 전략과 컨셉 5안을 만듭니다.
+      <b>아래 주소가 이 건의 진행 상황 페이지입니다. 저장해 두세요.</b></p>
+    <div class="myurl mono" id="myurl"></div>
+    <div class="actions" style="margin-top:14px">
+      <a class="btn" id="afterLink" href="#">진행 상황 보기 →</a>
+      <button class="btn ghost" type="button" id="copyLink">주소 복사</button>
+      <span class="msg" id="copied"></span>
+    </div>
+  </div>
+
+  <footer><span>onecue · 데모</span><span class="mono" id="stamp"></span></footer>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js?v=d4d97baa"></script>
+<script src="auth.js?v=fa839557"></script>
+<script src="new.js?v=f6233d99"></script>
+</body>
+</html>

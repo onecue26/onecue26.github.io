@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>진행 상황 — onecue</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="style.css?v=1f228d76">
+<style>
+.hero{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.hero h1{margin:0;font-size:27px;letter-spacing:-.02em}
+.hero .sub{color:var(--muted);font-size:13.5px;margin-top:2px}
+.hero .bar{margin-top:12px}
+.hero .bar i{width:34px;height:6px}
+.stepnames{display:flex;gap:3px;margin-top:5px}
+.stepnames span{width:34px;font-size:9.5px;color:var(--faint);text-align:center;
+  font-family:"JetBrains Mono",monospace;line-height:1.2}
+@media(max-width:640px){.stepnames{display:none}}
+.pickbtn{margin-top:10px}
+/* 의뢰 내용 고치기 */
+.ed-l{display:block;font-size:12.5px;color:var(--muted);margin:12px 0 4px;
+  font-family:"JetBrains Mono",monospace}
+.ed-l:first-child{margin-top:0}
+.ed-t,.ed-i{width:100%;padding:10px 12px;border:1px solid var(--rule);border-radius:8px;
+  background:var(--ground);color:var(--ink);font-family:inherit;font-size:14.5px;line-height:1.6}
+.ed-t{min-height:130px;resize:vertical}
+.ed-t:focus,.ed-i:focus{outline:2px solid var(--cue);outline-offset:1px;border-color:var(--cue)}
+h2 #editBrief{margin-left:auto}
+/* 보내주신 자료 */
+.files{display:flex;flex-wrap:wrap;gap:10px}
+.files a{width:96px;display:block}
+.files img{width:96px;height:96px;object-fit:cover;border-radius:8px;
+  border:1px solid var(--rule);display:block;background:var(--sunk)}
+.files .doc{width:96px;height:96px;border-radius:8px;border:1px solid var(--rule);
+  background:var(--sunk);display:flex;align-items:center;justify-content:center;
+  font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--muted)}
+.files em{display:block;font-style:normal;font-size:11px;color:var(--faint);margin-top:4px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.files a:hover img,.files a:hover .doc{border-color:var(--cue)}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="topbar-in">
+  <a class="mark" href="index.html"><span class="lamp"></span>onecue
+    <span class="sub">광고 기획 · 제작</span></a>
+  <div class="spacer"></div>
+  <span class="pill" id="conn"><span class="dot"></span>연결 확인 중</span>
+  <span class="acct" id="acct"></span>
+</div></div>
+
+<main id="main">
+  <div class="empty"><span class="big">불러오는 중</span></div>
+</main>
+
+<div class="zoom" id="zoom"><img id="zoomImg" alt=""></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js?v=d4d97baa"></script>
+<script src="auth.js?v=fa839557"></script>
+<script src="project.js?v=f52f4c0b"></script>
+</body>
+</html>
