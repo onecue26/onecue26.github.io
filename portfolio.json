@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "hero": "summer-memory",
+  "works": [
+    {"id":"tomori-okinawa","title":"TOMORI / 오키나와","category":"brand","label":"BRAND FILM · AD05","year":"2026","description":"토모리 광고 랩의 오키나와 편. 보존된 최종본 v23을 공개용으로 변환했습니다.","poster":"portfolio-media/tomori-okinawa.jpg","webm":"portfolio-media/tomori-okinawa.webm","mp4":"portfolio-media/tomori-okinawa.mp4","published":true},
+    {"id":"tomori-store","title":"TOMORI / 편의점","category":"brand","label":"BRAND FILM · AD03","year":"2026","description":"토모리 광고 랩의 편의점 편. 보존된 최종본 v20을 공개용으로 변환했습니다.","poster":"portfolio-media/tomori-store.jpg","webm":"portfolio-media/tomori-store.webm","mp4":"portfolio-media/tomori-store.mp4","published":true},
+    {"id":"summer-memory","title":"어느 여름날 하루의 기억","category":"story","label":"SHORT FILM · 1편","year":"2026","description":"혼자 다녀온 여름 하루. 배경음악 없이 현장음으로 담은 짧은 이야기입니다.","poster":"portfolio-media/summer-memory.jpg","webm":"portfolio-media/summer-memory.webm","mp4":"portfolio-media/summer-memory.mp4","hero_webm":"portfolio-media/summer-hero.webm","hero_mp4":"portfolio-media/summer-hero.mp4","published":true},
+    {"id":"summer-return","title":"그래서 다시 왔다","category":"story","label":"SHORT FILM · 2편","year":"2026","description":"같은 여름, 같은 길, 같은 집. 한 사람이 더 있던 해의 이야기입니다. 1편과 이어지는 단편입니다.","poster":"portfolio-media/summer-return.jpg","webm":"portfolio-media/summer-return.webm","mp4":"portfolio-media/summer-return.mp4","published":true},
+    {"id":"pado-surf","title":"PADO / 빨대 서핑","category":"brand","label":"CONCEPT FILM · 자체 제작 테스트","year":"2026","description":"빨대 위의 서핑을 탄산음료의 청량감으로 연결한 콘셉트 필름입니다. 실제 광고주 납품작이 아닌 자체 제작 테스트입니다.","poster":"portfolio-media/pado-surf.jpg","webm":"portfolio-media/pado-surf.webm","mp4":"portfolio-media/pado-surf.mp4","published":true},
+    {"id":"pado-summer","title":"PADO / 한 모금의 파도","category":"brand","label":"CONCEPT FILM · 자체 제작 테스트","year":"2026","description":"한 모금에서 시작되는 여름의 장면을 담은 콘셉트 필름입니다. 실제 광고주 납품작이 아닌 자체 제작 테스트입니다.","poster":"portfolio-media/pado-summer.jpg","webm":"portfolio-media/pado-summer.webm","mp4":"portfolio-media/pado-summer.mp4","published":true}
+  ]
+}
