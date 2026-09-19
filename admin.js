@@ -364,6 +364,12 @@
           db.from("events").select("project_id,ts").eq("kind", "sent")
             .in("project_id", ids).order("ts", { ascending: false }),
         ]).then(function (out) {
+          if (out[1].error) throw out[1].error;
+          return window.ONECUE_ASSETS.resolve(db, out[1].data || []).then(function (assets) {
+            out[1].data = assets;
+            return out;
+          });
+        }).then(function (out) {
           var cs = out[0], files = out[1].data || [], people = out[2].data || [];
           var jobs = out[3].data || [];
           var queued = jobs.map(function (j) { return j.project_id; });
@@ -400,6 +406,8 @@
           setConn("ok", "새 의뢰 " + ROWS.filter(function (x) { return x.isNew; }).length);
           render();
         });
+      }).catch(function () {
+        accessNotice('불러오지 못했습니다', '잠시 후 새로고침해 주세요.', false);
       });
   }
 
@@ -412,13 +420,14 @@
       '<h1 style="font-size:24px">' + esc(title) + '</h1><p>' + esc(message) + '</p>' +
       '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px">' +
       '<a class="btn" href="index.html">프로젝트로 돌아가기</a>' +
-      '<a class="btn ghost" href="login.html' + (login ? '?next=admin.html' : '') + '">계정 확인</a></div></section>';
+      '<a class="btn ghost" href="login.html' + (login ? '?next=admin.html' : '') + '">' +
+      (login ? '로그인' : '계정 확인') + '</a></div></section>';
     setConn('bad', title);
   }
   function gate() {
     authorized = false;
     return db.auth.getUser().then(function (r) {
-      if (r.error) throw r.error;
+      if (r.error && r.error.name !== 'AuthSessionMissingError') throw r.error;
       var user = r.data && r.data.user;
       if (!user) { accessNotice('로그인이 필요합니다', '관리자 계정으로 로그인해 주세요.', true); return false; }
       return db.from("profiles").select("is_admin").eq("id", user.id).maybeSingle()
