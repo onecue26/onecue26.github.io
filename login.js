@@ -78,7 +78,13 @@
   // 로그인 뒤에 어디로 돌려보낼지 — ?next=admin.html 처럼 넘어온다
   function nextUrl() {
     var n = new URLSearchParams(location.search).get("next");
-    return (n && /^[a-z0-9_\-]+\.html$/i.test(n)) ? n : null;
+    if (!n) return null;
+    try {
+      var target = new URL(n, location.href);
+      if (target.origin !== location.origin || target.username || target.password ||
+          !/^\/[a-z0-9_\-]+\.html$/i.test(target.pathname)) return null;
+      return target.pathname + target.search + target.hash;
+    } catch (_) { return null; }
   }
 
   function showWho(user) {
@@ -95,7 +101,7 @@
         el("whoRole").textContent = admin ? "관리자" : "광고주";
         el("goAdmin").hidden = !admin;
         var n = nextUrl();
-        if (n && (admin || n !== "admin.html")) location.replace(n);
+        if (n && (admin || new URL(n, location.href).pathname.toLowerCase() !== "/admin.html")) location.replace(n);
       });
 
     el("saveNick").addEventListener("click", function () {

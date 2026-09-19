@@ -106,7 +106,7 @@
     });
   }
 
-  // 파일 이름은 추측 못 하게 무작위로 짓는다. 버킷이 공개라 이름이 곧 자물쇠다
+  // Access is enforced by project ownership; filenames are not authorization.
   function upload(projectId, file) {
     var ext = (file.name.split(".").pop() || "bin").toLowerCase().slice(0, 8);
     var key = projectId + "/" + Date.now().toString(36) +
@@ -119,7 +119,7 @@
           project_id: projectId, kind: "product_ref", role: file.name,
           storage_path: key, url: url, mime: file.type, bytes: file.size,
           meta: { by: "client" },
-        });
+        }).then(function (saved) { if (saved.error) throw saved.error; return saved; });
       });
   }
 
@@ -200,12 +200,13 @@
     el("msg").textContent = "보내는 중…";
 
     // 회사(clients) → 건(projects) → 의뢰 내용(briefs) → 연락처(contacts) → 작업(jobs)
-    db.from("clients").select("id").eq("name", company).maybeSingle()
+    db.from("clients").select("id").eq("name", company).eq("owner_id", ME.id).maybeSingle()
       .then(function (r) {
+        if (r.error) throw r.error;
         if (r.data) return r.data;
         return db.from("clients")
           .insert({ name: company, company: company, owner_id: ME ? ME.id : null })
-          .select("id").single().then(function (x) { return x.data; });
+          .select("id").single().then(function (x) { if (x.error) throw x.error; return x.data; });
       })
       .then(function (client) {
         return db.from("projects").insert({

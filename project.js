@@ -24,7 +24,8 @@
   ];
   var IDX = {}; STEPS.forEach(function (s, i) { IDX[s[0]] = i; });
   // 광고주가 판단하는 자리 — 여기서만 버튼이 뜬다
-  var GATES = { strategy: "검토", concepts: "선택", storyboard: "승인" };
+  var GATES = { strategy: "검토", concepts: "선택", storyboard: "승인", video: "승인" };
+  var HAS_FINAL = false;
 
   // ★ 광고주는 자기에게 넘어온 것까지만 본다.
   //   전에는 DB 에 있는 걸 그냥 다 그렸다. 그래서 우리가 아직 검수도 안 한 콘티가
@@ -211,18 +212,7 @@
   }
 
   function askRedo(note) {
-    return db.from("approvals").insert({
-      project_id: P.id, gate: "concepts", decision: "revise",
-      note: note || "방향 지정 없음 — 축을 바꿔 다시",
-    }).then(function () {
-      // 광고주 차례가 끝났다. 다시 우리 차례라 pending 으로 내린다
-      return db.from("projects").update({ step: "concepts", state: "pending" }).eq("id", P.id);
-    }).then(function () {
-      return db.from("jobs").insert({
-        project_id: P.id, step: "concepts", kind: "text",
-        request: { note: "5안 재요청", direction: note || null },
-      });
-    });
+    return decide("concepts", "revise", note);
   }
 
   // ⚠️ 영상을 맨 위에 따로 나열하던 절은 **없앴다** (Dan 2026-09-08).
@@ -357,7 +347,7 @@
       var blank = said.indexOf("방향 지정 없음") === 0 || said.indexOf("내용 없음") >= 0;
       return '<div class="gate"><div class="txt"><b>다시 만들고 있습니다</b>' +
         "<small>" + (p.step === "concepts"
-          ? "새 다섯 가지가" : "고친 콘티가") + " 준비되면 이 화면에 올라옵니다." +
+          ? "새 다섯 가지가" : p.step === "video" ? "고친 영상이" : "고친 콘티가") + " 준비되면 이 화면에 올라옵니다." +
         (blank ? "" : "<br>주신 말씀 · " + esc(said)) +
         "</small></div></div>";
     }
@@ -395,6 +385,24 @@
         '<span class="hint">적으신 내용은 승인하실 때도 같이 전달됩니다.</span>' +
         "</div></div>";
     }
+    if (p.step === "video" && p.state === "ready" && HAS_FINAL) {
+      if (!MINE) return look;
+      return '<div class="gate col"><div class="txt"><b>완성본을 확인해주세요</b>' +
+        '<small>승인하시면 납품을 준비합니다.</small></div>' +
+        '<label for="videoNote">남기실 말씀</label>' +
+        '<textarea id="videoNote" maxlength="1000" placeholder="수정 요청 시 고칠 내용을 적어주세요"></textarea>' +
+        '<div class="acts"><button class="btn" id="approveVideo">영상 승인</button>' +
+        '<button class="btn ghost" id="reviseVideo">고쳐주세요</button></div>' +
+        '<span class="hint" id="videoMsg" role="status" aria-live="polite"></span></div>';
+    }
+    if (p.step === "deliver") {
+      return '<div class="gate done"><div class="txt"><b>영상 승인 완료</b><small>' +
+        (p.state === "ready" ? "납품이 준비되었습니다." : "납품을 준비하고 있습니다.") + '</small></div></div>';
+    }
+    if (p.step === "video") {
+      return '<div class="gate done"><div class="txt"><b>영상을 준비하고 있습니다</b>' +
+        '<small>검수가 끝나면 완성본이 올라옵니다.</small></div></div>';
+    }
     if (done.storyboard) {
       return '<div class="gate done"><div class="txt"><b>콘티 승인 완료</b>' +
         "<small>제작에 들어갑니다. 앵커 이미지와 영상이 준비되면 여기에 올라옵니다.</small>" +
@@ -406,55 +414,44 @@
 
   // ── 동작 ──────────────────────────────────────────────────────────────────
   function pickConcept(key) {
-    return db.from("concepts").update({ is_chosen: false }).eq("project_id", P.id)
-      .then(function () {
-        return db.from("concepts").update({ is_chosen: true })
-          .eq("project_id", P.id).eq("key", key);
-      })
-      .then(function () {
-        return db.from("approvals").insert({
-          project_id: P.id, gate: "concepts", decision: "ok", note: key + "안 선택",
-        });
-      })
-      .then(function () {
-        return db.from("projects").update({ step: "develop", state: "pending" })
-          .eq("id", P.id);
-      })
-      .then(function () {
-        return db.from("jobs").insert({
-          project_id: P.id, step: "develop", kind: "text",
-          request: { note: "선택안 전개", chosen: key },
-        });
-      });
+    return decide("concepts", "ok", key + "안 선택", key);
+  }
+
+  function decide(gate, decision, note, key) {
+    return db.rpc("onecue_decide", {
+      p_project_id: P.id, p_gate: gate, p_decision: decision,
+      p_note: note || "", p_concept_key: key || null,
+    }).then(function (r) {
+      if (r.error) throw r.error;
+      return r.data;
+    });
   }
 
   function decideBoard(decision) {
     var box = el("boardNote");
     var note = box ? (box.value || "").trim() : "";
-    return db.from("approvals").insert({
-      project_id: P.id, gate: "storyboard", decision: decision,
-      note: note || (decision === "ok" ? "콘티 승인 (남기신 말씀 없음)" : "콘티 수정 요청 (내용 없음)"),
-    }).then(function () {
-      // 반려도 pending 이다 — 「우리 차례」라는 뜻이고,
-      // idle 로 두면 관리자 화면에 1차 검수 칸이 안 돌아온다
-      return db.from("projects").update(
-        decision === "ok"
-          ? { step: "anchors", state: "pending" }
-          : { step: "storyboard", state: "pending" }
-      ).eq("id", P.id);
-    }).then(function () {
-      // 반려도 할 일이다. 작업을 안 만들면 우리가 온 줄을 모른다
-      return db.from("jobs").insert(
-        decision === "ok"
-          ? { project_id: P.id, step: "anchors", kind: "image",
-              request: { note: "콘티 승인 — 앵커 이미지 생성", said: note || null } }
-          : { project_id: P.id, step: "storyboard", kind: "text",
-              request: { note: "콘티 수정 요청", said: note || null } }
-      );
-    });
+    return decide("storyboard", decision, note);
   }
 
   function wire() {
+    var av = el("approveVideo"), vr = el("reviseVideo");
+    function videoDecision(decision) {
+      if (!MINE || !HAS_FINAL || P.step !== "video" || P.state !== "ready" || av.disabled) return;
+      var note = el("videoNote").value.trim();
+      if (decision === "revise" && !note) {
+        el("videoMsg").textContent = "고칠 내용을 적어주세요.";
+        el("videoNote").focus();
+        return;
+      }
+      av.disabled = vr.disabled = true;
+      el("videoMsg").textContent = "처리 중…";
+      decide("video", decision, note).then(load).catch(function () {
+        av.disabled = vr.disabled = false;
+        el("videoMsg").textContent = "저장하지 못했습니다. 진행 상태를 확인한 뒤 다시 시도해주세요.";
+      });
+    }
+    if (av) av.addEventListener("click", function () { videoDecision("ok"); });
+    if (vr) vr.addEventListener("click", function () { videoDecision("revise"); });
     document.querySelectorAll("[data-pick]").forEach(function (b) {
       b.addEventListener("click", function () {
         b.disabled = true; b.textContent = "고르는 중…";
@@ -482,7 +479,9 @@
     });
     if (rv) rv.addEventListener("click", function () {
       rv.disabled = true;
-      decideBoard("revise").then(load);
+      decideBoard("revise").then(load).catch(function (e) {
+        rv.disabled = false; rv.textContent = "실패 — " + e.message;
+      });
     });
 
     var z = el("zoom"), zi = el("zoomImg");
@@ -497,40 +496,54 @@
 
   // ── 불러오기 ──────────────────────────────────────────────────────────────
   function load() {
+    P = null; MINE = false; HAS_FINAL = false;
     var slug = qs("slug");
     if (!slug) { el("main").innerHTML = '<div class="empty">건을 지정하지 않았습니다</div>'; return; }
 
-    return db.from("projects").select("*").eq("slug", slug).maybeSingle()
+    var user;
+    function denied() {
+      setConn("", "접근 제한");
+      el("main").innerHTML = '<div class="empty"><span class="big">볼 수 없는 건입니다</span>' +
+        '<p>의뢰하신 계정으로 로그인했는지 확인해주세요.</p><a class="btn ghost" href="index.html">목록으로</a></div>';
+    }
+    return db.auth.getUser().then(function (auth) {
+      user = auth.data && auth.data.user;
+      if (!user) {
+        location.replace("login.html?next=" + encodeURIComponent("project.html" + location.search));
+        return null;
+      }
+      if (auth.error) throw auth.error;
+      LOGGED_IN = true;
+      return db.from("projects").select("id,client_id,slug,brand,product,running_sec,cut_count,aspect,aspects,channels,step,state").eq("slug", slug).maybeSingle();
+    })
       .then(function (r) {
+        if (!r) return;
         if (r.error) throw r.error;
-        if (!r.data) { el("main").innerHTML = '<div class="empty">그런 건이 없습니다</div>'; return; }
+        if (!r.data) { denied(); return; }
         P = r.data;
+        return Promise.all([
+          db.from("clients").select("owner_id").eq("id", P.client_id).maybeSingle(),
+          db.from("profiles").select("is_admin").eq("id", user.id).maybeSingle(),
+        ]).then(function (access) {
+        access.forEach(function (r) { if (r.error) throw r.error; });
+        var admin = !!(access[1].data && access[1].data.is_admin);
+        MINE = !admin && !!(access[0].data && access[0].data.owner_id === user.id);
+        if (!MINE && !admin) { P = null; denied(); return; }
         setConn("ok", "연결됨");
         var id = P.id;
         return Promise.all([
-          db.from("briefs").select("*").eq("project_id", id).maybeSingle(),
-          db.from("strategies").select("*").eq("project_id", id).maybeSingle(),
-          db.from("concepts").select("*").eq("project_id", id).order("key"),
-          db.from("cuts").select("*").eq("project_id", id).order("n"),
-          db.from("assets").select("*").eq("project_id", id),
-          db.from("approvals").select("*").eq("project_id", id),
-          // 판단하는 자리는 광고주의 것이다. 이 건을 넣은 사람인지 확인한다
-          db.from("contacts").select("email").eq("project_id", id),
-          db.auth.getUser(),
+          db.from("briefs").select("raw,goal,target,format").eq("project_id", id).maybeSingle(),
+          db.from("strategies").select("insight,usp,one_message,tone").eq("project_id", id).maybeSingle(),
+          db.from("concepts").select("key,axis,title,body,hook,is_chosen,is_recommended,reco_reason").eq("project_id", id).order("key"),
+          db.from("cuts").select("n,t_start,t_end,block,size,angle,move,lens,action,intent").eq("project_id", id).order("n"),
+          db.from("assets").select("kind,approved,url,storage_path,role,mime,cut_n,meta").eq("project_id", id).or("kind.neq.final,approved.eq.true"),
+          db.from("approvals").select("gate,decision,note,decided_at").eq("project_id", id).order("decided_at"),
         ]).then(function (x) {
-          var me = (x[7].data && x[7].data.user) || null;
-          var owners = (x[6].data || []).map(function (c) {
-            return (c.email || "").trim().toLowerCase();
-          });
-          LOGGED_IN = !!me;
-          MINE = !!(me && owners.indexOf((me.email || "").toLowerCase()) >= 0);
-          // 로그인 전이라면 이 브라우저에 남긴 기록으로 본인 여부를 대신한다
-          if (!me) {
-            try {
-              MINE = JSON.parse(localStorage.getItem("onecue.mine") || "[]")
-                .some(function (x) { return x.slug === P.slug; });
-            } catch (e) { MINE = false; }
-          }
+          x.forEach(function (r) { if (r.error) throw r.error; });
+          if (!window.ONECUE_ASSETS) throw new Error("자료 접근 설정을 불러오지 못했습니다.");
+          return window.ONECUE_ASSETS.resolve(db, x[4].data || []).then(function (assets) {
+          x[4].data = assets;
+          HAS_FINAL = (x[4].data || []).some(function (a) { return a.kind === "final" && a.approved === true && a.url; });
           var title = [P.brand, P.product].filter(Boolean).join(" ") || P.slug;
           el("main").innerHTML =
             '<div class="hero"><div><h1>' + esc(title) + "</h1>" +
@@ -547,7 +560,7 @@
               : "") +
             (shown("storyboard") ? secBoard(x[4].data) + secCuts(x[3].data, x[4].data) : "") +
             (shown("strategy") ? secStrategy(x[1].data) : "") +
-            secBrief(x[0].data, canEditBrief(P)) +
+            secBrief(x[0].data, MINE && canEditBrief(P)) +
             secFiles(x[4].data) +
             '<footer><span><a href="index.html">← 목록</a></span>' +
             '<span class="mono">' + new Date().toISOString().slice(0, 16).replace("T", " ") +
@@ -556,6 +569,8 @@
           remember(P);
           var eb = el("editBrief");
           if (eb) eb.addEventListener("click", function () { openBriefEditor(x[0].data || {}); });
+          });
+        });
         });
       })
       .catch(function (e) {

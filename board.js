@@ -17,6 +17,7 @@
   }
 
   var cfg = window.ONECUE || {}, db = null, P = null, CUTS = [], ASSETS = [];
+  var APPROVALS = [];
   var DIRTY = {};          // 바뀐 컷만 저장한다. 12개를 매번 다 쓰지 않는다
   var WHOLE_DIRTY = false;
   var ONLY_MARKED = false;
@@ -131,6 +132,20 @@
       "</div></div>";
   }
 
+  function approvalNotes() {
+    var notes = APPROVALS.filter(function (a) { return (a.note || "").trim(); });
+    if (!notes.length) return "";
+    var gates = { strategy: "전략", concepts: "컨셉", storyboard: "콘티", video: "영상" };
+    var decisions = { ok: "승인", revise: "수정 요청" };
+    return '<section style="overflow-wrap:anywhere"><h2>광고주가 남긴 말</h2>' +
+      notes.map(function (a) {
+        return '<article><h3>' + esc(gates[a.gate] || a.gate) + ' · ' +
+          esc(decisions[a.decision] || a.decision) + '</h3><time>' +
+          esc(a.decided_at || "") + '</time><p style="white-space:pre-wrap">' +
+          esc(a.note) + '</p></article>';
+      }).join("") + '</section>';
+  }
+
   function render() {
     var marked = CUTS.filter(function (c) { return (c.note || "").trim(); }).length;
     var list = ONLY_MARKED
@@ -145,6 +160,7 @@
         '<a class="btn ghost" href="project.html?slug=' + encodeURIComponent(P.slug) +
         '" target="_blank" rel="noopener">광고주에게 보이는 화면 ↗</a></div>' +
 
+      approvalNotes() +
       '<div class="whole"><h3>이 건 전체에 하고 싶은 말</h3>' +
       "<p>판을 뒤집는 말은 여기 적습니다. 컷 하나가 아니라 방향에 대한 것.</p>" +
       '<textarea id="whole" maxlength="2000" placeholder="예 · 아이 얼굴이 나오는 쪽으로 다시 짜자&#10;예 · 슬로건 컷을 하나 더 넣자">' +
@@ -293,21 +309,31 @@
     var slug = qs("slug");
     if (!slug) { el("main").innerHTML = '<div class="empty">건을 지정하지 않았습니다</div>'; return; }
 
-    return db.from("projects").select("*").eq("slug", slug).maybeSingle()
+    return db.from("admin_projects").select("*").eq("slug", slug).maybeSingle()
       .then(function (r) {
         if (r.error) throw r.error;
         if (!r.data) { el("main").innerHTML = '<div class="empty">그런 건이 없습니다</div>'; return; }
         P = r.data;
         setConn("ok", "연결됨");
         return Promise.all([
-          db.from("cuts").select("*").eq("project_id", P.id).order("n"),
+          db.from("admin_cuts").select("*").eq("project_id", P.id).order("n"),
           db.from("assets").select("*").eq("project_id", P.id),
+          db.from("approvals").select("gate,decision,note,decided_at")
+            .eq("project_id", P.id).order("decided_at", { ascending: false }),
         ]).then(function (x) {
+          var failed = x.filter(function (r) { return r.error; })[0];
+          if (failed) throw failed.error;
+          return window.ONECUE_ASSETS.resolve(db, x[1].data || []).then(function (assets) {
+            x[1].data = assets;
+            return x;
+          });
+        }).then(function (x) {
           CUTS = x[0].data || [];
           ASSETS = x[1].data || [];
+          APPROVALS = x[2].data || [];
           if (!CUTS.length) {
             el("main").innerHTML =
-              '<div class="empty"><span class="big">아직 콘티가 없습니다</span>' +
+              approvalNotes() + '<div class="empty"><span class="big">아직 콘티가 없습니다</span>' +
               "컷이 만들어지면 여기서 검수합니다.<br><br>" +
               '<a class="btn ghost" href="admin.html">← 목록</a></div>';
             return;
@@ -315,7 +341,10 @@
           render();
         });
       })
-      .catch(function (e) { setConn("bad", "불러오기 실패"); fail(e); });
+      .catch(function () {
+        setConn("bad", "불러오기 실패");
+        el("main").innerHTML = '<div class="empty">불러오지 못했습니다. 잠시 후 새로고침해 주세요.</div>';
+      });
   }
 
   // 이 화면은 관리자만 본다
@@ -323,7 +352,7 @@
     return db.auth.getUser().then(function (r) {
       var user = r.data && r.data.user;
       if (!user) {
-        location.replace("login.html?next=board.html" + location.search.replace("?", "&"));
+        location.replace("login.html?next=" + encodeURIComponent("board.html" + location.search + location.hash));
         return false;
       }
       return db.from("profiles").select("is_admin").eq("id", user.id).maybeSingle()
