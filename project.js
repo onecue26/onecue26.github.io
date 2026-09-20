@@ -18,9 +18,9 @@
   var cfg = window.ONECUE || {}, db = null, P = null, MINE = false, LOGGED_IN = false;
 
   var STEPS = [
-    ["brief", "의뢰"], ["facts", "팩트"], ["strategy", "전략"],
-    ["concepts", "5안"], ["develop", "전개"], ["storyboard", "콘티"],
-    ["anchors", "앵커"], ["video", "영상"], ["deliver", "납품"],
+    ["brief", "의뢰 접수"], ["facts", "제품·자료 확인"], ["strategy", "전략 설계"],
+    ["concepts", "콘셉트 5안"], ["develop", "구성·각본"], ["storyboard", "콘티 승인"],
+    ["anchors", "제작 자료"], ["video", "영상 제작"], ["deliver", "납품"],
   ];
   var IDX = {}; STEPS.forEach(function (s, i) { IDX[s[0]] = i; });
   // 광고주가 판단하는 자리 — 여기서만 버튼이 뜬다
@@ -68,10 +68,10 @@
 
   function bar(step) {
     var at = IDX[step] == null ? 0 : IDX[step];
-    return '<div class="bar">' + STEPS.map(function (s, i) {
+    return '<div class="progress-scroll"><div class="bar">' + STEPS.map(function (s, i) {
       return '<i class="' + (i < at ? "done" : i === at ? "now" : "") + '"></i>';
     }).join("") + "</div><div class=\"stepnames\">" +
-      STEPS.map(function (s) { return "<span>" + esc(s[1]) + "</span>"; }).join("") + "</div>";
+      STEPS.map(function (s) { return "<span>" + esc(s[1]) + "</span>"; }).join("") + "</div></div>";
   }
 
   // ── 각 구역 ───────────────────────────────────────────────────────────────
