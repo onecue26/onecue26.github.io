@@ -21,7 +21,7 @@
 
   var STEP_NAME = {
     brief: "의뢰 접수", facts: "제품·자료 확인", strategy: "전략 설계",
-    concepts: "콘셉트 선택", develop: "구성·각본", storyboard: "콘티 승인",
+    concepts: "콘셉트 5안", develop: "구성·각본", storyboard: "콘티 승인",
     anchors: "제작 자료", video: "영상 제작", deliver: "납품",
   };
   var FLOW = [
@@ -55,8 +55,8 @@
     brief: ["의뢰를 받았습니다", "보내주신 내용을 확인했습니다. 전략과 컨셉을 준비해 연락드리겠습니다."],
     facts: ["의뢰를 받았습니다", "보내주신 내용을 확인했습니다. 전략과 컨셉을 준비해 연락드리겠습니다."],
     strategy: ["전략 방향을 보내드립니다", "정리한 전략을 아래에서 확인해 주세요."],
-    concepts: ["컨셉 5안이 준비됐습니다", "다섯 가지 방향을 준비했습니다. 아래에서 보시고 하나를 골라 주세요."],
-    develop: ["선택하신 방향으로 전개 중입니다", "고르신 컨셉으로 카피와 구성을 만들고 있습니다."],
+    concepts: ["콘셉트 5안이 준비됐습니다", "다섯 가지 방향을 준비했습니다. 아래에서 보시고 하나를 골라 주세요."],
+    develop: ["선택하신 방향으로 전개 중입니다", "고르신 콘셉트로 카피와 구성을 만들고 있습니다."],
     storyboard: ["콘티가 준비됐습니다", "컷 구성을 아래에서 확인하시고 승인해 주세요."],
     anchors: ["제작에 들어갑니다", "승인해 주신 콘티대로 제작을 시작했습니다."],
     video: ["영상을 만들고 있습니다", "완성되면 바로 보내드리겠습니다."],
@@ -208,14 +208,6 @@
   // ── 목록 ──────────────────────────────────────────────────────────────────
   function card(p) {
     var isNew = p.isNew;
-    var have = [
-      ["의뢰", p.n_brief], ["팩트", p.n_facts], ["전략", p.n_strategy],
-      ["컨셉", p.n_concepts], ["콘티", p.n_cuts], ["파일", p.n_assets],
-    ].map(function (h) {
-      return '<span class="' + (h[1] ? "on" : "") + '">' + h[0] +
-        (h[1] > 1 ? " " + h[1] : "") + "</span>";
-    }).join("");
-
     var productionAction = "";
     if (p.step === "brief" && p.state === "pending" && p.job && p.job.step === "facts") {
       if (p.productionEnrolled) {
@@ -303,7 +295,7 @@
     }
 
     // 「다시 만들어 주세요」 — 제일 위에 둔다. 못 보고 지나가면 안 되는 것이다
-    var GNAME = { strategy: "전략", concepts: "5안", storyboard: "콘티" };
+    var GNAME = { strategy: "전략 설계", concepts: "콘셉트 5안", storyboard: "콘티 승인" };
     var redo = p.redo
       ? '<div class="said redo' + (p.redoDone ? " ok" : "") + '"><span class="lbl">' +
         esc(GNAME[p.redo.gate] || p.redo.gate) + " — 광고주가 남긴 말 · " +
@@ -319,7 +311,7 @@
       '<div class="meta">' + esc(p.slug) + " · " + p.running_sec + "초 · " +
       esc((p.aspects || []).join("/")) +
       (p.created_at ? " · " + ago(p.created_at) : "") + "</div>" +
-      '<div class="have">' + have + "</div></div>" +
+      '</div>' +
       '<div class="ways">' +
       (p.n_cuts
         ? '<a class="btn ghost" href="board.html?slug=' + encodeURIComponent(p.slug) +

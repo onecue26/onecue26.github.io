@@ -13,12 +13,13 @@
 .hero{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:22px}
 .hero h1{margin:0;font-size:27px;letter-spacing:-.02em}
 .hero .sub{color:var(--muted);font-size:13.5px;margin-top:2px}
-.hero .bar{margin-top:12px}
-.hero .bar i{width:34px;height:6px}
-.stepnames{display:flex;gap:3px;margin-top:5px}
-.stepnames span{width:34px;font-size:9.5px;color:var(--faint);text-align:center;
-  font-family:"JetBrains Mono",monospace;line-height:1.2}
-@media(max-width:640px){.stepnames{display:none}}
+.hero>div{width:100%}
+.progress-scroll{width:100%;overflow-x:auto;padding-bottom:4px}
+.hero .bar{margin-top:12px;min-width:765px}
+.hero .bar i{width:auto;flex:1;height:6px}
+.stepnames{display:grid;grid-template-columns:repeat(9,minmax(82px,1fr));gap:3px;margin-top:6px;min-width:765px}
+.stepnames span{font-size:10px;color:var(--faint);text-align:center;
+  font-family:"JetBrains Mono",monospace;line-height:1.35;letter-spacing:0}
 .pickbtn{margin-top:10px}
 /* 의뢰 내용 고치기 */
 .ed-l{display:block;font-size:12.5px;color:var(--muted);margin:12px 0 4px;
@@ -63,6 +64,6 @@ h2 #editBrief{margin-left:auto}
 <script src="config.js?v=d4d97baa"></script>
 <script src="auth.js?v=fa839557"></script>
 <script src="asset-access.js?v=260919"></script>
-<script src="project.js?v=260919"></script>
+<script src="project.js?v=stagelabels260920"></script>
 </body>
 </html>
