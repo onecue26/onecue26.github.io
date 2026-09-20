@@ -15,8 +15,8 @@
 
   var cfg = window.ONECUE || {}, db = null, ME = null;
 
-  // 길이 → 컷 수. ad-playbook _LENGTH_MAP (MONF 11편 실측) 에서 가져온 값이라
-  // 임의로 정하지 않는다. DB 의 cuts_for() 함수와 같은 규칙이다
+  // DB 호환용 임시 컷 수. 광고주의 입력값이나 확정 설계가 아니다.
+  // 실제 컷 구성은 컨셉과 연출 방식이 정해진 뒤 제작 단계에서 다시 결정한다.
   function cutsFor(sec) {
     if (sec <= 6) return 5;
     if (sec <= 10) return 9;
@@ -103,7 +103,7 @@
     }
     el("derived").innerHTML =
       (ps.length ? "선택 위치 <b>" + ps.length + "개</b> · " : "노출 위치 <b>미선택</b> · ") +
-      "권장 <b>" + sec + "초</b> → 컷 <b>" + cutsFor(sec) + "개</b>" +
+      "권장 <b>" + sec + "초</b> · 컷 구성은 <b>컨셉과 연출 방식에 따라 제안</b>" +
       "   ·   규격 <b>" + (as.length ? as.join(" / ") : "미선택") + "</b>" +
       (as.length > 1 ? "   ·   " + as.length + "개 버전으로 만듭니다" : "");
   }
@@ -227,6 +227,23 @@
   function submit(e) {
     e.preventDefault();
     if (!db) return;
+    db.auth.getUser().then(function (r) {
+      var current = r.data && r.data.user;
+      if (!current) {
+        location.replace("login.html?next=new.html");
+        return;
+      }
+      // 다른 탭에서 계정을 바꿔도 처음 열었을 때의 사용자를 저장하지 않는다.
+      ME = current;
+      el("email").value = current.email;
+      return submitForUser();
+    }).catch(function (err) {
+      el("msg").className = "msg err";
+      el("msg").textContent = "현재 로그인 계정을 확인하지 못했습니다 — " + (err.message || err);
+    });
+  }
+
+  function submitForUser() {
 
     var aspects = checked("aspects");
     var chosenChannels = checked("channels"), chosenPlacements = placements();
