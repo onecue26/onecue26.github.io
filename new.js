@@ -36,7 +36,21 @@
   }
   function runtime() {
     var r = document.querySelector('input[name="rt"]:checked');
-    return r ? parseInt(r.value, 10) : 15;
+    if (!r || r.value === "auto") return recommendedRuntime();
+    if (r.value === "custom") {
+      var custom = parseInt(el("runtimeCustom").value, 10);
+      return custom >= 3 && custom <= 300 ? custom : 0;
+    }
+    return parseInt(r.value, 10);
+  }
+
+  function placements() { return checked("placements"); }
+
+  function recommendedRuntime() {
+    var picked = el("placements").querySelectorAll("input:checked"), values = [];
+    picked.forEach(function (p) { values.push(parseInt(p.dataset.runtime || "15", 10)); });
+    if (!values.length) return 15;
+    return Math.max.apply(null, values);
   }
 
   function setConn(k, t) {
@@ -44,26 +58,52 @@
     p.innerHTML = '<span class="dot"></span>' + t;
   }
 
-  // 매체를 고르면 필요한 규격을 자동으로 켠다. 끄는 건 사람이 판단한다
+  function syncPlacements() {
+    var active = {};
+    checked("channels").forEach(function (c) { active[c] = true; });
+    el("placements").querySelectorAll(".placement-group").forEach(function (group) {
+      var on = !!active[group.dataset.channel];
+      group.classList.toggle("on", on);
+      if (!on) group.querySelectorAll("input").forEach(function (p) { p.checked = false; });
+    });
+    el("placementNote").textContent = Object.keys(active).length ?
+      "실제로 노출할 위치를 하나 이상 선택해 주세요." : "먼저 게시할 매체를 선택해 주세요.";
+    syncRecommendations();
+  }
+
+  // 노출 위치를 기준으로 규격과 길이를 추천한다. 자동 추천은 언제든 해제할 수 있다
   function syncAspects() {
     var need = {};
-    el("channels").querySelectorAll("input:checked").forEach(function (c) {
-      (c.dataset.aspects || "").split(",").forEach(function (a) {
+    el("placements").querySelectorAll("input:checked").forEach(function (p) {
+      (p.dataset.aspects || "").split(",").forEach(function (a) {
         if (a) need[a] = true;
       });
     });
-    if (!Object.keys(need).length) return;
     el("aspects").querySelectorAll("input").forEach(function (a) {
-      if (need[a.value]) a.checked = true;
+      a.disabled = el("autoAspect").checked;
+      if (el("autoAspect").checked) a.checked = !!need[a.value];
     });
+    showDerived();
+  }
+
+  function syncRecommendations() {
+    syncAspects();
+    var r = document.querySelector('input[name="rt"]:checked');
+    el("runtimeCustom").classList.toggle("on", !!r && r.value === "custom");
     showDerived();
   }
 
   // 광고주가 정하지 않는 값 — 길이에서 도출된다는 걸 눈에 보이게 한다
   function showDerived() {
     var sec = runtime(), as = checked("aspects");
+    var ps = placements();
+    if (!sec) {
+      el("derived").innerHTML = "직접 입력 길이는 <b>3~300초</b>로 적어주세요.";
+      return;
+    }
     el("derived").innerHTML =
-      "<b>" + sec + "초</b> → 컷 <b>" + cutsFor(sec) + "개</b>" +
+      (ps.length ? "선택 위치 <b>" + ps.length + "개</b> · " : "노출 위치 <b>미선택</b> · ") +
+      "권장 <b>" + sec + "초</b> → 컷 <b>" + cutsFor(sec) + "개</b>" +
       "   ·   규격 <b>" + (as.length ? as.join(" / ") : "미선택") + "</b>" +
       (as.length > 1 ? "   ·   " + as.length + "개 버전으로 만듭니다" : "");
   }
@@ -163,11 +203,14 @@
 
   function boot() {
     el("stamp").textContent = new Date().toISOString().slice(0, 16).replace("T", " ");
-    showDerived();
+    syncPlacements();
 
     el("files").addEventListener("change", previewFiles);
-    el("channels").addEventListener("change", syncAspects);
-    el("runtimes").addEventListener("change", showDerived);
+    el("channels").addEventListener("change", syncPlacements);
+    el("placements").addEventListener("change", syncRecommendations);
+    el("runtimes").addEventListener("change", syncRecommendations);
+    el("runtimeCustom").addEventListener("input", showDerived);
+    el("autoAspect").addEventListener("change", syncAspects);
     el("aspects").addEventListener("change", showDerived);
 
     if (!window.supabase || !cfg.supabaseUrl) { setConn("bad", "연결 설정 없음"); return; }
@@ -186,14 +229,26 @@
     if (!db) return;
 
     var aspects = checked("aspects");
+    var chosenChannels = checked("channels"), chosenPlacements = placements();
+    if (!chosenChannels.length || !chosenPlacements.length) {
+      el("msg").className = "msg err";
+      el("msg").textContent = "게시할 매체와 실제 노출 위치를 하나 이상 골라주세요";
+      return;
+    }
     if (!aspects.length) {
       el("msg").className = "msg err";
       el("msg").textContent = "화면 규격을 하나 이상 골라주세요";
       return;
     }
 
-    var brand = val("brand"), product = val("product"), company = val("company");
-    var sec = runtime(), slug = slugify(brand, product);
+    var brand = val("brand") || val("product"), product = val("product"), company = val("company");
+    var sec = runtime();
+    if (!sec) {
+      el("msg").className = "msg err";
+      el("msg").textContent = "영상 길이를 3~300초 사이로 입력해 주세요";
+      return;
+    }
+    var slug = slugify(brand, product);
 
     el("go").disabled = true;
     el("msg").className = "msg";
@@ -212,7 +267,7 @@
         return db.from("projects").insert({
           client_id: client.id, slug: slug, brand: brand, product: product,
           running_sec: sec, cut_count: cutsFor(sec),
-          aspect: aspects[0], aspects: aspects, channels: checked("channels"),
+          aspect: aspects[0], aspects: aspects, channels: chosenChannels,
           step: "brief", state: "pending",
         }).select("id,slug").single().then(function (p) {
           if (p.error) throw p.error;
@@ -225,7 +280,7 @@
           db.from("briefs").insert({
             project_id: pid, raw: val("item"),
             goal: val("goal") || null, target: val("target") || null,
-            format: sec + "초 · " + aspects.join("/"),
+            format: sec + "초 · " + aspects.join("/") + " · " + chosenPlacements.join(","),
           }),
           db.from("contacts").insert({
             client_id: ctx.client.id, project_id: pid,
@@ -237,7 +292,7 @@
             request: {
               note: "새 의뢰", brand: brand, product: product,
               item: val("item"), runtime: sec, aspects: aspects,
-              channels: checked("channels"),
+              channels: chosenChannels, placements: chosenPlacements,
             },
           }),
         ]).then(function (res) {
