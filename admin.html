@@ -102,6 +102,22 @@
 .production-progress .progress-state.wait{color:#9a6500}
 .production-progress .progress-state.ok{color:var(--live);font-weight:700}
 .production-progress .production-start{margin-left:auto}
+.flow-wrap{border-top:1px solid var(--rule);padding-top:12px}
+.flow-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.flow-head .lbl{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--faint)}
+.now-owner{font-size:12.5px;color:var(--muted)}
+.now-owner b{color:var(--cue)}
+.flow-track{display:grid;grid-template-columns:repeat(9,minmax(92px,1fr));gap:6px;overflow-x:auto;padding-bottom:4px}
+.flow-step{min-width:92px;border:1px solid var(--rule);background:var(--sunk);padding:9px 8px;position:relative}
+.flow-step strong,.flow-step small{display:block;letter-spacing:0}
+.flow-step strong{font-size:12px;margin-top:7px;color:var(--muted)}
+.flow-step small{font-size:10.5px;line-height:1.35;margin-top:4px;color:var(--faint)}
+.flow-marker{font-family:"JetBrains Mono",monospace;font-size:9.5px;color:var(--faint)}
+.flow-step.done{border-color:color-mix(in srgb,var(--live) 45%,var(--rule));background:color-mix(in srgb,var(--live) 6%,var(--sunk))}
+.flow-step.done .flow-marker,.flow-step.done strong{color:var(--live)}
+.flow-step.current{border:2px solid var(--cue);background:color-mix(in srgb,var(--cue) 7%,var(--panel));padding:8px 7px}
+.flow-step.current .flow-marker,.flow-step.current strong{color:var(--cue);font-weight:800}
+@media(max-width:760px){.flow-track{grid-template-columns:repeat(9,112px)}.flow-head{align-items:flex-start;flex-direction:column;gap:4px}}
 
 /* 광고주가 올린 파일 — 눌러서 받는다 */
 .files{display:flex;flex-wrap:wrap;gap:9px;align-items:center;
@@ -168,6 +184,6 @@
 <script src="config.js?v=d4d97baa"></script>
 <script src="auth.js?v=fa839557"></script>
 <script src="asset-access.js"></script>
-<script src="admin.js?v=productionstart260920"></script>
+<script src="admin.js?v=fullprogress260920"></script>
 </body>
 </html>

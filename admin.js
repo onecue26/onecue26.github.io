@@ -24,6 +24,17 @@
     concepts: "콘셉트 선택", develop: "구성·각본", storyboard: "콘티 승인",
     anchors: "제작 자료", video: "영상 제작", deliver: "납품",
   };
+  var FLOW = [
+    { key: "brief", owner: "광고주 → 관리자" },
+    { key: "facts", owner: "AI · 관리자 검수" },
+    { key: "strategy", owner: "AI · 관리자 검수" },
+    { key: "concepts", owner: "AI · 관리자 · 광고주" },
+    { key: "develop", owner: "AI 또는 담당자" },
+    { key: "storyboard", owner: "AI/담당자 · 관리자" },
+    { key: "anchors", owner: "AI · 제작 관리자" },
+    { key: "video", owner: "AI · 제작 관리자" },
+    { key: "deliver", owner: "관리자 → 광고주" },
+  ];
   // 이 단계로 옮기면 광고주가 판단할 차례가 된다
   var GATE = { strategy: "검토", concepts: "선택", storyboard: "승인" };
   var CHANNEL_NAME = {
@@ -72,6 +83,31 @@
   function siteUrl(slug) {
     return location.href.replace(/admin\.html.*$/, "") +
       "project.html?slug=" + encodeURIComponent(slug);
+  }
+
+  function currentOwner(p) {
+    if (p.step === "brief") {
+      if (p.productionEnrolled) return "AI 제작 세션";
+      if (p.enrollRequested) return "AI 연결 시스템";
+      return "관리자";
+    }
+    if (GATE[p.step]) return p.state === "ready" ? "광고주" : "관리자";
+    if (p.job && p.job.step === p.step) return "AI 제작 세션";
+    if (p.step === "anchors" || p.step === "video") return "제작 관리자";
+    if (p.step === "deliver") return "관리자";
+    return "AI 또는 지정 담당자";
+  }
+
+  function flow(p) {
+    var current = FLOW.map(function (x) { return x.key; }).indexOf(p.step);
+    return '<div class="flow-wrap"><div class="flow-head"><span class="lbl">전체 제작 흐름</span>' +
+      '<span class="now-owner">현재 담당 <b>' + esc(currentOwner(p)) + '</b></span></div>' +
+      '<div class="flow-track">' + FLOW.map(function (s, i) {
+        var status = i < current ? "done" : (i === current ? "current" : "upcoming");
+        var marker = i < current ? "완료" : (i === current ? "현재" : (i + 1));
+        return '<div class="flow-step ' + status + '"><span class="flow-marker">' + marker + '</span>' +
+          '<strong>' + esc(STEP_NAME[s.key]) + '</strong><small>' + esc(s.owner) + '</small></div>';
+      }).join("") + '</div></div>';
   }
 
   // ── 회신 문구 ─────────────────────────────────────────────────────────────
@@ -294,6 +330,7 @@
       check + redo + said + requirements + who +
       '<div class="mailbox" id="mail-' + esc(p.slug) + '" hidden></div>' +
       files +
+      flow(p) +
       '<div class="steps production-progress"><span class="lbl">제작 진행</span>' +
       '<strong class="current-step">' + esc(STEP_NAME[p.step] || p.step) + '</strong>' +
       productionAction + "</div></div>";
