@@ -544,9 +544,12 @@
           return window.ONECUE_ASSETS.resolve(db, x[4].data || []).then(function (assets) {
           x[4].data = assets;
           HAS_FINAL = (x[4].data || []).some(function (a) { return a.kind === "final" && a.approved === true && a.url; });
-          var title = [P.brand, P.product].filter(Boolean).join(" ") || P.slug;
+          var title = P.product || P.brand || P.slug;
+          var brand = P.brand && P.product
+            ? '<div class="brand-name"><span>브랜드</span>' + esc(P.brand) + '</div>'
+            : "";
           el("main").innerHTML =
-            '<div class="hero"><div><h1>' + esc(title) + "</h1>" +
+            '<div class="hero"><div>' + brand + '<h1>' + esc(title) + "</h1>" +
               '<div class="sub mono">' + esc(P.slug) + " · " + P.running_sec +
               "초 · " + P.cut_count + "컷 · " +
               esc((P.aspects && P.aspects.length) ? P.aspects.join(" / ") : P.aspect) +
