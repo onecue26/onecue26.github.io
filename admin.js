@@ -26,6 +26,18 @@
   ];
   // 이 단계로 옮기면 광고주가 판단할 차례가 된다
   var GATE = { strategy: "검토", concepts: "선택", storyboard: "승인" };
+  var CHANNEL_NAME = {
+    youtube: "유튜브", meta: "인스타·페북", tiktok: "틱톡",
+    tv: "TV·CTV", web: "웹사이트", ooh: "옥외·매장",
+  };
+  var PLACEMENT_NAME = {
+    youtube_instream: "유튜브 인스트림", youtube_video: "유튜브 일반 영상",
+    youtube_shorts: "유튜브 쇼츠", meta_feed: "인스타·페북 피드",
+    meta_reels: "릴스·스토리", tiktok_feed: "틱톡 추천 피드",
+    tv_spot: "방송 광고", ctv_spot: "스마트TV",
+    web_hero: "웹사이트 메인", web_product: "제품 페이지",
+    ooh_screen: "일반 전광판", store_signage: "매장 사이니지",
+  };
 
   // 단계별로 회신 문구가 다르다
   var MAIL = {
@@ -202,6 +214,24 @@
         "</div>"
       : "";
 
+    var request = (p.job && p.job.request) || {};
+    var placements = request.placements || [];
+    if (!placements.length && p.brief_format) {
+      var parts = p.brief_format.split("·");
+      if (parts.length > 2) placements = parts[2].split(",").map(function (x) { return x.trim(); });
+    }
+    var requirements = '<div class="said"><span class="lbl">의뢰 조건</span>' +
+      '<span class="sub">목표 · ' + esc(p.brief_goal || "입력 안 함") + '</span>' +
+      '<span class="sub">대상 · ' + esc(p.brief_target || "입력 안 함") + '</span>' +
+      '<span class="sub">매체 · ' + esc((p.channels || []).map(function (x) {
+        return CHANNEL_NAME[x] || x;
+      }).join(" / ") || "입력 안 함") + '</span>' +
+      '<span class="sub">노출 위치 · ' + esc(placements.map(function (x) {
+        return PLACEMENT_NAME[x] || x;
+      }).join(" / ") || "입력 안 함") + '</span>' +
+      '<span class="sub">영상 · ' + esc(p.running_sec + "초 · " + (p.aspects || []).join(" / ")) +
+      '</span></div>';
+
     // 1차 검수 — 정지점에 와 있으면 우리가 먼저 보고 광고주에게 넘긴다.
     // 이 버튼을 누르기 전까지 광고주 화면에는 판단 버튼이 안 뜬다
     var g = GATE[p.step];
@@ -254,7 +284,7 @@
         : "") +
       '<a class="btn ghost" href="' + esc(siteUrl(p.slug)) +
       '" target="_blank" rel="noopener">광고주 화면 ↗</a></div></div>' +
-      check + redo + said + who +
+      check + redo + said + requirements + who +
       '<div class="mailbox" id="mail-' + esc(p.slug) + '" hidden></div>' +
       files +
       '<div class="steps"><span class="lbl">단계를 옮긴다</span>' + buttons + "</div></div>";
@@ -356,7 +386,7 @@
           db.from("contacts").select("project_id,name,email,phone,title").in("project_id", ids),
           db.from("jobs").select("project_id,step,request").eq("state", "queued")
             .in("project_id", ids),
-          db.from("briefs").select("project_id,raw,goal,target").in("project_id", ids),
+          db.from("briefs").select("project_id,raw,goal,target,format").in("project_id", ids),
           // 승인하면서 남긴 말도 놓치면 안 된다. 반려만 보면 반쪽이다
           db.from("approvals").select("project_id,gate,decision,note,decided_at")
             .in("project_id", ids).order("decided_at", { ascending: false }),
@@ -401,7 +431,10 @@
             p.redoDone = !!(p.redo && p.sentAt &&
               new Date(p.sentAt) > new Date(p.redo.decided_at));
             var b = briefs.filter(function (x) { return x.project_id === p.id; })[0];
-            if (b) { p.brief_raw = b.raw; p.brief_goal = b.goal; p.brief_target = b.target; }
+            if (b) {
+              p.brief_raw = b.raw; p.brief_goal = b.goal;
+              p.brief_target = b.target; p.brief_format = b.format;
+            }
           });
           setConn("ok", "새 의뢰 " + ROWS.filter(function (x) { return x.isNew; }).length);
           render();
