@@ -1,0 +1,15 @@
+.lab-updated{font:11px "JetBrains Mono",monospace;color:var(--muted);text-align:right}
+.lab-layout{display:grid;grid-template-columns:minmax(190px,240px) minmax(0,1fr);gap:42px;align-items:start}
+.lab-index{position:sticky;top:24px;border-top:1px solid var(--rule)}
+.lab-index button{display:block;width:100%;border:0;border-bottom:1px solid var(--rule);background:transparent;color:var(--muted);padding:14px 4px;text-align:left;font:12px "Gothic A1",sans-serif;cursor:pointer}
+.lab-index button:hover,.lab-index button.on{color:var(--cue)}
+.lab-index button.on{font-weight:700}
+.lab-index small{display:block;margin-top:5px;color:var(--faint);font:9px "JetBrains Mono",monospace;text-transform:uppercase}
+.lab-document{max-width:920px;min-height:480px}
+.lab-document h1{font-size:30px;margin:0 0 32px}
+.lab-document h2{font-size:18px;margin:36px 0 13px;padding-top:24px;border-top:1px solid var(--rule)}
+.lab-document p,.lab-document li{font-size:14px;line-height:1.85;color:var(--muted);word-break:keep-all}
+.lab-document ul,.lab-document ol{padding-left:21px;margin:10px 0 20px}
+.lab-document code{font-family:"JetBrains Mono",monospace;font-size:12px;background:var(--sunk);padding:2px 5px;border-radius:3px;color:var(--ink)}
+.lab-empty{padding:28px 0;border-top:1px solid var(--rule);color:var(--muted);font-size:14px}
+@media(max-width:760px){.lab-layout{grid-template-columns:1fr;gap:25px}.lab-index{position:static;display:flex;overflow:auto;border-top:0;border-bottom:1px solid var(--rule)}.lab-index button{min-width:155px;border-bottom:0;padding:11px}.lab-document h1{font-size:25px}.lab-updated{display:none}}
