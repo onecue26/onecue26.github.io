@@ -182,6 +182,14 @@
     return stamp + "_" + name + "_" + Math.random().toString(36).slice(2, 5);
   }
 
+  function newId() {
+    if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+      var r = Math.random() * 16 | 0, v = c === "x" ? r : (r & 3 | 8);
+      return v.toString(16);
+    });
+  }
+
   // 의뢰는 단발성 문의가 아니다. 광고주는 5안을 고르고 콘티를 승인하러 반드시 돌아온다.
   // 그래서 로그인을 먼저 받는다 — 대신 계정 이메일이 곧 연락처라 폼이 짧아진다
   function gate() {
@@ -281,14 +289,18 @@
           .select("id").single().then(function (x) { if (x.error) throw x.error; return x.data; });
       })
       .then(function (client) {
+        var projectId = newId();
         return db.from("projects").insert({
+          id: projectId,
           client_id: client.id, slug: slug, brand: brand, product: product,
           running_sec: sec, cut_count: cutsFor(sec),
           aspect: aspects[0], aspects: aspects, channels: chosenChannels,
           step: "brief", state: "pending",
-        }).select("id,slug").single().then(function (p) {
+        }).then(function (p) {
           if (p.error) throw p.error;
-          return { client: client, project: p.data };
+          // projects의 INSERT 정책은 통과하지만 같은 문장의 RETURNING은
+          // owner_read가 새 행을 다시 조회하며 RLS에 막힌다. 이미 만든 UUID를 쓴다.
+          return { client: client, project: { id: projectId, slug: slug } };
         });
       })
       .then(function (ctx) {
