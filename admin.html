@@ -96,6 +96,12 @@
 .steps button:disabled{opacity:.45;cursor:default}
 .steps .lbl{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--faint);
   align-self:center;margin-right:2px}
+.production-progress{align-items:center;gap:10px}
+.production-progress .current-step{font-size:14px;color:var(--ink);margin-right:auto}
+.production-progress .progress-state{font-size:12.5px;color:var(--muted)}
+.production-progress .progress-state.wait{color:#9a6500}
+.production-progress .progress-state.ok{color:var(--live);font-weight:700}
+.production-progress .production-start{margin-left:auto}
 
 /* 광고주가 올린 파일 — 눌러서 받는다 */
 .files{display:flex;flex-wrap:wrap;gap:9px;align-items:center;
@@ -162,6 +168,6 @@
 <script src="config.js?v=d4d97baa"></script>
 <script src="auth.js?v=fa839557"></script>
 <script src="asset-access.js"></script>
-<script src="admin.js?v=briefdetails260920"></script>
+<script src="admin.js?v=productionstart260920"></script>
 </body>
 </html>

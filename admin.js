@@ -1,7 +1,7 @@
 // onecue — 관리자 화면
 //
 // 광고주가 「의뢰하기」를 누르면 이메일이 아니라 여기로 들어온다.
-// 하는 일은 셋 — ①새로 들어온 걸 안다 ②단계를 옮긴다 ③회신 문구를 가져간다.
+// 하는 일은 셋 — ①새로 들어온 걸 안다 ②다음 제작 절차를 승인한다 ③회신 문구를 가져간다.
 //
 // 목록은 하나뿐이다. 예전엔 「새 의뢰」와 「진행 중」을 따로 뒀는데
 // 갓 들어온 건이 양쪽에 똑같이 나와서 같은 걸 두 번 보게 됐다.
@@ -19,11 +19,11 @@
 
   var cfg = window.ONECUE || {}, db = null, ROWS = [], authorized = false;
 
-  var STEPS = [
-    ["brief", "의뢰"], ["facts", "팩트"], ["strategy", "전략"],
-    ["concepts", "5안"], ["develop", "전개"], ["storyboard", "콘티"],
-    ["anchors", "앵커"], ["video", "영상"], ["deliver", "납품"],
-  ];
+  var STEP_NAME = {
+    brief: "의뢰 접수", facts: "제품·자료 확인", strategy: "전략 설계",
+    concepts: "콘셉트 선택", develop: "구성·각본", storyboard: "콘티 승인",
+    anchors: "제작 자료", video: "영상 제작", deliver: "납품",
+  };
   // 이 단계로 옮기면 광고주가 판단할 차례가 된다
   var GATE = { strategy: "검토", concepts: "선택", storyboard: "승인" };
   var CHANNEL_NAME = {
@@ -180,12 +180,19 @@
         (h[1] > 1 ? " " + h[1] : "") + "</span>";
     }).join("");
 
-    var buttons = STEPS.map(function (s) {
-      var at = s[0] === p.step;
-      var g = GATE[s[0]] ? " ★" + GATE[s[0]] : "";
-      return '<button data-slug="' + esc(p.slug) + '" data-step="' + s[0] + '"' +
-        (at ? ' class="at" disabled' : "") + ">" + s[1] + g + "</button>";
-    }).join("");
+    var productionAction = "";
+    if (p.step === "brief" && p.state === "pending" && p.job && p.job.step === "facts") {
+      if (p.productionEnrolled) {
+        productionAction = '<span class="progress-state ok">AI 제작 등록 완료 · 제품·자료 확인 준비 중</span>';
+      } else if (p.enrollRequested) {
+        productionAction = '<span class="progress-state wait">등록 요청됨 · 로컬 처리 대기</span>';
+      } else {
+        productionAction = '<button class="btn production-start" type="button" data-enroll="' +
+          esc(p.slug) + '">AI 제작 시작</button>';
+      }
+    } else {
+      productionAction = '<span class="progress-state">현재 절차에 따라 진행 중입니다</span>';
+    }
 
     var files = (p.files || []).length
       ? '<div class="files"><span class="lbl">광고주가 올린 것 ' + p.files.length + "</span>" +
@@ -287,7 +294,9 @@
       check + redo + said + requirements + who +
       '<div class="mailbox" id="mail-' + esc(p.slug) + '" hidden></div>' +
       files +
-      '<div class="steps"><span class="lbl">단계를 옮긴다</span>' + buttons + "</div></div>";
+      '<div class="steps production-progress"><span class="lbl">제작 진행</span>' +
+      '<strong class="current-step">' + esc(STEP_NAME[p.step] || p.step) + '</strong>' +
+      productionAction + "</div></div>";
   }
 
   function render() {
@@ -307,10 +316,13 @@
       : '<div class="empty"><span class="big">아직 들어온 의뢰가 없습니다</span>' +
         "광고주가 의뢰하면 여기에 뜹니다.</div>";
 
-    document.querySelectorAll(".steps button").forEach(function (b) {
+    document.querySelectorAll("[data-enroll]").forEach(function (b) {
       b.addEventListener("click", function () {
-        b.disabled = true;
-        move(b.dataset.slug, b.dataset.step).then(load);
+        b.disabled = true; b.textContent = "등록 요청 중…";
+        requestEnrollment(b.dataset.enroll).then(load).catch(function (e) {
+          b.disabled = false; b.textContent = "AI 제작 시작";
+          window.alert("등록하지 못했습니다 — " + (e.message || e));
+        });
       });
     });
     document.querySelectorAll("[data-mail]").forEach(function (b) {
@@ -339,24 +351,27 @@
       });
   }
 
-  // 단계를 옮기면 언제나 pending — 「우리 차례」다.
-  // 정지점이라 해도 곧바로 광고주에게 넘기지 않는다. 우리가 먼저 보고 나서
-  // 「광고주에게 보내기」를 눌러야 ready 가 되고, 그때 광고주 화면에 버튼이 뜬다
-  function move(slug, step) {
-    var state = "pending";
-    return db.from("projects").update({ step: step, state: state, updated_at: new Date() })
-      .eq("slug", slug)
-      .then(function () {
-        return db.from("projects").select("id").eq("slug", slug).single();
-      })
-      .then(function (r) {
-        // 단계를 옮겼으면 그 건의 대기 작업은 처리된 것으로 본다
-        db.from("jobs").update({ state: "ok", finished_at: new Date() })
-          .eq("project_id", r.data.id).eq("state", "queued");
-        return db.from("events").insert({
-          project_id: r.data.id, kind: "step", to_step: step, payload: { by: "admin" },
-        });
-      });
+  // 관리자가 승인한 사실만 기록한다. PC의 로컬 처리기가 이 요청을 검증한 뒤
+  // 실제 제작 등록을 수행하므로 웹 화면이 임의로 단계를 건너뛸 수 없다.
+  function requestEnrollment(slug) {
+    var p = ROWS.filter(function (x) { return x.slug === slug; })[0];
+    if (!p || p.step !== "brief" || p.state !== "pending" || !p.job || p.job.step !== "facts") {
+      return Promise.reject(new Error("지금 시작할 수 있는 의뢰가 아닙니다"));
+    }
+    if (p.enrollRequested || p.productionEnrolled) return Promise.resolve();
+    return db.from("events").insert({
+      project_id: p.id,
+      kind: "production_enroll_requested",
+      from_step: p.step,
+      to_step: p.step,
+      payload: {
+        by: "admin_ui",
+        action: "onecue_astra_enroll",
+        requested_at: new Date().toISOString(),
+      },
+    }).then(function (r) {
+      if (r.error) throw r.error;
+    });
   }
 
   // ── 불러오기 ──────────────────────────────────────────────────────────────
@@ -393,6 +408,9 @@
           // 우리가 마지막으로 넘긴 시각 — 광고주 말을 처리했는지 가르는 기준
           db.from("events").select("project_id,ts").eq("kind", "sent")
             .in("project_id", ids).order("ts", { ascending: false }),
+          db.from("events").select("project_id,kind,ts,payload")
+            .in("kind", ["production_enroll_requested", "production_enrolled"])
+            .in("project_id", ids).order("ts", { ascending: false }),
         ]).then(function (out) {
           if (out[1].error) throw out[1].error;
           return window.ONECUE_ASSETS.resolve(db, out[1].data || []).then(function (assets) {
@@ -406,6 +424,7 @@
           var briefs = out[4].data || [];
           var revises = out[5].data || [];
           var sents = out[6].data || [];
+          var enrollEvents = out[7].data || [];
 
           ROWS.forEach(function (p) {
             counts.forEach(function (t, i) {
@@ -430,6 +449,12 @@
             p.sentAt = last ? last.ts : null;
             p.redoDone = !!(p.redo && p.sentAt &&
               new Date(p.sentAt) > new Date(p.redo.decided_at));
+            p.enrollRequested = enrollEvents.filter(function (e) {
+              return e.project_id === p.id && e.kind === "production_enroll_requested";
+            })[0] || null;
+            p.productionEnrolled = enrollEvents.filter(function (e) {
+              return e.project_id === p.id && e.kind === "production_enrolled";
+            })[0] || null;
             var b = briefs.filter(function (x) { return x.project_id === p.id; })[0];
             if (b) {
               p.brief_raw = b.raw; p.brief_goal = b.goal;
