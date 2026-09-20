@@ -105,6 +105,24 @@
 .production-progress .progress-state.wait{color:#9a6500}
 .production-progress .progress-state.ok{color:var(--live);font-weight:700}
 .production-progress .production-start{margin-left:auto}
+.concept-review{border-top:1px solid var(--rule);padding-top:14px}
+.review-head span{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--cue);font-weight:700}
+.review-head h3{font-size:19px;margin:4px 0 2px;letter-spacing:0}
+.review-head p{font-size:12.5px;color:var(--muted);margin:0 0 12px}
+.review-strategy{background:var(--sunk);border-left:3px solid var(--cue);padding:11px 13px;margin-bottom:8px}
+.review-strategy span,.review-strategy b,.review-strategy small{display:block;letter-spacing:0}
+.review-strategy span{font-size:10px;color:var(--faint)}
+.review-strategy b{font-size:14px;margin-top:3px}
+.review-strategy small{font-size:11.5px;color:var(--muted);margin-top:4px}
+.concept-row{display:grid;grid-template-columns:42px minmax(0,1fr);gap:12px;padding:13px 2px;border-top:1px solid var(--rule)}
+.concept-row.recommended{border-left:3px solid var(--cue);padding-left:10px;background:color-mix(in srgb,var(--cue) 4%,transparent)}
+.concept-key{font-family:"JetBrains Mono",monospace;font-size:22px;font-weight:800;color:var(--muted)}
+.concept-key em{display:block;font-style:normal;font-size:9px;color:var(--cue);margin-top:3px}
+.concept-copy h4{font-size:15px;margin:0 0 4px;letter-spacing:0}
+.concept-copy p{font-size:13px;margin:0 0 8px;color:var(--ink);line-height:1.55}
+.concept-copy dl{display:grid;grid-template-columns:42px minmax(0,1fr);gap:3px 8px;margin:0;font-size:11.5px;line-height:1.5}
+.concept-copy dt{color:var(--faint)}.concept-copy dd{margin:0;color:var(--muted)}
+.concept-copy small{display:block;color:var(--cue);margin-top:7px;line-height:1.5}
 .flow-wrap{border-top:1px solid var(--rule);padding-top:12px}
 .flow-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
 .flow-head .lbl{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--faint)}
@@ -187,6 +205,6 @@
 <script src="config.js?v=d4d97baa"></script>
 <script src="auth.js?v=fa839557"></script>
 <script src="asset-access.js"></script>
-<script src="admin.js?v=brandproduct260920"></script>
+<script src="admin.js?v=conceptreview260920"></script>
 </body>
 </html>

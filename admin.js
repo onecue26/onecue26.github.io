@@ -267,6 +267,26 @@
       '<span class="sub">영상 · ' + esc(p.running_sec + "초 · " + (p.aspects || []).join(" / ")) +
       '</span></div>';
 
+    var conceptReview = "";
+    if (p.step === "concepts" && p.concepts && p.concepts.length) {
+      var strategyLine = p.strategy
+        ? '<div class="review-strategy"><span>전략 한 줄</span><b>' + esc(p.strategy.one_message || "") + '</b>' +
+          '<small>' + esc(p.strategy.insight || "") + '</small></div>'
+        : "";
+      conceptReview = '<section class="concept-review"><div class="review-head"><span>관리자 검토</span>' +
+        '<h3>콘셉트 5안</h3><p>추천은 참고값입니다. 다섯 방향의 차이와 위험을 확인한 뒤 광고주에게 보내세요.</p></div>' +
+        strategyLine + p.concepts.slice().sort(function (a, b) { return a.key.localeCompare(b.key); })
+          .map(function (c) {
+            return '<article class="concept-row' + (c.is_recommended ? ' recommended' : '') + '">' +
+              '<div class="concept-key">' + esc(c.key) + (c.is_recommended ? '<em>추천</em>' : '') + '</div>' +
+              '<div class="concept-copy"><h4>' + esc(c.title) + '</h4><p>' + esc(c.body) + '</p>' +
+              '<dl><dt>후킹</dt><dd>' + esc(c.hook) + '</dd><dt>화면</dt><dd>' + esc(c.visual) +
+              '</dd><dt>위험</dt><dd>' + esc(c.risk) + '</dd></dl>' +
+              (c.is_recommended && c.reco_reason ? '<small>추천 이유 · ' + esc(c.reco_reason) + '</small>' : '') +
+              '</div></article>';
+          }).join("") + '</section>';
+    }
+
     // 1차 검수 — 정지점에 와 있으면 우리가 먼저 보고 광고주에게 넘긴다.
     // 이 버튼을 누르기 전까지 광고주 화면에는 판단 버튼이 안 뜬다
     var g = GATE[p.step];
@@ -320,7 +340,7 @@
         : "") +
       '<a class="btn ghost" href="' + esc(siteUrl(p.slug)) +
       '" target="_blank" rel="noopener">광고주 화면 ↗</a></div></div>' +
-      check + redo + said + requirements + who +
+      redo + said + requirements + conceptReview + check + who +
       '<div class="mailbox" id="mail-' + esc(p.slug) + '" hidden></div>' +
       files +
       flow(p) +
@@ -441,6 +461,9 @@
           db.from("events").select("project_id,kind,ts,payload")
             .in("kind", ["production_enroll_requested", "production_enrolled"])
             .in("project_id", ids).order("ts", { ascending: false }),
+          db.from("strategies").select("project_id,insight,one_message").in("project_id", ids),
+          db.from("concepts").select("project_id,key,title,body,hook,visual,risk,is_recommended,reco_reason")
+            .in("project_id", ids),
         ]).then(function (out) {
           if (out[1].error) throw out[1].error;
           return window.ONECUE_ASSETS.resolve(db, out[1].data || []).then(function (assets) {
@@ -455,6 +478,8 @@
           var revises = out[5].data || [];
           var sents = out[6].data || [];
           var enrollEvents = out[7].data || [];
+          var strategies = out[8].data || [];
+          var concepts = out[9].data || [];
 
           ROWS.forEach(function (p) {
             counts.forEach(function (t, i) {
@@ -485,6 +510,8 @@
             p.productionEnrolled = enrollEvents.filter(function (e) {
               return e.project_id === p.id && e.kind === "production_enrolled";
             })[0] || null;
+            p.strategy = strategies.filter(function (s) { return s.project_id === p.id; })[0] || null;
+            p.concepts = concepts.filter(function (c) { return c.project_id === p.id; });
             var b = briefs.filter(function (x) { return x.project_id === p.id; })[0];
             if (b) {
               p.brief_raw = b.raw; p.brief_goal = b.goal;
