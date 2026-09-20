@@ -307,7 +307,8 @@
     return '<div class="wrk' + (isNew ? " fresh" : "") + '">' +
       '<div class="top"><div>' +
       '<div class="name">' + (isNew ? '<span class="new">NEW</span>' : "") +
-      esc([p.brand, p.product].filter(Boolean).join(" ")) + "</div>" +
+      (p.brand && p.product ? '<span class="brand-name"><em>브랜드</em>' + esc(p.brand) + '</span>' : "") +
+      '<strong class="product-name">' + esc(p.product || p.brand || p.slug) + '</strong></div>' +
       '<div class="meta">' + esc(p.slug) + " · " + p.running_sec + "초 · " +
       esc((p.aspects || []).join("/")) +
       (p.created_at ? " · " + ago(p.created_at) : "") + "</div>" +
