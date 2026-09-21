@@ -125,13 +125,29 @@ h2::after{content:"";flex:1;height:1px;background:var(--rule)}
 /* 컨셉 5안 */
 .concepts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
 .cc{background:var(--panel);border:1px solid var(--rule);border-radius:11px;padding:15px 17px;
-  display:flex;flex-direction:column;gap:6px}
+  display:flex;flex-direction:column;gap:13px}
 .cc.chosen{border-color:var(--cue);border-width:2px;background:var(--cue-soft)}
+.cc-head{display:flex;flex-direction:column;gap:5px;padding-bottom:11px;border-bottom:1px solid var(--rule)}
 .cc .k{font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;
-  letter-spacing:.1em;color:var(--muted)}
+  letter-spacing:.08em;color:var(--muted)}
+.cc .k em{font-style:normal;font-family:"Gothic A1","Malgun Gothic",sans-serif;font-weight:500;
+  letter-spacing:0;color:var(--faint);margin-left:5px}
 .cc.chosen .k{color:var(--cue)}
-.cc .t{font-weight:700;font-size:15.5px;line-height:1.4}
-.cc .b{font-size:13.5px;color:var(--muted)}
+.cc .t{font-weight:800;font-size:17px;line-height:1.45}
+.cc-part{display:grid;gap:4px}
+.cc-part b{font-size:11px;color:var(--faint);font-family:"JetBrains Mono",monospace;letter-spacing:.04em}
+.cc-part span{font-size:13.5px;color:var(--muted);line-height:1.65}
+.cc-part.hook{background:var(--sunk);border-radius:7px;padding:9px 10px}
+.cc-part.hook b{color:var(--cue)}
+.section-guide{margin:-6px 0 14px;color:var(--muted);font-size:13.5px}
+.chosen-summary{background:var(--cue-soft);border:1px solid var(--cue);border-radius:12px;padding:14px}
+.chosen-summary .cc{max-width:720px;border-color:transparent;background:var(--panel)}
+.chosen-label{display:block;color:var(--cue);font-family:"JetBrains Mono",monospace;font-size:11px;
+  font-weight:800;letter-spacing:.08em;margin:0 0 9px 2px}
+.other-concepts{margin-top:13px;border:1px solid var(--rule);border-radius:11px;background:var(--panel)}
+.other-concepts summary{cursor:pointer;padding:14px 17px;font-size:13.5px;font-weight:700;color:var(--muted)}
+.other-concepts[open] summary{border-bottom:1px solid var(--rule)}
+.other-concepts .concepts{padding:13px;background:var(--sunk);grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
 
 /* 추천 배지 — 카드 오른쪽 위. 이유는 올려놓거나 눌러야 펼쳐진다 */
 .cc{position:relative}

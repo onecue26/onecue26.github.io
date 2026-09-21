@@ -171,8 +171,7 @@
   function secConcepts(list, canPick) {
     if (!list || !list.length) return "";
     var chosen = list.filter(function (c) { return c.is_chosen; })[0];
-    var head = "<h2>컨셉 5안" + (chosen ? " — " + esc(chosen.key) + "안 선택됨" : "") + "</h2>";
-    var body = '<div class="concepts">' + list.map(function (c) {
+    function card(c) {
       var pick = (canPick && !c.is_chosen)
         ? '<button class="btn ghost pickbtn" data-pick="' + esc(c.key) + '">이걸로 하겠습니다</button>'
         : "";
@@ -183,15 +182,26 @@
           (c.reco_reason ? '<span class="why">' + esc(c.reco_reason) + "</span>" : "") +
           "</span>"
         : "";
-      return '<div class="cc' + (c.is_chosen ? " chosen" : "") +
+      return '<article class="cc' + (c.is_chosen ? " chosen" : "") +
         (c.is_recommended ? " reco-on" : "") + '">' + reco +
-        '<span class="k">' + esc(c.key) + "안 · " + esc(c.axis || "") + "</span>" +
-        '<span class="t">' + esc(c.title || "") + "</span>" +
-        '<span class="b">' + esc(c.body || "") + "</span>" +
-        (c.hook ? '<span class="b">훅 · ' + esc(c.hook) + "</span>" : "") +
-        pick + "</div>";
-    }).join("") + redoCard(canPick) + "</div>";
-    return head + body;
+        '<header class="cc-head"><span class="k">' + esc(c.key) + "안" +
+          (c.axis ? ' <em>' + esc(c.axis) + "</em>" : "") + "</span>" +
+          '<span class="t">' + esc(c.title || "") + "</span></header>" +
+        '<div class="cc-part"><b>핵심 아이디어</b><span>' + esc(c.body || "") + "</span></div>" +
+        (c.visual ? '<div class="cc-part"><b>장면 방식</b><span>' + esc(c.visual) + "</span></div>" : "") +
+        (c.hook ? '<div class="cc-part hook"><b>첫 장면</b><span>' + esc(c.hook) + "</span></div>" : "") +
+        pick + "</article>";
+    }
+    var head = "<h2>컨셉 5안" + (chosen ? " — 선택 완료" : "") + "</h2>";
+    if (chosen) {
+      var others = list.filter(function (c) { return !c.is_chosen; });
+      return head + '<div class="chosen-summary"><span class="chosen-label">선택한 방향</span>' +
+        card(chosen) + "</div>" +
+        (others.length ? '<details class="other-concepts"><summary>다른 제안 ' + others.length +
+          '개 다시 보기</summary><div class="concepts">' + others.map(card).join("") + "</div></details>" : "");
+    }
+    return head + '<p class="section-guide">제목을 먼저 보고, 관심 가는 안의 핵심 아이디어와 첫 장면을 비교해 주세요.</p>' +
+      '<div class="concepts">' + list.map(card).join("") + redoCard(canPick) + "</div>";
   }
 
   // 여섯 번째 카드 — 다섯 개가 다 아닐 수 있다.
@@ -408,6 +418,13 @@
         "<small>제작에 들어갑니다. 앵커 이미지와 영상이 준비되면 여기에 올라옵니다.</small>" +
         "</div></div>";
     }
+    if (p.step === "develop" && done.concepts) {
+      var chosenKey = String(done.concepts.note || "").match(/^([A-Z])안/);
+      return '<div class="gate done"><div class="txt"><b>' +
+        (chosenKey ? chosenKey[1] + "안 선택 완료" : "컨셉 선택 완료") + '</b>' +
+        '<small>선택하신 방향으로 구성과 각본을 만들고 있습니다. 다음 확인 단계가 준비되면 이 화면이 바뀝니다.</small>' +
+        '</div></div>';
+    }
     return '<div class="gate done"><div class="txt"><b>작업 중입니다</b>' +
       "<small>준비되면 이 화면에 올라옵니다. 광고주가 하실 일은 없습니다.</small></div></div>";
   }
@@ -534,7 +551,7 @@
         return Promise.all([
           db.from("briefs").select("raw,goal,target,format").eq("project_id", id).maybeSingle(),
           db.from("strategies").select("insight,usp,one_message,tone").eq("project_id", id).maybeSingle(),
-          db.from("concepts").select("key,axis,title,body,hook,is_chosen,is_recommended,reco_reason").eq("project_id", id).order("key"),
+          db.from("concepts").select("key,axis,title,body,hook,visual,is_chosen,is_recommended,reco_reason").eq("project_id", id).order("key"),
           db.from("cuts").select("n,t_start,t_end,block,size,angle,move,lens,action,intent").eq("project_id", id).order("n"),
           db.from("assets").select("kind,approved,url,storage_path,role,mime,cut_n,meta").eq("project_id", id).or("kind.neq.final,approved.eq.true"),
           db.from("approvals").select("gate,decision,note,decided_at").eq("project_id", id).order("decided_at"),
