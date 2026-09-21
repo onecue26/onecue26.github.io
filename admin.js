@@ -444,25 +444,28 @@
       deliver: p.step === "deliver" ? productionAction : ""
     };
 
-    return '<div class="wrk' + (isNew ? " fresh" : "") + '">' +
-      '<div class="top"><div>' +
+    var openProject = isNew || p.aiNeedsReview || !!p.job || (p.state !== "done" && p.step !== "deliver");
+    return '<details class="wrk project-fold' + (isNew ? " fresh" : "") + '"' +
+      (openProject ? " open" : "") + '>' +
+      '<summary class="project-summary"><div>' +
       '<div class="name">' + (isNew ? '<span class="new">NEW</span>' : "") +
       (p.brand && p.product ? '<span class="brand-name"><em>브랜드</em>' + esc(p.brand) + '</span>' : "") +
       '<strong class="product-name">' + esc(p.product || p.brand || p.slug) + '</strong></div>' +
       '<div class="meta">' + esc(p.slug) + " · " + p.running_sec + "초 · " +
       esc((p.aspects || []).join("/")) +
       (p.created_at ? " · " + ago(p.created_at) : "") + "</div>" +
-      '</div>' +
-      '<div class="ways">' +
+      '</div><div class="project-summary-side"><span class="project-stage">' +
+      esc(STEP_NAME[p.step] || p.step) + '</span><span class="fold-icon" aria-hidden="true">⌄</span></div></summary>' +
+      '<div class="project-body"><div class="ways project-ways">' +
       (p.n_cuts
         ? '<a class="btn ghost" href="board.html?slug=' + encodeURIComponent(p.slug) +
           '">콘티 검수</a>'
         : "") +
       '<a class="btn ghost" href="' + esc(siteUrl(p.slug)) +
-      '" target="_blank" rel="noopener">광고주 화면 ↗</a></div></div>' +
+      '" target="_blank" rel="noopener">광고주 화면 ↗</a></div>' +
       redo + who +
       '<div class="mailbox" id="mail-' + esc(p.slug) + '" hidden></div>' +
-      flow(p, stageBodies) + "</div>";
+      flow(p, stageBodies) + "</div></details>";
   }
 
   function render() {

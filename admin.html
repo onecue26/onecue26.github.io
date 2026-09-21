@@ -21,8 +21,19 @@
   text-underline-offset:3px}
 
 .wrk{background:var(--panel);border:1px solid var(--rule);border-radius:11px;
-  padding:15px 17px;display:grid;gap:12px;margin-bottom:12px}
+  padding:0;margin-bottom:12px;overflow:hidden}
 .wrk.fresh{border-color:var(--cue);border-left-width:4px}
+.project-fold>summary{list-style:none;cursor:pointer}.project-fold>summary::-webkit-details-marker{display:none}
+.project-summary{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;
+  padding:15px 17px;background:var(--panel)}
+.project-summary:hover{background:var(--sunk)}
+.project-summary-side{display:flex;align-items:center;gap:12px}
+.project-stage{font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;color:var(--cue);
+  border:1px solid var(--rule);background:var(--ground);padding:4px 8px;white-space:nowrap}
+.fold-icon{font-size:22px;color:var(--muted);line-height:1;transform:rotate(0deg);transition:transform .15s}
+.project-fold[open] .fold-icon{transform:rotate(180deg)}
+.project-body{display:grid;gap:12px;padding:0 17px 15px;border-top:1px solid var(--rule)}
+.project-ways{justify-self:end;flex-direction:row!important;flex-wrap:wrap;margin-top:12px}
 .wrk .top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:start}
 .wrk .name{font-weight:700;font-size:16.5px;display:flex;align-items:center;gap:8px}
 .wrk .name .brand-name{display:inline-flex;align-items:center;gap:5px;color:var(--muted);font-size:12px;font-weight:700}
@@ -38,7 +49,7 @@
 .wrk .have span.on{background:var(--live-soft);border-color:transparent;color:var(--live)}
 .wrk .ways{display:flex;flex-direction:column;gap:6px;align-items:stretch}
 @media(max-width:600px){.wrk .ways{flex-direction:row;flex-wrap:wrap}}
-@media(max-width:600px){.wrk .top{grid-template-columns:1fr}}
+@media(max-width:600px){.wrk .top{grid-template-columns:1fr}.project-summary{grid-template-columns:1fr}.project-summary-side{justify-content:space-between}}
 
 /* 광고주가 쓴 것 — 제일 먼저 읽어야 하니 카드 안에 그대로 편다 */
 .said{background:var(--sunk);border:1px solid var(--rule);border-radius:9px;
@@ -248,6 +259,6 @@
 <script src="config.js?v=d4d97baa"></script>
 <script src="auth.js?v=fa839557"></script>
 <script src="asset-access.js"></script>
-<script src="admin.js?v=unified-stage-workspace-2"></script>
+<script src="admin.js?v=project-fold-260921"></script>
 </body>
 </html>
