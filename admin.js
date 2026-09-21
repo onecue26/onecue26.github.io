@@ -85,17 +85,212 @@
       "project.html?slug=" + encodeURIComponent(slug);
   }
 
+  // 단계별 실행 주체 — stage-executor.js 가 판단을 쥔다.
+  // 스크립트가 없으면 예전 그대로 전부 AI 로 본다(기능이 죽어도 흐름은 안 깨진다)
+  function SE() {
+    return window.ONECUE_STAGE || {
+      ORDER: FLOW.map(function (x) { return x.key; }),
+      of: function () { return { mode: "ai", assignee: "", reviewer_model: "", state: "planned" }; },
+      isHuman: function () { return false; },
+      performer: function () { return { kind: "ai", label: "기록 없음" }; },
+      reviewer: function () { return "별도 검토 없음"; },
+      editable: function () { return false; },
+      waiting: function () { return false; },
+      currentHolder: function () { return null; },
+      byProject: function () { return {}; },
+      nextStep: function () { return null; },
+      // 계약을 못 읽은 상태다. 검사할 수 없으면 통과시키지 않는다
+      contractReady: function () { return false; },
+      fields: function () { return []; },
+      lines: function () { return []; },
+      checkForm: function () { return ["폼 계약을 불러오지 못했습니다"]; },
+      checkText: function () { return ["글 계약을 불러오지 못했습니다"]; },
+      humanAllowed: function () { return true; },
+      // 폼 계약이 없으면 담당자로 돌릴 수 있는 단계도 없다. 메모만 받는 자리를 열지 않는다
+      hasForm: function () { return false; },
+      assignable: function () {
+        return { ok: false, reason: "contract_missing",
+          note: "폼 계약을 불러오지 못했습니다 — 새로고침한 뒤 다시 시도해 주세요" };
+      },
+      // 검토 결과를 읽는 규칙도 못 읽었다. 조용히 빈칸으로 두지 않고 오류로 보이게 한다
+      reviewFindings: function () {
+        return { present: false, ok: false, shape: "contract_missing",
+          error: "검토 결과를 읽는 규칙을 불러오지 못했습니다 — 새로고침해 주세요" };
+      },
+      plainFirst: function () { return ""; },
+      plainGlossary: function () { return []; },
+      jargon: function () { return []; },
+      sendGate: function () { return { ok: false, reason: "contract_missing", hits: [], texts: [] }; },
+      JARGON: [],
+    };
+  }
+
   function currentOwner(p) {
     if (p.step === "brief") {
       if (p.productionEnrolled) return "AI 제작 세션";
       if (p.enrollRequested) return "AI 연결 시스템";
       return "관리자";
     }
-    if (GATE[p.step]) return p.state === "ready" ? "광고주" : "관리자";
+    if (GATE[p.step] && p.state === "ready") return "광고주";
+    var held = SE().currentHolder(p);
+    if (held) {
+      return "담당자 " + (held.assignee || "미지정") +
+        (held.state === "waiting" ? " · 결과 등록 대기" : "");
+    }
+    if (GATE[p.step]) return "관리자";
     if (p.job && p.job.step === p.step) return "AI 제작 세션";
     if (p.step === "anchors" || p.step === "video") return "제작 관리자";
     if (p.step === "deliver") return "관리자";
     return "AI 또는 지정 담당자";
+  }
+
+  // ── 실행 주체 고르기 ───────────────────────────────────────────────────────
+  // 「AI 진행」은 지금까지와 똑같이 기존 jobs 큐로 간다.
+  // 「담당자 진행」은 이름을 받고, 사람이 결과를 등록할 때까지 그 단계가 멈춘다.
+  // 화면 조건문은 안내일 뿐이고 실제로 큐를 막는 건 DB 트리거다(migrate_016).
+  function execPicker(p, key) {
+    var s = SE(), pick = s.of(p, key);
+    if (!s.editable(p, key)) return "";
+    var human = pick.mode === "human";
+    var name = "exec-" + p.slug + "-" + key;
+    var tag = ' data-slug="' + esc(p.slug) + '" data-step="' + esc(key) + '"';
+    // 담당자로 돌릴 수 있는 단계인지는 계약이 정한다. 고르는 것 자체를 막고
+    // 왜 막았는지 화면에 적는다 — 서버(onecue_stage_executor_set)도 같은 이유로 거절한다.
+    // 막히는 이유는 두 가지다 — 제품·자료 확인(의뢰가 막힌다), 그리고 아직 결과를 받을
+    // 칸이 정해지지 않은 단계(이번 범위 아님 · 메모만 남는 자리를 만들지 않는다)
+    var pickable = SE().assignable(key);
+    // assignable() 이 이미 같은 판단을 하지만 humanBlocked 목록을 한 번 더 본다 —
+    // 계약이 바뀌어도 제품·자료 확인은 두 겹으로 닫혀 있어야 한다
+    var personOk = pickable.ok && SE().humanAllowed(key);
+    var offLabel = pickable.reason === "out_of_scope"
+      ? "이번 범위 아님 · 아직 고를 수 없습니다"
+      : "권장하지 않음 · 이번 버전에서는 고를 수 없습니다";
+    return '<div class="exec-pick" data-exec-form' + tag + '>' +
+      '<b>이 단계를 누가 맡습니까(실행 주체)</b>' +
+      '<div class="exec-modes">' +
+      '<label><input type="radio" name="' + esc(name) + '" data-exec-mode value="ai"' +
+      (human ? "" : " checked") + '><span>AI 진행 <small>기존 작업 큐로 등록</small></span></label>' +
+      '<label' + (personOk ? "" : ' class="exec-mode-off"') +
+      '><input type="radio" name="' + esc(name) + '" data-exec-mode value="human"' +
+      (human ? " checked" : "") + (personOk ? "" : " disabled") +
+      '><span>담당자 진행 <small>' +
+      (personOk ? "사람이 결과를 올릴 때까지 대기" : offLabel) + '</small></span></label>' +
+      '</div>' +
+      (personOk ? "" : '<small class="exec-blocked">' + esc(pickable.note) + '</small>') +
+      '<label class="exec-field"><span>담당자 이름</span>' +
+      '<input type="text" data-exec-name maxlength="80" value="' + esc(pick.assignee) +
+      '" placeholder="담당자 진행일 때만 필요합니다"></label>' +
+      '<label class="exec-field"><span>결과를 검토하는 AI(핵심 검토 AI)</span>' +
+      '<input type="text" data-exec-reviewer maxlength="120" value="' + esc(pick.reviewer_model) +
+      '" placeholder="예 · anthropic claude-fable-5-1"></label>' +
+      '<button class="btn ghost" type="button" data-exec-save' + tag + '>누가 맡는지 저장(실행 주체)</button>' +
+      '<small>비워 두면 AI 진행입니다. 이미 시작된 AI 작업이 있으면 담당자로 바꿀 수 없습니다.</small>' +
+      '</div>';
+  }
+
+  // 구조화 폼 — AI 가 만드는 결과와 칸이 똑같다. 계약이 칸도 규칙도 쥐고 있고
+  // 이 함수는 그 계약을 그리기만 한다. 칸 이름을 여기서 새로 짓지 않는다
+  function formFields(key) {
+    var list = SE().fields(key);
+    if (!list.length) return "";
+    return '<div class="stage-form">' + list.map(function (f) {
+      var id = ' data-form-field="' + esc(f.key) + '"';
+      var head = '<span>' + esc(f.label) +
+        (f.required ? ' <em class="req">필수</em>' : '') + '</span>' +
+        '<small>' + esc(f.help || "") + '</small>';
+      if (f.type === "boolean") {
+        return '<label class="exec-field form-bool">' + head +
+          '<select' + id + '><option value="false">' + esc(f.false_label || "사용 안 함") +
+          '</option><option value="true">' + esc(f.true_label || "사용") +
+          '</option></select></label>';
+      }
+      if (f.type === "list") {
+        return '<label class="exec-field">' + head +
+          '<textarea' + id + ' rows="4" placeholder="' + esc(f.placeholder || "") +
+          '"></textarea><small class="form-hint">한 줄에 하나씩 · ' +
+          f.min_items + '~' + f.max_items + '줄 · 한 줄 ' + f.max_length + '자까지</small></label>';
+      }
+      return '<label class="exec-field">' + head +
+        '<input type="text"' + id + ' maxlength="' + f.max_length +
+        '" placeholder="' + esc(f.placeholder || "") + '">' +
+        '<small class="form-hint">' + f.min_length + '~' + f.max_length + '자</small></label>';
+    }).join("") + '</div>';
+  }
+
+  // 사람이 끝냈다는 것을 등록한다. 계약이 있는 단계(develop)는 결과물 자체를
+  // 여기서 구조화된 칸으로 받아 한 번에 저장한다 — 메모만 남고 산출물이 안 생기던
+  // 자리가 이 자리였다.
+  //
+  // ★ 계약에 칸이 없는 단계에는 등록 폼을 아예 그리지 않는다. 예전에는 그 자리에
+  //   메모만 받는 폼이 떴는데, 그게 바로 「메모형」 구조다. 이번 범위가 아니므로
+  //   폼 대신 왜 안 열렸는지만 적는다. 애초에 담당자 지정 자체가 막혀 있어서
+  //   여기까지 오지 않지만, 옛 데이터로 이 상태가 되더라도 메모 폼은 뜨지 않는다.
+  function deliverBox(p, key) {
+    var s = SE();
+    if (!s.waiting(p, key)) return "";
+    var pick = s.of(p, key);
+    var structured = s.fields(key).length > 0;
+    var tag = ' data-slug="' + esc(p.slug) + '" data-step="' + esc(key) + '"';
+    if (!structured) {
+      return '<div class="deliver-box out-of-scope"' + tag + '>' +
+        '<b>담당자 ' + esc(pick.assignee || "미지정") + ' 지정됨 — 등록 폼 없음</b>' +
+        '<small>이번 범위 아님 — 이 단계는 결과를 받을 칸이 아직 정해지지 않았습니다. ' +
+        '메모만 받는 등록은 결과물을 만들지 못해 열지 않았습니다. ' +
+        '이 단계를 다시 AI 진행으로 돌려 주세요.</small></div>';
+    }
+    return '<div class="deliver-box structured" data-deliver-form' + tag +
+      ' data-deliver-structured>' +
+      '<b>담당자 ' + esc(pick.assignee || "미지정") + ' 진행 중 — 결과 등록 대기</b>' +
+      '<small>이 단계는 AI 작업 큐에 올라가지 않습니다. 아래 칸은 AI 가 만들 때와 같은 칸입니다' +
+      ' — 채워서 등록하면 그대로 결과물이 됩니다.</small>' +
+      formFields(key) +
+      // 광고주가 읽을 말과 내부 제작 명세는 칸을 나눈다. 같은 칸에 섞으면
+      // 내부 용어가 섞인 글이 그대로 광고주에게 나간다
+      '<label class="exec-field plain"><span>광고주용 설명 <em>쉬운 일상어</em></span>' +
+      '<textarea data-deliver-summary rows="3" maxlength="4000" ' +
+      'placeholder="예 · 자몽을 조각내 붉은 사선으로 놓고, 화면 가장자리에 여백을 둡니다"></textarea>' +
+      // 쉬운 말을 앞에 쓰고 전문용어는 괄호에 넣는다 — 「쉬운 말(전문용어)」 꼴이다.
+      // 전문용어를 감추지 않는다. 광고주용 설명에는 괄호 안의 말만 빼면 된다.
+      // 용어 자체는 계약에서만 온다 — 여기 예로 적으면 그게 곧 사본이 된다
+      '<small class="jargon-help">이렇게 씁니다 — ' +
+      SE().plainGlossary(6).map(esc).join(" · ") + '</small>' +
+      '<small class="jargon-help warn">광고주용 설명에 이런 말은 쓰지 마세요 — ' +
+      SE().JARGON.slice(0, 6).map(function (x) { return esc(x[0]); }).join(" · ") +
+      '</small></label>' +
+      '<label class="exec-field"><span>내부 제작 명세 <em>전문용어 가능</em></span>' +
+      '<textarea data-deliver-note rows="3" maxlength="10000" ' +
+      'placeholder="컷 사양·저장 위치 등 내부 기록. 광고주 화면에는 나가지 않습니다"></textarea></label>' +
+      '<label class="exec-adv plain-check"><input type="checkbox" data-deliver-plain>' +
+      '<span>게시 전 검수 — <b>비전문가가 바로 이해할 수 있는 말인지</b> 확인했습니다</span></label>' +
+      // 등록은 단계를 옮기지 않는다. 전진은 관리자 검수 뒤 기존 경로로만 일어난다
+      '<small class="deliver-note-advance">등록해도 단계는 움직이지 않습니다. ' +
+      '다음 단계로 넘기는 것은 검수를 마친 뒤 기존 경로로만 합니다.</small>' +
+      '<div class="deliver-problems" data-deliver-problems hidden></div>' +
+      '<button class="btn" type="button" data-deliver-save' + tag + '>담당자 결과 등록</button>' +
+      '</div>';
+  }
+
+  // 결과가 아직 없는 현재 단계 — 왜 비어 있는지 화면에서 바로 읽히게 한다.
+  // 「저장된 상세 내용이 없습니다」만 뜨면 고장인지 대기인지 구분이 안 된다
+  function stageWait(p, key, label) {
+    var st = SE().status(p, key, false);
+    var head, body, cls = "stage-wait";
+    if (st.kind === "human_wait") {
+      head = "제작 중 · 담당자 결과 대기";
+      body = "담당자 " + (st.assignee || "미지정") + " 가 진행 중입니다. 결과가 등록되면 이 자리에 " +
+        label + " 상세가 그대로 표시됩니다.";
+    } else if (st.kind === "empty") {
+      head = "등록 완료 · 내용 없음";
+      body = "담당자가 완료를 등록했지만 " + label + " 내용이 아직 저장되지 않았습니다. 확인이 필요합니다.";
+      cls += " alert";
+    } else if (st.kind === "ai_working") {
+      head = "제작 중 · AI 작업";
+      body = "AI 작업 큐에서 만들고 있습니다. 끝나면 이 자리에 " + label + " 상세가 표시됩니다.";
+    } else {
+      head = "대기 중";
+      body = "아직 " + label + " 결과가 등록되지 않았습니다.";
+    }
+    return '<div class="' + cls + '"><b>' + esc(head) + '</b><span>' + esc(body) + '</span></div>';
   }
 
   function flow(p, bodies) {
@@ -111,30 +306,56 @@
         var marker = i < current ? "완료" : (i === current ? "현재" : (i + 1));
         var h = stageAi(s.key), ai = h && h.executor ? h.executor : null;
         var version = (p.aiVersions && p.aiVersions[s.key]) || (h ? 1 : 0);
-        var worker = ai ? [ai.executor_provider, ai.executor_model].filter(Boolean).join(" · ") : "기록 없음";
-        var reviewer = ai && ai.reviewer_model
-          ? (ai.reviewer_model === ai.executor_model ? "동일 AI 자체 검토"
-            : [ai.reviewer_provider, ai.reviewer_model].filter(Boolean).join(" · "))
-          : "별도 검토 없음";
-        var findings = ai && ai.review_findings ? ai.review_findings : null;
-        var findingText = findings && typeof findings.critical === "number"
-          ? '<span>검토 결과 · 치명 ' + findings.critical + ' / 참고 ' + (findings.advisory || 0) + '</span>' : '';
+        // 수행자와 핵심 검토 AI — 관리자가 지정한 실행 주체가 먼저고, 없으면 AI 실행 기록이다
+        var pick = SE().of(p, s.key);
+        var who = SE().performer(p, s.key);
+        var worker = (who.kind === "human" ? "담당자 · " : "AI · ") + who.label;
+        var reviewer = SE().reviewer(p, s.key);
+        // 검토 결과는 계약이 아는 모양일 때만 숫자로 그린다. 모르는 모양이면
+        // 조용히 빈칸이 되지 않고 무엇이 잘못됐는지 그 자리에 뜬다
+        var fr = SE().reviewFindings(ai);
+        var findingText = !fr.present ? ''
+          : (fr.ok
+            ? '<span>검토 결과 · 치명 ' + fr.critical + ' / 참고 ' + fr.advisory +
+              (fr.shape === "count" ? '' : ' · ' + esc(fr.shape_label)) + '</span>'
+            : '<span class="findings-bad">검토 결과를 읽지 못했습니다 · ' +
+              esc(fr.error) + '</span>');
+        var waitingHere = SE().waiting(p, s.key);
         var working = i === current && p.job && p.job.step === s.key;
         var updated = i === current && p.aiNeedsReview && h;
-        var badge = working ? '<em class="ai-update working">AI 재작업 중</em>'
-          : (updated ? '<em class="ai-update done">NEW · 업데이트 완료</em>' : '');
+        var badge = waitingHere ? '<em class="ai-update working">담당자 결과 대기</em>'
+          : (working ? '<em class="ai-update working">AI 재작업 중</em>'
+          : (updated ? '<em class="ai-update done">NEW · 업데이트 완료</em>' : ''));
+        var personBadge = pick.mode === "human"
+          ? '<em class="stage-person">담당자 ' + esc(pick.assignee || "미지정") +
+            (pick.state === "delivered" ? " · 등록 완료" : "") + '</em>' : '';
         var versionBadge = version ? '<em class="stage-version">v' + version + '</em>' : '';
-        if (status === "upcoming") {
-          return '<div class="flow-step upcoming"><div class="flow-summary"><span class="flow-marker">' +
-            marker + '</span><strong>' + esc(STEP_NAME[s.key]) + '</strong><small>' + esc(s.owner) +
-            '</small></div></div>';
-        }
+        // 등록된 뒤에는 광고주용 설명과 내부 명세를 따로 보여 준다 — 섞어 놓지 않는다
+        var delivered = pick.state === "delivered"
+          ? '<span>담당자 결과 등록 완료' + (pick.delivered_at ? ' · ' + esc(ago(pick.delivered_at)) : '') +
+            (pick.plain_language_ok ? ' · 쉬운 말 검수 확인' : '') + '</span>' +
+            (pick.client_summary
+              ? '<div class="stage-content delivered-text"><dl class="stage-data">' +
+                '<dt>광고주용 설명</dt><dd>' + esc(pick.client_summary) + '</dd>' +
+                (pick.delivered_note
+                  ? '<dt>내부 제작 명세</dt><dd>' + esc(pick.delivered_note) + '</dd>' : '') +
+                '</dl></div>'
+              : (pick.delivered_note
+                ? '<div class="stage-content delivered-text"><dl class="stage-data">' +
+                  '<dt>내부 제작 명세</dt><dd>' + esc(pick.delivered_note) + '</dd></dl></div>' : ''))
+          : '';
+        // 아직 오지 않은 단계도 펼칠 수 있어야 한다 — 실행 주체는 미리 정해 두는 것이다
+        var detail = '<div class="flow-detail"><span>수행 · ' + esc(worker) +
+          '</span><span>결과를 검토하는 AI(핵심 검토 AI) · ' + esc(reviewer) + '</span>' +
+          findingText + delivered +
+          execPicker(p, s.key) + deliverBox(p, s.key) +
+          (status === "upcoming" ? ''
+            : (bodies[s.key] || '<p class="stage-empty">저장된 상세 내용이 없습니다.</p>')) +
+          '</div>';
         return '<details class="flow-step ' + status + '"' + (status === "current" ? ' open' : '') + '>' +
           '<summary class="flow-summary"><span class="flow-marker">' + marker + '</span><strong>' +
-          esc(STEP_NAME[s.key]) + '</strong>' + versionBadge + badge + '<small>' + esc(s.owner) + '</small></summary>' +
-          '<div class="flow-detail"><span>수행 AI · ' + esc(worker) + '</span><span>검토 AI · ' +
-          esc(reviewer) + '</span>' + findingText +
-          (bodies[s.key] || '<p class="stage-empty">저장된 상세 내용이 없습니다.</p>') + '</div></details>';
+          esc(STEP_NAME[s.key]) + '</strong>' + versionBadge + personBadge + badge +
+          '<small>' + esc(s.owner) + '</small></summary>' + detail + '</details>';
       }).join("") + '</div></div>';
   }
 
@@ -257,6 +478,8 @@
         productionAction = '<button class="btn production-start" type="button" data-enroll="' +
           esc(p.slug) + '">AI 제작 시작</button>';
       }
+    } else if (SE().waiting(p, p.step)) {
+      productionAction = '<span class="progress-state wait">담당자 진행 — 결과 등록 대기</span>';
     } else {
       productionAction = '<span class="progress-state">현재 절차에 따라 진행 중입니다</span>';
     }
@@ -321,21 +544,26 @@
           var reviewer = ai.reviewer_model && ai.reviewer_model !== ai.executor_model
             ? [ai.reviewer_provider, ai.reviewer_model].filter(Boolean).join(" · ")
             : (ai.reviewer_model ? "동일 AI 자체 검토" : "별도 검토 없음");
-          var findings = ai.review_findings || {};
-          var findingText = typeof findings.critical === "number"
-            ? " · 치명 " + findings.critical + " / 참고 " + (findings.advisory || 0) : "";
+          // 같은 판단을 한 곳에서 한다 — 모르는 모양이면 숫자를 지어내지 않고 드러낸다
+          var fr = SE().reviewFindings(ai);
+          var findingText = !fr.present ? ""
+            : (fr.ok
+              ? " · 치명 " + fr.critical + " / 참고 " + fr.advisory +
+                (fr.shape === "count" ? "" : " · " + fr.shape_label)
+              : " · 검토 결과를 읽지 못했습니다(" + fr.error + ")");
           return '<div class="executor-step"><span>' + esc(AI_STAGE[h.step] || h.step || "단계 미상") +
             '</span><b>수행 ' + esc(worker) + '</b><b>검토 ' + esc(reviewer + findingText) + '</b></div>';
         }).join("") + '</div>'
       : '<div class="executor-history empty"><strong>단계별 AI 작업 기록</strong><span>아직 모델 기록이 없습니다.</span></div>';
 
     var conceptReview = "";
-    if (p.step === "concepts" && p.concepts && p.concepts.length) {
+    if (p.concepts && p.concepts.length) {
       var strategyLine = p.strategy
         ? '<div class="review-strategy"><span>전략 한 줄</span><b>' + esc(p.strategy.one_message || "") + '</b>' +
           '<small>' + esc(p.strategy.insight || "") + '</small></div>'
         : "";
-      var replanBusy = p.job && p.job.step === "concepts";
+      var atConceptStage = p.step === "concepts";
+      var replanBusy = atConceptStage && p.job && p.job.step === "concepts";
       // 재기획 범위 — 전부 다시 만들지, 아쉬운 안만 다시 만들지 고른다.
       // 고르지 않은 안은 손대지 않는다(서버에서도 강제한다).
       var conceptKeys = p.concepts.map(function (c) { return c.key; })
@@ -344,7 +572,7 @@
         return '<label class="replan-pick"><input type="checkbox" data-replan-key="' + esc(p.slug) +
           '" value="' + esc(k) + '"><span>' + esc(k) + '</span></label>';
       }).join("");
-      var replanBox = p.state === "pending"
+      var replanBox = atConceptStage && p.state === "pending"
         ? (replanBusy
           ? '<div class="replan-box busy"><b>새 콘셉트를 만드는 중입니다</b><span>완료되면 이 화면에 자동으로 교체됩니다.</span></div>'
           : '<div class="replan-box" data-replan-form="' + esc(p.slug) + '">' +
@@ -364,8 +592,11 @@
             '<button class="btn ghost" type="button" data-replan="' + esc(p.slug) +
             '">5안 전체 다시 만들기</button><small>이전 5안은 비교 기록으로 보존됩니다.</small></div>')
         : "";
-      conceptReview = '<section class="concept-review"><div class="review-head"><span>관리자 검토</span>' +
-        '<h3>콘셉트 5안</h3><p>추천은 참고값입니다. 다섯 방향의 차이와 위험을 확인한 뒤 광고주에게 보내세요.</p></div>' +
+      conceptReview = '<section class="concept-review"><div class="review-head"><span>' +
+        (atConceptStage ? "관리자 검토" : "선택 완료 · 보관본") + '</span>' +
+        '<h3>콘셉트 5안</h3><p>' + (atConceptStage
+          ? "추천은 참고값입니다. 다섯 방향의 차이와 위험을 확인한 뒤 광고주에게 보내세요."
+          : "이 프로젝트에서 실제로 제안하고 선택한 콘셉트 기록입니다.") + '</p></div>' +
         strategyLine + p.concepts.slice().sort(function (a, b) { return a.key.localeCompare(b.key); })
           .map(function (c) {
             return '<article class="concept-row' + (c.is_recommended ? ' recommended' : '') + '">' +
@@ -432,12 +663,28 @@
         '<dt>톤</dt><dd>' + esc(readable(p.strategy.tone)) + '</dd>' +
         '</dl></div>'
       : '<p class="stage-empty">저장된 전략 설계 내용이 없습니다.</p>';
+
+    // 구성·각본 — 결과가 들어오기 전에는 「제작 중 / 대기」를 분명히 보여 주고,
+    // 들어온 뒤에는 같은 단계 안에서 구조화된 상세로 바뀐다. 별도 화면으로 빼지 않는다
+    var d = p.development;
+    var hasDevelopment = !!(d && ((d.arc && d.arc.length) || (d.copies && d.copies.length) ||
+      d.narration_tone || d.slogan));
+    var developBody = hasDevelopment
+      ? '<div class="stage-content"><dl class="stage-data">' +
+        '<dt>전개 흐름</dt><dd>' + esc(readable(d.arc)) + '</dd>' +
+        '<dt>카피</dt><dd>' + esc(readable(d.copies)) + '</dd>' +
+        '<dt>나레이션 톤</dt><dd>' + esc(readable(d.narration_tone)) + '</dd>' +
+        '<dt>슬로건</dt><dd>' + esc(readable(d.slogan)) + '</dd>' +
+        '<dt>BGM</dt><dd>' + (d.bgm ? "사용" : "사용 안 함") + '</dd>' +
+        '</dl></div>'
+      : (p.step === "develop" ? stageWait(p, "develop", "구성·각본") : "");
+
     var stageBodies = {
       brief: '<div class="stage-content">' + said + requirements + '</div>',
       facts: factsBody,
       strategy: strategyBody,
       concepts: conceptReview + check,
-      develop: p.step === "develop" ? productionAction : "",
+      develop: developBody,
       storyboard: p.step === "storyboard" ? productionAction : "",
       anchors: p.step === "anchors" ? productionAction : "",
       video: p.step === "video" ? productionAction : "",
@@ -509,8 +756,13 @@
     });
     document.querySelectorAll("[data-send]").forEach(function (b) {
       b.addEventListener("click", function () {
+        var label = b.textContent;
         b.disabled = true; b.textContent = "보내는 중…";
-        send(b.dataset.send).then(load);
+        // 쉬운말 게이트에 걸리면 보내지 않는다. 왜 막혔는지 그 자리에서 말해 준다
+        send(b.dataset.send).then(load, function (e) {
+          b.disabled = false; b.textContent = label;
+          window.alert(e.message || String(e));
+        });
       });
     });
     // 범위를 바꾸면 체크박스를 열고 닫고, 버튼 문구도 선택 상태를 따라간다
@@ -546,6 +798,165 @@
     });
     document.querySelectorAll("[data-replan-form]").forEach(function (f) {
       syncReplanForm(f.dataset.replanForm);
+    });
+
+    // 실행 주체 — 담당자를 고르면 이름 칸이 필요해진다
+    document.querySelectorAll("[data-exec-form]").forEach(function (f) { syncExecForm(f); });
+    document.querySelectorAll("[data-exec-mode]").forEach(function (r) {
+      r.addEventListener("change", function () {
+        syncExecForm(r.closest("[data-exec-form]"));
+      });
+    });
+    document.querySelectorAll("[data-exec-save]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var f = b.closest("[data-exec-form]");
+        var mode = f.querySelector("[data-exec-mode]:checked");
+        var name = (f.querySelector("[data-exec-name]").value || "").trim();
+        var rev = (f.querySelector("[data-exec-reviewer]").value || "").trim();
+        mode = mode ? mode.value : "ai";
+        if (mode === "human" && !name) {
+          window.alert("담당자 이름을 적어 주세요.");
+          f.querySelector("[data-exec-name]").focus();
+          return;
+        }
+        var label = b.textContent;
+        b.disabled = true; b.textContent = "저장 중…";
+        setStageExecutor(b.dataset.slug, b.dataset.step, mode, name, rev)
+          .then(load)
+          .catch(function (e) {
+            b.disabled = false; b.textContent = label;
+            window.alert("누가 맡는지(실행 주체) 저장하지 못했습니다 — " + (e.message || e));
+          });
+      });
+    });
+    document.querySelectorAll("[data-deliver-save]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var f = b.closest("[data-deliver-form]");
+        var note = (f.querySelector("[data-deliver-note]").value || "").trim();
+        var summary = (f.querySelector("[data-deliver-summary]").value || "").trim();
+        var plain = f.querySelector("[data-deliver-plain]");
+        var box = f.querySelector("[data-deliver-problems]");
+        function show(problems) {
+          if (!box) return;
+          box.hidden = !problems.length;
+          box.innerHTML = problems.length
+            ? "<b>고쳐야 할 것 " + problems.length + "가지</b><ul>" +
+              problems.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>"
+            : "";
+        }
+        if (!plain || !plain.checked) {
+          show(["게시 전 검수 — 비전문가가 바로 이해할 수 있는 말인지 확인하고 체크해 주세요"]);
+          if (plain) plain.focus();
+          return;
+        }
+        var structured = f.hasAttribute("data-deliver-structured");
+        var values = null;
+        var problems = SE().checkText("client_summary", summary)
+          .concat(SE().checkText("delivered_note", note));
+        if (structured) {
+          values = readForm(f, b.dataset.step);
+          problems = SE().checkForm(b.dataset.step, values).concat(problems);
+        }
+        // 규칙을 외우게 하지 않는다. 걸리는 것이 있으면 그 자리에 전부 적어 준다.
+        // 예전처럼 확인창으로 넘겨 통과시키지 않는다 — 서버도 같은 계약으로 거절한다
+        if (problems.length) { show(problems); return; }
+        show([]);
+        var label = b.textContent;
+        b.disabled = true; b.textContent = "등록 중…";
+        var done = structured
+          ? developSet(b.dataset.slug, values, summary, note)
+          : deliverStage(b.dataset.slug, b.dataset.step, note, summary, true);
+        done.then(load).catch(function (e) {
+          b.disabled = false; b.textContent = label;
+          show([(e.message || String(e))]);
+        });
+      });
+    });
+  }
+
+  // 폼에 적힌 것을 계약이 말하는 모양으로 바꾼다 — 목록은 줄 단위, 참/거짓은 불리언
+  function readForm(f, step) {
+    var out = {};
+    SE().fields(step).forEach(function (field) {
+      var node = f.querySelector('[data-form-field="' + field.key + '"]');
+      if (!node) return;
+      if (field.type === "boolean") { out[field.key] = node.value === "true"; return; }
+      if (field.type === "list") { out[field.key] = SE().lines(node.value); return; }
+      out[field.key] = (node.value || "").trim();
+    });
+    return out;
+  }
+
+  function syncExecForm(f) {
+    if (!f) return;
+    var mode = f.querySelector("[data-exec-mode]:checked");
+    var human = !!mode && mode.value === "human";
+    var name = f.querySelector("[data-exec-name]");
+    if (name) {
+      name.required = human;
+      name.placeholder = human ? "담당자 이름" : "담당자 진행일 때만 필요합니다";
+    }
+  }
+
+  // 실행 주체는 RPC 로만 바꾼다. 브라우저에는 stage_executors 쓰기 권한이 없다
+  function setStageExecutor(slug, step, mode, assignee, reviewer) {
+    var p = ROWS.filter(function (x) { return x.slug === slug; })[0];
+    if (!p) return Promise.reject(new Error("건을 찾지 못했습니다"));
+    if (!SE().editable(p, step)) {
+      return Promise.reject(new Error("지금은 이 단계를 누가 맡는지(실행 주체) 바꿀 수 없습니다"));
+    }
+    // 담당자로 돌릴 수 없는 단계는 버튼이 눌려도 보내지 않는다. 서버도 거절하지만
+    // 여기서 막아야 왜 안 되는지가 그대로 화면에 뜬다
+    if (mode === "human") {
+      var pickable = SE().assignable(step);
+      if (!pickable.ok) return Promise.reject(new Error(pickable.note));
+    }
+    return db.rpc("onecue_stage_executor_set", {
+      p_project_id: p.id, p_step: step, p_mode: mode,
+      p_assignee: assignee || "", p_reviewer_model: reviewer || "", p_reviewer_note: "",
+    }).then(function (r) {
+      if (r.error) throw r.error;
+      return r.data;
+    });
+  }
+
+  // 등록은 단계를 옮기지 않는다. p_advance 는 계약에 남아 있지만 항상 false 로 보내고,
+  // 서버는 true 가 오면 거절한다 — 옛 화면이 조용히 단계를 밀어 버리지 않게 하려는 것이다
+  function deliverStage(slug, step, note, summary, plainOk) {
+    var p = ROWS.filter(function (x) { return x.slug === slug; })[0];
+    if (!p) return Promise.reject(new Error("건을 찾지 못했습니다"));
+    if (!SE().canDeliver(p, step)) {
+      return Promise.reject(new Error("지금은 결과를 등록할 수 있는 단계가 아닙니다"));
+    }
+    // 쉬운 말 검수 확인 없이는 서버가 거절한다. 화면에서도 한 번 더 막는다
+    if (!plainOk) {
+      return Promise.reject(new Error("게시 전 검수 확인이 필요합니다"));
+    }
+    return db.rpc("onecue_stage_deliver", {
+      p_project_id: p.id, p_step: step, p_note: note || "", p_advance: false,
+      p_client_summary: summary || "", p_plain_language_ok: true,
+    }).then(function (r) {
+      if (r.error) throw r.error;
+      return r.data;
+    });
+  }
+
+  // 구성·각본 — 결과물과 등록 기록이 한 호출 안에서 같이 저장된다.
+  // 반쪽만 남는 경우가 없도록 developments 쓰기를 화면에서 따로 하지 않는다
+  function developSet(slug, values, summary, note) {
+    var p = ROWS.filter(function (x) { return x.slug === slug; })[0];
+    if (!p) return Promise.reject(new Error("건을 찾지 못했습니다"));
+    if (!SE().canDeliver(p, "develop")) {
+      return Promise.reject(new Error("지금은 결과를 등록할 수 있는 단계가 아닙니다"));
+    }
+    var problems = SE().checkForm("develop", values);
+    if (problems.length) return Promise.reject(new Error(problems[0]));
+    return db.rpc("onecue_stage_develop_set", {
+      p_project_id: p.id, p_fields: values, p_client_summary: summary || "",
+      p_note: note || "", p_plain_language_ok: true,
+    }).then(function (r) {
+      if (r.error) throw r.error;
+      return r.data;
     });
   }
 
@@ -621,19 +1032,58 @@
     });
   }
 
-  // 1차 검수를 마쳤다 → 광고주 차례로 넘긴다. 이때 비로소 광고주 화면에 버튼이 뜬다
+  // 1차 검수를 마쳤다 → 광고주 차례로 넘긴다. 이때 비로소 광고주 화면에 버튼이 뜬다.
+  //
+  // ★ 쉬운말 게이트가 여기에도 선다. AI 가 만든 글도 똑같이 본다 — 담당자 등록분만
+  //   보는 게 아니다. 걸리면 보내지 않고, 통과든 차단이든 검사 사실을 기록한다.
+  //   (지금은 화면이 막는다. DB 로 옮기는 안은 README §8-5 에 있다)
   function send(slug) {
-    return db.from("projects").update({ state: "ready", updated_at: new Date() })
-      .eq("slug", slug)
-      .then(function () {
-        return db.from("projects").select("id,step").eq("slug", slug).single();
-      })
-      .then(function (r) {
-        return db.from("events").insert({
-          project_id: r.data.id, kind: "sent", to_step: r.data.step,
-          payload: { by: "admin", note: "1차 검수 완료 — 광고주에게 넘김" },
+    var p = ROWS.filter(function (x) { return x.slug === slug; })[0];
+    if (!p) return Promise.reject(new Error("건을 찾지 못했습니다"));
+    var gate = SE().sendGate(p);
+    return recordPlainReview(p, gate).then(function () {
+      if (!gate.ok) {
+        throw new Error(gate.reason === "contract_missing"
+          ? "쉬운말 검사 목록을 불러오지 못했습니다 — 새로고침한 뒤 다시 보내세요"
+          : "광고주에게 나갈 글에 내부 용어가 남아 있어 보내지 않았습니다.\n\n" +
+            gate.hits.map(function (x) { return x.term + " → " + x.plain; }).join("\n") +
+            "\n\n고친 뒤에 다시 눌러 주세요.");
+      }
+      return db.from("projects").update({ state: "ready", updated_at: new Date() })
+        .eq("slug", slug)
+        .then(function () {
+          return db.from("projects").select("id,step").eq("slug", slug).single();
+        })
+        .then(function (r) {
+          return db.from("events").insert({
+            project_id: r.data.id, kind: "sent", to_step: r.data.step,
+            payload: { by: "admin", note: "1차 검수 완료 — 광고주에게 넘김" },
+          });
         });
-      });
+    });
+  }
+
+  // 검사 사실을 남긴다. 기록이 실패해도 보내기 판단 자체는 바뀌지 않는다 —
+  // 통과했는데 기록이 안 됐다고 막으면 기존 흐름이 기록 장애로 멈춘다
+  function recordPlainReview(p, gate) {
+    return db.rpc("onecue_stage_plain_review", {
+      p_project_id: p.id, p_step: p.step, p_texts: gate.texts || [], p_source: "send",
+    }).then(function (r) {
+      if (r.error) throw r.error;
+      return r.data;
+    }).catch(function () {
+      // RPC 가 아직 없는 서버(마이그레이션 016 이전)에서도 화면은 그대로 돈다
+      return db.from("events").insert({
+        project_id: p.id, kind: "plain_language_check",
+        from_step: p.step, to_step: p.step,
+        payload: {
+          by: "admin_ui", source: "send", step: p.step,
+          result: gate.ok ? "pass" : "blocked",
+          terms: (gate.hits || []).map(function (x) { return x.term; }),
+          checked: (gate.texts || []).length,
+        },
+      }).then(function () { return null; }, function () { return null; });
+    });
   }
 
   // 관리자가 승인한 사실만 기록한다. PC의 로컬 처리기가 이 요청을 검증한 뒤
@@ -704,6 +1154,14 @@
             .in("project_id", ids),
           db.from("jobs").select("project_id,response,finished_at").eq("state", "ok")
             .in("project_id", ids).order("finished_at", { ascending: false }),
+          // 단계별 실행 주체 — 줄이 없는 단계는 예전 그대로 AI 다
+          db.from("stage_executors")
+            .select("project_id,step,mode,assignee,reviewer_model,reviewer_note,state," +
+              "delivered_at,delivered_note,client_summary,plain_language_ok")
+            .in("project_id", ids),
+          // 구성·각본 결과 — 등록되면 그 단계 안에서 상세로 펼친다
+          db.from("developments").select("project_id,arc,copies,narration_tone,slogan,bgm")
+            .in("project_id", ids),
         ]).then(function (out) {
           if (out[1].error) throw out[1].error;
           return window.ONECUE_ASSETS.resolve(db, out[1].data || []).then(function (assets) {
@@ -722,8 +1180,13 @@
           var strategies = out[9].data || [];
           var concepts = out[10].data || [];
           var completedJobs = out[11].data || [];
+          // 표가 아직 없는 서버(마이그레이션 016 이전)에서도 화면은 그대로 떠야 한다
+          var stageRows = (out[12] && !out[12].error && out[12].data) || [];
+          var developments = (out[13] && !out[13].error && out[13].data) || [];
 
           ROWS.forEach(function (p) {
+            p.stageExecutors = SE().byProject(stageRows, p.id);
+            p.development = developments.filter(function (x) { return x.project_id === p.id; })[0] || null;
             counts.forEach(function (t, i) {
               var d = cs[i].data || [];
               p[t[1]] = d.filter(function (x) { return x.project_id === p.id; }).length;

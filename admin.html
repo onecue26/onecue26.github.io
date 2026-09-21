@@ -171,14 +171,72 @@
 .flow-track{display:grid;grid-template-columns:1fr;gap:6px;padding-bottom:4px}
 .flow-step{min-width:0;border:1px solid var(--rule);background:var(--sunk);position:relative}
 .flow-step summary{cursor:pointer;list-style:none}.flow-step summary::-webkit-details-marker{display:none}
-.flow-summary{display:grid;grid-template-columns:54px minmax(130px,.7fr) auto auto minmax(150px,1fr);gap:9px;align-items:center;padding:9px 10px}
+.flow-summary{display:grid;grid-template-columns:54px minmax(130px,.7fr) auto auto auto minmax(150px,1fr);gap:9px;align-items:center;padding:9px 10px}
 .flow-step strong,.flow-step small{letter-spacing:0}
 .flow-step strong{font-size:12px;color:var(--muted)}
 .flow-step small{font-size:10.5px;line-height:1.35;color:var(--faint)}
 .flow-detail{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 14px;padding:9px 10px 11px 73px;border-top:1px solid var(--rule)}
 .flow-detail span,.flow-detail b{font-size:11px;letter-spacing:0;overflow-wrap:anywhere}.flow-detail b{grid-column:1/-1;color:var(--cue)}
 .stage-version{font-style:normal;font:700 10px/1 "JetBrains Mono",monospace;color:var(--ink);border:1px solid var(--rule);padding:4px 6px;background:var(--panel)}
-.stage-content,.stage-empty,.flow-detail>.concept-review,.flow-detail>.check{grid-column:1/-1}
+.stage-content,.stage-empty,.flow-detail>.concept-review,.flow-detail>.check,
+.flow-detail>.exec-pick,.flow-detail>.deliver-box{grid-column:1/-1}
+/* 실행 주체 — 단계마다 AI 진행인지 담당자 진행인지 관리자가 고른다 */
+.stage-person{font-style:normal;font:700 10px/1 "JetBrains Mono",monospace;color:#7a4b00;
+  background:#fff1bf;border:1px solid #dcae32;padding:4px 6px;white-space:nowrap}
+.exec-pick,.deliver-box{margin:9px 0 0;padding:11px 12px;background:var(--panel);
+  border:1px solid var(--rule);display:grid;gap:7px}
+.exec-pick>b,.deliver-box>b{font-size:12.5px;font-weight:700}
+.exec-pick>small,.deliver-box>small{font-size:11px;color:var(--muted)}
+.exec-modes{display:flex;flex-wrap:wrap;gap:8px 18px}
+.exec-modes label,.exec-adv{display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer}
+.exec-modes small{display:block;color:var(--muted);font-size:10.5px}
+.exec-field{display:grid;gap:4px;font-size:11.5px;color:var(--muted)}
+.exec-field input,.exec-field textarea{width:100%;box-sizing:border-box;font:inherit;font-size:13px;
+  color:var(--ink);background:var(--ground);border:1px solid var(--rule);border-radius:6px;padding:7px 9px}
+.exec-field textarea{resize:vertical;min-height:52px}
+.exec-pick .btn,.deliver-box .btn{justify-self:start;width:auto}
+.deliver-box{border-color:var(--cue);border-left-width:3px}
+/* 광고주용 설명과 내부 제작 명세는 칸을 나눈다 — 섞어 쓰면 내부 용어가 그대로 나간다 */
+.exec-field>span em{font-style:normal;font-size:10px;font-weight:700;color:var(--cue);
+  border:1px solid var(--cue);padding:1px 5px;margin-left:5px}
+.exec-field.plain textarea{border-color:var(--cue)}
+.jargon-help{display:block;margin-top:4px;font-size:10.5px;line-height:1.55;color:var(--faint);
+  overflow-wrap:anywhere}
+/* 쉬운 말을 앞에, 전문용어는 괄호에. 쓰면 안 되는 말은 한 줄 아래에 따로 세운다 */
+.jargon-help.warn{color:var(--hold);border-top:1px dotted var(--rule);padding-top:4px}
+.plain-check{padding:7px 9px;background:var(--hold-soft);border:1px solid var(--hold);
+  align-items:flex-start}
+.plain-check b{font-weight:800}
+/* 담당자로 돌릴 수 없는 단계 — 고를 수 없다는 것과 왜인지를 같이 보여 준다 */
+.exec-mode-off{opacity:.55;cursor:not-allowed}
+.exec-blocked{display:block;font-size:10.5px;line-height:1.6;color:var(--faint);
+  padding:6px 8px;background:var(--sunk);border:1px dashed var(--rule)}
+/* 이번 범위 아님 — 결과를 받을 칸이 없는 단계에는 등록 폼 대신 이 안내만 뜬다 */
+.deliver-box.out-of-scope{border-color:var(--rule);border-left-color:var(--hold)}
+/* 검토 결과의 모양이 규칙에 없을 때 — 조용히 빈칸이 되지 않고 이 줄이 뜬다 */
+.flow-detail span.findings-bad{color:var(--hold);font-weight:700}
+/* 구조화 폼 — AI 결과와 같은 칸을 사람이 채운다 */
+.stage-form{display:grid;gap:9px;padding:10px 11px;background:var(--sunk);
+  border:1px solid var(--rule)}
+.stage-form .exec-field>span{font-size:12px;color:var(--ink);font-weight:700}
+.stage-form .exec-field>small{font-size:10.5px;color:var(--faint);line-height:1.5}
+.stage-form .form-hint{font-size:10px;color:var(--faint)}
+.stage-form select{font:inherit;font-size:13px;color:var(--ink);background:var(--ground);
+  border:1px solid var(--rule);border-radius:6px;padding:7px 9px}
+.exec-field>span em.req{color:var(--cue);border-color:var(--cue)}
+.deliver-note-advance{display:block;font-size:10.5px;color:var(--faint);line-height:1.6}
+/* 무엇을 고쳐야 하는지 그 자리에 적는다 — 확인창으로 넘기지 않는다 */
+.deliver-problems{padding:8px 10px;background:var(--cue-soft);border:1px solid var(--cue);
+  font-size:11.5px;line-height:1.6}
+.deliver-problems b{display:block;font-size:12px;margin-bottom:4px}
+.deliver-problems ul{margin:0;padding-left:17px}
+/* 결과가 아직 없는 현재 단계 — 고장인지 대기인지 구분되게 */
+.stage-wait{grid-column:1/-1;margin:8px 0 0;padding:11px 13px;background:var(--sunk);
+  border:1px solid var(--rule);border-left:3px solid var(--hold);display:grid;gap:3px}
+.stage-wait b{font-size:13px}
+.stage-wait span{font-size:11.5px;color:var(--muted);line-height:1.6}
+.stage-wait.alert{border-left-color:var(--cue);background:var(--cue-soft)}
+.delivered-text{margin-top:6px}
 .stage-content{padding-top:8px;border-top:1px solid var(--rule)}
 .stage-empty{margin:6px 0;color:var(--faint);font-size:12px}
 .stage-data{display:grid;grid-template-columns:120px minmax(0,1fr);gap:7px 14px;margin:0;font-size:12px;line-height:1.55}
@@ -192,7 +250,7 @@
 .flow-step.done .flow-marker,.flow-step.done strong{color:var(--live)}
 .flow-step.current{border:2px solid var(--cue);background:color-mix(in srgb,var(--cue) 7%,var(--panel))}
 .flow-step.current .flow-marker,.flow-step.current strong{color:var(--cue);font-weight:800}
-@media(max-width:760px){.flow-head{align-items:flex-start;flex-direction:column;gap:4px}.flow-summary{grid-template-columns:48px 1fr auto}.flow-summary small{grid-column:2/-1}.flow-summary .ai-update{grid-column:2/-1}.flow-detail{grid-template-columns:1fr;padding:10px 12px}.stage-data{grid-template-columns:1fr}.stage-data dt{font-weight:700;margin-top:5px}}
+@media(max-width:760px){.flow-head{align-items:flex-start;flex-direction:column;gap:4px}.flow-summary{grid-template-columns:48px 1fr auto}.flow-summary small{grid-column:2/-1}.flow-summary .ai-update{grid-column:2/-1}.flow-summary .stage-person{grid-column:2/-1;justify-self:start}.flow-detail{grid-template-columns:1fr;padding:10px 12px}.stage-data{grid-template-columns:1fr}.stage-data dt{font-weight:700;margin-top:5px}}
 
 /* 광고주가 올린 파일 — 눌러서 받는다 */
 .files{display:flex;flex-wrap:wrap;gap:9px;align-items:center;
@@ -250,7 +308,16 @@
     누르시면 됩니다.<br><br>
     본문 가운데 들어가는 주소는 <b>그 광고주의 진행 페이지</b>입니다. 이 링크로 들어와
     5안을 고르고 콘티를 승인합니다.<br><br>
-    연락처는 <b>로그인한 관리자에게만</b> 보입니다.</p>
+    연락처는 <b>로그인한 관리자에게만</b> 보입니다.<br><br>
+    <b>전체 제작 흐름</b>의 단계를 펼치면 <b>이 단계를 누가 진행합니까</b> 칸이 있습니다.
+    <b>AI 진행</b>은 지금까지와 똑같이 기존 작업 큐로 들어갑니다.
+    <b>담당자 진행</b>을 고르고 이름을 적으면 그 단계는 <b>작업 큐에 올라가지 않고</b>
+    사람이 결과를 등록할 때까지 <b>대기</b>합니다. 이건 화면에서만 막는 것이 아니라
+    <b>데이터베이스에서 막습니다.</b> 아무것도 고르지 않은 단계는 예전 그대로 AI 진행입니다.<br><br>
+    각 단계에는 <b>수행자</b>와 <b>핵심 검토 AI</b>가 함께 표시됩니다.
+    검토 AI 를 적어 두면 담당자 단계처럼 AI 실행 기록이 없는 곳에서도 남습니다.
+    담당자가 끝내면 그 단계에서 <b>담당자 결과 등록</b>을 누르세요 —
+    결과물 자체는 기존 저장 경로로 넣고, 이 버튼은 <b>대기를 푸는 것</b>입니다.</p>
 
   <footer><span>onecue · 관리자</span><span class="mono" id="stamp"></span></footer>
 </main>
@@ -259,6 +326,9 @@
 <script src="config.js?v=d4d97baa"></script>
 <script src="auth.js?v=fa839557"></script>
 <script src="asset-access.js"></script>
-<script src="admin.js?v=project-fold-260921"></script>
+<!-- 폼 계약은 stage-executor.js 보다 먼저 온다. 계약이 없으면 검사가 닫히는 쪽으로 실패한다 -->
+<script src="stage-form-contract.js?v=contract-260921-v3"></script>
+<script src="stage-executor.js?v=stage-exec-260921-v3"></script>
+<script src="admin.js?v=stage-form-260921-v3"></script>
 </body>
 </html>
