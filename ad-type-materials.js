@@ -8,6 +8,10 @@
   /* ONECUE-ADTYPE-BEGIN */
   root.ONECUE_AD_TYPE_MATERIALS =
 {
+  "angles": {
+    "each": "컷마다 다른 것을 보여 준다. 공간·사람·앱 화면이 그렇다. 수가 컷보다 적으면 없는 것을 지어내게 되므로 그 사실을 말한다.",
+    "one": "한 각도로 전부 덮을 수 있다. 단단한 물건·로고·글자가 그렇다. 각도가 하나뿐이면 그 각도에 맞춰 컷을 짠다고 적고 넘어간다. 막지 않는다."
+  },
   "kinds": {
     "anchor": {
       "by": "system",
@@ -81,6 +85,7 @@
       "label": "앱·디지털 서비스 광고",
       "materials": [
         {
+          "angles": "each",
           "ask": "광고에 보일 화면을 캡처로 주십시오. 캡처 안의 글자는 생성에 맡기지 않고 그대로 씁니다.",
           "kind": "screen_ref",
           "min": 2,
@@ -89,16 +94,19 @@
           "why": "화면은 실제로 그 앱에 있는 화면이어야 한다. 없는 기능을 그리면 허위광고다."
         },
         {
+          "angles": "one",
           "kind": "logo",
           "need": "required",
           "real": "yes"
         },
         {
+          "angles": "one",
           "kind": "legal_text",
           "need": "optional",
           "real": "yes"
         },
         {
+          "angles": "one",
           "kind": "mood_ref",
           "need": "optional",
           "real": "no"
@@ -115,22 +123,26 @@
       "label": "행사·모집 광고",
       "materials": [
         {
+          "angles": "one",
           "kind": "legal_text",
           "need": "required",
           "real": "yes",
           "why": "날짜·장소·가격·신청 방법은 틀리면 안 되는 글자다. 한 글자도 생성에 맡기지 않는다."
         },
         {
+          "angles": "each",
           "kind": "place_ref",
           "need": "expected",
           "real": "yes"
         },
         {
+          "angles": "one",
           "kind": "logo",
           "need": "expected",
           "real": "yes"
         },
         {
+          "angles": "one",
           "kind": "mood_ref",
           "need": "optional",
           "real": "no"
@@ -146,6 +158,7 @@
       "label": "그 밖",
       "materials": [
         {
+          "angles": "one",
           "kind": "doc",
           "need": "optional",
           "real": "no"
@@ -161,6 +174,7 @@
       "label": "인물·전문가 광고",
       "materials": [
         {
+          "angles": "each",
           "ask": "정면과 측면을 포함해 두 장 이상, 그리고 화면 사용 동의를 주십시오.",
           "kind": "char_ref",
           "min": 2,
@@ -169,16 +183,19 @@
           "why": "그 사람이어야 한다. 닮은 사람은 그 사람이 아니다."
         },
         {
+          "angles": "each",
           "kind": "place_ref",
           "need": "optional",
           "real": "yes"
         },
         {
+          "angles": "one",
           "kind": "logo",
           "need": "optional",
           "real": "yes"
         },
         {
+          "angles": "one",
           "kind": "mood_ref",
           "need": "optional",
           "real": "no"
@@ -200,6 +217,7 @@
       "label": "공간·서비스 광고",
       "materials": [
         {
+          "angles": "each",
           "ask": "내부를 서로 다른 각도로 3장 이상 주십시오. 컷마다 다른 각도가 필요하고, 없는 각도는 지어내지 않습니다.",
           "kind": "place_ref",
           "min": 3,
@@ -208,6 +226,7 @@
           "why": "손님이 실제로 찾아오는 곳이다. 더 예쁜 공간을 만들어 넣으면 광고가 거짓이 된다."
         },
         {
+          "angles": "each",
           "ask": "화면에 나올 분의 사진과, 나와도 된다는 확인을 주십시오.",
           "kind": "char_ref",
           "need": "expected",
@@ -215,17 +234,20 @@
           "why": "원장·강사가 나오면 그 사람이어야 한다."
         },
         {
+          "angles": "one",
           "kind": "logo",
           "need": "expected",
           "real": "yes"
         },
         {
+          "angles": "one",
           "kind": "legal_text",
           "need": "optional",
           "real": "yes",
           "why": "병원·의원은 의료광고 심의 문구가 따로 있다."
         },
         {
+          "angles": "one",
           "kind": "mood_ref",
           "need": "optional",
           "real": "no"
@@ -242,6 +264,7 @@
       "label": "제품 광고",
       "materials": [
         {
+          "angles": "one",
           "ask": "제품 사진을 앞·뒤·측면으로 주시면 뒷면 표기를 가릴지 보여줄지 정할 수 있습니다.",
           "kind": "product_ref",
           "min": 1,
@@ -250,23 +273,27 @@
           "why": "제품이 화면에 나오면 실제 모양·색·그래픽이 기준이다. 바꾸면 다른 제품이 된다."
         },
         {
+          "angles": "one",
           "kind": "logo",
           "need": "expected",
           "real": "yes",
           "why": "로고는 후반에 얹는다. 생성에 맡기면 비슷하지만 틀린 로고가 나온다."
         },
         {
+          "angles": "one",
           "kind": "legal_text",
           "need": "optional",
           "real": "yes",
           "why": "의무 표기가 있으면 글자 그대로 얹는다. 식품·건강기능식품은 표기 자체가 규제 대상이다."
         },
         {
+          "angles": "one",
           "kind": "brand_guide",
           "need": "optional",
           "real": "no"
         },
         {
+          "angles": "one",
           "kind": "mood_ref",
           "need": "optional",
           "real": "no"
@@ -277,8 +304,8 @@
   "version": "ad-type-materials-v1",
   "why": [
     "광고 종류마다 「실재하는 것」이 다르다. 음료 광고는 캔이 실재이고, 요가학원 광고는 그 학원 공간이 실재다.",
-    "실재를 가리키는 자료는 지어내면 광고가 거짓이 된다 — 손님이 찾아가면 다른 곳이고, 라벨을 읽으면 다른 글자다.",
     "이 표는 종류를 보고 「무엇이 필요한가」를 말한다. 그래야 자료가 모자랄 때 조용히 지어내지 않고 모자란다고 말할 수 있다.",
+    "실재를 가리키는 자료라도 **한 각도로 덮이는 것**과 **컷마다 달라지는 것**은 다르다. 캔은 한 장이면 그 각도로 컷을 짜면 되고, 요가학원은 컷마다 다른 곳을 보여 주므로 수가 모자라면 없는 방을 그리게 된다. angles 가 이 둘을 가른다.",
     "종류는 늘려 간다. 없는 종류가 오면 other 로 받고, 그 건을 보고 한 줄 더한다.",
     "자료 종류를 부르는 이름도 여기 둔다. 화면마다 다른 말로 부르면 광고주가 무엇을 달라는 건지 모른다."
   ]
