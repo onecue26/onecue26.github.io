@@ -213,6 +213,59 @@
       "보실 것이 준비되면 이 화면에 올라옵니다.</p></section></div></div>";
   }
 
+  // ── 광고주가 보는 흐름은 여섯 칸이다 ──────────────────────────────────────
+  //
+  // 내부 제작 단계는 아홉이지만 광고주가 판단할 자리는 그중 셋뿐이다. 나머지는
+  // 「지금 이걸 하고 있다」는 상태다. 그래서 내부 단계와 1:1 로 맞추지 않고,
+  // 광고주가 실제로 겪는 여섯 칸으로 묶는다 (Codex seq198).
+  //
+  // 그리고 **접는다.** 지금까지는 의뢰 내용·콘셉트·제작 설계·보내주신 자료가
+  // 한 줄로 죽 늘어서 있어서, 지금 볼 것이 무엇인지가 그 속에 묻혔다.
+  // 지금 칸만 열려 있고 지난 칸은 한 줄로 접힌다 — 눌러서 언제든 다시 본다.
+  function box(key, title, state, body, open) {
+    if (!body) return "";
+    return '<details class="cstep' + (open ? " now" : "") + '"' + (open ? " open" : "") +
+      ' data-step="' + esc(key) + '">' +
+      '<summary class="cstep-head"><span class="cstep-t">' + esc(title) + "</span>" +
+      (state ? '<span class="cstep-s">' + esc(state) + "</span>" : "") +
+      '<span class="cstep-x" aria-hidden="true"></span></summary>' +
+      '<div class="cstep-body">' + body + "</div></details>";
+  }
+
+  // 여섯 칸을 순서대로 세운다. 각 칸은 **볼 것이 있을 때만** 나온다 —
+  // 빈 상자는 「아직 안 했다」가 아니라 「무엇인지 모르겠다」로 읽힌다.
+  // 지금 칸 하나만 열려 있다. 그 판단은 여기 한 곳에서만 한다.
+  function flow(x) {
+    var brief = x[0].data, concepts = x[2].data, cuts = x[3].data, assets = x[4].data;
+    var at = IDX[P.step] == null ? 0 : IDX[P.step];
+    var boardOpen = BOARD_READY && shown("storyboard");
+    // 광고주 칸 → 그 칸이 「지금」인 내부 단계
+    var now = {
+      ask: at <= IDX.facts,
+      pick: P.step === "concepts",
+      design: P.step === "develop" || (P.step === "storyboard" && !boardOpen),
+      board: P.step === "storyboard" && boardOpen,
+      making: P.step === "anchors" || P.step === "video",
+      done: P.step === "deliver" || HAS_FINAL,
+    };
+    return [
+      box("ask", "의뢰 내용", "접수됨",
+        secBrief(brief, MINE && canEditBrief(P)) + secFiles(assets), now.ask),
+      box("pick", "콘셉트 선택",
+        (concepts || []).some(function (c) { return c.is_chosen; }) ? "선택 완료" : "고르실 차례",
+        shown("concepts")
+          ? secConcepts(concepts, MINE && P.step === "concepts" && P.state === "ready")
+          : "",
+        now.pick),
+      box("design", "제작 설계", "진행 중",
+        (!boardOpen && shown("develop")) ? secDesigning() : "", now.design),
+      box("board", "콘티 확인", "확인하실 차례",
+        boardOpen ? secBoard(assets) + secCuts(cuts, assets) : "", now.board),
+      box("done", "완성 영상", "도착",
+        secFinal(assets), now.done),
+    ].join("");
+  }
+
   function secConcepts(list, canPick) {
     if (!list || !list.length) return "";
     var chosen = list.filter(function (c) { return c.is_chosen; })[0];
@@ -599,21 +652,7 @@
               ((P.channels && P.channels.length) ? " · " + esc(P.channels.join(" ")) : "") +
               "</div>" +
               bar(P.step) + "</div></div>" +
-            secGate(P, x[5].data) +
-            secFinal(x[4].data) +
-            (shown("concepts")
-              ? secConcepts(x[2].data, MINE && P.step === "concepts" && P.state === "ready")
-              : "") +
-            // 시각 콘티가 실제로 있을 때만 콘티를 연다. 그림이 없으면 컷 사양은
-            // 광고주가 판단할 자료가 아니라 내부 설계서다 — 초·카메라·렌즈·의도가
-            // 그대로 나간다. 실제로 그렇게 나가 있었다(카메라 11 · 렌즈 6 · 의도 6).
-            // 준비되기 전까지는 구성·각본과 콘티 준비를 한 구간으로 묶어 상태만 적는다.
-            (BOARD_READY && shown("storyboard")
-              ? secBoard(x[4].data) + secCuts(x[3].data, x[4].data)
-              : (shown("develop") ? secDesigning() : "")) +
-            // 전략(인사이트·강점·톤)은 내부 판단 기록이라 내보내지 않는다
-            secBrief(x[0].data, MINE && canEditBrief(P)) +
-            secFiles(x[4].data) +
+            secGate(P, x[5].data) + flow(x) +
             '<footer><span><a href="index.html">← 목록</a></span>' +
             '<span class="mono">' + new Date().toISOString().slice(0, 16).replace("T", " ") +
             "</span></footer>";

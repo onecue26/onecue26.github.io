@@ -44,6 +44,12 @@
       delivered_note: row.delivered_note || "",
       client_summary: row.client_summary || "",
       plain_language_ok: !!row.plain_language_ok,
+      // 상태기계가 보는 네 가지 시각. 없으면 null 이고, null 은 「아직 안 했다」다.
+      chosen_at: row.chosen_at || null,
+      started_at: row.started_at || null,
+      approved_at: row.approved_at || null,
+      revision_at: row.revision_at || null,
+      revision_note: row.revision_note || "",
     };
   }
 
@@ -115,6 +121,55 @@
     return {
       assignee: pick.assignee,
       state: waiting(project, project.step) ? "waiting" : pick.state,
+    };
+  }
+
+  // ── 한 단계가 지나는 여섯 자리 ──────────────────────────────────────────────
+  //
+  // 지금까지 이 화면은 선택·실행·결과·검수·단계 이동을 한꺼번에 펼쳐 놓았다.
+  // 그래서 지금 무엇을 해야 하는지가 보이지 않았다. 한 단계는 순서가 있고,
+  // 그 순서의 어디에 있느냐가 화면에 무엇이 뜰지를 혼자 정한다.
+  //
+  //   upcoming  아직 오지 않은 단계        — 접힌다. 버튼 없음
+  //   choose    누가 맡을지 아직 안 골랐다  — AI / 사람 두 갈래만
+  //   start     골랐다, 아직 시작 안 했다   — 시작 버튼 하나.
+  //             ★ 고르는 것만으로 작업이 만들어지지 않는다. 눌러야 만들어진다
+  //   working   시작했다, 결과가 없다      — 누가·언제·무슨 상태. 버튼 없음
+  //   review    결과가 왔다, 승인 전       — 승인 / 수정 요청 둘
+  //   approved  승인했다                  — 다음 단계로 이동 하나
+  //   past      지나간 단계               — 한 줄 이력
+  //
+  // 결과가 없으면 승인도 수정도 다음 단계도 없다. 결과 없는 검수 버튼은
+  // 누를 것이 없는 버튼이고, 누를 것이 없는 버튼은 화면을 못 믿게 만든다.
+  function phase(project, step, hasResult) {
+    if (!project || index(step) < 0) return "upcoming";
+    if (index(step) < index(project.step)) return "past";
+    if (index(step) > index(project.step)) return "upcoming";
+    var pick = of(project, step);
+    if (hasResult) return pick.approved_at ? "approved" : "review";
+    if (!pick.chosen_at) return "choose";
+    // 시작의 증거는 둘 중 하나다 — AI 는 만들어진 작업, 사람은 시작 시각.
+    // 작업 큐에 지금 이 단계가 돌고 있으면 그것도 시작이다(기록보다 현실이 먼저다).
+    var running = !!(project.job && project.job.step === step);
+    var started = pick.mode === "human"
+      ? !!pick.started_at
+      : (!!pick.ai_job_id || running);
+    return started ? "working" : "start";
+  }
+
+  // 그 자리에서 **실제로 눌리는 것**. 화면이 이 표를 보고 그린다.
+  // 숫자가 아니라 이름으로 둔다 — 테스트가 「승인 1개」가 아니라
+  // 「승인이 있고 수정이 있고 다음 단계는 없다」를 잡아야 한다.
+  function actions(project, step, hasResult) {
+    var at = phase(project, step, hasResult);
+    return {
+      phase: at,
+      chooseAi: at === "choose",
+      chooseHuman: at === "choose" && humanAllowed(step),
+      start: at === "start",
+      approve: at === "review",
+      revise: at === "review",
+      next: at === "approved" && !!nextStep(step),
     };
   }
 
@@ -472,7 +527,7 @@
     of: of, isHuman: isHuman, performer: performer, reviewer: reviewer,
     editable: editable, waiting: waiting, canDeliver: canDeliver,
     queuesAi: queuesAi, currentHolder: currentHolder, byProject: byProject,
-    status: status, jargon: jargon,
+    status: status, phase: phase, actions: actions, jargon: jargon,
     contract: contract, contractReady: contractReady, fields: fields,
     textRule: textRule, lines: lines, checkForm: checkForm, checkText: checkText,
     humanAllowed: humanAllowed, HUMAN_BLOCKED: HUMAN_BLOCKED,
