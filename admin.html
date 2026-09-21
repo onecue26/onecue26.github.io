@@ -64,10 +64,12 @@
 .replan-box small,.replan-box span{grid-column:1/-1;color:var(--muted);font-size:11.5px}
 .replan-box.busy{display:block;border-color:var(--hold)}
 .replan-box.busy span{display:block;margin-top:3px}
-.executor-line{margin:10px 0 14px;padding:9px 11px;border-left:3px solid var(--cue);background:var(--sunk);
-  display:grid;grid-template-columns:auto minmax(0,1fr) auto minmax(0,1fr);gap:4px 10px;align-items:center}
-.executor-line span{font-size:11px;color:var(--muted);font-weight:700}.executor-line b{font-size:12px;overflow-wrap:anywhere}
-@media(max-width:700px){.executor-line{grid-template-columns:auto 1fr}}
+.executor-history{margin:10px 0 14px;padding:10px 12px;border-left:3px solid var(--cue);background:var(--sunk)}
+.executor-history>strong{display:block;margin-bottom:7px;font-size:12px}.executor-history.empty>span{font-size:12px;color:var(--muted)}
+.executor-step{display:grid;grid-template-columns:minmax(110px,.7fr) minmax(0,1.15fr) minmax(0,1.15fr);
+  gap:6px 12px;padding:6px 0;border-top:1px solid var(--rule);align-items:start}
+.executor-step span{font-size:11px;color:var(--muted);font-weight:700}.executor-step b{font-size:12px;overflow-wrap:anywhere}
+@media(max-width:700px){.executor-step{grid-template-columns:1fr}.executor-step span{margin-top:2px}}
 /* 재기획 범위 — 전체인지 고른 것만인지. 고르지 않은 안은 건드리지 않는다 */
 .replan-scope,.replan-keys{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
 .replan-scope label,.replan-pick{display:inline-flex;align-items:center;gap:5px;font-size:13px;cursor:pointer}
@@ -227,6 +229,6 @@
 <script src="config.js?v=d4d97baa"></script>
 <script src="auth.js?v=fa839557"></script>
 <script src="asset-access.js"></script>
-<script src="admin.js?v=executor-display-2"></script>
+<script src="admin.js?v=executor-history-2"></script>
 </body>
 </html>
