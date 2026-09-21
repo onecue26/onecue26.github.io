@@ -155,6 +155,29 @@
   // 단계(구성·각본)가 정하는 것이고, 여기서 미리 못을 박으면 두 단계가 같은 말을
   // 두 번 하면서 서로 어긋난다. 그래서 고를 때 필요한 만큼만 — 처음·가운데·끝
   // 세 덩이로 묶어 시간 없이 보여 준다. 원문은 지우지 않고 아래 접힘에 남긴다.
+  // ── 제작 지시가 섞인 문장인가 ───────────────────────────────────────────────
+  // RUSH 콘셉트 본문에는 "카메라는 한 번도 움직이지 않고", "0.4초 정지 비트를 둬
+  // 480p에서 형태가 읽히게 한다" 같은 문장이 섞여 있다. 콘셉트 단계가 말하면 안
+  // 되는 것들인데(단계 계약 v1 §4), 이미 쓰인 글이라 지울 수 없다.
+  //
+  // 낱말만 지우면 문장이 부서져 **우리가 쓰지 않은 말**이 된다. 그래서 고치지
+  // 않고 **내보내지 않는다.** 광고주에게는 안전한 칸만 남기고, 관리자 화면에는
+  // 원문이 그대로 있다. 원문을 광고주용으로 다시 쓰는 것은 사람이 할 일이다.
+  var PRODUCTION_WORDS =
+    /(카메라|렌즈|화각|컷|프레임|합성|팩샷|와이프|비트|480p|720p|해상도|생성|모델|전환)/;
+  function isProductionTalk(s) {
+    var t = text(s);
+    return PRODUCTION_WORDS.test(t) || /\d+(?:\.\d+)?\s*초/.test(t);
+  }
+
+  // 안전하면 공통 칸으로, 제작 지시가 섞였으면 관리자 블록으로. 같은 html 이
+  // 어느 쪽에 놓이느냐만 달라진다 — 글자는 한 자도 고치지 않는다.
+  function guard(cls, head, html, source, opts) {
+    if (!html) return "";
+    return isProductionTalk(source) ? extra(opts, part(cls, head, html))
+                                    : part(cls, head, html);
+  }
+
   function coarseFlow(steps) {
     if (!steps || !steps.length) return "";
     var names = ["처음", "가운데", "끝"];
@@ -197,6 +220,7 @@
   // 관리자 추가 — 주의점
   function concept(c, opts) {
     var row = c || {};
+    var admin = isAdmin(opts);
     var flow = timeline(row.body);
     var idea = paragraphs(flow.lead, "concept-lead");
     var production = flow.production
@@ -220,11 +244,25 @@
       '<header class="cc-head"><span class="k">' + esc(text(row.key)) + "안" +
         (has(row.axis) ? " <em>" + esc(text(row.axis)) + "</em>" : "") + "</span>" +
         '<span class="t">' + esc(text(row.title)) + "</span></header>" +
-      part("idea", "핵심 아이디어", idea || "") +
-      part("flow", "대략의 흐름", coarseFlow(flow.steps)) +
-      part("hook", "첫 장면", has(row.hook) ? "<span>" + esc(text(row.hook)) + "</span>" : "") +
-      part("pay", "이렇게 끝난다",
-        has(row.payoff) ? "<span>" + esc(text(row.payoff)) + "</span>" : "") +
+      // 제작 지시가 섞인 칸은 **관리자 쪽으로 옮긴다.** 지우거나 낱말만 도려내면
+      // 우리가 쓰지 않은 문장이 되고, 광고주 화면에서만 빼면 「관리자 = 광고주 +
+      // 덧붙임」이라는 이 파일의 전제가 깨진다. 옮기면 둘 다 지켜진다 —
+      // 표식을 벗기면 광고주 출력이 그대로 나온다.
+      guard("idea", "핵심 아이디어", idea, flow.lead, opts) +
+      guard("flow", "대략의 흐름", coarseFlow(flow.steps),
+        flow.steps.map(function (s) { return s.what; }).join(" "), opts) +
+      guard("hook", "첫 장면",
+        has(row.hook) ? "<span>" + esc(text(row.hook)) + "</span>" : "", row.hook, opts) +
+      guard("pay", "이렇게 끝난다",
+        has(row.payoff) ? "<span>" + esc(text(row.payoff)) + "</span>" : "", row.payoff, opts) +
+      // 옮겨진 칸이 있으면 왜 비어 있는지 적는다. 빈 자리는 「아직 안 만들었다」로
+      // 읽히지만 실제로는 「광고주가 읽을 말로 다시 써야 한다」이다. 두 역할이
+      // 같이 본다 — 관리자도 이 카드가 손봐야 할 카드임을 알아야 한다.
+      (isProductionTalk(row.body)
+        ? '<div class="cc-part pending"><b>정리 중</b><span>' +
+          esc("이 방향의 설명에 제작 지시가 섞여 있어, 보시기 좋은 말로 다시 정리하고 있습니다.") +
+          "</span></div>"
+        : "") +
       // 위 넷(발상·흐름·첫 장면·착지)이 고를 때 쓰는 값이다. 아래 접힘은 하나를
       // 정하고 나서 파고드는 값이라 **관리자만** 본다 — 제작 사양·위험·초 단위
       // 원문이 들어간다. 콘셉트 단계에서 초와 컷수는 아직 정해진 값도 아니다.
