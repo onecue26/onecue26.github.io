@@ -1424,6 +1424,23 @@
             { p_asset_id: b.dataset.asset, p_approved: true })
             .then(load).catch(fail(b, msg));
         }
+        // 전송은 되돌릴 수 있는 일이 아니다 — 누르는 순간 광고주 화면에 뜬다.
+        // 그래서 한 번 묻는다. 「취소」는 반대로 내리는 일이라 묻지 않는다.
+        if (what === "send") {
+          if (!window.confirm("콘티를 광고주에게 보냅니다. 보내면 광고주 화면에 바로 뜹니다.")) {
+            b.disabled = false;
+            return;
+          }
+          return rpc(slug, "onecue_board_send", {}).then(load).catch(fail(b, msg));
+        }
+        if (what === "back") {
+          // 전 단계로 돌아가는 일은 **내리는 일까지**가 한 벌이다. 보낸 뒤에
+          // 고치기로 해 놓고 옛 콘티가 광고주 화면에 남아 있으면, 광고주는
+          // 이미 없는 것을 보고 말한다.
+          return rpc(slug, "onecue_board_unsend", {})
+            .then(function () { return stageRevise(slug, step, text || "완성 콘티를 다시 봅니다"); })
+            .then(load).catch(fail(b, msg));
+        }
         var call = what === "choose-ai" ? chooseStageExecutor(slug, step, "ai", "", "")
           : what === "rechoose" ? clearStageChoice(slug, step)
           : what === "start" ? stageStart(slug, step)

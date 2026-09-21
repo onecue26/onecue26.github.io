@@ -768,7 +768,13 @@
           HAS_FINAL = (x[4].data || []).some(function (a) { return a.kind === "final" && a.approved === true && a.url; });
           // 콘티 그림이 한 장이라도 있는가. 이 한 값이 콘티 구간 전체(승인 요청 ·
           // 시트 · 컷)를 연다. 컷 표만 있는 상태는 「콘티」가 아니라 컷 설계다.
-          BOARD_READY = (x[4].data || []).some(function (a) { return a.kind === "board"; });
+          // ★ 「있는가」가 아니라 「보내졌는가」다. 전에는 board 자산이 있기만 하면
+          //   열렸다. 그래서 승인도 전송도 안 한 콘티가 광고주 화면에 떴다.
+          //   이제 서버(RLS)가 승인 안 된 board 를 아예 안 내주지만, 화면도
+          //   같은 조건으로 판단한다 — 한 곳만 믿으면 그 한 곳이 틀리는 날 샌다.
+          BOARD_READY = (x[4].data || []).some(function (a) {
+            return a.kind === "board" && a.approved === true;
+          });
           var title = P.product || P.brand || P.slug;
           var brand = P.brand && P.product
             ? '<div class="brand-name"><span>브랜드</span>' + esc(P.brand) + '</div>'
