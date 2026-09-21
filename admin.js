@@ -98,7 +98,7 @@
     return "AI 또는 지정 담당자";
   }
 
-  function flow(p) {
+  function flow(p, bodies) {
     var current = FLOW.map(function (x) { return x.key; }).indexOf(p.step);
     var history = p.aiHistory || [];
     function stageAi(key) {
@@ -110,6 +110,7 @@
         var status = i < current ? "done" : (i === current ? "current" : "upcoming");
         var marker = i < current ? "완료" : (i === current ? "현재" : (i + 1));
         var h = stageAi(s.key), ai = h && h.executor ? h.executor : null;
+        var version = (p.aiVersions && p.aiVersions[s.key]) || (h ? 1 : 0);
         var worker = ai ? [ai.executor_provider, ai.executor_model].filter(Boolean).join(" · ") : "기록 없음";
         var reviewer = ai && ai.reviewer_model
           ? (ai.reviewer_model === ai.executor_model ? "동일 AI 자체 검토"
@@ -122,6 +123,7 @@
         var updated = i === current && p.aiNeedsReview && h;
         var badge = working ? '<em class="ai-update working">AI 재작업 중</em>'
           : (updated ? '<em class="ai-update done">NEW · 업데이트 완료</em>' : '');
+        var versionBadge = version ? '<em class="stage-version">v' + version + '</em>' : '';
         if (status === "upcoming") {
           return '<div class="flow-step upcoming"><div class="flow-summary"><span class="flow-marker">' +
             marker + '</span><strong>' + esc(STEP_NAME[s.key]) + '</strong><small>' + esc(s.owner) +
@@ -129,11 +131,22 @@
         }
         return '<details class="flow-step ' + status + '"' + (status === "current" ? ' open' : '') + '>' +
           '<summary class="flow-summary"><span class="flow-marker">' + marker + '</span><strong>' +
-          esc(STEP_NAME[s.key]) + '</strong>' + badge + '<small>' + esc(s.owner) + '</small></summary>' +
+          esc(STEP_NAME[s.key]) + '</strong>' + versionBadge + badge + '<small>' + esc(s.owner) + '</small></summary>' +
           '<div class="flow-detail"><span>수행 AI · ' + esc(worker) + '</span><span>검토 AI · ' +
           esc(reviewer) + '</span>' + findingText +
-          (status === "current" ? '<b>현재 단계입니다. 위 상세 내용을 확인하세요.</b>' : '') + '</div></details>';
+          (bodies[s.key] || '<p class="stage-empty">저장된 상세 내용이 없습니다.</p>') + '</div></details>';
       }).join("") + '</div></div>';
+  }
+
+  function readable(value) {
+    if (value == null || value === "") return "입력 없음";
+    if (Array.isArray(value)) return value.map(readable).join(" · ");
+    if (typeof value === "object") {
+      return Object.keys(value).map(function (key) {
+        return key + " · " + readable(value[key]);
+      }).join(" / ");
+    }
+    return String(value);
   }
 
   // ── 회신 문구 ─────────────────────────────────────────────────────────────
@@ -402,6 +415,35 @@
         "</span>" + esc(p.redo.note || "") + "</div>"
       : "";
 
+    var factsBody = p.facts
+      ? '<div class="stage-content"><dl class="stage-data">' +
+        '<dt>확인된 사실</dt><dd>' + esc(readable(p.facts.facts)) + '</dd>' +
+        '<dt>제품 잠금</dt><dd>' + esc(readable(p.facts.product_lock)) + '</dd>' +
+        '<dt>표기 문구</dt><dd>' + esc(readable(p.facts.label_text)) + '</dd>' +
+        '<dt>사용 가능한 주장</dt><dd>' + esc(readable(p.facts.claims)) + '</dd>' +
+        (p.facts.device_note ? '<dt>제작 메모</dt><dd>' + esc(p.facts.device_note) + '</dd>' : '') +
+        '</dl>' + files + '</div>'
+      : '<p class="stage-empty">제품 자료는 등록됐지만 정리된 확인 내용이 없습니다.</p>' + files;
+    var strategyBody = p.strategy
+      ? '<div class="stage-content"><dl class="stage-data">' +
+        '<dt>인사이트</dt><dd>' + esc(readable(p.strategy.insight)) + '</dd>' +
+        '<dt>핵심 메시지</dt><dd>' + esc(readable(p.strategy.one_message)) + '</dd>' +
+        '<dt>USP</dt><dd>' + esc(readable(p.strategy.usp)) + '</dd>' +
+        '<dt>톤</dt><dd>' + esc(readable(p.strategy.tone)) + '</dd>' +
+        '</dl></div>'
+      : '<p class="stage-empty">저장된 전략 설계 내용이 없습니다.</p>';
+    var stageBodies = {
+      brief: '<div class="stage-content">' + said + requirements + '</div>',
+      facts: factsBody,
+      strategy: strategyBody,
+      concepts: conceptReview + check,
+      develop: p.step === "develop" ? productionAction : "",
+      storyboard: p.step === "storyboard" ? productionAction : "",
+      anchors: p.step === "anchors" ? productionAction : "",
+      video: p.step === "video" ? productionAction : "",
+      deliver: p.step === "deliver" ? productionAction : ""
+    };
+
     return '<div class="wrk' + (isNew ? " fresh" : "") + '">' +
       '<div class="top"><div>' +
       '<div class="name">' + (isNew ? '<span class="new">NEW</span>' : "") +
@@ -418,13 +460,9 @@
         : "") +
       '<a class="btn ghost" href="' + esc(siteUrl(p.slug)) +
       '" target="_blank" rel="noopener">광고주 화면 ↗</a></div></div>' +
-      redo + said + requirements + conceptReview + check + who +
+      redo + who +
       '<div class="mailbox" id="mail-' + esc(p.slug) + '" hidden></div>' +
-      files +
-      flow(p) +
-      '<div class="steps production-progress"><span class="lbl">제작 진행</span>' +
-      '<strong class="current-step">' + esc(STEP_NAME[p.step] || p.step) + '</strong>' +
-      productionAction + "</div></div>";
+      flow(p, stageBodies) + "</div>";
   }
 
   function render() {
@@ -655,7 +693,10 @@
           db.from("events").select("project_id,kind,to_step,ts,payload")
             .in("kind", ["production_enroll_requested", "production_enrolled", "astra_draft"])
             .in("project_id", ids).order("ts", { ascending: false }),
-          db.from("strategies").select("project_id,insight,one_message").in("project_id", ids),
+          db.from("product_facts").select("project_id,facts,label_text,claims,product_lock,device_note")
+            .in("project_id", ids),
+          db.from("strategies").select("project_id,insight,insight_flip,usp,one_message,tone")
+            .in("project_id", ids),
           db.from("concepts").select("project_id,key,title,body,hook,visual,risk,is_recommended,reco_reason")
             .in("project_id", ids),
           db.from("jobs").select("project_id,response,finished_at").eq("state", "ok")
@@ -674,9 +715,10 @@
           var revises = out[5].data || [];
           var sents = out[6].data || [];
           var enrollEvents = out[7].data || [];
-          var strategies = out[8].data || [];
-          var concepts = out[9].data || [];
-          var completedJobs = out[10].data || [];
+          var productFacts = out[8].data || [];
+          var strategies = out[9].data || [];
+          var concepts = out[10].data || [];
+          var completedJobs = out[11].data || [];
 
           ROWS.forEach(function (p) {
             counts.forEach(function (t, i) {
@@ -710,8 +752,15 @@
             p.productionEnrolled = enrollEvents.filter(function (e) {
               return e.project_id === p.id && e.kind === "production_enrolled";
             })[0] || null;
+            p.facts = productFacts.filter(function (f) { return f.project_id === p.id; })[0] || null;
             p.strategy = strategies.filter(function (s) { return s.project_id === p.id; })[0] || null;
             p.concepts = concepts.filter(function (c) { return c.project_id === p.id; });
+            p.aiVersions = {};
+            enrollEvents.forEach(function (e) {
+              if (e.project_id !== p.id || e.kind !== "astra_draft" || !e.payload || !e.payload.executor) return;
+              var versionStep = e.to_step || e.payload.target || "unknown";
+              p.aiVersions[versionStep] = (p.aiVersions[versionStep] || 0) + 1;
+            });
             var seenAiSteps = {};
             p.aiHistory = enrollEvents.filter(function (e) {
               if (e.project_id !== p.id || e.kind !== "astra_draft" ||
