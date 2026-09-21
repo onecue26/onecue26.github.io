@@ -141,6 +141,75 @@
   //
   // 결과가 없으면 승인도 수정도 다음 단계도 없다. 결과 없는 검수 버튼은
   // 누를 것이 없는 버튼이고, 누를 것이 없는 버튼은 화면을 못 믿게 만든다.
+  // ── 콘티는 두 겹이다 ───────────────────────────────────────────────────────
+  //
+  // 글로 된 컷 설계와 그림은 만드는 사람도 다르고(글은 AI 나 작업자, 그림은 시스템)
+  // 검수 시점도 다르다. 한 겹으로 뭉뚱그려 놓으니 순서가 보이지 않았다.
+  // 절차 정본: agency_site/db/stage_storyboard_flow.md (Dan 지시 2026-09-21)
+  //
+  //   design.*  컷 설계(글) — 고르기 → 시작 → 작업 중 → 검수
+  //   board.*   콘티 그림   — 뽑기 → 뽑는 중 → 검수
+  //   final.*   완성 콘티   — 보고 또 고치거나, 승인하면 전송 버튼이 뜬다
+  //
+  // 가장 최근 판단만 본다. 기록은 쌓이지만 지금 상태는 마지막 한 줄이다.
+  function lastReview(project, layer, cut) {
+    var rows = (project && project.reviews) || [];
+    var want = cut == null ? null : Number(cut);
+    var best = null;
+    for (var i = 0; i < rows.length; i++) {
+      var r = rows[i];
+      if (r.layer !== layer) continue;
+      var rn = r.cut_n == null ? null : Number(r.cut_n);
+      if (rn !== want) continue;
+      if (!best || String(r.decided_at) > String(best.decided_at)) best = r;
+    }
+    return best;
+  }
+
+  function approved(project, layer, cut) {
+    var r = lastReview(project, layer, cut);
+    return !!(r && r.decision === "ok");
+  }
+
+  function boardPhase(project, counts) {
+    var c = counts || {};
+    // ① 글 — 여기서부터 시작한다. 컷이 없으면 아직 아무것도 없다.
+    var pick = of(project, "storyboard");
+    if (!c.cuts) {
+      if (!pick.chosen_at) return "design.choose";
+      var running = !!(project.job && project.job.step === "storyboard");
+      var started = pick.mode === "human" ? !!pick.started_at
+        : (!!pick.ai_job_id || running);
+      return started ? "design.working" : "design.start";
+    }
+    if (!approved(project, "design", null)) return "design.review";
+    // ② 그림 — 글이 통과해야 뽑는다. 승인 안 된 글로 뽑으면 다시 뽑게 된다.
+    if (!c.board) return c.boardRunning ? "board.working" : "board.make";
+    if (!approved(project, "board", null)) return "board.review";
+    // ③ 완성 — 보고 또 고칠 수 있다. 승인해야 전송이 뜬다.
+    return approved(project, "final", null) ? "final.sent" : "final.review";
+  }
+
+  // 그 자리에서 눌리는 것. 화면은 이 표를 그리기만 한다.
+  function boardActions(project, counts) {
+    var at = boardPhase(project, counts);
+    var layer = at.split(".")[0];
+    return {
+      phase: at,
+      layer: layer,
+      chooseAi: at === "design.choose",
+      chooseHuman: at === "design.choose" && humanAllowed("storyboard"),
+      start: at === "design.start",
+      // 그림 뽑기는 돈이 나가는 자리다. 버튼은 만들되 누르는 때는 Dan 이 정한다.
+      make: at === "board.make",
+      // 검수는 겹마다 있고, 컷마다도 있다
+      review: at === "design.review" || at === "board.review" || at === "final.review",
+      perCut: at === "design.review" || at === "board.review",
+      send: at === "final.sent",
+      cancel: at === "final.review" || at === "final.sent",
+    };
+  }
+
   function phase(project, step, hasResult) {
     if (!project || index(step) < 0) return "upcoming";
     if (index(step) < index(project.step)) return "past";
@@ -530,7 +599,9 @@
     of: of, isHuman: isHuman, performer: performer, reviewer: reviewer,
     editable: editable, waiting: waiting, canDeliver: canDeliver,
     queuesAi: queuesAi, currentHolder: currentHolder, byProject: byProject,
-    status: status, phase: phase, actions: actions, jargon: jargon,
+    status: status, phase: phase, actions: actions,
+    boardPhase: boardPhase, boardActions: boardActions,
+    lastReview: lastReview, approved: approved, jargon: jargon,
     contract: contract, contractReady: contractReady, fields: fields,
     textRule: textRule, lines: lines, checkForm: checkForm, checkText: checkText,
     humanAllowed: humanAllowed, HUMAN_BLOCKED: HUMAN_BLOCKED,
