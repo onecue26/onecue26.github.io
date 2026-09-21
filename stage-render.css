@@ -87,3 +87,22 @@
   .cut .cut-row { grid-template-columns: 1fr; gap: 3px; }
   .cut .cut-row > b { padding-top: 0; }
 }
+
+/* ── 좁은 칸에서는 라벨 칸을 접는다 ─────────────────────────────────────────
+   기준은 화면 폭이 아니라 **그 글이 실제로 들어앉는 칸의 폭**이다.
+   관리자 콘셉트 목록은 repeat(auto-fit, minmax(240px, 1fr)) 격자라 화면이
+   1280px 이어도 카드 한 장은 240px 다. 화면 폭으로 판단하면 아래 collapse 가
+   영영 걸리지 않아, 66px 짜리 시간 라벨이 자리를 먹고 본문이 열 글자씩 끊긴다.
+   실제로 A·C안이 그렇게 보였다. 아래 @media 는 컨테이너 쿼리가 없는 구형
+   브라우저용 보루로 남겨 둔다. */
+.cc, .cut, .stage-read { container-type: inline-size; }
+
+@container (max-width: 440px) {
+  .concept-timeline li,
+  .concept-production,
+  .stage-seq li,
+  .cut .cut-row { grid-template-columns: minmax(0, 1fr); gap: 3px; }
+  .concept-timeline li b,
+  .stage-seq li b,
+  .cut .cut-row > b { padding-top: 0; }
+}
