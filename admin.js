@@ -251,26 +251,38 @@
     var offLabel = pickable.reason === "out_of_scope"
       ? "이번 범위 아님 · 아직 고를 수 없습니다"
       : "권장하지 않음 · 이번 버전에서는 고를 수 없습니다";
-    return '<div class="exec-pick" data-exec-form' + tag + '>' +
-      '<b>이 단계를 누가 맡습니까(실행 주체)</b>' +
-      '<div class="exec-modes">' +
-      '<label><input type="radio" name="' + esc(name) + '" data-exec-mode value="ai"' +
-      (human ? "" : " checked") + '><span>AI 진행 <small>기존 작업 큐로 등록</small></span></label>' +
-      '<label' + (personOk ? "" : ' class="exec-mode-off"') +
-      '><input type="radio" name="' + esc(name) + '" data-exec-mode value="human"' +
-      (human ? " checked" : "") + (personOk ? "" : " disabled") +
-      '><span>담당자 진행 <small>' +
-      (personOk ? "사람이 결과를 올릴 때까지 대기" : offLabel) + '</small></span></label>' +
-      '</div>' +
-      (personOk ? "" : '<small class="exec-blocked">' + esc(pickable.note) + '</small>') +
-      '<label class="exec-field"><span>담당자 이름</span>' +
+    // 고를 것은 둘 중 하나뿐인데 화면에는 라디오 둘 · 못 누르는 항목 · 그 이유 ·
+    // 이름 칸 · 검토 AI 칸 · 저장 단추 · 안내문이 한꺼번에 서 있었다. 정작 지금
+    // 할 일(둘 중 하나 누르고 저장)이 그 사이에 묻힌다.
+    // 그래서 **지금 누를 수 있는 것만** 위에 두고, 못 고르는 항목과 그 이유,
+    // 자주 안 건드리는 칸은 접는다. 입력 칸은 DOM 에서 빼지 않는다 — 저장
+    // 처리기가 data-exec-* 로 그대로 찾아 쓴다.
+    var modes = '<label><input type="radio" name="' + esc(name) + '" data-exec-mode value="ai"' +
+      (human ? "" : " checked") + '><span>AI 진행</span></label>' +
+      (personOk
+        ? '<label><input type="radio" name="' + esc(name) + '" data-exec-mode value="human"' +
+          (human ? " checked" : "") + '><span>담당자 진행</span></label>'
+        : "");
+    var nameField = '<label class="exec-field"><span>담당자 이름</span>' +
       '<input type="text" data-exec-name maxlength="80" value="' + esc(pick.assignee) +
-      '" placeholder="담당자 진행일 때만 필요합니다"></label>' +
-      '<label class="exec-field"><span>결과를 검토하는 AI(핵심 검토 AI)</span>' +
+      '" placeholder="담당자 진행일 때만 필요합니다"></label>';
+    var reviewerField = '<label class="exec-field"><span>결과를 검토하는 AI(핵심 검토 AI)</span>' +
       '<input type="text" data-exec-reviewer maxlength="120" value="' + esc(pick.reviewer_model) +
-      '" placeholder="예 · anthropic claude-fable-5-1"></label>' +
-      '<button class="btn ghost" type="button" data-exec-save' + tag + '>누가 맡는지 저장(실행 주체)</button>' +
+      '" placeholder="예 · anthropic claude-fable-5-1"></label>';
+    var folded = (personOk ? "" :
+        '<p class="exec-blocked"><b>담당자 진행 — ' + esc(offLabel) + '</b>' +
+        '<span>' + esc(pickable.note) + '</span></p>') +
+      (personOk ? nameField : "") + reviewerField +
       '<small>비워 두면 AI 진행입니다. 이미 시작된 AI 작업이 있으면 담당자로 바꿀 수 없습니다.</small>' +
+      (personOk ? "" : nameField);
+    return '<div class="exec-pick" data-exec-form' + tag + '>' +
+      '<div class="exec-line">' +
+      '<b>누가 맡습니까</b>' +
+      '<div class="exec-modes">' + modes + '</div>' +
+      '<button class="btn ghost" type="button" data-exec-save' + tag + '>저장</button>' +
+      '</div>' +
+      '<details class="exec-more"><summary>검토 AI · 담당자 설정</summary>' +
+      folded + '</details>' +
       '</div>';
   }
 
@@ -410,10 +422,19 @@
         var working = i === current && p.job && p.job.step === s.key;
         var updated = i === current && p.aiNeedsReview && h;
         var needsPick = SE().awaitingChoice(p, s.key);
+        // ★ 콘티는 그림이 나와야 끝난 것이다. 컷 표가 등록됐다고 「업데이트 완료」를
+        //   달면, 바로 아래 본문의 「시각 콘티 미제작」과 정면으로 어긋난다. 머리와
+        //   본문이 서로 다른 말을 하면 둘 다 못 믿게 된다 — 머리를 본문에 맞춘다.
+        var boardMissing = s.key === BOARD_REVIEW_STAGE &&
+          !(p.files || []).some(function (f) { return f.kind === "board"; });
         var badge = needsPick ? '<em class="ai-update choice">실행 주체 선택 대기</em>'
           : (waitingHere ? '<em class="ai-update working">담당자 결과 대기</em>'
           : (working ? '<em class="ai-update working">AI 재작업 중</em>'
-          : (updated ? '<em class="ai-update done">NEW · 업데이트 완료</em>' : '')));
+          : (updated
+            ? (boardMissing
+              ? '<em class="ai-update working">콘티 준비 중</em>'
+              : '<em class="ai-update done">NEW · 업데이트 완료</em>')
+            : '')));
         var personBadge = pick.mode === "human"
           ? '<em class="stage-person">담당자 ' + esc(pick.assignee || "미지정") +
             (pick.state === "delivered" ? " · 등록 완료" : "") + '</em>' : '';
@@ -816,8 +837,11 @@
     function boardLink(key) {
       if (p.step !== key) return "";
       if (!(p.cuts && p.cuts.length) && !p.n_cuts) return "";
+      // 그림이 없는데 「콘티 검수」라고 적으면 눌러 본 사람이 컷 표만 만난다.
+      // 검수할 것이 아직 없으면 이름도 그렇게 적는다.
+      var label = (boardSheet || boardPanels) ? "콘티 검수" : "컷 설계 보기";
       return '<div class="ways stage-ways"><a class="btn ghost" href="board.html?slug=' +
-        encodeURIComponent(p.slug) + '">콘티 검수</a></div>';
+        encodeURIComponent(p.slug) + '">' + label + '</a></div>';
     }
 
     var stageBodies = {
