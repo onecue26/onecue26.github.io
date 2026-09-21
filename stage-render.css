@@ -1,0 +1,89 @@
+/* onecue — 단계별 읽기 렌더 공용 스타일
+ *
+ * shared-stage-renderers.js 가 내는 마크업 하나에 붙는 하나의 스타일이다.
+ * 페이지마다 따로 만들지 않는다 — admin.html 과 project.html 이 같은 파일을 읽는다.
+ * 색과 간격 변수는 style.css 가 이미 정의한 것을 그대로 쓴다.
+ *
+ * 세로 목록이 기본이다. 한 줄에 쉼표로 이어 붙이는 표시는 여기 없다.
+ * 360px 에서도 가로로 넘치지 않는다 — 좁아지면 시간 칸이 위로 접힌다.
+ */
+
+.stage-read { display: grid; gap: 14px; min-width: 0; }
+.stage-read .stage-block { display: grid; gap: 7px; min-width: 0; }
+.stage-read .stage-block > h4 {
+  margin: 0; font-size: 11.5px; font-weight: 700; letter-spacing: .04em;
+  color: var(--faint); font-family: "JetBrains Mono", monospace;
+  overflow-wrap: anywhere;
+}
+.stage-read .stage-block > p {
+  margin: 0; font-size: 14px; line-height: 1.75; color: var(--ink);
+  overflow-wrap: anywhere; word-break: keep-all;
+}
+.stage-read .stage-block.slogan > p b { color: var(--cue); }
+
+/* 시간 구간별 세로 목록 — 구간이 왼쪽, 내용이 오른쪽. 좁으면 위아래로 접힌다 */
+.stage-seq { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; min-width: 0; }
+.stage-seq li {
+  display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 12px;
+  padding: 9px 0; border-top: 1px solid var(--rule); min-width: 0;
+}
+.stage-seq li:first-child { border-top: 0; }
+.stage-seq li b {
+  font-family: "JetBrains Mono", monospace; font-size: 11.5px; color: var(--cue);
+  padding-top: 2px; overflow-wrap: anywhere;
+}
+.stage-seq li span {
+  font-size: 14px; line-height: 1.7; color: var(--ink);
+  overflow-wrap: anywhere; word-break: keep-all;
+}
+
+/* 문구 하나가 한 행 — 여러 개를 쉼표로 잇지 않는다 */
+.stage-lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; min-width: 0; }
+.stage-lines li {
+  background: var(--sunk); border-radius: 7px; padding: 8px 11px; min-width: 0;
+}
+.stage-lines li span {
+  font-size: 13.5px; line-height: 1.65; color: var(--ink);
+  overflow-wrap: anywhere; word-break: keep-all;
+}
+
+.stage-para {
+  margin: 0 0 8px; font-size: 14px; line-height: 1.75; color: var(--ink);
+  overflow-wrap: anywhere; word-break: keep-all;
+}
+.stage-para:last-child { margin-bottom: 0; }
+
+/* 컷 — 행마다 무엇인지 이름이 붙는다 */
+.cut .cut-row {
+  display: grid; grid-template-columns: 62px minmax(0, 1fr); gap: 10px;
+  padding: 6px 0; border-top: 1px solid var(--rule); min-width: 0;
+}
+.cut .cut-row > b {
+  font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--faint);
+  padding-top: 3px; letter-spacing: .03em;
+}
+.cut .cut-row > span {
+  font-size: 13.5px; line-height: 1.65; overflow-wrap: anywhere; word-break: keep-all;
+}
+.cut .cut-row.memo { background: var(--sunk); border-radius: 7px; padding: 7px 9px; }
+.cut-spec { display: flex; flex-wrap: wrap; gap: 4px 10px; margin: 0; min-width: 0; }
+.cut-spec dt {
+  font-size: 10.5px; color: var(--faint); font-family: "JetBrains Mono", monospace;
+  align-self: center;
+}
+.cut-spec dd { margin: 0 8px 0 0; font-size: 13px; overflow-wrap: anywhere; }
+
+/* 접이식 컷 묶음 — 과거 단계는 접고 현재 단계만 펼친다 */
+.stage-cuts > summary {
+  cursor: pointer; padding: 11px 13px; font-size: 13.5px; font-weight: 700;
+  color: var(--muted);
+}
+.stage-cuts[open] > summary { border-bottom: 1px solid var(--rule); }
+.stage-cuts { border: 1px solid var(--rule); border-radius: 11px; background: var(--panel); }
+.stage-cuts > .cuts { padding: 11px; }
+
+@media (max-width: 560px) {
+  .stage-seq li,
+  .cut .cut-row { grid-template-columns: 1fr; gap: 3px; }
+  .cut .cut-row > b { padding-top: 0; }
+}

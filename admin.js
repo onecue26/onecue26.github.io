@@ -37,6 +37,10 @@
   ];
   // 이 단계로 옮기면 광고주가 판단할 차례가 된다
   var GATE = { strategy: "검토", concepts: "선택", storyboard: "승인" };
+  // 콘티(board.html)가 속한 단계. 이름이 이 파일에 적히는 자리는 여기 하나이고,
+  // 그 단계의 본문을 등록할 때도, 콘티 검수 링크를 띄울지 판정할 때도 같은 값을 쓴다.
+  // 그래서 링크가 등록된 곳과 뜨는 곳이 어긋날 수 없다.
+  var BOARD_REVIEW_STAGE = "storyboard";
   var CHANNEL_NAME = {
     youtube: "유튜브", meta: "인스타·페북", tiktok: "틱톡",
     tv: "TV·CTV", web: "웹사이트", ooh: "옥외·매장",
@@ -90,6 +94,7 @@
   function SE() {
     return window.ONECUE_STAGE || {
       ORDER: FLOW.map(function (x) { return x.key; }),
+      index: function () { return -1; },
       of: function () { return { mode: "ai", assignee: "", reviewer_model: "", state: "planned" }; },
       isHuman: function () { return false; },
       performer: function () { return { kind: "ai", label: "기록 없음" }; },
@@ -108,6 +113,12 @@
       humanAllowed: function () { return true; },
       // 폼 계약이 없으면 담당자로 돌릴 수 있는 단계도 없다. 메모만 받는 자리를 열지 않는다
       hasForm: function () { return false; },
+      // 계약을 못 읽었으면 「고를 필요 없음」이라고 말하지 않는다. 모른다고 말한다 —
+      // 그래야 화면이 저장을 막는다(닫히는 쪽으로 실패한다)
+      choiceRequired: function () { return false; },
+      choiceState: function () { return "contract_missing"; },
+      awaitingChoice: function () { return false; },
+      ranBefore: function () { return false; },
       assignable: function () {
         return { ok: false, reason: "contract_missing",
           note: "폼 계약을 불러오지 못했습니다 — 새로고침한 뒤 다시 시도해 주세요" };
@@ -124,6 +135,30 @@
       JARGON: [],
     };
   }
+
+  // 읽기 렌더는 광고주 화면(project.js)과 **같은 모듈**을 쓴다.
+  // 같은 데이터를 화면마다 따로 그리던 것을 없앤다 — 역할만 다르다.
+  // 모듈이 없으면 예전처럼 평범한 글로 떨어진다(화면이 비지 않는다)
+  function R() {
+    return window.ONECUE_RENDER || {
+      concept: function (c) {
+        return '<article class="cc"><header class="cc-head"><span class="k">' +
+          esc((c && c.key) || "") + '안</span><span class="t">' +
+          esc((c && c.title) || "") + "</span></header></article>";
+      },
+      development: function (d) {
+        return '<div class="stage-read development"><p>' +
+          esc(readable(d && d.slogan)) + "</p></div>";
+      },
+      cuts: function () { return ""; },
+      strategy: function (s) {
+        return '<div class="stage-read strategy"><p>' +
+          esc(readable(s && s.one_message)) + "</p></div>";
+      },
+    };
+  }
+  // 관리자 역할 — 공통 구조에 내부 메모·위험 메모·제작 워크플로가 **덧붙는다**
+  var ADMIN = { role: "admin" };
 
   function currentOwner(p) {
     if (p.step === "brief") {
@@ -142,6 +177,57 @@
     if (p.step === "anchors" || p.step === "video") return "제작 관리자";
     if (p.step === "deliver") return "관리자";
     return "AI 또는 지정 담당자";
+  }
+
+  // ── ★ 실행 주체 선택 게이트 (migrate_017) ──────────────────────────────────
+  //
+  // 예전에는 stage_executors 에 줄이 없으면 AI 로 보고 **묻지 않고** 작업 큐에
+  // 올렸다. 이제 고르기 전에는 아무것도 만들지 않는다. 그래서 이 블록이 그 단계
+  // 상세의 **맨 위**에 오고, 답하기 전까지는 다른 것이 눈에 먼저 들어오지 않는다.
+  //
+  // 이 블록은 관리자 화면에만 있다. 광고주 화면(project.js)은 stage_executors 를
+  // 읽지도 않고, 표 자체가 관리자만 읽을 수 있게 막혀 있다(migrate_016 RLS).
+  function choiceGate(p, key) {
+    var s = SE();
+    var state = s.choiceState(p, key);
+    var tag = ' data-slug="' + esc(p.slug) + '" data-step="' + esc(key) + '"';
+    if (state === "legacy_ai") {
+      // 이 기능이 생기기 전에 끝난 단계다. 되돌리지도 다시 돌리지도 않는다 —
+      // 무엇이 있었는지만 적는다
+      return '<div class="choice-note done"' + tag + '>' +
+        '<b>AI 진행 완료(기존 작업)</b>' +
+        '<small>실행 주체를 고르는 기능이 생기기 전에 진행된 단계입니다. ' +
+        '결과는 그대로 두고 수행 기록만 표시합니다.</small></div>';
+    }
+    if (state !== "awaiting") return "";
+    // 이미 지나간 단계에는 묻지 않는다. 기록이 남지 않은 옛 건이라도 되돌리지 않는다
+    if (s.index(key) >= 0 && s.index(key) < s.index(p.step)) return "";
+    var current = p.step === key && p.state === "pending";
+    var pickable = s.assignable(key);
+    if (!current) {
+      // 아직 오지 않은 단계다. 미리 정해 둘 수는 있지만 재촉하지 않는다
+      return '<div class="choice-note ahead"' + tag + '>' +
+        '<b>실행 주체 미정</b><small>이 단계에 들어오면 그때 고르셔도 됩니다. ' +
+        '미리 정해 두면 들어오는 순간 그대로 시작합니다.</small></div>';
+    }
+    return '<div class="choice-gate" data-choice-form' + tag + '>' +
+      '<b>이 단계를 누가 진행할지 먼저 골라 주세요(실행 주체)</b>' +
+      '<small>고르기 전까지 AI 작업 큐에 아무것도 올라가지 않습니다. ' +
+      '이 선택은 관리자만 보며, 광고주 화면에는 나타나지 않습니다.</small>' +
+      '<label class="exec-field"><span>담당자 이름</span>' +
+      '<input type="text" data-choice-name maxlength="80" ' +
+      'placeholder="담당자 진행일 때만 필요합니다"></label>' +
+      '<label class="exec-field"><span>결과를 검토하는 AI(핵심 검토 AI)</span>' +
+      '<input type="text" data-choice-reviewer maxlength="120" ' +
+      'placeholder="예 · anthropic claude-fable-5-1"></label>' +
+      '<div class="choice-actions">' +
+      '<button class="btn" type="button" data-choice="ai"' + tag +
+      '>AI 진행으로 시작</button>' +
+      '<button class="btn ghost" type="button" data-choice="human"' + tag +
+      (pickable.ok ? "" : " disabled") + '>담당자 진행으로 지정</button>' +
+      '</div>' +
+      (pickable.ok ? "" : '<small class="exec-blocked">' + esc(pickable.note) + '</small>') +
+      '<div class="choice-problem" data-choice-problem hidden></div></div>';
   }
 
   // ── 실행 주체 고르기 ───────────────────────────────────────────────────────
@@ -323,9 +409,11 @@
         var waitingHere = SE().waiting(p, s.key);
         var working = i === current && p.job && p.job.step === s.key;
         var updated = i === current && p.aiNeedsReview && h;
-        var badge = waitingHere ? '<em class="ai-update working">담당자 결과 대기</em>'
+        var needsPick = SE().awaitingChoice(p, s.key);
+        var badge = needsPick ? '<em class="ai-update choice">실행 주체 선택 대기</em>'
+          : (waitingHere ? '<em class="ai-update working">담당자 결과 대기</em>'
           : (working ? '<em class="ai-update working">AI 재작업 중</em>'
-          : (updated ? '<em class="ai-update done">NEW · 업데이트 완료</em>' : ''));
+          : (updated ? '<em class="ai-update done">NEW · 업데이트 완료</em>' : '')));
         var personBadge = pick.mode === "human"
           ? '<em class="stage-person">담당자 ' + esc(pick.assignee || "미지정") +
             (pick.state === "delivered" ? " · 등록 완료" : "") + '</em>' : '';
@@ -344,8 +432,11 @@
                 ? '<div class="stage-content delivered-text"><dl class="stage-data">' +
                   '<dt>내부 제작 명세</dt><dd>' + esc(pick.delivered_note) + '</dd></dl></div>' : ''))
           : '';
-        // 아직 오지 않은 단계도 펼칠 수 있어야 한다 — 실행 주체는 미리 정해 두는 것이다
-        var detail = '<div class="flow-detail"><span>수행 · ' + esc(worker) +
+        // 아직 오지 않은 단계도 펼칠 수 있어야 한다 — 실행 주체는 미리 정해 두는 것이다.
+        // ★ 답을 기다리는 단계에서는 선택 블록이 **맨 위**에 온다. 수행·검토 줄보다
+        //   먼저 눈에 들어와야 무엇을 해야 하는지가 바로 읽힌다
+        var detail = '<div class="flow-detail">' + choiceGate(p, s.key) +
+          '<span>수행 · ' + esc(worker) +
           '</span><span>결과를 검토하는 AI(핵심 검토 AI) · ' + esc(reviewer) + '</span>' +
           findingText + delivered +
           execPicker(p, s.key) + deliverBox(p, s.key) +
@@ -478,6 +569,10 @@
         productionAction = '<button class="btn production-start" type="button" data-enroll="' +
           esc(p.slug) + '">AI 제작 시작</button>';
       }
+    } else if (SE().awaitingChoice(p, p.step)) {
+      // 고르기 전에는 작업이 하나도 만들어지지 않았다. 카드 맨 위에서 바로 보이게 한다
+      productionAction = '<span class="progress-state pick">실행 주체 선택 대기 — ' +
+        '누가 진행할지 고르기 전까지 작업이 시작되지 않습니다</span>';
     } else if (SE().waiting(p, p.step)) {
       productionAction = '<span class="progress-state wait">담당자 진행 — 결과 등록 대기</span>';
     } else {
@@ -592,21 +687,20 @@
             '<button class="btn ghost" type="button" data-replan="' + esc(p.slug) +
             '">5안 전체 다시 만들기</button><small>이전 5안은 비교 기록으로 보존됩니다.</small></div>')
         : "";
+      // ★ 콘셉트 카드는 광고주 화면과 **같은 공용 렌더**가 그린다.
+      // 예전에는 본문 한 문단이 통째로 <p> 하나였고 후킹·화면·위험이 한 줄씩
+      // 붙어 있었다 — 같은 글이 광고주 화면에서는 시간 흐름까지 나뉘어 보이는데
+      // 관리자 화면에서만 벽으로 보였다. 이제 구조가 같고, 관리자에는 주의점이
+      // **덧붙을** 뿐이다(role: admin).
       conceptReview = '<section class="concept-review"><div class="review-head"><span>' +
         (atConceptStage ? "관리자 검토" : "선택 완료 · 보관본") + '</span>' +
         '<h3>콘셉트 5안</h3><p>' + (atConceptStage
           ? "추천은 참고값입니다. 다섯 방향의 차이와 위험을 확인한 뒤 광고주에게 보내세요."
           : "이 프로젝트에서 실제로 제안하고 선택한 콘셉트 기록입니다.") + '</p></div>' +
-        strategyLine + p.concepts.slice().sort(function (a, b) { return a.key.localeCompare(b.key); })
-          .map(function (c) {
-            return '<article class="concept-row' + (c.is_recommended ? ' recommended' : '') + '">' +
-              '<div class="concept-key">' + esc(c.key) + (c.is_recommended ? '<em>추천</em>' : '') + '</div>' +
-              '<div class="concept-copy"><h4>' + esc(c.title) + '</h4><p>' + esc(c.body) + '</p>' +
-              '<dl><dt>후킹</dt><dd>' + esc(c.hook) + '</dd><dt>화면</dt><dd>' + esc(c.visual) +
-              '</dd><dt>위험</dt><dd>' + esc(c.risk) + '</dd></dl>' +
-              (c.is_recommended && c.reco_reason ? '<small>추천 이유 · ' + esc(c.reco_reason) + '</small>' : '') +
-              '</div></article>';
-          }).join("") + replanBox + '</section>';
+        strategyLine + '<div class="concepts">' +
+        p.concepts.slice().sort(function (a, b) { return a.key.localeCompare(b.key); })
+          .map(function (c) { return R().concept(c, ADMIN); }).join("") +
+        '</div>' + replanBox + '</section>';
     }
 
     // 1차 검수 — 정지점에 와 있으면 우리가 먼저 보고 광고주에게 넘긴다.
@@ -624,10 +718,9 @@
         (back ? "아래 남긴 말을 보고 고친 뒤에 다시 넘기세요."
               : "광고주에게 보이는 화면에서 내용을 확인하신 뒤 넘기세요.") +
         " 지금은 광고주 쪽에 버튼이 없습니다.</span></div>" +
-        (p.n_cuts
-          ? '<a class="btn" href="board.html?slug=' + encodeURIComponent(p.slug) +
-            '">콘티 검수 →</a>'
-          : "") +
+        // 콘티 검수 링크는 여기 없다. 이 블록은 콘셉트 5안 아래에 그려지므로
+        // 그 자리에 두면 「콘티 승인」이 콘셉트 단계의 일처럼 읽힌다.
+        // 링크는 콘티 승인 단계 본문 안에만 있다(boardLink 참고).
         '<button class="btn ghost" type="button" data-send="' + esc(p.slug) +
         '">광고주에게 보내기</button></div>';
     } else if (g && p.state === "ready") {
@@ -655,13 +748,9 @@
         (p.facts.device_note ? '<dt>제작 메모</dt><dd>' + esc(p.facts.device_note) + '</dd>' : '') +
         '</dl>' + files + '</div>'
       : '<p class="stage-empty">제품 자료는 등록됐지만 정리된 확인 내용이 없습니다.</p>' + files;
+    // 전략도 공용 렌더다 — 네 칸이 각각 한 구획이고, 긴 문단은 문장 단위로 나뉜다
     var strategyBody = p.strategy
-      ? '<div class="stage-content"><dl class="stage-data">' +
-        '<dt>인사이트</dt><dd>' + esc(readable(p.strategy.insight)) + '</dd>' +
-        '<dt>핵심 메시지</dt><dd>' + esc(readable(p.strategy.one_message)) + '</dd>' +
-        '<dt>USP</dt><dd>' + esc(readable(p.strategy.usp)) + '</dd>' +
-        '<dt>톤</dt><dd>' + esc(readable(p.strategy.tone)) + '</dd>' +
-        '</dl></div>'
+      ? '<div class="stage-content">' + R().strategy(p.strategy, ADMIN) + '</div>'
       : '<p class="stage-empty">저장된 전략 설계 내용이 없습니다.</p>';
 
     // 구성·각본 — 결과가 들어오기 전에는 「제작 중 / 대기」를 분명히 보여 주고,
@@ -669,18 +758,40 @@
     var d = p.development;
     var hasDevelopment = !!(d && ((d.arc && d.arc.length) || (d.copies && d.copies.length) ||
       d.narration_tone || d.slogan));
+    // ★ 배열을 한 줄에 쉼표로 이어 붙이던 자리다. 이제 공용 렌더가
+    // 전개는 시간 구간별 세로 목록으로, 카피는 한 문구 한 행으로,
+    // 나레이션·슬로건·음악은 각각 별도 구획으로 그린다.
+    // 「최종 편집 음악」(Codex 가 나눈 음악 워크플로)은 관리자에만 덧붙는다.
     var developBody = hasDevelopment
-      ? '<div class="stage-content"><dl class="stage-data">' +
-        '<dt>이야기 흐름(전개 arc)</dt><dd>' + esc(readable(d.arc)) + '</dd>' +
-        '<dt>화면 글자(카피)</dt><dd>' + esc(readable(d.copies)) + '</dd>' +
-        '<dt>읽어 주는 목소리 느낌(나레이션 톤)</dt><dd>' + esc(readable(d.narration_tone)) + '</dd>' +
-        '<dt>마지막 한 줄(슬로건)</dt><dd>' + esc(readable(d.slogan)) + '</dd>' +
-        '<dt>생성 단계 음악(BGM)</dt><dd>' + (d.bgm ? "생성할 때 함께 사용" : "넣지 않음") + '</dd>' +
-        '<dt>최종 편집 음악</dt><dd>' + (d.bgm
-          ? "생성된 음악을 확인한 뒤 유지·교체 결정"
-          : "전체 영상에 맞는 한 곡을 별도로 선택해 삽입") + '</dd>' +
-        '</dl></div>'
+      ? '<div class="stage-content">' + R().development({
+          arc: d.arc, copies: d.copies, narration_tone: d.narration_tone,
+          slogan: d.slogan, bgm: d.bgm,
+        }, ADMIN) + '</div>'
       : (p.step === "develop" ? stageWait(p, "develop", "구성·각본") : "");
+
+    // 콘티 — 컷을 한 줄에 이어 붙이지 않는다. 컷마다 번호·시간·장면·행동·대사·
+    // 의도·카메라·이어지는 것이 행으로 나뉘고, 제작 메모는 관리자에만 덧붙는다.
+    // 컷이 많으므로 접이식으로 두고 현재 단계일 때만 펼친다
+    var cutRows = p.cuts || [];
+    var storyboardBody = cutRows.length
+      ? '<details class="stage-cuts"' +
+        (p.step === BOARD_REVIEW_STAGE ? ' open' : '') + '>' +
+        '<summary>콘티 ' + cutRows.length + '컷 — 펼쳐서 보기</summary>' +
+        R().cuts(cutRows, ADMIN) + '</details>'
+      : (p.n_cuts ? '<p class="stage-empty">콘티 ' + p.n_cuts +
+          '컷이 있습니다. 컷 내용을 불러오지 못했습니다.</p>' : "");
+
+    // ★ 콘티 검수 링크 — **콘티 승인 단계 본문 안에서만** 뜬다.
+    //   조건 두 가지뿐이다: 콘티가 실제로 있는가(데이터), 그리고 지금 그 단계인가.
+    //   단계 이름을 여기서 새로 짓지 않는다 — stageBodies 가 그 본문을 등록하는
+    //   바로 그 키(BOARD_REVIEW_STAGE)를 판정에도 그대로 쓴다. 과거 단계·다른
+    //   단계에서는 아무것도 나오지 않는다.
+    function boardLink(key) {
+      if (p.step !== key) return "";
+      if (!(p.cuts && p.cuts.length) && !p.n_cuts) return "";
+      return '<div class="ways stage-ways"><a class="btn ghost" href="board.html?slug=' +
+        encodeURIComponent(p.slug) + '">콘티 검수</a></div>';
+    }
 
     var stageBodies = {
       brief: '<div class="stage-content">' + said + requirements + '</div>',
@@ -688,7 +799,8 @@
       strategy: strategyBody,
       concepts: conceptReview + check,
       develop: developBody,
-      storyboard: p.step === "storyboard" ? productionAction : "",
+      storyboard: boardLink(BOARD_REVIEW_STAGE) + storyboardBody +
+        (p.step === BOARD_REVIEW_STAGE ? productionAction : ""),
       anchors: p.step === "anchors" ? productionAction : "",
       video: p.step === "video" ? productionAction : "",
       deliver: p.step === "deliver" ? productionAction : ""
@@ -706,11 +818,10 @@
       (p.created_at ? " · " + ago(p.created_at) : "") + "</div>" +
       '</div><div class="project-summary-side"><span class="project-stage">' +
       esc(STEP_NAME[p.step] || p.step) + '</span><span class="fold-icon" aria-hidden="true">⌄</span></div></summary>' +
+      // ★ 카드 맨 위에는 단계와 무관한 것만 둔다. 「콘티 검수」가 여기 있으면
+      //   어느 단계의 일인지 알 수 없고, 바로 아래에 콘셉트 5안이 오므로 그
+      //   단계의 버튼처럼 읽혔다. 링크는 콘티 승인 단계 본문 안으로 옮겼다.
       '<div class="project-body"><div class="ways project-ways">' +
-      (p.n_cuts
-        ? '<a class="btn ghost" href="board.html?slug=' + encodeURIComponent(p.slug) +
-          '">콘티 검수</a>'
-        : "") +
       '<a class="btn ghost" href="' + esc(siteUrl(p.slug)) +
       '" target="_blank" rel="noopener">광고주 화면 ↗</a></div>' +
       redo + who +
@@ -803,6 +914,42 @@
       syncReplanForm(f.dataset.replanForm);
     });
 
+    // ★ 실행 주체 선택 게이트 — 답하기 전에는 아무 작업도 만들어지지 않는다.
+    // 한 번 눌리면 그 블록의 두 버튼이 같이 잠긴다(같은 건에 두 요청을 못 보낸다).
+    // 그래도 중복 0 을 지키는 것은 서버다 — 여기서는 사람이 덜 헷갈리게 할 뿐이다
+    document.querySelectorAll("[data-choice]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var box = b.closest("[data-choice-form]");
+        var buttons = box ? box.querySelectorAll("[data-choice]") : [b];
+        var problem = box && box.querySelector("[data-choice-problem]");
+        var nameField = box && box.querySelector("[data-choice-name]");
+        var revField = box && box.querySelector("[data-choice-reviewer]");
+        var mode = b.dataset.choice;
+        var name = nameField ? (nameField.value || "").trim() : "";
+        var reviewer = revField ? (revField.value || "").trim() : "";
+        function fail(message) {
+          if (!problem) { window.alert(message); return; }
+          problem.hidden = false;
+          problem.textContent = message;
+        }
+        if (mode === "human" && !name) {
+          fail("담당자 이름을 적어 주세요.");
+          if (nameField) nameField.focus();
+          return;
+        }
+        if (problem) { problem.hidden = true; problem.textContent = ""; }
+        var labels = [];
+        buttons.forEach(function (x) { labels.push(x.textContent); x.disabled = true; });
+        b.textContent = "처리 중…";
+        chooseStageExecutor(b.dataset.slug, b.dataset.step, mode, name, reviewer)
+          .then(load)
+          .catch(function (e) {
+            buttons.forEach(function (x, i) { x.disabled = false; x.textContent = labels[i]; });
+            fail("실행 주체를 정하지 못했습니다 — " + (e.message || e));
+          });
+      });
+    });
+
     // 실행 주체 — 담당자를 고르면 이름 칸이 필요해진다
     document.querySelectorAll("[data-exec-form]").forEach(function (f) { syncExecForm(f); });
     document.querySelectorAll("[data-exec-mode]").forEach(function (r) {
@@ -824,7 +971,12 @@
         }
         var label = b.textContent;
         b.disabled = true; b.textContent = "저장 중…";
-        setStageExecutor(b.dataset.slug, b.dataset.step, mode, name, rev)
+        // 실행 주체를 묻는 단계는 선택 RPC 로 간다 — AI 를 고르면 그 호출 안에서
+        // 작업이 만들어진다. 묻지 않는 단계는 예전 경로 그대로(검토 AI 지정 등)
+        var save = SE().choiceRequired(b.dataset.step)
+          ? chooseStageExecutor(b.dataset.slug, b.dataset.step, mode, name, rev)
+          : setStageExecutor(b.dataset.slug, b.dataset.step, mode, name, rev);
+        save
           .then(load)
           .catch(function (e) {
             b.disabled = false; b.textContent = label;
@@ -915,6 +1067,36 @@
       if (!pickable.ok) return Promise.reject(new Error(pickable.note));
     }
     return db.rpc("onecue_stage_executor_set", {
+      p_project_id: p.id, p_step: step, p_mode: mode,
+      p_assignee: assignee || "", p_reviewer_model: reviewer || "", p_reviewer_note: "",
+    }).then(function (r) {
+      if (r.error) throw r.error;
+      return r.data;
+    });
+  }
+
+  // ★ 실행 주체 선택 — 한 번의 호출이 한 트랜잭션이다 (migrate_017).
+  //
+  // AI 를 고르면 그 안에서 **작업 한 건만** 만들어진다. 화면이 jobs 에 직접 쓰지
+  // 않는다 — 브라우저가 작업을 만들면 두 번 눌렀을 때 두 건이 생기는 것을 막을
+  // 방법이 없다. 서버가 프로젝트 줄을 잠그고, 이미 만든 작업이 있으면 다시 만들지
+  // 않는다. 화면의 버튼 잠금은 그 위에 얹는 편의일 뿐 보장이 아니다.
+  function chooseStageExecutor(slug, step, mode, assignee, reviewer) {
+    var p = ROWS.filter(function (x) { return x.slug === slug; })[0];
+    if (!p) return Promise.reject(new Error("건을 찾지 못했습니다"));
+    if (SE().choiceState(p, step) === "contract_missing") {
+      return Promise.reject(new Error(
+        "폼 계약을 불러오지 못해 누가 맡는지 정할 수 없습니다 — 새로고침한 뒤 다시 시도해 주세요"));
+    }
+    if (!SE().choiceRequired(step)) {
+      return Promise.reject(new Error("이 단계는 실행 주체를 따로 고르지 않습니다"));
+    }
+    if (mode === "human") {
+      var pickable = SE().assignable(step);
+      if (!pickable.ok) return Promise.reject(new Error(pickable.note));
+      if (!assignee) return Promise.reject(new Error("담당자 이름을 적어 주세요"));
+    }
+    return db.rpc("onecue_stage_executor_choose", {
       p_project_id: p.id, p_step: step, p_mode: mode,
       p_assignee: assignee || "", p_reviewer_model: reviewer || "", p_reviewer_note: "",
     }).then(function (r) {
@@ -1165,6 +1347,17 @@
           // 구성·각본 결과 — 등록되면 그 단계 안에서 상세로 펼친다
           db.from("developments").select("project_id,arc,copies,narration_tone,slogan,bgm")
             .in("project_id", ids),
+          // 콘티 컷 — 광고주 화면과 같은 공용 렌더로 같은 구조로 편다.
+          // admin_cuts 는 board.js 가 이미 쓰는 관리자용 보기다
+          db.from("admin_cuts")
+            .select("project_id,n,t_start,t_end,block,who,action,dialogue,intent," +
+              "size,angle,move,lens,inherits,face,note")
+            .in("project_id", ids).order("n"),
+          // ★ 017 이 더한 칸은 **따로** 읽는다. 위 줄에 섞으면 017 적용 전 서버에서
+          // 「없는 칸」 때문에 실행 주체 조회 전체가 실패해 화면에서 기능이 통째로 사라진다.
+          // 따로 읽으면 017 전에는 이 칸만 비고 나머지는 예전 그대로 뜬다
+          db.from("stage_executors").select("project_id,step,ai_job_id")
+            .in("project_id", ids),
         ]).then(function (out) {
           if (out[1].error) throw out[1].error;
           return window.ONECUE_ASSETS.resolve(db, out[1].data || []).then(function (assets) {
@@ -1186,10 +1379,28 @@
           // 표가 아직 없는 서버(마이그레이션 016 이전)에서도 화면은 그대로 떠야 한다
           var stageRows = (out[12] && !out[12].error && out[12].data) || [];
           var developments = (out[13] && !out[13].error && out[13].data) || [];
+          var cutRows = (out[14] && !out[14].error && out[14].data) || [];
+          // 017 전에는 빈 목록이다 — 그러면 「AI 라고 적혔는데 작업이 없는 줄」은
+          // 살아 있는 작업 기록으로 판정된다(choiceState 의 ranBefore)
+          var jobLinks = (out[15] && !out[15].error && out[15].data) || [];
+          jobLinks.forEach(function (link) {
+            stageRows.forEach(function (row) {
+              if (row.project_id === link.project_id && row.step === link.step) {
+                row.ai_job_id = link.ai_job_id;
+              }
+            });
+          });
 
           ROWS.forEach(function (p) {
             p.stageExecutors = SE().byProject(stageRows, p.id);
             p.development = developments.filter(function (x) { return x.project_id === p.id; })[0] || null;
+            p.cuts = cutRows.filter(function (x) { return x.project_id === p.id; });
+            // 이 단계에 이미 결과가 있는가 — 기능이 생기기 전에 끝난 건을
+            // 「선택 대기」로 되돌리지 않기 위한 증거다. 아무것도 되돌리지 않는다
+            p.stageResults = {
+              develop: !!p.development,
+              storyboard: p.cuts.length > 0,
+            };
             counts.forEach(function (t, i) {
               var d = cs[i].data || [];
               p[t[1]] = d.filter(function (x) { return x.project_id === p.id; }).length;

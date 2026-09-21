@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="style.css?v=1f228d76">
+<link rel="stylesheet" href="stage-render.css?v=stage-read-260921-v1">
 <style>
 /* 관리자 화면 — 훑고 조작하는 곳이라 정보 밀도를 우선한다 */
 
@@ -179,7 +180,30 @@
 .flow-detail span,.flow-detail b{font-size:11px;letter-spacing:0;overflow-wrap:anywhere}.flow-detail b{grid-column:1/-1;color:var(--cue)}
 .stage-version{font-style:normal;font:700 10px/1 "JetBrains Mono",monospace;color:var(--ink);border:1px solid var(--rule);padding:4px 6px;background:var(--panel)}
 .stage-content,.stage-empty,.flow-detail>.concept-review,.flow-detail>.check,
-.flow-detail>.exec-pick,.flow-detail>.deliver-box{grid-column:1/-1}
+.flow-detail>.exec-pick,.flow-detail>.deliver-box,.flow-detail>.choice-gate,
+.flow-detail>.choice-note,.flow-detail>.stage-cuts,.flow-detail>.stage-ways{grid-column:1/-1}
+/* ★ 실행 주체 선택 게이트 — 고르기 전에는 작업이 하나도 만들어지지 않는다.
+   그래서 이 블록이 단계 상세의 맨 위에 오고, 가장 먼저 읽히게 둔다 */
+.choice-gate{margin:0 0 10px;padding:13px 14px;background:var(--cue-soft);
+  border:1px solid var(--cue);border-left-width:3px;border-radius:8px;display:grid;gap:8px}
+.choice-gate>b{font-size:13.5px;font-weight:800;color:var(--ink)}
+.choice-gate>small{font-size:11.5px;color:var(--muted);line-height:1.65}
+.choice-actions{display:flex;flex-wrap:wrap;gap:8px}
+.choice-actions .btn{width:auto}
+.choice-actions .btn[disabled]{opacity:.5;cursor:not-allowed}
+.choice-problem{font-size:11.5px;line-height:1.6;color:#9a2222;overflow-wrap:anywhere}
+.choice-note{margin:0 0 10px;padding:10px 12px;background:var(--sunk);
+  border:1px solid var(--rule);border-radius:8px;display:grid;gap:4px}
+.choice-note>b{font-size:12.5px}
+.choice-note>small{font-size:11px;color:var(--muted);line-height:1.6}
+.choice-note.done{border-left:3px solid var(--live)}
+/* 콘티 검수 — 그 단계 본문 안에만 있다. 카드 맨 위에는 두지 않는다 */
+.stage-ways{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px}
+.stage-ways .btn{width:auto}
+@media(max-width:560px){.stage-ways .btn{width:100%}}
+.ai-update.choice{color:#fff;background:#9a2222;border:1px solid #9a2222}
+.production-progress .progress-state.pick{color:#9a2222;font-weight:700}
+@media(max-width:560px){.choice-actions .btn{width:100%}}
 /* 실행 주체 — 단계마다 AI 진행인지 담당자 진행인지 관리자가 고른다 */
 .stage-person{font-style:normal;font:700 10px/1 "JetBrains Mono",monospace;color:#7a4b00;
   background:#fff1bf;border:1px solid #dcae32;padding:4px 6px;white-space:nowrap}
@@ -328,7 +352,8 @@
 <script src="asset-access.js"></script>
 <!-- 폼 계약은 stage-executor.js 보다 먼저 온다. 계약이 없으면 검사가 닫히는 쪽으로 실패한다 -->
 <script src="stage-form-contract.js?v=contract-260921-v3"></script>
-<script src="stage-executor.js?v=stage-exec-260921-v3"></script>
-<script src="admin.js?v=stage-form-260921-v3"></script>
+<script src="stage-executor.js?v=stage-exec-260921-v4"></script>
+<script src="shared-stage-renderers.js?v=stage-read-260921-v1"></script>
+<script src="admin.js?v=stage-choice-260921-v4"></script>
 </body>
 </html>

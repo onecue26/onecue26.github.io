@@ -27,7 +27,7 @@
     var row = map[step];
     if (!row) {
       return { mode: "ai", assignee: "", reviewer_model: "", reviewer_note: "",
-        state: "planned", delivered_at: null, delivered_note: "",
+        state: "planned", ai_job_id: null, delivered_at: null, delivered_note: "",
         client_summary: "", plain_language_ok: false };
     }
     return {
@@ -36,6 +36,9 @@
       reviewer_model: row.reviewer_model || "",
       reviewer_note: row.reviewer_note || "",
       state: row.state || "planned",
+      // 이 선택이 만든 AI 작업. 있으면 「이미 만들었다」가 사실로 남는다 —
+      // 같은 버튼을 두 번 눌러도 두 번째는 작업을 만들지 않는 근거다
+      ai_job_id: row.ai_job_id || null,
       delivered_at: row.delivered_at || null,
       // 광고주가 읽을 말과 내부 제작 명세는 끝까지 다른 칸에 있다
       delivered_note: row.delivered_note || "",
@@ -191,6 +194,53 @@
           "칸이 정해지면 그때 열립니다." };
     }
     return { ok: true, reason: "", note: "" };
+  }
+
+  // ── ★ 실행 주체를 먼저 고른다 (migrate_017) ─────────────────────────────────
+  //
+  // 예전에는 stage_executors 에 줄이 없으면 「AI」로 보고 그대로 작업 큐에 올렸다.
+  // 그건 아무도 묻지 않은 질문에 AI 를 기본 답으로 넣어 둔 것이었다 — 2트랙의
+  // 목적과 어긋난다(Dan 지시 2026-09-21). 이제 **고르기 전에는 아무것도 만들지 않는다.**
+  //
+  // 어느 단계가 묻는가는 계약이 정한다 — 구조화 폼이 있는 단계가 곧 사람이 맡을 수
+  // 있는 단계이고, 그 단계만 질문을 던진다. 새 단계에 칸이 생기면 저절로 열린다.
+  // SQL 의 onecue_stage_choice_required 와 **같은 한 가지 규칙**이다.
+  function choiceRequired(step) {
+    if (!contractReady()) return false;
+    return hasForm(step);
+  }
+
+  // 이 단계가 이 건에서 이미 한 번 돌아간 적이 있는가.
+  // 기능이 생기기 전에 끝난 건을 「대기 중」으로 되돌리지 않기 위한 증거다 —
+  // 되돌리지도, 다시 돌리지도 않고 수행 기록으로만 보여 준다.
+  function ranBefore(project, step) {
+    if (!project) return false;
+    if (aiRecord(project, step)) return true;
+    if (project.job && project.job.step === step) return true;
+    var results = project.stageResults || {};
+    return !!results[step];
+  }
+
+  // SQL onecue_stage_choice_state 와 같은 낱말을 쓴다. 화면과 DB 가 다른 말을
+  // 쓰면 「대기」와 「예전에 이미 돌린 것」이 섞인다.
+  //   not_required · awaiting · ai_queued · human · legacy_ai · contract_missing
+  function choiceState(project, step) {
+    if (!contractReady()) return "contract_missing";
+    if (!choiceRequired(step)) return "not_required";
+    var map = (project && project.stageExecutors) || {};
+    var row = map[step];
+    if (!row) return ranBefore(project, step) ? "legacy_ai" : "awaiting";
+    if (row.mode === "human") return "human";
+    // 예전 onecue_stage_executor_set 으로 'ai' 만 적힌 줄은 작업을 만들지 않았다.
+    // 답은 있는데 결과가 없는 상태이므로 여전히 기다리는 중이다
+    return (row.ai_job_id || ranBefore(project, step)) ? "ai_queued" : "awaiting";
+  }
+
+  // 지금 이 건이 관리자 답을 기다리며 멈춰 있는가 — 화면 맨 위에 띄울 것
+  function awaitingChoice(project, step) {
+    if (!project) return false;
+    return choiceState(project, step) === "awaiting" &&
+      project.step === step && project.state === "pending";
   }
 
   // ── 검토 결과(review_findings) 의 모양 ──────────────────────────────────────
@@ -427,6 +477,8 @@
     textRule: textRule, lines: lines, checkForm: checkForm, checkText: checkText,
     humanAllowed: humanAllowed, HUMAN_BLOCKED: HUMAN_BLOCKED,
     hasForm: hasForm, assignable: assignable,
+    choiceRequired: choiceRequired, choiceState: choiceState,
+    awaitingChoice: awaitingChoice, ranBefore: ranBefore,
     reviewFindings: reviewFindings,
     plainFirst: plainFirst, plainGlossary: plainGlossary,
     advertiserTexts: advertiserTexts, sendGate: sendGate,

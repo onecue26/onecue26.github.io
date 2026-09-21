@@ -158,57 +158,53 @@
       }).join("") + "</div>";
   }
 
+  // ── 읽기 렌더는 관리자 화면과 **같은 모듈**을 쓴다 ─────────────────────────
+  // 같은 데이터가 화면마다 다르게 보이던 것을 없앤다. 역할만 다르다 —
+  // 광고주에게는 내부 메모·AI 기록·위험 메모가 애초에 만들어지지 않는다.
+  // 모듈이 없으면 예전처럼 평범한 글로 떨어진다(화면이 비지는 않는다).
+  function R() {
+    return window.ONECUE_RENDER || {
+      strategy: function (s) {
+        return '<div class="stage-read strategy"><p>' +
+          esc([s && s.one_message, s && s.insight].filter(Boolean).join(" ")) + "</p></div>";
+      },
+      concept: function (c) {
+        return '<article class="cc"><header class="cc-head"><span class="k">' +
+          esc((c && c.key) || "") + "안</span><span class=\"t\">" +
+          esc((c && c.title) || "") + "</span></header></article>";
+      },
+      development: function () { return ""; },
+      cuts: function () { return ""; },
+    };
+  }
+  var CLIENT = { role: "client" };
+
   function secStrategy(s) {
     if (!s) return "";
-    return "<h2>전략</h2><div class=\"panel\"><dl class=\"kv\">" +
-      (s.insight ? "<dt>인사이트</dt><dd>" + nl(s.insight) + "</dd>" : "") +
-      (s.usp ? "<dt>USP</dt><dd>" + nl(s.usp) + "</dd>" : "") +
-      (s.one_message ? "<dt>한 줄</dt><dd><b>" + esc(s.one_message) + "</b></dd>" : "") +
-      (s.tone ? "<dt>톤</dt><dd>" + esc(s.tone) + "</dd>" : "") +
-      "</dl></div>";
+    return "<h2>전략</h2><div class=\"panel\">" + R().strategy(s, CLIENT) + "</div>";
+  }
+
+  // ★ 광고주에게는 **상태와 완료 안내만** 나간다.
+  //   전개·카피·나레이션 톤·슬로건·BGM 의 원문은 내보내지 않는다 — 광고주용
+  //   요약 칸도 명시적인 공유 게이트도 아직 없기 때문이다(Codex 검수 2026-09-21).
+  //   그래서 이 화면은 결과 줄을 **조회하지도 않고** 인자로 받지도 않는다.
+  //   받을 수 없으니 흘릴 수도 없다. 공용 모듈의 development() 는 지우지 않았고
+  //   관리자 화면이 계속 쓴다 — 광고주용 요약이 생기면 그때 이 자리에 더한다.
+  function secDevelop(done) {
+    return "<h2>구성·각본</h2><div class=\"panel\">" +
+      R().developmentNotice(done ? "done" : "working") + "</div>";
   }
 
   function secConcepts(list, canPick) {
     if (!list || !list.length) return "";
     var chosen = list.filter(function (c) { return c.is_chosen; })[0];
-    function readableConcept(s) {
-      var raw = String(s || "").trim();
-      if (!raw) return "";
-      var production = "", at = raw.indexOf("제작:");
-      if (at >= 0) { production = raw.slice(at + 3).trim(); raw = raw.slice(0, at).trim(); }
-      var parts = raw.split(/(?=\b\d+(?:~|–|-)\d+초)/).filter(Boolean);
-      var main = parts.shift() || "";
-      var html = '<p class="concept-lead">' + esc(main) + "</p>";
-      if (parts.length) {
-        html += '<ol class="concept-timeline">' + parts.map(function (part) {
-          var m = part.match(/^(\d+(?:~|–|-)\d+초)\s*(.*)$/);
-          return m ? '<li><b>' + esc(m[1]) + '</b><span>' + esc(m[2]) + '</span></li>'
-            : '<li><span>' + esc(part) + '</span></li>';
-        }).join("") + "</ol>";
-      }
-      if (production) html += '<div class="concept-production"><b>제작 메모</b><span>' + esc(production) + "</span></div>";
-      return html;
-    }
     function card(c) {
+      // 「이걸로 하겠습니다」는 데이터가 아니라 이 화면의 버튼이다.
+      // 공용 렌더에는 actions 로 넘긴다 — 기록에서 온 글은 여기로 들어가지 않는다
       var pick = (canPick && !c.is_chosen)
         ? '<button class="btn ghost pickbtn" data-pick="' + esc(c.key) + '">이걸로 하겠습니다</button>'
         : "";
-      // 추천은 의견이지 결정이 아니다. 그래서 이유를 같이 달아둔다 —
-      // 올려놓거나(마우스) 눌러야(폰) 펼쳐지므로 카드를 어지럽히지 않는다
-      var reco = c.is_recommended
-        ? '<span class="reco" tabindex="0">추천' +
-          (c.reco_reason ? '<span class="why">' + esc(c.reco_reason) + "</span>" : "") +
-          "</span>"
-        : "";
-      return '<article class="cc' + (c.is_chosen ? " chosen" : "") +
-        (c.is_recommended ? " reco-on" : "") + '">' + reco +
-        '<header class="cc-head"><span class="k">' + esc(c.key) + "안" +
-          (c.axis ? ' <em>' + esc(c.axis) + "</em>" : "") + "</span>" +
-          '<span class="t">' + esc(c.title || "") + "</span></header>" +
-        '<div class="cc-part idea"><b>핵심 아이디어</b><div>' + readableConcept(c.body) + "</div></div>" +
-        (c.visual ? '<div class="cc-part"><b>장면 방식</b><span>' + esc(c.visual) + "</span></div>" : "") +
-        (c.hook ? '<div class="cc-part hook"><b>첫 장면</b><span>' + esc(c.hook) + "</span></div>" : "") +
-        pick + "</article>";
+      return R().concept(c, { role: "client", actions: pick });
     }
     var head = "<h2>컨셉 5안" + (chosen ? " — 선택 완료" : "") + "</h2>";
     if (chosen) {
@@ -337,24 +333,11 @@
       if (a.kind === "anchor" && !anchor[a.cut_n]) anchor[a.cut_n] = a;
     });
     var made = Object.keys(anchor).length;
+    // 글 구조는 공용 렌더가 만든다. 그림 칸만 이 화면이 만든다 —
+    // 주소와 권한이 화면마다 다르기 때문이다(공용 모듈은 URL 을 그리지 않는다)
     return "<h2>콘티 " + cuts.length + "컷" +
       (made ? " — 만든 컷 " + made + "개" : "") + "</h2>" +
-      "<div class=\"cuts\">" + cuts.map(function (c) {
-      var has = true;
-      var t = (c.t_start != null ? c.t_start + "–" + c.t_end + "초" : "");
-      var spec = [c.size, c.angle, c.move, c.lens].filter(Boolean)
-        .map(function (x) { return "<span>" + esc(x) + "</span>"; }).join("");
-      return '<div class="cut' + (has ? "" : " noimg") + '">' +
-        shots(c.n, board, anchor, clips) +
-        '<div class="body"><div class="head">' +
-          '<span class="n">' + c.n + "</span>" +
-          '<span class="tt">' + esc(t) + "</span>" +
-          '<span class="blk">' + esc(c.block || "") + "</span></div>" +
-          '<div class="what">' + esc(c.action || "") + "</div>" +
-          (c.intent ? '<div class="why">' + esc(c.intent) + "</div>" : "") +
-          (spec ? '<div class="spec">' + spec + "</div>" : "") +
-        "</div></div>";
-    }).join("") + "</div>";
+      R().cuts(cuts, CLIENT, function (c) { return shots(c.n, board, anchor, clips); });
   }
 
   // 지금 광고주가 무엇을 해야 하나
@@ -596,6 +579,7 @@
             (shown("concepts")
               ? secConcepts(x[2].data, MINE && P.step === "concepts" && P.state === "ready")
               : "") +
+            (shown("develop") ? secDevelop(IDX[P.step] > IDX.develop) : "") +
             (shown("storyboard") ? secBoard(x[4].data) + secCuts(x[3].data, x[4].data) : "") +
             (shown("strategy") ? secStrategy(x[1].data) : "") +
             secBrief(x[0].data, MINE && canEditBrief(P)) +
