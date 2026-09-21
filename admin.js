@@ -424,7 +424,8 @@
       return '<div class="needs need-admin"><h4>필요한 자료</h4>' + picker +
         '<p class="need-type">종류를 정해야 무엇이 모자란지 셀 수 있습니다.</p></div>';
     }
-    var out = G.gaps(counts, p.ad_type, p.cut_count || 0);
+    // 관리자는 우리 말투로 본다 — 「왜」와 「고를 것」이 판단에 필요하다.
+    var out = G.text(G.gaps(counts, p.ad_type, p.cut_count || 0), "internal");
     if (!out) return "";
     function list(items, cls) {
       return '<ul class="' + cls + '">' + items.map(function (t) {

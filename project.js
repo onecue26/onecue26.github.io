@@ -247,8 +247,10 @@
   function secNeeds(assets, cuts) {
     var G = window.ONECUE_MATERIAL_GAPS;
     if (!G || !P.ad_type) return "";
-    var out = G.gaps(clientCounts(assets), P.ad_type,
-                     (cuts && cuts.length) || P.cut_count || 0);
+    // ★ 광고주 말투로 받는다. 우리끼리 쓰는 이름(product_ref)과 말(생성·컷)은
+    //   이 화면에 나오면 안 된다 — 실제로 그대로 나갔었다 (Dan 2026-09-22).
+    var out = G.text(G.gaps(clientCounts(assets), P.ad_type,
+                     (cuts && cuts.length) || P.cut_count || 0), "client");
     if (!out) return "";
     var guessed = String(P.ad_type_by || "").indexOf("ai:") === 0;
     var head = '<h2>필요한 자료</h2><div class="panel needs">' +
@@ -467,19 +469,19 @@
       return m.indexOf(n) >= 0;
     });
     if (!b && !a && !vs.length) return '<div class="noimg-n">' + n + "</div>";
+    // ★ 빈 칸을 자리까지 만들어 「대기」라고 적어 두지 않는다. 그건 우리 공정의
+    //   자리표시다. 광고주 화면에서는 「뭔가 비어 있다」로만 읽히고, 아직 하지
+    //   않은 일을 못 한 일처럼 보이게 한다. 없는 것은 안 보이는 게 맞다.
     function pic(label, x, cls) {
-      return '<figure class="' + cls + (x ? " on" : "") + '">' +
-        (x ? '<img src="' + esc(x.url) + '" alt="컷 ' + n + '" loading="lazy"' +
-             ' data-big="' + esc(x.url) + '" data-kind="img">'
-           : '<div class="none">—</div>') +
-        "<figcaption>" + (x ? label : "대기") + "</figcaption></figure>";
+      if (!x) return "";
+      return '<figure class="' + cls + ' on">' +
+        '<img src="' + esc(x.url) + '" alt="컷 ' + n + '" loading="lazy"' +
+        ' data-big="' + esc(x.url) + '" data-kind="img">' +
+        "<figcaption>" + label + "</figcaption></figure>";
     }
     // 영상 칸 — 조각이 여럿이면 세로로 쌓는다. 이름(role)을 밑에 적어야 무엇인지 안다
     function vids() {
-      if (!vs.length) {
-        return '<figure class="made"><div class="none">—</div>' +
-          "<figcaption>대기</figcaption></figure>";
-      }
+      if (!vs.length) return "";
       return vs.map(function (x) {
         return '<figure class="made on"><video src="' + esc(x.url) +
           '" controls playsinline preload="metadata" data-big="' + esc(x.url) +
@@ -487,8 +489,12 @@
           esc(x.role || "영상") + "</figcaption></figure>";
       }).join("");
     }
-    return '<div class="shots three">' + pic("콘티", b, "plan") +
-      pic("완성", a, "made") + '<div class="vidcol">' + vids() + "</div></div>";
+    // 칸 수는 **있는 것**이 정한다. 셋으로 고정해 두면 없는 둘이 빈칸으로 남는다.
+    var v = vids();
+    var shown = [pic("콘티", b, "plan"), pic("완성", a, "made"),
+                 v ? '<div class="vidcol">' + v + "</div>" : ""].filter(Boolean);
+    return '<div class="shots' + (shown.length > 1 ? " three" : " one") + '">' +
+      shown.join("") + "</div>";
   }
 
   // 눌러서 크게 보기 — 작은 칸에서는 판정이 안 된다.
