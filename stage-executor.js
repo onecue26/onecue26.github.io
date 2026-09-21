@@ -171,16 +171,32 @@
     return !!(r && r.decision === "ok");
   }
 
+  // 어떤 일이 그 판단보다 **뒤에** 일어났는가. 시각 문자열은 ISO 라 그대로 비교한다.
+  function after(when, mark) {
+    return !!when && (!mark || String(when) > String(mark));
+  }
+
   function boardPhase(project, counts) {
     var c = counts || {};
-    // ① 글 — 여기서부터 시작한다. 컷이 없으면 아직 아무것도 없다.
     var pick = of(project, "storyboard");
-    if (!c.cuts) {
-      if (!pick.chosen_at) return "design.choose";
+    // ① 글 — 컷이 없거나, 반려당해 다시 써야 하면 여기다.
+    //   반려는 「누가 다시 쓸지」부터 다시 묻는다. 같은 사람이 다시 할 수도 있고
+    //   AI 가 쓴 것을 사람이 고쳐 쓸 수도 있는데, 그걸 못 고르면 반려가 반쪽이 된다.
+    var lastDesign = lastReview(project, "design", null);
+    var rework = !!(lastDesign && lastDesign.decision === "revise");
+    var since = rework ? lastDesign.decided_at : null;
+    if (!c.cuts || rework) {
+      // 반려 뒤에 다시 고르고 다시 시작해야 답한 것이다. 반려 **전**의 선택은
+      // 그 반려에 대한 답이 아니다 — 그걸 답으로 세면 화면이 그냥 넘어가 버린다.
+      if (!after(pick.chosen_at, since)) return "design.choose";
       var running = !!(project.job && project.job.step === "storyboard");
-      var started = pick.mode === "human" ? !!pick.started_at
-        : (!!pick.ai_job_id || running);
-      return started ? "design.working" : "design.start";
+      var started = pick.mode === "human"
+        ? after(pick.started_at, since)
+        : (after(pick.started_at, since) || (!since && !!pick.ai_job_id) || running);
+      if (!started) return "design.start";
+      if (running) return "design.working";
+      // 다시 쓴 결과가 들어왔으면 다시 검수한다. 컷이 아직 없으면 쓰는 중이다.
+      return c.cuts ? "design.review" : "design.working";
     }
     if (!approved(project, "design", null)) return "design.review";
     // ② 그림 — 글이 통과해야 뽑는다. 승인 안 된 글로 뽑으면 다시 뽑게 된다.
