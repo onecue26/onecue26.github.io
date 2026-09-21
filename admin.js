@@ -787,12 +787,34 @@
         "컷 " + (n.cuts || 0) + "개 · 승인해야 그림을 뽑습니다. 컷마다 따로 요청하려면 아래 컷에서 적으세요");
     }
     if (act.phase === "board.make") {
+      // ★ 승인된 제품 기준 이미지가 없으면 뽑지 않는다. 기준 없이 여섯 컷을 뽑으면
+      //   컷마다 캔 모양·색·사선 위치가 달라지고, 그건 고쳐 쓸 수 있는 문제가 아니라
+      //   전부 다시 뽑아야 하는 문제다. 그래서 할 일을 「승인」으로 바꿔 보여 준다 —
+      //   못 누르는 버튼을 띄워 놓고 이유를 옆에 적는 것보다, 할 수 있는 일을 준다.
+      var ref = (p.files || []).filter(function (f) {
+        return f.kind === "product_ref" || f.kind === "anchor";
+      });
+      var okRef = ref.filter(function (f) { return f.approved; });
+      if (!okRef.length) {
+        return '<div class="lc lc-start"' + tag + ">" +
+          head("제품 기준 이미지를 먼저 승인해 주세요",
+               "기준 없이 뽑으면 컷마다 제품 모양이 달라집니다") +
+          (ref.length
+            ? '<div class="lc-row">' +
+              '<a class="btn ghost" href="' + esc(ref[0].url) +
+              '" target="_blank" rel="noopener">이미지 보기</a>' +
+              '<button class="btn" type="button" data-lc="approve-anchor" data-asset="' +
+              esc(ref[0].id || "") + '"' + tag + ">이 이미지를 기준으로 승인</button></div>"
+            : '<span class="lc-msg err">등록된 제품 이미지가 없습니다 — 광고주 자료를 먼저 받아야 합니다</span>') +
+          '<span class="lc-msg" data-lc-msg></span></div>';
+      }
       return '<div class="lc lc-start"' + tag + ">" +
         head("콘티 그림을 뽑습니다", "승인된 컷 설계 " + (n.cuts || 0) + "개를 기준으로 한 판 뽑아 컷마다 잘라 넣습니다") +
         '<div class="lc-row">' +
         '<button class="btn" type="button" data-lc="make-board"' + tag + ">콘티 뽑기</button>" +
         "</div>" +
-        '<span class="lc-msg">유료 생성입니다 — 시점은 Dan 이 정합니다</span></div>';
+        '<span class="lc-msg">유료 생성입니다 — 누르면 작업으로 걸리고, 실제 생성 시점은 Dan 이 정합니다</span>' +
+        '<span class="lc-msg" data-lc-msg></span></div>';
     }
     if (act.phase === "board.working") {
       return '<div class="lc lc-working"' + tag + ">" +
@@ -1296,12 +1318,19 @@
           return stageReview(slug, step, layer, cut,
             what === "review-ok" ? "ok" : "revise", text).then(load).catch(fail(b, msg));
         }
+        if (what === "approve-anchor") {
+          lock(b);
+          return rpc(slug, "onecue_asset_approve",
+            { p_asset_id: b.dataset.asset, p_approved: true })
+            .then(load).catch(fail(b, msg));
+        }
         var call = what === "choose-ai" ? chooseStageExecutor(slug, step, "ai", "", "")
           : what === "rechoose" ? clearStageChoice(slug, step)
           : what === "start" ? stageStart(slug, step)
           : what === "approve" ? stageApprove(slug, step)
           : what === "revise" ? stageRevise(slug, step, text)
           : what === "next" ? stageNext(slug, step)
+          : what === "make-board" ? rpc(slug, "onecue_board_request", {})
           : null;
         if (!call) { b.disabled = false; return; }
         return call.then(load).catch(fail(b, msg));
@@ -1675,7 +1704,7 @@
           })),
           // kind·cut_n 을 같이 읽는다 — 콘티 단계가 「시각 콘티가 실제로 있는가」를
           // 데이터로 답해야 한다. 없는데 「완료」라고 적으면 그게 거짓 보고다
-          db.from("assets").select("project_id,role,kind,cut_n,url,storage_path,mime,meta")
+          db.from("assets").select("id,project_id,role,kind,cut_n,url,storage_path,mime,meta,approved")
             .eq("kind", "product_ref").in("project_id", ids),
           db.from("contacts").select("project_id,name,email,phone,title").in("project_id", ids),
           db.from("jobs").select("project_id,step,request").eq("state", "queued")
