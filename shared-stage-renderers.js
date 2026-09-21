@@ -27,11 +27,13 @@
   // 여기에 없는 칸은 어느 역할에서도 화면에 나가지 않는다(모르는 칸 = 안 그린다).
   var FIELDS = {
     concept: {
-      // visual(제작 방식)에는 안전 여백 같은 제작 사양이 들어가므로 관리자 칸이다.
-      // payoff(착지)는 광고주가 「어떻게 끝나나」를 알아야 고를 수 있어 공통이다.
-      common: ["key", "axis", "title", "body", "hook", "payoff",
+      // 광고주가 보는 것은 일곱 개다 — 번호·제목과 client_* 다섯.
+      // 내부 원문(axis·body·hook·visual·payoff·risk)은 초 단위 시간표와 제작
+      // 사양이라 관리자 칸이다. 광고주 칸이 비어도 이것으로 대신 채우지 않는다.
+      common: ["key", "title", "client_one_line", "client_explain",
+        "client_appeal", "client_mood", "client_difference",
         "is_chosen", "is_recommended", "reco_reason"],
-      admin: ["visual", "risk"],
+      admin: ["axis", "body", "hook", "visual", "payoff", "risk"],
     },
     development: {
       common: ["arc", "copies", "narration_tone", "slogan", "bgm"],
@@ -139,7 +141,7 @@
       var m = part.match(/^(\d+(?:\.\d+)?(?:~|–|-)\d+(?:\.\d+)?초)\s*([\s\S]*)$/);
       return m ? { at: m[1].trim(), what: m[2].trim() } : { at: "", what: part.trim() };
     });
-    return { lead: lead, steps: steps, production: production };
+    return { lead: lead, steps: steps, production: production, main: body };
   }
 
   function timelineList(steps) {
@@ -216,65 +218,63 @@
   }
 
   // ── 콘셉트 한 장 ────────────────────────────────────────────────────────────
-  // 공통 — 제목 / 핵심 아이디어 / 시간 흐름 / 제작 방식 / 첫 장면
-  // 관리자 추가 — 주의점
+  //
+  // 콘셉트 5안은 **다섯 발상 중 하나를 고르는 자리**다. 초·컷·카메라·장면 순서는
+  // 다음 단계(구성·각본)가 정한다. 여기서 미리 말하면 두 단계가 같은 말을 두 번
+  // 하면서 어긋나고, 고르는 사람은 발상이 아니라 제작 계획을 읽게 된다.
+  // (Codex seq218 단계 경계 · Dan 지시 2026-09-21 "콘셉트는 그냥 설명하는 것")
+  //
+  // 그래서 카드는 client_* 다섯 칸과 번호·제목, 일곱 개만 그린다.
+  // **내부 원문(body·axis·hook·visual·payoff·risk)으로 대신 채우지 않는다.**
+  // 그 칸들은 초 단위 시간표라, 비었을 때 대신 쓰면 지금 막은 것이 그대로 돌아온다.
+  // 비어 있으면 비었다고 적고, 원문은 관리자 접힘에 그대로 둔다.
   function concept(c, opts) {
     var row = c || {};
-    var admin = isAdmin(opts);
-    var flow = timeline(row.body);
-    var idea = paragraphs(flow.lead, "concept-lead");
-    var production = flow.production
-      ? '<div class="concept-production"><b>' + esc("제작 메모") + "</b><span>" +
-        esc(flow.production) + "</span></div>"
-      : "";
-    var scene = has(row.visual) ? "<span>" + esc(text(row.visual)) + "</span>" : "";
-    // 제작 방식(visual + 제작 메모)은 통째로 관리자 것이다. 화면 가장자리 안전
-    // 여백 같은 제작 사양이 여기 들어가는데, 콘셉트는 「어느 방향으로 갈까」를
-    // 고르는 자리라 광고주가 판단할 거리가 아니다.
-    // 표식은 한 겹만 씌운다 — 겹치면 commonOnly() 가 안쪽 닫힘에서 끊긴다.
-    // 그래서 여기서는 감싸지 않고, 아래 cc-more 한 겹으로 한 번에 감싼다.
-    var makeBox = part("make", "제작 방식", production + scene);
     var reco = row.is_recommended
       ? '<span class="reco" tabindex="0">추천' +
         (has(row.reco_reason) ? '<span class="why">' + esc(text(row.reco_reason)) + "</span>" : "") +
         "</span>"
       : "";
+    var one = text(row.client_one_line);
+    var ready = has(one) || has(row.client_explain);
+
+    // 광고주 칸이라도 제작 지시가 섞여 들어오면 관리자 쪽으로 넘긴다. 쓰는 쪽에
+    // 검사기가 있지만, 그 검사기를 지나오지 않은 행이 언젠가 생긴다.
+    var line = function (cls, head, value) {
+      return guard(cls, head,
+        has(value) ? "<span>" + esc(text(value)) + "</span>" : "", value, opts);
+    };
+
+    // 관리자만 보는 내부 원문. 콘셉트를 다시 쓸 때 근거가 되는 자리라 지우지 않는다.
+    var flow = timeline(row.body);
+    var internal =
+      (has(row.axis) ? part("axis", "내부 축", "<span>" + esc(text(row.axis)) + "</span>") : "") +
+      (flow.lead ? part("full", "내부 원문", paragraphs(flow.lead, "stage-para", 3)) : "") +
+      (flow.steps.length ? part("time", "내부 시간표", timelineList(flow.steps)) : "") +
+      (flow.production ? part("make", "제작 메모",
+        "<span>" + esc(flow.production) + "</span>") : "") +
+      (has(row.visual) ? part("scene", "장면 방식",
+        "<span>" + esc(text(row.visual)) + "</span>") : "") +
+      (has(row.hook) ? part("hook", "훅", "<span>" + esc(text(row.hook)) + "</span>") : "") +
+      (has(row.payoff) ? part("pay", "착지", "<span>" + esc(text(row.payoff)) + "</span>") : "") +
+      (has(row.risk) ? part("warn", "주의점", paragraphs(row.risk, "stage-para", 2)) : "");
+
     return '<article class="cc' + (row.is_chosen ? " chosen" : "") +
       (row.is_recommended ? " reco-on" : "") + '">' + reco +
       '<header class="cc-head"><span class="k">' + esc(text(row.key)) + "안" +
-        (has(row.axis) ? " <em>" + esc(text(row.axis)) + "</em>" : "") + "</span>" +
+        (has(one) ? " <em>" + esc(one) + "</em>" : "") + "</span>" +
         '<span class="t">' + esc(text(row.title)) + "</span></header>" +
-      // 제작 지시가 섞인 칸은 **관리자 쪽으로 옮긴다.** 지우거나 낱말만 도려내면
-      // 우리가 쓰지 않은 문장이 되고, 광고주 화면에서만 빼면 「관리자 = 광고주 +
-      // 덧붙임」이라는 이 파일의 전제가 깨진다. 옮기면 둘 다 지켜진다 —
-      // 표식을 벗기면 광고주 출력이 그대로 나온다.
-      guard("idea", "핵심 아이디어", idea, flow.lead, opts) +
-      guard("flow", "대략의 흐름", coarseFlow(flow.steps),
-        flow.steps.map(function (s) { return s.what; }).join(" "), opts) +
-      guard("hook", "첫 장면",
-        has(row.hook) ? "<span>" + esc(text(row.hook)) + "</span>" : "", row.hook, opts) +
-      guard("pay", "이렇게 끝난다",
-        has(row.payoff) ? "<span>" + esc(text(row.payoff)) + "</span>" : "", row.payoff, opts) +
-      // 옮겨진 칸이 있으면 왜 비어 있는지 적는다. 빈 자리는 「아직 안 만들었다」로
-      // 읽히지만 실제로는 「광고주가 읽을 말로 다시 써야 한다」이다. 두 역할이
-      // 같이 본다 — 관리자도 이 카드가 손봐야 할 카드임을 알아야 한다.
-      (isProductionTalk(row.body)
-        ? '<div class="cc-part pending"><b>정리 중</b><span>' +
-          esc("이 방향의 설명에 제작 지시가 섞여 있어, 보시기 좋은 말로 다시 정리하고 있습니다.") +
-          "</span></div>"
-        : "") +
-      // 위 넷(발상·흐름·첫 장면·착지)이 고를 때 쓰는 값이다. 아래 접힘은 하나를
-      // 정하고 나서 파고드는 값이라 **관리자만** 본다 — 제작 사양·위험·초 단위
-      // 원문이 들어간다. 콘셉트 단계에서 초와 컷수는 아직 정해진 값도 아니다.
-      // 지우는 게 아니라 역할을 나누는 것이다. 관리자 화면에는 그대로 있다.
-      extra(opts, (makeBox || has(row.risk) || flow.steps.length)
-        ? '<details class="cc-more"><summary>자세히</summary>' +
-          makeBox +
-          part("warn", "주의점",
-            has(row.risk) ? paragraphs(row.risk, "stage-para", 2) : "") +
-          (flow.steps.length
-            ? part("full", "기존 상세 기록 (초 단위)", timelineList(flow.steps)) : "") +
-          "</details>"
+      guard("idea", "설명",
+        has(row.client_explain) ? paragraphs(row.client_explain, "concept-lead", 3) : "",
+        row.client_explain, opts) +
+      line("appeal", "매력 포인트", row.client_appeal) +
+      line("mood", "분위기", row.client_mood) +
+      line("diff", "다른 안과 다른 점", row.client_difference) +
+      (ready ? "" :
+        '<div class="cc-part pending"><b>정리 중</b><span>' +
+        esc("이 방향의 설명을 보시기 좋은 말로 정리하고 있습니다.") + "</span></div>") +
+      extra(opts, internal
+        ? '<details class="cc-more"><summary>내부 제작 참고</summary>' + internal + "</details>"
         : "") +
       // opts.actions 는 **데이터가 아니라 그 화면의 버튼 자리**다(광고주의 「이걸로
       // 하겠습니다」 같은 것). 기록에서 온 글이 여기로 들어가는 일은 없고, 두 역할의
