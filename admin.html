@@ -156,17 +156,21 @@
 .flow-head .lbl{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--faint)}
 .now-owner{font-size:12.5px;color:var(--muted)}
 .now-owner b{color:var(--cue)}
-.flow-track{display:grid;grid-template-columns:repeat(9,minmax(92px,1fr));gap:6px;overflow-x:auto;padding-bottom:4px}
-.flow-step{min-width:92px;border:1px solid var(--rule);background:var(--sunk);padding:9px 8px;position:relative}
-.flow-step strong,.flow-step small{display:block;letter-spacing:0}
-.flow-step strong{font-size:12px;margin-top:7px;color:var(--muted)}
-.flow-step small{font-size:10.5px;line-height:1.35;margin-top:4px;color:var(--faint)}
+.flow-track{display:grid;grid-template-columns:1fr;gap:6px;padding-bottom:4px}
+.flow-step{min-width:0;border:1px solid var(--rule);background:var(--sunk);position:relative}
+.flow-step summary{cursor:pointer;list-style:none}.flow-step summary::-webkit-details-marker{display:none}
+.flow-summary{display:grid;grid-template-columns:54px minmax(130px,.7fr) auto minmax(150px,1fr);gap:9px;align-items:center;padding:9px 10px}
+.flow-step strong,.flow-step small{letter-spacing:0}
+.flow-step strong{font-size:12px;color:var(--muted)}
+.flow-step small{font-size:10.5px;line-height:1.35;color:var(--faint)}
+.flow-detail{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 14px;padding:9px 10px 11px 73px;border-top:1px solid var(--rule)}
+.flow-detail span,.flow-detail b{font-size:11px;letter-spacing:0;overflow-wrap:anywhere}.flow-detail b{grid-column:1/-1;color:var(--cue)}
 .flow-marker{font-family:"JetBrains Mono",monospace;font-size:9.5px;color:var(--faint)}
 .flow-step.done{border-color:color-mix(in srgb,var(--live) 45%,var(--rule));background:color-mix(in srgb,var(--live) 6%,var(--sunk))}
 .flow-step.done .flow-marker,.flow-step.done strong{color:var(--live)}
-.flow-step.current{border:2px solid var(--cue);background:color-mix(in srgb,var(--cue) 7%,var(--panel));padding:8px 7px}
+.flow-step.current{border:2px solid var(--cue);background:color-mix(in srgb,var(--cue) 7%,var(--panel))}
 .flow-step.current .flow-marker,.flow-step.current strong{color:var(--cue);font-weight:800}
-@media(max-width:760px){.flow-track{grid-template-columns:repeat(9,112px)}.flow-head{align-items:flex-start;flex-direction:column;gap:4px}}
+@media(max-width:760px){.flow-head{align-items:flex-start;flex-direction:column;gap:4px}.flow-summary{grid-template-columns:48px 1fr auto}.flow-summary small{grid-column:2/-1}.flow-detail{grid-template-columns:1fr;padding-left:67px}}
 
 /* 광고주가 올린 파일 — 눌러서 받는다 */
 .files{display:flex;flex-wrap:wrap;gap:9px;align-items:center;
@@ -233,6 +237,6 @@
 <script src="config.js?v=d4d97baa"></script>
 <script src="auth.js?v=fa839557"></script>
 <script src="asset-access.js"></script>
-<script src="admin.js?v=ai-update-badge-1"></script>
+<script src="admin.js?v=stage-accordion-1"></script>
 </body>
 </html>

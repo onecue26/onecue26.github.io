@@ -100,13 +100,39 @@
 
   function flow(p) {
     var current = FLOW.map(function (x) { return x.key; }).indexOf(p.step);
+    var history = p.aiHistory || [];
+    function stageAi(key) {
+      return history.filter(function (h) { return h.step === key; })[0] || null;
+    }
     return '<div class="flow-wrap"><div class="flow-head"><span class="lbl">전체 제작 흐름</span>' +
       '<span class="now-owner">현재 담당 <b>' + esc(currentOwner(p)) + '</b></span></div>' +
       '<div class="flow-track">' + FLOW.map(function (s, i) {
         var status = i < current ? "done" : (i === current ? "current" : "upcoming");
         var marker = i < current ? "완료" : (i === current ? "현재" : (i + 1));
-        return '<div class="flow-step ' + status + '"><span class="flow-marker">' + marker + '</span>' +
-          '<strong>' + esc(STEP_NAME[s.key]) + '</strong><small>' + esc(s.owner) + '</small></div>';
+        var h = stageAi(s.key), ai = h && h.executor ? h.executor : null;
+        var worker = ai ? [ai.executor_provider, ai.executor_model].filter(Boolean).join(" · ") : "기록 없음";
+        var reviewer = ai && ai.reviewer_model
+          ? (ai.reviewer_model === ai.executor_model ? "동일 AI 자체 검토"
+            : [ai.reviewer_provider, ai.reviewer_model].filter(Boolean).join(" · "))
+          : "별도 검토 없음";
+        var findings = ai && ai.review_findings ? ai.review_findings : null;
+        var findingText = findings && typeof findings.critical === "number"
+          ? '<span>검토 결과 · 치명 ' + findings.critical + ' / 참고 ' + (findings.advisory || 0) + '</span>' : '';
+        var working = i === current && p.job && p.job.step === s.key;
+        var updated = i === current && p.aiNeedsReview && h;
+        var badge = working ? '<em class="ai-update working">AI 재작업 중</em>'
+          : (updated ? '<em class="ai-update done">NEW · 업데이트 완료</em>' : '');
+        if (status === "upcoming") {
+          return '<div class="flow-step upcoming"><div class="flow-summary"><span class="flow-marker">' +
+            marker + '</span><strong>' + esc(STEP_NAME[s.key]) + '</strong><small>' + esc(s.owner) +
+            '</small></div></div>';
+        }
+        return '<details class="flow-step ' + status + '"' + (status === "current" ? ' open' : '') + '>' +
+          '<summary class="flow-summary"><span class="flow-marker">' + marker + '</span><strong>' +
+          esc(STEP_NAME[s.key]) + '</strong>' + badge + '<small>' + esc(s.owner) + '</small></summary>' +
+          '<div class="flow-detail"><span>수행 AI · ' + esc(worker) + '</span><span>검토 AI · ' +
+          esc(reviewer) + '</span>' + findingText +
+          (status === "current" ? '<b>현재 단계입니다. 위 상세 내용을 확인하세요.</b>' : '') + '</div></details>';
       }).join("") + '</div></div>';
   }
 
@@ -208,12 +234,6 @@
   // ── 목록 ──────────────────────────────────────────────────────────────────
   function card(p) {
     var isNew = p.isNew;
-    var aiWorking = !!(p.job && p.job.step === "concepts");
-    var aiNeedsReview = !!(p.latestAiAt && p.state === "pending" &&
-      (!p.sentAt || new Date(p.latestAiAt) > new Date(p.sentAt)) && !aiWorking);
-    var aiBadge = aiWorking
-      ? '<span class="ai-update working">AI 재작업 중</span>'
-      : (aiNeedsReview ? '<span class="ai-update done">NEW · 업데이트 완료</span>' : '');
     var productionAction = "";
     if (p.step === "brief" && p.state === "pending" && p.job && p.job.step === "facts") {
       if (p.productionEnrolled) {
@@ -384,7 +404,7 @@
 
     return '<div class="wrk' + (isNew ? " fresh" : "") + '">' +
       '<div class="top"><div>' +
-      '<div class="name">' + (isNew ? '<span class="new">NEW</span>' : "") + aiBadge +
+      '<div class="name">' + (isNew ? '<span class="new">NEW</span>' : "") +
       (p.brand && p.product ? '<span class="brand-name"><em>브랜드</em>' + esc(p.brand) + '</span>' : "") +
       '<strong class="product-name">' + esc(p.product || p.brand || p.slug) + '</strong></div>' +
       '<div class="meta">' + esc(p.slug) + " · " + p.running_sec + "초 · " +
@@ -398,7 +418,7 @@
         : "") +
       '<a class="btn ghost" href="' + esc(siteUrl(p.slug)) +
       '" target="_blank" rel="noopener">광고주 화면 ↗</a></div></div>' +
-      aiLine + redo + said + requirements + conceptReview + check + who +
+      redo + said + requirements + conceptReview + check + who +
       '<div class="mailbox" id="mail-' + esc(p.slug) + '" hidden></div>' +
       files +
       flow(p) +
@@ -692,6 +712,8 @@
                 executor: e.payload.executor, ts: e.ts };
             });
             p.latestAiAt = p.aiHistory.length ? p.aiHistory[0].ts : null;
+            p.aiNeedsReview = !!(p.latestAiAt && p.state === "pending" &&
+              (!p.sentAt || new Date(p.latestAiAt) > new Date(p.sentAt)));
             var b = briefs.filter(function (x) { return x.project_id === p.id; })[0];
             if (b) {
               p.brief_raw = b.raw; p.brief_goal = b.goal;
