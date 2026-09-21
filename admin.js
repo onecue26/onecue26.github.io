@@ -917,9 +917,17 @@
       productionAction = '<span class="progress-state">현재 절차에 따라 진행 중입니다</span>';
     }
 
-    var files = (p.files || []).length
-      ? '<div class="files"><span class="lbl">광고주가 올린 것 ' + p.files.length + "</span>" +
-        p.files.map(function (f) {
+    // 이제 p.files 에 우리가 만든 것(콘티·앵커·영상)도 들어 있다. 카드의 이 줄은
+    // **광고주가 보낸 것**만 세는 자리라, 여기서 골라야 한다. 안 그러면
+    // 콘티를 뽑을 때마다 「광고주가 올린 것」 숫자가 같이 늘어난다.
+    var sent = (p.files || []).filter(function (f) {
+      var spec = window.ONECUE_AD_TYPE_MATERIALS;
+      var k = spec && spec.kinds && spec.kinds[f.kind];
+      return k ? (k.by === "client" || k.by === "both") : f.kind === "product_ref";
+    });
+    var files = sent.length
+      ? '<div class="files"><span class="lbl">광고주가 올린 것 ' + sent.length + "</span>" +
+        sent.map(function (f) {
           var img = (f.mime || "").indexOf("image/") === 0;
           return '<a href="' + esc(f.url) + '" target="_blank" rel="noopener" download>' +
             (img ? '<img src="' + esc(f.url) + '" alt="' + esc(f.role) + '">'
@@ -1796,8 +1804,15 @@
           })),
           // kind·cut_n 을 같이 읽는다 — 콘티 단계가 「시각 콘티가 실제로 있는가」를
           // 데이터로 답해야 한다. 없는데 「완료」라고 적으면 그게 거짓 보고다
+          // ★ 여기에 .eq("kind","product_ref") 가 박혀 있었다. 그래서 관리자 화면은
+          //   **콘티 그림을 한 번도 불러온 적이 없다.** 증상이 셋으로 갈려 나왔는데
+          //   원인은 이 한 줄이었다 —
+          //     · 컷 글 옆 그림 자리가 늘 「그림 준비 전」이었고,
+          //     · boardCounts.board 가 늘 0 이라 그림을 올려도 다음 자리로 안 갔고,
+          //     · 「필요한 자료」가 제품 사진 말고는 아무것도 못 셌다.
+          //   관리자는 그 건의 모든 자료를 보는 자리다. 종류로 미리 거르지 않는다.
           db.from("assets").select("id,project_id,role,kind,cut_n,url,storage_path,mime,meta,approved")
-            .eq("kind", "product_ref").in("project_id", ids),
+            .in("project_id", ids),
           db.from("contacts").select("project_id,name,email,phone,title").in("project_id", ids),
           db.from("jobs").select("project_id,step,request").eq("state", "queued")
             .in("project_id", ids),
@@ -1894,9 +1909,13 @@
             // 이 단계에 이미 결과가 있는가 — 기능이 생기기 전에 끝난 건을
             // 「선택 대기」로 되돌리지 않기 위한 증거다. 아무것도 되돌리지 않는다
             p.reviews = reviewRows.filter(function (x) { return x.project_id === p.id; });
+            // ★ p.files 는 아래에서 채워졌는데 여기서 먼저 세고 있었다. 그래서
+            //   board 는 **항상 0** 이었다 — 그림이 다 올라와 있어도 화면은
+            //   「아직 그림이 없다」고 판단했다. 세려면 먼저 채운다.
+            p.files = files.filter(function (f) { return f.project_id === p.id; });
             p.boardCounts = {
               cuts: p.cuts.length,
-              board: (p.files || []).filter(function (f) { return f.kind === "board"; }).length,
+              board: p.files.filter(function (f) { return f.kind === "board"; }).length,
               boardRunning: !!(p.job && p.job.step === "storyboard" && p.job.kind === "image"),
             };
             p.stageResults = {
@@ -1907,7 +1926,6 @@
               var d = cs[i].data || [];
               p[t[1]] = d.filter(function (x) { return x.project_id === p.id; }).length;
             });
-            p.files = files.filter(function (f) { return f.project_id === p.id; });
             p.who = people.filter(function (c) { return c.project_id === p.id; })[0] || null;
             // 「새 의뢰」는 접수 단계에서 제품·자료 확인을 기다리는 건만 뜻한다.
             // 후속 단계의 재작업 job이 queued여도 새 의뢰로 되돌려 표시하지 않는다.
