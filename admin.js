@@ -267,6 +267,16 @@
       '<span class="sub">영상 · ' + esc(p.running_sec + "초 · " + (p.aspects || []).join(" / ")) +
       '</span></div>';
 
+    var ai = p.executor || null;
+    var aiLine = ai
+      ? '<div class="executor-line"><span>수행 AI</span><b>' +
+        esc([ai.executor_provider, ai.executor_model].filter(Boolean).join(" · ") || "기록 없음") +
+        '</b><span>핵심 검토 AI</span><b>' +
+        esc(ai.reviewer_model && ai.reviewer_model !== ai.executor_model
+          ? [ai.reviewer_provider, ai.reviewer_model].filter(Boolean).join(" · ")
+          : (ai.reviewer_model ? "동일 AI 자체 검토" : "별도 검토 없음")) + '</b></div>'
+      : '';
+
     var conceptReview = "";
     if (p.step === "concepts" && p.concepts && p.concepts.length) {
       var strategyLine = p.strategy
@@ -369,7 +379,7 @@
         : "") +
       '<a class="btn ghost" href="' + esc(siteUrl(p.slug)) +
       '" target="_blank" rel="noopener">광고주 화면 ↗</a></div></div>' +
-      redo + said + requirements + conceptReview + check + who +
+      aiLine + redo + said + requirements + conceptReview + check + who +
       '<div class="mailbox" id="mail-' + esc(p.slug) + '" hidden></div>' +
       files +
       flow(p) +
@@ -599,6 +609,8 @@
           db.from("strategies").select("project_id,insight,one_message").in("project_id", ids),
           db.from("concepts").select("project_id,key,title,body,hook,visual,risk,is_recommended,reco_reason")
             .in("project_id", ids),
+          db.from("jobs").select("project_id,response,finished_at").eq("state", "ok")
+            .in("project_id", ids).order("finished_at", { ascending: false }),
         ]).then(function (out) {
           if (out[1].error) throw out[1].error;
           return window.ONECUE_ASSETS.resolve(db, out[1].data || []).then(function (assets) {
@@ -615,6 +627,7 @@
           var enrollEvents = out[7].data || [];
           var strategies = out[8].data || [];
           var concepts = out[9].data || [];
+          var completedJobs = out[10].data || [];
 
           ROWS.forEach(function (p) {
             counts.forEach(function (t, i) {
@@ -647,6 +660,10 @@
             })[0] || null;
             p.strategy = strategies.filter(function (s) { return s.project_id === p.id; })[0] || null;
             p.concepts = concepts.filter(function (c) { return c.project_id === p.id; });
+            var completed = completedJobs.filter(function (j) {
+              return j.project_id === p.id && j.response && j.response.executor;
+            })[0];
+            p.executor = completed ? completed.response.executor : null;
             var b = briefs.filter(function (x) { return x.project_id === p.id; })[0];
             if (b) {
               p.brief_raw = b.raw; p.brief_goal = b.goal;
