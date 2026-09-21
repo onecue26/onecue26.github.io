@@ -166,13 +166,18 @@
     var row = c || {};
     var flow = timeline(row.body);
     var idea = paragraphs(flow.lead, "concept-lead");
-    var make = [
-      extra(opts, flow.production
-        ? '<div class="concept-production"><b>' + esc("제작 메모") + "</b><span>" +
-          esc(flow.production) + "</span></div>"
-        : ""),
-      has(row.visual) ? "<span>" + esc(text(row.visual)) + "</span>" : "",
-    ].join("");
+    var production = flow.production
+      ? '<div class="concept-production"><b>' + esc("제작 메모") + "</b><span>" +
+        esc(flow.production) + "</span></div>"
+      : "";
+    var scene = has(row.visual) ? "<span>" + esc(text(row.visual)) + "</span>" : "";
+    // 장면 방식(visual)이 비면 이 박스에 남는 것은 관리자 전용 제작 메모뿐이다.
+    // 그대로 두면 관리자에게만 박스가 생겨 「공통 구조는 두 역할이 같다」가 깨진다.
+    // 공통으로 보일 것이 없을 때는 박스째 관리자 쪽으로 넘긴다. 표식은 한 겹만
+    // 씌운다 — 겹치면 commonOnly() 가 안쪽 닫힘에서 끊겨 바깥 꼬리가 남는다.
+    var makeBox = scene
+      ? part("make", "제작 방식", extra(opts, production) + scene)
+      : extra(opts, part("make", "제작 방식", production));
     var reco = row.is_recommended
       ? '<span class="reco" tabindex="0">추천' +
         (has(row.reco_reason) ? '<span class="why">' + esc(text(row.reco_reason)) + "</span>" : "") +
@@ -185,7 +190,7 @@
         '<span class="t">' + esc(text(row.title)) + "</span></header>" +
       part("idea", "핵심 아이디어", idea || "") +
       part("flow", "시간 흐름", timelineList(flow.steps)) +
-      part("make", "제작 방식", make) +
+      makeBox +
       part("hook", "첫 장면", has(row.hook) ? "<span>" + esc(text(row.hook)) + "</span>" : "") +
       extra(opts, part("warn", "주의점",
         has(row.risk) ? paragraphs(row.risk, "stage-para", 2) : "")) +
