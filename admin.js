@@ -391,6 +391,57 @@
     return '<div class="' + cls + '"><b>' + esc(head) + '</b><span>' + esc(body) + '</span></div>';
   }
 
+  // ── 무엇이 모자란가 ───────────────────────────────────────────────────────
+  //
+  // 광고주 화면과 **같은 모듈·같은 계약**으로 센다(material-gaps.js). 두 화면이
+  // 다른 답을 하면 관리자는 「다 왔다」고 보고 광고주는 「더 달라」를 본다.
+  //
+  // 종류는 광고주에게 고르라고 하지 않는다. 의뢰 글을 읽고 우리가 판단하고,
+  // 여기서 **맞는지만** 확인한다. ai: 로 남은 것은 짐작이고 human: 은 확인된 것이다.
+  function needsPanel(p) {
+    var G = window.ONECUE_MATERIAL_GAPS, spec = window.ONECUE_AD_TYPE_MATERIALS;
+    if (!G || !spec) return "";
+    var counts = {};
+    (p.files || []).forEach(function (f) {
+      var k = spec.kinds && spec.kinds[f.kind];
+      if (!k || (k.by !== "client" && k.by !== "both")) return;
+      counts[f.kind] = (counts[f.kind] || 0) + 1;
+    });
+    var guessed = String(p.ad_type_by || "").indexOf("ai:") === 0;
+    var picker = '<div class="need-pick"><label>광고 종류</label><select data-adtype="' +
+      esc(p.slug) + '">' +
+      (p.ad_type ? "" : '<option value="">— 아직 정하지 않음 —</option>') +
+      Object.keys(spec.types).map(function (k) {
+        return '<option value="' + esc(k) + '"' + (k === p.ad_type ? " selected" : "") +
+          ">" + esc(spec.types[k].label) + "</option>";
+      }).join("") + '</select>' +
+      '<button class="btn ghost" data-adtype-save="' + esc(p.slug) + '">' +
+      (guessed ? "이걸로 확정" : "저장") + "</button>" +
+      (guessed ? '<em class="need-guess">AI 짐작입니다 — 확인해 주십시오</em>' : "") +
+      '<span class="msg" data-adtype-msg="' + esc(p.slug) + '"></span></div>';
+
+    if (!p.ad_type) {
+      return '<div class="needs need-admin"><h4>필요한 자료</h4>' + picker +
+        '<p class="need-type">종류를 정해야 무엇이 모자란지 셀 수 있습니다.</p></div>';
+    }
+    var out = G.gaps(counts, p.ad_type, p.cut_count || 0);
+    if (!out) return "";
+    function list(items, cls) {
+      return '<ul class="' + cls + '">' + items.map(function (t) {
+        var lines = t.split(/\r?\n/).map(function (x) { return x.trim(); });
+        return "<li>" + esc(lines[0]) + lines.slice(1).map(function (x) {
+          return '<span class="need-why">' + esc(x) + "</span>";
+        }).join("") + "</li>";
+      }).join("") + "</ul>";
+    }
+    return '<div class="needs need-admin"><h4>필요한 자료</h4>' + picker +
+      (out.blocking.length
+        ? '<h4>이게 없으면 정직하게 만들 수 없습니다</h4>' + list(out.blocking, "need-block")
+        : (out.notes.length ? "" : '<p class="need-ok">필요한 자료가 다 도착했습니다.</p>')) +
+      (out.notes.length ? '<h4>광고주에게 알릴 것</h4>' + list(out.notes, "need-note") : "") +
+      "</div>";
+  }
+
   function flow(p, bodies) {
     var current = FLOW.map(function (x) { return x.key; }).indexOf(p.step);
     var history = p.aiHistory || [];
@@ -472,6 +523,7 @@
           '</span><span>결과를 검토하는 AI(핵심 검토 AI) · ' + esc(reviewer) + '</span>' +
           findingText + delivered +
           (bact ? "" : execPicker(p, s.key)) + deliverBox(p, s.key) +
+          (s.key === "facts" ? needsPanel(p) : "") +
           (status === "upcoming" ? ''
             : (bodies[s.key] || '<p class="stage-empty">저장된 상세 내용이 없습니다.</p>')) +
           '</div>';
@@ -1201,6 +1253,31 @@
         });
       });
     });
+    // 광고 종류 확정 — 짐작(ai:)을 사람이 확인하면 human: 으로 바뀐다.
+    // 둘을 한 칸에 섞으면 「누가 정한 건지」를 영영 알 수 없게 된다.
+    document.querySelectorAll("[data-adtype-save]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var slug = b.dataset.adtypeSave;
+        var sel = document.querySelector('[data-adtype="' + slug + '"]');
+        var msg = document.querySelector('[data-adtype-msg="' + slug + '"]');
+        var row = ROWS.filter(function (x) { return x.slug === slug; })[0];
+        if (!sel || !row) return;
+        if (!sel.value) { msg.className = "msg err"; msg.textContent = "종류를 고르십시오."; return; }
+        var label = b.textContent;
+        b.disabled = true; b.textContent = "저장 중…";
+        msg.className = "msg"; msg.textContent = "";
+        db.rpc("onecue_set_ad_type", { p_project_id: row.id, p_type: sel.value })
+          .then(function (r) {
+            if (r.error) {
+              b.disabled = false; b.textContent = label;
+              msg.className = "msg err";
+              msg.textContent = "저장 실패 — " + r.error.message;
+              return;
+            }
+            load();
+          });
+      });
+    });
     document.querySelectorAll("[data-mail]").forEach(function (b) {
       b.addEventListener("click", function () { toggleMail(b.dataset.mail); });
     });
@@ -1686,7 +1763,7 @@
     el("stamp").textContent = new Date().toISOString().slice(0, 16).replace("T", " ");
 
     return db.from("projects")
-      .select("id,slug,brand,product,step,state,running_sec,cut_count,aspects,created_at")
+      .select("id,slug,brand,product,step,state,running_sec,cut_count,aspects,created_at,ad_type,ad_type_by")
       .order("created_at", { ascending: false })
       .then(function (r) {
         if (r.error) { setConn("bad", "불러오기 실패"); return; }
