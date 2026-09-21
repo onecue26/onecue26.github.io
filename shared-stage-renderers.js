@@ -406,6 +406,10 @@
     //   나란히 놓는 넓은 칸이라 지금 배치가 맞다. 멀쩡한 쪽을 같이 바꾸지 않는다.
     if (opts && opts.compact) {
       var beat = [text(row.move), when].filter(Boolean).join(" · ");
+      // 컷 하나에 대한 의견을 **그 컷 옆에** 붙인다. 전체 의견과 한 칸에 섞으면
+      // 어느 컷 얘기인지 모르게 되고, 모르면 다시 뽑을 때 쓸 수 없다.
+      var mine = (opts && typeof opts.cutActions === "function")
+        ? opts.cutActions(row.n) : "";
       return '<figure class="cut panel' + (media ? "" : " noimg") + '">' +
         (media || '<div class="cut-empty"><span>그림 준비 전</span></div>') +
         '<figcaption class="body">' +
@@ -415,6 +419,7 @@
         (has(row.action) ? '<p class="what">' + esc(text(row.action)) + "</p>" : "") +
         (beat ? '<p class="beat">' + esc(beat) + "</p>" : "") +
         (rows ? '<details class="cut-more"><summary>자세히</summary>' + rows + "</details>" : "") +
+        mine +
         "</figcaption></figure>";
     }
 

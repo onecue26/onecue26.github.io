@@ -704,6 +704,28 @@
     return "";
   }
 
+  // 컷 하나에 대한 의견. 그 컷 옆에 붙는다 — 전체 의견 칸과 섞지 않는다.
+  // 이미 낸 판단이 있으면 그것부터 보여 준다. 무엇을 요청했는지 모른 채로
+  // 다시 판단하게 하면 같은 말을 반복하거나 앞말을 잊는다.
+  function cutReviewBox(p, layer, n) {
+    var tag = ' data-slug="' + esc(p.slug) + '" data-step="storyboard"' +
+      ' data-layer="' + esc(layer) + '" data-cut="' + esc(String(n)) + '"';
+    var last = SE().lastReview(p, layer, n);
+    var said = last
+      ? '<span class="cut-said ' + (last.decision === "ok" ? "ok" : "revise") + '">' +
+        esc(last.decision === "ok" ? "승인함" : "수정 요청함") +
+        (last.note ? " · " + esc(last.note) : "") + "</span>"
+      : "";
+    return '<div class="cut-review"' + tag + ">" + said +
+      '<textarea class="lc-note" data-lc-note rows="2" placeholder="' +
+      esc(n + "번 컷만 고칠 점") + '"></textarea>' +
+      '<div class="lc-row">' +
+      '<button class="btn ghost" type="button" data-lc="review-ok"' + tag + ">이 컷 승인</button>" +
+      '<button class="btn ghost" type="button" data-lc="review-revise"' + tag +
+      ">이 컷 수정</button></div>" +
+      '<span class="lc-msg" data-lc-msg></span></div>';
+  }
+
   // ── 콘티 단계 — 한 자리에 할 일 하나 ──────────────────────────────────────
   //
   // 절차 정본: agency_site/db/stage_storyboard_flow.md (Dan 지시 2026-09-21)
@@ -1043,10 +1065,23 @@
         '<span class="bs-n">' + cutRows.length + '컷</span>' +
         '</div>'
       : "";
+    // 새 흐름이 도는 동안에는 옛 상태바·링크를 띄우지 않는다. 검수 칸이 같은 말을
+    // 이미 하고 있고, 두 번 말하면 어느 쪽을 봐야 할지 모르게 된다.
+    var boardFlow = (p.step === BOARD_REVIEW_STAGE)
+      ? SE().boardActions(p, p.boardCounts) : null;
+    if (boardFlow) storyboardHead = "";
     var storyboardBody = storyboardHead + (cutRows.length
-      ? '<details class="stage-cuts">' +
+      ? '<details class="stage-cuts"' +
+        ((boardFlow && boardFlow.perCut) ? " open" : "") + ">" +
         '<summary>컷 사양 ' + cutRows.length + '개 — 글로 확인하기</summary>' +
-        R().cuts(cutRows, { role: "admin", compact: true }) + '</details>'
+        R().cuts(cutRows, {
+          role: "admin", compact: true,
+          // 검수하는 자리에서만 컷마다 의견 칸이 붙는다. 볼 것이 없는 자리에
+          // 입력 칸을 두면 누를 수 없는 버튼이 생긴다.
+          cutActions: (boardFlow && boardFlow.perCut)
+            ? function (n) { return cutReviewBox(p, boardFlow.layer, n); }
+            : null,
+        }) + '</details>'
       : (p.n_cuts ? '<p class="stage-empty">콘티 ' + p.n_cuts +
           '컷이 있습니다. 컷 내용을 불러오지 못했습니다.</p>' : ""));
 
