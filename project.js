@@ -222,8 +222,15 @@
   // 그리고 **접는다.** 지금까지는 의뢰 내용·콘셉트·제작 설계·보내주신 자료가
   // 한 줄로 죽 늘어서 있어서, 지금 볼 것이 무엇인지가 그 속에 묻혔다.
   // 지금 칸만 열려 있고 지난 칸은 한 줄로 접힌다 — 눌러서 언제든 다시 본다.
+  // 상자에 이미 제목이 있는데 안쪽 구역이 또 제목을 달면 같은 말이 두 번 나온다.
+  // 구역 함수들은 상자 밖에서도 쓰이므로 제목을 지우지 않고, 상자에 넣을 때만 뗀다.
+  function stripHead(html) {
+    return String(html || "").replace(/^\s*<h2>[\s\S]*?<\/h2>/, "");
+  }
+
   function box(key, title, state, body, open) {
-    if (!body) return "";
+    body = stripHead(body);
+    if (!body.trim()) return "";
     return '<details class="cstep' + (open ? " now" : "") + '"' + (open ? " open" : "") +
       ' data-step="' + esc(key) + '">' +
       '<summary class="cstep-head"><span class="cstep-t">' + esc(title) + "</span>" +
