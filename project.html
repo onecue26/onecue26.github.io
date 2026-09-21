@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="style.css?v=client-concept-readable-260921">
-<link rel="stylesheet" href="stage-render.css?v=stage-read-260921-v12">
+<link rel="stylesheet" href="stage-render.css?v=stage-read-260921-v13">
 <style>
 .hero{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:22px}
 .hero h1{margin:0;font-size:27px;letter-spacing:-.02em}
@@ -18,11 +18,20 @@
 .hero .sub{color:var(--muted);font-size:13.5px;margin-top:2px}
 .hero>div{width:100%}
 .progress-scroll{width:100%;overflow-x:auto;padding-bottom:4px}
-.hero .bar{margin-top:12px;min-width:765px}
-.hero .bar i{width:auto;flex:1;height:6px}
-.stepnames{display:grid;grid-template-columns:repeat(9,minmax(82px,1fr));gap:3px;margin-top:6px;min-width:765px}
+/* ★ 칸 수를 숫자로 박지 않는다. repeat(9,…) 로 박혀 있었는데 막대는 여섯 칸이
+   되면서 이름만 아홉 칸으로 나뉘어 둘이 어긋났다. 아래처럼 두면 칸 수가
+   자식 수를 따라가므로, 단계를 더하거나 빼도 다시 어긋나지 않는다.
+   두 줄이 **같은 규칙**을 쓰는 것이 핵심이다 — 한쪽만 고치면 또 갈라진다. */
+.hero .bar,
+.stepnames{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(82px,1fr);gap:3px}
+.hero .bar{margin-top:12px}
+.hero .bar i{width:auto;height:6px}
+.stepnames{margin-top:6px}
 .stepnames span{font-size:10px;color:var(--faint);text-align:center;
   font-family:"JetBrains Mono",monospace;line-height:1.35;letter-spacing:0}
+/* 지금 칸은 이름도 같이 짚어 준다 — 막대 색만으로는 어느 이름인지 세어야 한다 */
+.stepnames span.now{color:var(--cue);font-weight:700}
+.stepnames span.done{color:var(--muted)}
 .pickbtn{margin-top:10px}
 /* 의뢰 내용 고치기 */
 .ed-l{display:block;font-size:12.5px;color:var(--muted);margin:12px 0 4px;
@@ -67,7 +76,7 @@ h2 #editBrief{margin-left:auto}
 <script src="config.js?v=d4d97baa"></script>
 <script src="auth.js?v=fa839557"></script>
 <script src="asset-access.js?v=260919"></script>
-<script src="shared-stage-renderers.js?v=stage-read-260921-v12"></script>
-<script src="project.js?v=stage-read-260921-v12"></script>
+<script src="shared-stage-renderers.js?v=stage-read-260921-v13"></script>
+<script src="project.js?v=stage-read-260921-v13"></script>
 </body>
 </html>
