@@ -1388,7 +1388,12 @@
             .in("project_id", ids),
           db.from("strategies").select("project_id,insight,insight_flip,usp,one_message,tone")
             .in("project_id", ids),
-          db.from("concepts").select("project_id,key,title,body,hook,visual,risk,is_recommended,reco_reason")
+          // axis·payoff·is_chosen 이 빠져 있었다. 그래서 고른 안을 전체폭으로 펼치는
+          // 배치가 한 번도 걸리지 않았고(is_chosen 이 늘 undefined), 카드의 「이렇게
+          // 끝난다」도 비어 있었다. 화면이 쓰는 칸은 화면이 읽어 와야 한다.
+          db.from("concepts")
+            .select("project_id,key,axis,title,body,hook,visual,payoff,risk," +
+              "is_recommended,reco_reason,is_chosen")
             .in("project_id", ids),
           db.from("jobs").select("project_id,response,finished_at").eq("state", "ok")
             .in("project_id", ids).order("finished_at", { ascending: false }),
