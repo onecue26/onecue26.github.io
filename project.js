@@ -176,7 +176,7 @@
       if (!raw) return "";
       var production = "", at = raw.indexOf("제작:");
       if (at >= 0) { production = raw.slice(at + 3).trim(); raw = raw.slice(0, at).trim(); }
-      var parts = raw.split(/(?=\d+(?:~|–|-)\d+초)/).filter(Boolean);
+      var parts = raw.split(/(?=\b\d+(?:~|–|-)\d+초)/).filter(Boolean);
       var main = parts.shift() || "";
       var html = '<p class="concept-lead">' + esc(main) + "</p>";
       if (parts.length) {
