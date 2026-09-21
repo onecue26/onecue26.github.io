@@ -165,11 +165,24 @@
   // 낱말만 지우면 문장이 부서져 **우리가 쓰지 않은 말**이 된다. 그래서 고치지
   // 않고 **내보내지 않는다.** 광고주에게는 안전한 칸만 남기고, 관리자 화면에는
   // 원문이 그대로 있다. 원문을 광고주용으로 다시 쓰는 것은 사람이 할 일이다.
-  var PRODUCTION_WORDS =
-    /(카메라|렌즈|화각|컷|프레임|합성|팩샷|와이프|비트|480p|720p|해상도|생성|모델|전환)/;
+  // ★ 이 목록은 파이썬 정본과 **같은 집합**이어야 한다.
+  //   정본: reference_library/scripts/onecue_dispatch.py 의 CONCEPT_FORBIDDEN.
+  //   갈라지면 한쪽만 통과시키는 구멍이 생기므로
+  //   agency_site/tests/test_concept_forbidden_parity.py 가 두 목록을 대조한다.
+  //   여기를 고치면 그 테스트가 먼저 깨진다 — 정본도 같이 고쳐야 한다.
+  var PRODUCTION_WORDS = new RegExp([
+    "카메라", "렌즈", "구도", "화각", "프레임",
+    "전환", "합성", "와이프", "팩샷", "비트",
+    "BGM", "효과음", "내레이션", "나레이션",
+    "프롬프트", "480p", "720p", "해상도", "생성 모델",
+    "처음", "가운데", "끝",
+    "첫 장면", "마지막 장면", "엔딩",
+    "난이도", "위험", "리스크"
+  ].join("|"));
   function isProductionTalk(s) {
     var t = text(s);
-    return PRODUCTION_WORDS.test(t) || /\d+(?:\.\d+)?\s*초/.test(t);
+    return PRODUCTION_WORDS.test(t) ||
+      /\d+(?:\.\d+)?\s*초/.test(t) || /\d+\s*컷/.test(t);
   }
 
   // 안전하면 공통 칸으로, 제작 지시가 섞였으면 관리자 블록으로. 같은 html 이
@@ -446,6 +459,9 @@
     esc: esc, text: text, has: has, label: label,
     sentences: sentences, chunks: chunks, paragraphs: paragraphs,
     timeline: timeline, timelineList: timelineList, itemList: itemList,
+    // parity 테스트가 같은 문장을 양쪽이 똑같이 잡는지 확인하려고 부른다.
+    // 목록이 같다고 적혀 있는 것과 실제로 잡는 것은 다르다.
+    isProductionTalk: isProductionTalk,
     concept: concept, development: development, cut: cut, cuts: cuts,
     developmentNotice: developmentNotice, DEVELOPMENT_STATES: DEVELOPMENT_STATES,
     strategy: strategy,
