@@ -188,17 +188,90 @@
     }).join("") + "</div>";
   }
 
+  // 광고주가 보낸 것만 고른다. 시스템이 만든 앵커·콘티·영상은 여기가 아니다.
+  // 누가 올린 것인지는 계약(ad-type-materials.js)이 kinds[].by 로 들고 있다 —
+  // 여기서 목록을 또 적으면 종류를 늘릴 때 한 곳을 빠뜨린다.
+  function clientKinds() {
+    var spec = window.ONECUE_AD_TYPE_MATERIALS;
+    if (!spec || !spec.kinds) return { product_ref: 1 };
+    var out = {};
+    Object.keys(spec.kinds).forEach(function (k) {
+      var by = spec.kinds[k].by;
+      if (by === "client" || by === "both") out[k] = 1;
+    });
+    return out;
+  }
+
+  function kindLabel(kind) {
+    var spec = window.ONECUE_AD_TYPE_MATERIALS;
+    var k = spec && spec.kinds && spec.kinds[kind];
+    return (k && k.label) || kind;
+  }
+
+  /** 종류별로 몇 개나 받았나. 모자란 것을 세는 쪽과 보여주는 쪽이 같은 수를 본다. */
+  function clientCounts(assets) {
+    var mine = clientKinds();
+    var counts = {};
+    (assets || []).forEach(function (a) {
+      if (!mine[a.kind]) return;
+      counts[a.kind] = (counts[a.kind] || 0) + 1;
+    });
+    return counts;
+  }
+
   function secFiles(assets) {
-    var f = (assets || []).filter(function (a) { return a.kind === "product_ref"; });
+    var mine = clientKinds();
+    var f = (assets || []).filter(function (a) { return !!mine[a.kind]; });
     if (!f.length) return "";
     return "<h2>보내주신 자료 " + f.length + "</h2><div class=\"files\">" +
       f.map(function (a) {
         var img = (a.mime || "").indexOf("image/") === 0;
+        var name = a.role || kindLabel(a.kind);
         return '<a href="' + esc(a.url) + '" target="_blank" rel="noopener">' +
-          (img ? '<img src="' + esc(a.url) + '" alt="' + esc(a.role) + '" loading="lazy">'
-               : '<span class="doc">PDF</span>') +
-          "<em>" + esc(a.role) + "</em></a>";
+          (img ? '<img src="' + esc(a.url) + '" alt="' + esc(name) + '" loading="lazy">'
+               : '<span class="doc">' + esc(kindLabel(a.kind)) + "</span>") +
+          "<em>" + esc(name) + "</em></a>";
       }).join("") + "</div>";
+  }
+
+  // ── 무엇이 더 필요한가 ────────────────────────────────────────────────────
+  //
+  // 자료가 모자라도 여태 아무도 말하지 않았다. 그냥 지어내고 넘어갔다.
+  // 요가학원 사진이 두 장인데 컷이 여섯이면 없는 각도 네 개를 만들어 낸다 —
+  // 그러면 손님이 찾아갔을 때 다른 곳이다. 모자란 것을 말하는 일은 거절이
+  // 아니라 **더 받으면 제대로 만들 수 있다**는 말이고, 그 말을 할 자리가
+  // 여태 없었다.
+  //
+  // 종류를 광고주에게 고르라고 하지 않는다. 우리가 의뢰 글을 읽고 판단한
+  // 값을 보여 주고, 틀렸으면 말해 달라고만 한다.
+  function secNeeds(assets, cuts) {
+    var G = window.ONECUE_MATERIAL_GAPS;
+    if (!G || !P.ad_type) return "";
+    var out = G.gaps(clientCounts(assets), P.ad_type,
+                     (cuts && cuts.length) || P.cut_count || 0);
+    if (!out) return "";
+    var guessed = String(P.ad_type_by || "").indexOf("ai:") === 0;
+    var head = '<h2>필요한 자료</h2><div class="panel needs">' +
+      '<p class="need-type">이 의뢰를 <b>' + esc(out.label) + "</b>로 보고 있습니다." +
+      (guessed ? " 다르면 알려주시면 바꿉니다." : "") + "</p>";
+    if (!out.blocking.length && !out.notes.length) {
+      return head + '<p class="need-ok">필요한 자료가 다 도착했습니다.</p></div>';
+    }
+    function list(items, cls) {
+      return '<ul class="' + cls + '">' + items.map(function (t) {
+        var lines = t.split(/\r?\n/).map(function (x) { return x.trim(); });
+        return "<li>" + esc(lines[0]) +
+          lines.slice(1).map(function (x) {
+            return '<span class="need-why">' + esc(x) + "</span>";
+          }).join("") + "</li>";
+      }).join("") + "</ul>";
+    }
+    return head +
+      (out.blocking.length
+        ? "<h4>이게 있어야 정직하게 만들 수 있습니다</h4>" + list(out.blocking, "need-block")
+        : "") +
+      (out.notes.length ? "<h4>알려드립니다</h4>" + list(out.notes, "need-note") : "") +
+      "</div>";
   }
 
   // ── 읽기 렌더는 관리자 화면과 **같은 모듈**을 쓴다 ─────────────────────────
@@ -298,7 +371,7 @@
     };
     return [
       box("ask", "의뢰 내용", "접수됨",
-        secBrief(brief, MINE && canEditBrief(P)) + secFiles(assets), now.ask),
+        secBrief(brief, MINE && canEditBrief(P)) + secFiles(assets) + secNeeds(assets, cuts), now.ask),
       box("pick", "콘셉트 선택",
         (concepts || []).some(function (c) { return c.is_chosen; }) ? "선택 완료" : "고르실 차례",
         shown("concepts")
@@ -661,7 +734,7 @@
       }
       if (auth.error) throw auth.error;
       LOGGED_IN = true;
-      return db.from("projects").select("id,client_id,slug,brand,product,running_sec,cut_count,aspect,aspects,channels,step,state").eq("slug", slug).maybeSingle();
+      return db.from("projects").select("id,client_id,slug,brand,product,running_sec,cut_count,aspect,aspects,channels,step,state,ad_type,ad_type_by").eq("slug", slug).maybeSingle();
     })
       .then(function (r) {
         if (!r) return;
