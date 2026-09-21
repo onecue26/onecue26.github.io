@@ -295,3 +295,22 @@ body.admin-wide .other-concepts .concepts {
 /* 끝난 자리 */
 .lc-approved { background: var(--live-soft); border-color: var(--live); }
 .lc-approved .lc-head > b { color: var(--live); }
+
+
+/* ── 컷 하나에 대한 의견 (.cut-review) ──────────────────────────────────────
+   전체 의견과 한 칸에 섞으면 어느 컷 얘기인지 모르게 되고, 모르면 다시 뽑을 때
+   쓸 수 없다. 그래서 그 컷 안에 붙는다. */
+.cut-review {
+  display: grid; gap: 6px; margin-top: 9px; padding-top: 9px;
+  border-top: 1px dashed var(--rule);
+}
+.cut-review .lc-note { min-height: 40px; font-size: 12px; padding: 6px 8px; }
+.cut-review .btn { font-size: 11px; padding: 5px 9px; }
+.cut-review .lc-row { gap: 5px; }
+/* 이미 낸 판단 — 무엇을 요청했는지 보고 나서 다시 판단한다 */
+.cut-said {
+  font-size: 11.5px; line-height: 1.5; padding: 5px 8px; border-radius: 6px;
+  overflow-wrap: anywhere; word-break: keep-all;
+}
+.cut-said.ok { background: var(--live-soft); color: var(--live); }
+.cut-said.revise { background: var(--hold-soft); color: var(--hold); }
