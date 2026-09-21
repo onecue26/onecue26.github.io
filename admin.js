@@ -671,11 +671,14 @@
       d.narration_tone || d.slogan));
     var developBody = hasDevelopment
       ? '<div class="stage-content"><dl class="stage-data">' +
-        '<dt>전개 흐름</dt><dd>' + esc(readable(d.arc)) + '</dd>' +
-        '<dt>카피</dt><dd>' + esc(readable(d.copies)) + '</dd>' +
-        '<dt>나레이션 톤</dt><dd>' + esc(readable(d.narration_tone)) + '</dd>' +
-        '<dt>슬로건</dt><dd>' + esc(readable(d.slogan)) + '</dd>' +
-        '<dt>BGM</dt><dd>' + (d.bgm ? "사용" : "사용 안 함") + '</dd>' +
+        '<dt>이야기 흐름(전개 arc)</dt><dd>' + esc(readable(d.arc)) + '</dd>' +
+        '<dt>화면 글자(카피)</dt><dd>' + esc(readable(d.copies)) + '</dd>' +
+        '<dt>읽어 주는 목소리 느낌(나레이션 톤)</dt><dd>' + esc(readable(d.narration_tone)) + '</dd>' +
+        '<dt>마지막 한 줄(슬로건)</dt><dd>' + esc(readable(d.slogan)) + '</dd>' +
+        '<dt>생성 단계 음악(BGM)</dt><dd>' + (d.bgm ? "생성할 때 함께 사용" : "넣지 않음") + '</dd>' +
+        '<dt>최종 편집 음악</dt><dd>' + (d.bgm
+          ? "생성된 음악을 확인한 뒤 유지·교체 결정"
+          : "전체 영상에 맞는 한 곡을 별도로 선택해 삽입") + '</dd>' +
         '</dl></div>'
       : (p.step === "develop" ? stageWait(p, "develop", "구성·각본") : "");
 
