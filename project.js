@@ -17,6 +17,8 @@
   // 판단하는 자리(5안 선택·콘티 승인)는 광고주의 것이다. 관리자가 대신 누르면 안 된다
   var cfg = window.ONECUE || {}, db = null, P = null, MINE = false, LOGGED_IN = false;
 
+  // 내부 단계 순서. **이름은 우리 것이라 화면에 쓰지 않는다** — 순서를 비교하는
+  // 데만 쓴다(IDX). 광고주가 보는 이름과 칸은 아래 CLIENT_FLOW 가 정한다.
   var STEPS = [
     ["brief", "의뢰 접수"], ["facts", "제품·자료 확인"], ["strategy", "전략 설계"],
     ["concepts", "콘셉트 5안"], ["develop", "구성·각본"], ["storyboard", "콘티 승인"],
@@ -68,12 +70,34 @@
     } catch (e) { /* 사생활 보호 모드 — 기억 못 해도 진행에 지장 없다 */ }
   }
 
+  // ── 광고주가 보는 흐름은 여섯 칸 ──────────────────────────────────────────
+  // 내부 아홉 단계를 그대로 보여 주면 「전략 설계」·「구성·각본」·「제작 자료」
+  // 같은 우리 말이 광고주 화면에 그대로 뜬다. 그건 광고주가 겪는 일이 아니라
+  // 우리가 일하는 순서다. 광고주가 실제로 지나는 여섯 칸으로 옮긴다.
+  // 막대와 아래 상자가 **같은 표**를 본다 — 둘이 다른 말을 하면 안 된다.
+  var CLIENT_FLOW = [
+    { key: "ask",    name: "의뢰 접수",   from: ["brief", "facts"] },
+    { key: "pick",   name: "콘셉트 선택", from: ["strategy", "concepts"] },
+    { key: "design", name: "제작 설계",   from: ["develop"] },
+    { key: "board",  name: "콘티 확인",   from: ["storyboard"] },
+    { key: "making", name: "영상 제작",   from: ["anchors", "video"] },
+    { key: "done",   name: "납품",        from: ["deliver"] },
+  ];
+
+  function clientAt(step) {
+    for (var i = 0; i < CLIENT_FLOW.length; i++) {
+      if (CLIENT_FLOW[i].from.indexOf(step) >= 0) return i;
+    }
+    return 0;
+  }
+
   function bar(step) {
-    var at = IDX[step] == null ? 0 : IDX[step];
-    return '<div class="progress-scroll"><div class="bar">' + STEPS.map(function (s, i) {
+    var at = clientAt(step);
+    return '<div class="progress-scroll"><div class="bar">' + CLIENT_FLOW.map(function (s, i) {
       return '<i class="' + (i < at ? "done" : i === at ? "now" : "") + '"></i>';
     }).join("") + "</div><div class=\"stepnames\">" +
-      STEPS.map(function (s) { return "<span>" + esc(s[1]) + "</span>"; }).join("") + "</div></div>";
+      CLIENT_FLOW.map(function (s) { return "<span>" + esc(s.name) + "</span>"; }).join("") +
+      "</div></div>";
   }
 
   // ── 각 구역 ───────────────────────────────────────────────────────────────
@@ -268,6 +292,14 @@
         (!boardOpen && shown("develop")) ? secDesigning() : "", now.design),
       box("board", "콘티 확인", "확인하실 차례",
         boardOpen ? secBoard(assets) + secCuts(cuts, assets) : "", now.board),
+      box("making", "영상 제작", "진행 중",
+        (now.making && !HAS_FINAL)
+          ? '<div class="stage-read development-notice">' +
+            '<section class="stage-block status"><h4>영상을 만들고 있습니다</h4>' +
+            "<p>승인하신 콘티대로 촬영·생성과 편집을 진행하고 있습니다. " +
+            "완성되면 이 화면에서 바로 보실 수 있습니다.</p></section></div>"
+          : "",
+        now.making),
       box("done", "완성 영상", "도착",
         secFinal(assets), now.done),
     ].join("");
