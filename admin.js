@@ -208,6 +208,12 @@
   // ── 목록 ──────────────────────────────────────────────────────────────────
   function card(p) {
     var isNew = p.isNew;
+    var aiWorking = !!(p.job && p.job.step === "concepts");
+    var aiNeedsReview = !!(p.latestAiAt && p.state === "pending" &&
+      (!p.sentAt || new Date(p.latestAiAt) > new Date(p.sentAt)) && !aiWorking);
+    var aiBadge = aiWorking
+      ? '<span class="ai-update working">AI 재작업 중</span>'
+      : (aiNeedsReview ? '<span class="ai-update done">NEW · 업데이트 완료</span>' : '');
     var productionAction = "";
     if (p.step === "brief" && p.state === "pending" && p.job && p.job.step === "facts") {
       if (p.productionEnrolled) {
@@ -378,7 +384,7 @@
 
     return '<div class="wrk' + (isNew ? " fresh" : "") + '">' +
       '<div class="top"><div>' +
-      '<div class="name">' + (isNew ? '<span class="new">NEW</span>' : "") +
+      '<div class="name">' + (isNew ? '<span class="new">NEW</span>' : "") + aiBadge +
       (p.brand && p.product ? '<span class="brand-name"><em>브랜드</em>' + esc(p.brand) + '</span>' : "") +
       '<strong class="product-name">' + esc(p.product || p.brand || p.slug) + '</strong></div>' +
       '<div class="meta">' + esc(p.slug) + " · " + p.running_sec + "초 · " +
@@ -685,6 +691,7 @@
               return { step: e.to_step || e.payload.target || "unknown",
                 executor: e.payload.executor, ts: e.ts };
             });
+            p.latestAiAt = p.aiHistory.length ? p.aiHistory[0].ts : null;
             var b = briefs.filter(function (x) { return x.project_id === p.id; })[0];
             if (b) {
               p.brief_raw = b.raw; p.brief_goal = b.goal;
