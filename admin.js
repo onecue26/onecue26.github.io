@@ -604,7 +604,7 @@
           db.from("events").select("project_id,ts").eq("kind", "sent")
             .in("project_id", ids).order("ts", { ascending: false }),
           db.from("events").select("project_id,kind,ts,payload")
-            .in("kind", ["production_enroll_requested", "production_enrolled"])
+            .in("kind", ["production_enroll_requested", "production_enrolled", "astra_draft"])
             .in("project_id", ids).order("ts", { ascending: false }),
           db.from("strategies").select("project_id,insight,one_message").in("project_id", ids),
           db.from("concepts").select("project_id,key,title,body,hook,visual,risk,is_recommended,reco_reason")
@@ -663,7 +663,12 @@
             var completed = completedJobs.filter(function (j) {
               return j.project_id === p.id && j.response && j.response.executor;
             })[0];
-            p.executor = completed ? completed.response.executor : null;
+            var draftEvent = enrollEvents.filter(function (e) {
+              return e.project_id === p.id && e.kind === "astra_draft" &&
+                e.payload && e.payload.executor;
+            })[0];
+            p.executor = completed ? completed.response.executor
+              : (draftEvent ? draftEvent.payload.executor : null);
             var b = briefs.filter(function (x) { return x.project_id === p.id; })[0];
             if (b) {
               p.brief_raw = b.raw; p.brief_goal = b.goal;
