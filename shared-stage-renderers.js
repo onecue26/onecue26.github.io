@@ -120,10 +120,16 @@
     var production = "";
     var at = body.indexOf("제작:");
     if (at >= 0) { production = body.slice(at + 3).trim(); body = body.slice(0, at).trim(); }
-    var parts = body.split(/(?=\b\d+(?:~|–|-)\d+초)/).filter(Boolean);
+    // 시간은 소수로도 적힌다 — "0.5~3초", "1.5~3초", "4.5~7초".
+    // \b\d+ 로 자르면 점 뒤의 숫자부터 잡아서 "0." 이 앞 문단 끝에 남고 "5~3초" 라는
+    // 없는 시간이 생긴다. 실제로 A·C·D안이 그렇게 깨져 있었다.
+    // 경계는 lookbehind 대신 표시를 심어 나눈다 — 구형 브라우저에서도 같게 돈다.
+    var MARK = "\u0000";
+    var RANGE = /\d+(?:\.\d+)?(?:~|–|-)\d+(?:\.\d+)?초/g;
+    var parts = body.replace(RANGE, MARK + "$&").split(MARK).filter(Boolean);
     var lead = (parts.shift() || "").trim();
     var steps = parts.map(function (part) {
-      var m = part.match(/^(\d+(?:~|–|-)\d+초)\s*([\s\S]*)$/);
+      var m = part.match(/^(\d+(?:\.\d+)?(?:~|–|-)\d+(?:\.\d+)?초)\s*([\s\S]*)$/);
       return m ? { at: m[1].trim(), what: m[2].trim() } : { at: "", what: part.trim() };
     });
     return { lead: lead, steps: steps, production: production };
