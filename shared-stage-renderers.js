@@ -389,8 +389,13 @@
         esc(text(row.intent)) + "</span></div>" : "") +
       (has(row.who) ? '<div class="cut-row"><b>등장 요소</b><span>' + esc(text(row.who)) +
         "</span></div>" : "") +
-      (cameraHtml ? '<div class="cut-row spec"><b>카메라</b>' + cameraHtml + "</div>" : "") +
-      (contHtml ? '<div class="cut-row cont"><b>이어지는 것</b>' + contHtml + "</div>" : "") +
+      // ★ 카메라 사양은 만드는 쪽이 서로에게 하는 말이다. 「이전 컷과 같은 표준
+      //   화각」은 광고주에게 아무 뜻이 없고, 판단할 자리도 아니다.
+      //   광고주가 콘티에서 보는 것은 **무슨 일이 일어나고 왜 그런가**다.
+      extra(opts, cameraHtml
+        ? '<div class="cut-row spec"><b>카메라</b>' + cameraHtml + "</div>" : "") +
+      extra(opts, contHtml
+        ? '<div class="cut-row cont"><b>이어지는 것</b>' + contHtml + "</div>" : "") +
       extra(opts, has(row.note)
         ? '<div class="cut-row memo"><b>제작 메모</b><span>' + esc(text(row.note)) +
           "</span></div>"
