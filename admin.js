@@ -456,7 +456,15 @@
         // 아직 오지 않은 단계도 펼칠 수 있어야 한다 — 실행 주체는 미리 정해 두는 것이다.
         // ★ 답을 기다리는 단계에서는 선택 블록이 **맨 위**에 온다. 수행·검토 줄보다
         //   먼저 눈에 들어와야 무엇을 해야 하는지가 바로 읽힌다
-        var detail = '<div class="flow-detail">' + choiceGate(p, s.key) +
+        // ── 지금 이 단계에서 할 일 하나 ─────────────────────────────────────
+        // 자리(phase)가 무엇을 보여 줄지 혼자 정한다. 화면은 그 표를 그리기만
+        // 한다 — 여기서 조건을 다시 판단하지 않는다. 구성·각본 한 단계에만
+        // 먼저 건다. 되는 것을 보고 나서 콘티로 옮긴다.
+        var act = (s.key === LIFECYCLE_STEP && i === current)
+          ? SE().actions(p, s.key, !!(p.stageResults && p.stageResults[s.key]))
+          : null;
+        var detail = '<div class="flow-detail">' +
+          (act ? lifecycleBar(p, s.key, act) : choiceGate(p, s.key)) +
           '<span>수행 · ' + esc(worker) +
           '</span><span>결과를 검토하는 AI(핵심 검토 AI) · ' + esc(reviewer) + '</span>' +
           findingText + delivered +
@@ -575,6 +583,115 @@
       box.hidden = false; box.innerHTML = ""; box.hidden = true;
       toggleMail(slug);
     });
+  }
+
+  // 이번 판에서 새 흐름을 타는 단계. 하나씩 옮긴다 (Codex seq227).
+  var LIFECYCLE_STEP = "develop";
+
+  // 누르는 동안 잠근다. 잠그지 않으면 같은 버튼이 두 번 눌려 작업이 둘 생긴다.
+  function lock(b) {
+    b.disabled = true;
+    b.dataset.label = b.textContent;
+    b.textContent = "처리 중…";
+  }
+  function fail(b, msg) {
+    return function (e) {
+      b.disabled = false;
+      if (b.dataset.label) b.textContent = b.dataset.label;
+      var why = (e && (e.message || e.error_description)) || String(e);
+      if (msg) { msg.className = "lc-msg err"; msg.textContent = why; }
+      else window.alert(why);
+    };
+  }
+
+  function bySlug(slug) {
+    return ROWS.filter(function (x) { return x.slug === slug; })[0] || null;
+  }
+  function rpcOk(r) {
+    if (r.error) throw r.error;
+    return r.data;
+  }
+  function rpc(slug, name, args) {
+    var p = bySlug(slug);
+    if (!p) return Promise.reject(new Error("건을 찾지 못했습니다"));
+    var body = { p_project_id: p.id };
+    Object.keys(args || {}).forEach(function (k) { body[k] = args[k]; });
+    return db.rpc(name, body).then(rpcOk);
+  }
+
+  function stageStart(slug, step) { return rpc(slug, "onecue_stage_start", { p_step: step }); }
+  function stageApprove(slug, step) { return rpc(slug, "onecue_stage_approve", { p_step: step }); }
+  function stageRevise(slug, step, note) {
+    return rpc(slug, "onecue_stage_revise", { p_step: step, p_note: note });
+  }
+  // 016 은 「결과 등록이 단계를 옮기지 않는다」를 일부러 막아 두었다. 그래서
+  // 앞으로 가는 일은 **사람이 누르는 한 동작**이다. 승인 뒤에만 눌린다.
+  function stageNext(slug, step) { return rpc(slug, "onecue_stage_next", { p_step: step }); }
+  // 담당을 다시 고르는 것은 「아직 시작 전」일 때만 뜻이 있다. 시작한 뒤에는
+  // 버튼 자체가 없다(상태표가 그렇게 정한다). 서버도 같은 이유로 거절한다.
+  function clearStageChoice(slug, step) {
+    return chooseStageExecutor(slug, step, "ai", "", "").then(function () {
+      return db.from("stage_executors").update({ chosen_at: null })
+        .eq("project_id", bySlug(slug).id).eq("step", step).then(rpcOk);
+    });
+  }
+
+  // 자리마다 **할 일 하나**를 띄운다. 여러 개를 동시에 펼치지 않는다 —
+  // 선택·실행·결과·검수·이동이 한꺼번에 서 있으면 무엇부터인지 알 수 없다.
+  function lifecycleBar(p, key, act) {
+    var tag = ' data-slug="' + esc(p.slug) + '" data-step="' + esc(key) + '"';
+    var pick = SE().of(p, key);
+    var head = function (what, why) {
+      return '<div class="lc-head"><b>' + esc(what) + "</b>" +
+        (why ? "<span>" + esc(why) + "</span>" : "") + "</div>";
+    };
+    if (act.phase === "choose") {
+      return '<div class="lc lc-choose"' + tag + ">" +
+        head("누가 맡습니까", "고르기만 해서는 작업이 시작되지 않습니다") +
+        '<div class="lc-row">' +
+        '<button class="btn" type="button" data-lc="choose-ai"' + tag + ">AI에게 맡기기</button>" +
+        (act.chooseHuman
+          ? '<button class="btn ghost" type="button" data-lc="choose-human"' + tag +
+            ">사람이 직접 진행</button>"
+          : "") + "</div></div>";
+    }
+    if (act.phase === "start") {
+      return '<div class="lc lc-start"' + tag + ">" +
+        head(pick.mode === "human" ? "담당자 · " + (pick.assignee || "미지정") : "AI가 맡습니다",
+             "시작을 눌러야 실제로 진행됩니다") +
+        '<div class="lc-row">' +
+        '<button class="btn" type="button" data-lc="start"' + tag + ">" +
+        (pick.mode === "human" ? "작성 시작" : "AI 작업 시작") + "</button>" +
+        '<button class="btn ghost" type="button" data-lc="rechoose"' + tag +
+        ">담당 다시 고르기</button></div></div>";
+    }
+    if (act.phase === "working") {
+      return '<div class="lc lc-working"' + tag + ">" +
+        head(pick.mode === "human"
+          ? "담당자가 작성 중 · " + (pick.assignee || "미지정")
+          : "AI가 작업 중",
+          pick.started_at ? "시작 " + ago(pick.started_at) : "") + "</div>";
+    }
+    if (act.phase === "review") {
+      return '<div class="lc lc-review"' + tag + ">" +
+        head("결과를 검토해 주세요", "승인해야 다음 단계로 넘어갑니다") +
+        '<div class="lc-row">' +
+        '<button class="btn" type="button" data-lc="approve"' + tag + ">승인</button>" +
+        '<button class="btn ghost" type="button" data-lc="revise"' + tag + ">수정 요청</button>" +
+        "</div>" +
+        '<textarea class="lc-note" data-lc-note placeholder="' +
+        esc("수정 요청은 무엇을 고칠지 적어야 보냅니다") + '"></textarea>' +
+        '<span class="lc-msg" data-lc-msg></span></div>';
+    }
+    if (act.phase === "approved") {
+      return '<div class="lc lc-approved"' + tag + ">" +
+        head("승인 완료", pick.approved_at ? esc(ago(pick.approved_at)) : "") +
+        (act.next
+          ? '<div class="lc-row"><button class="btn" type="button" data-lc="next"' + tag +
+            ">다음 단계로 이동</button></div>"
+          : "") + "</div>";
+    }
+    return "";
   }
 
   // ── 목록 ──────────────────────────────────────────────────────────────────
@@ -1002,6 +1119,41 @@
     });
 
     // 실행 주체 — 담당자를 고르면 이름 칸이 필요해진다
+    // ── 단계 상태 버튼 ────────────────────────────────────────────────────
+    // 한 곳에서 받는다. 어느 버튼이든 하는 일은 같다 — RPC 하나 부르고 다시 읽기.
+    // 누르는 동안 잠가서 두 번 눌리지 않게 한다(두 번 누르면 작업이 둘 생긴다).
+    document.querySelectorAll("[data-lc]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var what = b.dataset.lc;
+        var slug = b.dataset.slug, step = b.dataset.step;
+        var wrap = b.closest(".lc");
+        var msg = wrap && wrap.querySelector("[data-lc-msg]");
+        var note = wrap && wrap.querySelector("[data-lc-note]");
+        var text = note ? (note.value || "").trim() : "";
+        if (what === "revise" && !text) {
+          if (msg) { msg.className = "lc-msg err"; msg.textContent = "무엇을 고칠지 적어 주세요."; }
+          if (note) note.focus();
+          return;
+        }
+        if (what === "choose-human") {
+          var who = (window.prompt("담당자 이름을 적어 주세요.") || "").trim();
+          if (!who) return;
+          lock(b);
+          return chooseStageExecutor(slug, step, "human", who, "").then(load).catch(fail(b, msg));
+        }
+        lock(b);
+        var call = what === "choose-ai" ? chooseStageExecutor(slug, step, "ai", "", "")
+          : what === "rechoose" ? clearStageChoice(slug, step)
+          : what === "start" ? stageStart(slug, step)
+          : what === "approve" ? stageApprove(slug, step)
+          : what === "revise" ? stageRevise(slug, step, text)
+          : what === "next" ? stageNext(slug, step)
+          : null;
+        if (!call) { b.disabled = false; return; }
+        return call.then(load).catch(fail(b, msg));
+      });
+    });
+
     document.querySelectorAll("[data-exec-form]").forEach(function (f) { syncExecForm(f); });
     document.querySelectorAll("[data-exec-mode]").forEach(function (r) {
       r.addEventListener("change", function () {
@@ -1402,7 +1554,10 @@
           // 단계별 실행 주체 — 줄이 없는 단계는 예전 그대로 AI 다
           db.from("stage_executors")
             .select("project_id,step,mode,assignee,reviewer_model,reviewer_note,state," +
-              "delivered_at,delivered_note,client_summary,plain_language_ok")
+              "delivered_at,delivered_note,client_summary,plain_language_ok," +
+              // 상태기계가 보는 네 시각. 이것이 없으면 phase() 는 늘 「고르세요」로
+              // 판정한다 — 골랐다는 사실도, 시작했다는 사실도 화면에 없기 때문이다.
+              "chosen_at,started_at,approved_at,approved_by,revision_at,revision_note")
             .in("project_id", ids),
           // 구성·각본 결과 — 등록되면 그 단계 안에서 상세로 펼친다
           db.from("developments").select("project_id,arc,copies,narration_tone,slogan,bgm")
@@ -1416,7 +1571,7 @@
           // ★ 017 이 더한 칸은 **따로** 읽는다. 위 줄에 섞으면 017 적용 전 서버에서
           // 「없는 칸」 때문에 실행 주체 조회 전체가 실패해 화면에서 기능이 통째로 사라진다.
           // 따로 읽으면 017 전에는 이 칸만 비고 나머지는 예전 그대로 뜬다
-          db.from("stage_executors").select("project_id,step,ai_job_id")
+          db.from("stage_executors").select("project_id,step,ai_job_id,chosen_at,started_at")
             .in("project_id", ids),
         ]).then(function (out) {
           if (out[1].error) throw out[1].error;

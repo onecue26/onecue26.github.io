@@ -288,7 +288,10 @@
     if (row.mode === "human") return "human";
     // 예전 onecue_stage_executor_set 으로 'ai' 만 적힌 줄은 작업을 만들지 않았다.
     // 답은 있는데 결과가 없는 상태이므로 여전히 기다리는 중이다
-    return (row.ai_job_id || ranBefore(project, step)) ? "ai_queued" : "awaiting";
+    if (row.ai_job_id || ranBefore(project, step)) return "ai_queued";
+    // 고른 기록이 있으면 답은 나온 것이다. 시작만 남았다.
+    // 이게 없으면 골라도 화면이 계속 「고르세요」라고 해서 같은 선택을 반복하게 된다.
+    return row.chosen_at ? "chosen" : "awaiting";
   }
 
   // 지금 이 건이 관리자 답을 기다리며 멈춰 있는가 — 화면 맨 위에 띄울 것
