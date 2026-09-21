@@ -242,13 +242,13 @@
   function redoCard(canPick) {
     if (!canPick) return "";
     return '<div class="cc redo">' +
-      '<span class="k">다시</span>' +
-      '<span class="t">다섯 개 다 아니면</span>' +
-      '<span class="b">억지로 고르지 않으셔도 됩니다. 다른 다섯 가지를 새로 만들어 드립니다.</span>' +
+      '<span class="k">재요청</span>' +
+      '<span class="t">원하는 방향이 없나요?</span>' +
+      '<span class="b">억지로 고르지 않으셔도 됩니다. 의견을 주시면 다섯 가지를 새로 만들어 드립니다.</span>' +
       '<textarea id="redoNote" maxlength="500" ' +
       'placeholder="원하시는 방향이 있으면 적어주세요 — 안 적으셔도 됩니다&#10;&#10;예 · 아이가 나오는 건 피하고 싶습니다&#10;예 · 하와이를 더 보여주면 좋겠습니다&#10;예 · B안 방향은 좋은데 더 밝았으면"></textarea>' +
       '<span class="hint">비워두시면 저희가 축을 바꿔 다시 잡습니다.</span>' +
-      '<button class="btn ghost" id="redoBtn">다시 부탁드립니다</button>' +
+      '<button class="btn ghost" id="redoBtn">의견과 함께 5안 다시 요청</button>' +
       '<span class="hint" id="redoMsg"></span>' +
       "</div>";
   }
@@ -574,7 +574,7 @@
           db.from("strategies").select("insight,usp,one_message,tone").eq("project_id", id).maybeSingle(),
           // visual 은 관리자 칸이다(제작 사양). 화면에 안 그리는 것으로는 부족하고
           // 애초에 읽어 오지 않는다 — 받아 두면 언젠가 그려진다
-          db.from("concepts").select("key,axis,title,body,hook,payoff,is_chosen,is_recommended,reco_reason").eq("project_id", id).order("key"),
+          db.from("concepts").select("key,title,client_one_line,client_explain,client_appeal,client_mood,client_difference,is_chosen,is_recommended,reco_reason").eq("project_id", id).order("key"),
           db.from("cuts").select("n,t_start,t_end,block,size,angle,move,lens,action,intent").eq("project_id", id).order("n"),
           db.from("assets").select("kind,approved,url,storage_path,role,mime,cut_n,meta").eq("project_id", id).or("kind.neq.final,approved.eq.true"),
           db.from("approvals").select("gate,decision,note,decided_at").eq("project_id", id).order("decided_at"),
