@@ -267,15 +267,28 @@
       '<span class="sub">영상 · ' + esc(p.running_sec + "초 · " + (p.aspects || []).join(" / ")) +
       '</span></div>';
 
-    var ai = p.executor || null;
-    var aiLine = ai
-      ? '<div class="executor-line"><span>수행 AI</span><b>' +
-        esc([ai.executor_provider, ai.executor_model].filter(Boolean).join(" · ") || "기록 없음") +
-        '</b><span>핵심 검토 AI</span><b>' +
-        esc(ai.reviewer_model && ai.reviewer_model !== ai.executor_model
-          ? [ai.reviewer_provider, ai.reviewer_model].filter(Boolean).join(" · ")
-          : (ai.reviewer_model ? "동일 AI 자체 검토" : "별도 검토 없음")) + '</b></div>'
-      : '';
+    var AI_STAGE = {
+      facts: "제품·자료 확인", strategy: "전략 설계", concepts: "콘셉트 5안",
+      develop: "구성·각본·연출", storyboard: "콘티", asset: "제작 자료",
+      prompt: "프롬프트", render: "영상 제작", review: "영상 검수", post: "후처리"
+    };
+    var aiHistory = p.aiHistory || [];
+    var latestAiUpdate = aiHistory.length && aiHistory[0].ts ? ago(aiHistory[0].ts) : "";
+    var aiLine = aiHistory.length
+      ? '<div class="executor-history"><strong>단계별 AI 작업 기록' +
+        (latestAiUpdate ? ' · 마지막 업데이트 ' + esc(latestAiUpdate) : '') + '</strong>' + aiHistory.map(function (h) {
+          var ai = h.executor || {};
+          var worker = [ai.executor_provider, ai.executor_model].filter(Boolean).join(" · ") || "기록 없음";
+          var reviewer = ai.reviewer_model && ai.reviewer_model !== ai.executor_model
+            ? [ai.reviewer_provider, ai.reviewer_model].filter(Boolean).join(" · ")
+            : (ai.reviewer_model ? "동일 AI 자체 검토" : "별도 검토 없음");
+          var findings = ai.review_findings || {};
+          var findingText = typeof findings.critical === "number"
+            ? " · 치명 " + findings.critical + " / 참고 " + (findings.advisory || 0) : "";
+          return '<div class="executor-step"><span>' + esc(AI_STAGE[h.step] || h.step || "단계 미상") +
+            '</span><b>수행 ' + esc(worker) + '</b><b>검토 ' + esc(reviewer + findingText) + '</b></div>';
+        }).join("") + '</div>'
+      : '<div class="executor-history empty"><strong>단계별 AI 작업 기록</strong><span>아직 모델 기록이 없습니다.</span></div>';
 
     var conceptReview = "";
     if (p.step === "concepts" && p.concepts && p.concepts.length) {
@@ -603,7 +616,7 @@
           // 우리가 마지막으로 넘긴 시각 — 광고주 말을 처리했는지 가르는 기준
           db.from("events").select("project_id,ts").eq("kind", "sent")
             .in("project_id", ids).order("ts", { ascending: false }),
-          db.from("events").select("project_id,kind,ts,payload")
+          db.from("events").select("project_id,kind,to_step,ts,payload")
             .in("kind", ["production_enroll_requested", "production_enrolled", "astra_draft"])
             .in("project_id", ids).order("ts", { ascending: false }),
           db.from("strategies").select("project_id,insight,one_message").in("project_id", ids),
@@ -660,15 +673,18 @@
             })[0] || null;
             p.strategy = strategies.filter(function (s) { return s.project_id === p.id; })[0] || null;
             p.concepts = concepts.filter(function (c) { return c.project_id === p.id; });
-            var completed = completedJobs.filter(function (j) {
-              return j.project_id === p.id && j.response && j.response.executor;
-            })[0];
-            var draftEvent = enrollEvents.filter(function (e) {
-              return e.project_id === p.id && e.kind === "astra_draft" &&
-                e.payload && e.payload.executor;
-            })[0];
-            p.executor = completed ? completed.response.executor
-              : (draftEvent ? draftEvent.payload.executor : null);
+            var seenAiSteps = {};
+            p.aiHistory = enrollEvents.filter(function (e) {
+              if (e.project_id !== p.id || e.kind !== "astra_draft" ||
+                  !e.payload || !e.payload.executor) return false;
+              var step = e.to_step || e.payload.target || "unknown";
+              if (seenAiSteps[step]) return false;
+              seenAiSteps[step] = true;
+              return true;
+            }).map(function (e) {
+              return { step: e.to_step || e.payload.target || "unknown",
+                executor: e.payload.executor, ts: e.ts };
+            });
             var b = briefs.filter(function (x) { return x.project_id === p.id; })[0];
             if (b) {
               p.brief_raw = b.raw; p.brief_goal = b.goal;
