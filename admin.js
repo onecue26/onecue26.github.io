@@ -685,8 +685,11 @@
             });
             p.files = files.filter(function (f) { return f.project_id === p.id; });
             p.who = people.filter(function (c) { return c.project_id === p.id; })[0] || null;
-            // 「새 의뢰」 = 아직 우리가 손대지 않은 것. 처리하면 표시가 사라진다
-            p.isNew = queued.indexOf(p.id) >= 0;
+            // 「새 의뢰」는 접수 단계에서 제품·자료 확인을 기다리는 건만 뜻한다.
+            // 후속 단계의 재작업 job이 queued여도 새 의뢰로 되돌려 표시하지 않는다.
+            p.isNew = p.step === "brief" && jobs.some(function (j) {
+              return j.project_id === p.id && j.step === "facts";
+            });
             p.job = jobs.filter(function (j) { return j.project_id === p.id; })[0] || null;
             // 광고주가 실제로 남긴 말 중 가장 최근 것.
             // 자동으로 채워 넣은 문구(「…선택」·「남기신 말씀 없음」)는 말이 아니다
