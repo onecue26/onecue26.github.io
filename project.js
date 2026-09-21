@@ -91,12 +91,29 @@
     return 0;
   }
 
+  // 막대가 가리키는 칸과 열려 있는 상자는 **같아야 한다.**
+  // 내부 단계가 storyboard 여도 콘티 그림이 아직 없으면 광고주가 볼 것은
+  // 「제작 설계 진행 중」뿐이다. 그때 막대만 「콘티 확인」으로 가 있으면
+  // 「확인하라면서 볼 게 없다」가 된다. 막대를 볼 것에 맞춘다.
+  function clientNow() {
+    var i = clientAt(P ? P.step : "brief");
+    var board = CLIENT_FLOW.findIndex
+      ? CLIENT_FLOW.findIndex(function (s) { return s.key === "board"; })
+      : 3;
+    if (i === board && !BOARD_READY) return board - 1;
+    return i;
+  }
+
   function bar(step) {
-    var at = clientAt(step);
+    var at = clientNow();
+    void step;
     return '<div class="progress-scroll"><div class="bar">' + CLIENT_FLOW.map(function (s, i) {
       return '<i class="' + (i < at ? "done" : i === at ? "now" : "") + '"></i>';
     }).join("") + "</div><div class=\"stepnames\">" +
-      CLIENT_FLOW.map(function (s) { return "<span>" + esc(s.name) + "</span>"; }).join("") +
+      CLIENT_FLOW.map(function (s, i) {
+        return '<span class="' + (i < at ? "done" : i === at ? "now" : "") + '">' +
+          esc(s.name) + "</span>";
+      }).join("") +
       "</div></div>";
   }
 
