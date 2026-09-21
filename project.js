@@ -26,6 +26,8 @@
   // 광고주가 판단하는 자리 — 여기서만 버튼이 뜬다
   var GATES = { strategy: "검토", concepts: "선택", storyboard: "승인", video: "승인" };
   var HAS_FINAL = false;
+  // 콘티 그림이 실제로 올라와 있는가. 그림 없이 콘티 승인을 묻지 않기 위한 값이다
+  var BOARD_READY = false;
 
   // ★ 광고주는 자기에게 넘어온 것까지만 본다.
   //   전에는 DB 에 있는 걸 그냥 다 그렸다. 그래서 우리가 아직 검수도 안 한 콘티가
@@ -179,6 +181,9 @@
   }
   var CLIENT = { role: "client" };
 
+  // ★ 전략은 내부 문서다. 인사이트·강점·톤은 우리가 어떻게 판단했는지를 적은
+  //   것이지 광고주가 결정할 자리가 아니다(단계 계약 v1 §3 — 공개: 관리자 전용).
+  //   함수는 남겨 둔다. 부르는 곳이 없어야 새지 않는다 — 지우면 되살아날 뿐이다.
   function secStrategy(s) {
     if (!s) return "";
     return "<h2>전략</h2><div class=\"panel\">" + R().strategy(s, CLIENT) + "</div>";
@@ -193,6 +198,19 @@
   function secDevelop(done) {
     return "<h2>구성·각본</h2><div class=\"panel\">" +
       R().developmentNotice(done ? "done" : "working") + "</div>";
+  }
+
+  // ── 콘셉트 선택 뒤부터 시각 콘티 발송 전까지는 한 구간이다 ──────────────────
+  // 광고주 화면을 내부 9단계와 1:1 로 맞추지 않는다. 구성·각본을 짜는 일과
+  // 콘티를 준비하는 일은 광고주가 판단할 자리가 없는 내부 작업이라, 둘을
+  // 쪼개 보여 주면 「구성·각본 준비 완료」 같은 내부 진행만 늘어놓게 된다.
+  // 볼 것이 생기기 전까지는 상태 한 줄이다.
+  function secDesigning() {
+    return '<h2>제작 설계</h2><div class="panel">' +
+      '<div class="stage-read development-notice">' +
+      '<section class="stage-block status"><h4>제작 설계 진행 중입니다</h4>' +
+      "<p>고르신 방향으로 장면 구성과 콘티를 준비하고 있습니다. " +
+      "보실 것이 준비되면 이 화면에 올라옵니다.</p></section></div></div>";
   }
 
   function secConcepts(list, canPick) {
@@ -376,7 +394,9 @@
     }
     // 콘티에 「고쳐주세요」만 있고 무엇을 고칠지 적을 데가 없었다.
     // 승인이냐 반려냐만 받으면 우리는 어디가 틀렸는지 모른 채 다시 짜게 된다
-    if (p.step === "storyboard" && p.state === "ready" && !done.storyboard) {
+    // 그림이 없으면 승인을 묻지 않는다. 컷 표만 놓고 「승인하시면 제작에
+    // 들어갑니다」라고 하면, 광고주는 보지도 못한 화면을 승인하는 셈이 된다.
+    if (p.step === "storyboard" && p.state === "ready" && !done.storyboard && BOARD_READY) {
       if (!MINE) return look;
       var rev = (approvals || []).filter(function (a) {
         return a.gate === "storyboard" && a.decision === "revise";
@@ -514,7 +534,7 @@
 
   // ── 불러오기 ──────────────────────────────────────────────────────────────
   function load() {
-    P = null; MINE = false; HAS_FINAL = false;
+    P = null; MINE = false; HAS_FINAL = false; BOARD_READY = false;
     var slug = qs("slug");
     if (!slug) { el("main").innerHTML = '<div class="empty">건을 지정하지 않았습니다</div>'; return; }
 
@@ -552,7 +572,9 @@
         return Promise.all([
           db.from("briefs").select("raw,goal,target,format").eq("project_id", id).maybeSingle(),
           db.from("strategies").select("insight,usp,one_message,tone").eq("project_id", id).maybeSingle(),
-          db.from("concepts").select("key,axis,title,body,hook,visual,is_chosen,is_recommended,reco_reason").eq("project_id", id).order("key"),
+          // visual 은 관리자 칸이다(제작 사양). 화면에 안 그리는 것으로는 부족하고
+          // 애초에 읽어 오지 않는다 — 받아 두면 언젠가 그려진다
+          db.from("concepts").select("key,axis,title,body,hook,payoff,is_chosen,is_recommended,reco_reason").eq("project_id", id).order("key"),
           db.from("cuts").select("n,t_start,t_end,block,size,angle,move,lens,action,intent").eq("project_id", id).order("n"),
           db.from("assets").select("kind,approved,url,storage_path,role,mime,cut_n,meta").eq("project_id", id).or("kind.neq.final,approved.eq.true"),
           db.from("approvals").select("gate,decision,note,decided_at").eq("project_id", id).order("decided_at"),
@@ -562,6 +584,9 @@
           return window.ONECUE_ASSETS.resolve(db, x[4].data || []).then(function (assets) {
           x[4].data = assets;
           HAS_FINAL = (x[4].data || []).some(function (a) { return a.kind === "final" && a.approved === true && a.url; });
+          // 콘티 그림이 한 장이라도 있는가. 이 한 값이 콘티 구간 전체(승인 요청 ·
+          // 시트 · 컷)를 연다. 컷 표만 있는 상태는 「콘티」가 아니라 컷 설계다.
+          BOARD_READY = (x[4].data || []).some(function (a) { return a.kind === "board"; });
           var title = P.product || P.brand || P.slug;
           var brand = P.brand && P.product
             ? '<div class="brand-name"><span>브랜드</span>' + esc(P.brand) + '</div>'
@@ -579,9 +604,14 @@
             (shown("concepts")
               ? secConcepts(x[2].data, MINE && P.step === "concepts" && P.state === "ready")
               : "") +
-            (shown("develop") ? secDevelop(IDX[P.step] > IDX.develop) : "") +
-            (shown("storyboard") ? secBoard(x[4].data) + secCuts(x[3].data, x[4].data) : "") +
-            (shown("strategy") ? secStrategy(x[1].data) : "") +
+            // 시각 콘티가 실제로 있을 때만 콘티를 연다. 그림이 없으면 컷 사양은
+            // 광고주가 판단할 자료가 아니라 내부 설계서다 — 초·카메라·렌즈·의도가
+            // 그대로 나간다. 실제로 그렇게 나가 있었다(카메라 11 · 렌즈 6 · 의도 6).
+            // 준비되기 전까지는 구성·각본과 콘티 준비를 한 구간으로 묶어 상태만 적는다.
+            (BOARD_READY && shown("storyboard")
+              ? secBoard(x[4].data) + secCuts(x[3].data, x[4].data)
+              : (shown("develop") ? secDesigning() : "")) +
+            // 전략(인사이트·강점·톤)은 내부 판단 기록이라 내보내지 않는다
             secBrief(x[0].data, MINE && canEditBrief(P)) +
             secFiles(x[4].data) +
             '<footer><span><a href="index.html">← 목록</a></span>' +

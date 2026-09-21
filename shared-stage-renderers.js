@@ -27,9 +27,11 @@
   // 여기에 없는 칸은 어느 역할에서도 화면에 나가지 않는다(모르는 칸 = 안 그린다).
   var FIELDS = {
     concept: {
-      common: ["key", "axis", "title", "body", "hook", "visual",
+      // visual(제작 방식)에는 안전 여백 같은 제작 사양이 들어가므로 관리자 칸이다.
+      // payoff(착지)는 광고주가 「어떻게 끝나나」를 알아야 고를 수 있어 공통이다.
+      common: ["key", "axis", "title", "body", "hook", "payoff",
         "is_chosen", "is_recommended", "reco_reason"],
-      admin: ["risk"],
+      admin: ["visual", "risk"],
     },
     development: {
       common: ["arc", "copies", "narration_tone", "slogan", "bgm"],
@@ -202,13 +204,12 @@
         esc(flow.production) + "</span></div>"
       : "";
     var scene = has(row.visual) ? "<span>" + esc(text(row.visual)) + "</span>" : "";
-    // 장면 방식(visual)이 비면 이 박스에 남는 것은 관리자 전용 제작 메모뿐이다.
-    // 그대로 두면 관리자에게만 박스가 생겨 「공통 구조는 두 역할이 같다」가 깨진다.
-    // 공통으로 보일 것이 없을 때는 박스째 관리자 쪽으로 넘긴다. 표식은 한 겹만
-    // 씌운다 — 겹치면 commonOnly() 가 안쪽 닫힘에서 끊겨 바깥 꼬리가 남는다.
-    var makeBox = scene
-      ? part("make", "제작 방식", extra(opts, production) + scene)
-      : extra(opts, part("make", "제작 방식", production));
+    // 제작 방식(visual + 제작 메모)은 통째로 관리자 것이다. 화면 가장자리 안전
+    // 여백 같은 제작 사양이 여기 들어가는데, 콘셉트는 「어느 방향으로 갈까」를
+    // 고르는 자리라 광고주가 판단할 거리가 아니다.
+    // 표식은 한 겹만 씌운다 — 겹치면 commonOnly() 가 안쪽 닫힘에서 끊긴다.
+    // 그래서 여기서는 감싸지 않고, 아래 cc-more 한 겹으로 한 번에 감싼다.
+    var makeBox = part("make", "제작 방식", production + scene);
     var reco = row.is_recommended
       ? '<span class="reco" tabindex="0">추천' +
         (has(row.reco_reason) ? '<span class="why">' + esc(text(row.reco_reason)) + "</span>" : "") +
@@ -224,15 +225,15 @@
       part("hook", "첫 장면", has(row.hook) ? "<span>" + esc(text(row.hook)) + "</span>" : "") +
       part("pay", "이렇게 끝난다",
         has(row.payoff) ? "<span>" + esc(text(row.payoff)) + "</span>" : "") +
-      // 다섯 안을 **나란히 놓고 비교**하려면 칸 하나가 화면을 넘기면 안 된다.
-      // 위에 남긴 넷(발상·흐름·첫 장면·착지)이 고를 때 쓰는 값이고, 아래 셋은
-      // 하나를 정하고 나서 파고드는 값이다. 접는 것이지 빼는 것이 아니다 —
-      // 초 단위 원문도 지우지 않고 여기 그대로 둔다.
-      ((makeBox || has(row.risk) || flow.steps.length)
+      // 위 넷(발상·흐름·첫 장면·착지)이 고를 때 쓰는 값이다. 아래 접힘은 하나를
+      // 정하고 나서 파고드는 값이라 **관리자만** 본다 — 제작 사양·위험·초 단위
+      // 원문이 들어간다. 콘셉트 단계에서 초와 컷수는 아직 정해진 값도 아니다.
+      // 지우는 게 아니라 역할을 나누는 것이다. 관리자 화면에는 그대로 있다.
+      extra(opts, (makeBox || has(row.risk) || flow.steps.length)
         ? '<details class="cc-more"><summary>자세히</summary>' +
           makeBox +
-          extra(opts, part("warn", "주의점",
-            has(row.risk) ? paragraphs(row.risk, "stage-para", 2) : "")) +
+          part("warn", "주의점",
+            has(row.risk) ? paragraphs(row.risk, "stage-para", 2) : "") +
           (flow.steps.length
             ? part("full", "기존 상세 기록 (초 단위)", timelineList(flow.steps)) : "") +
           "</details>"
