@@ -1070,7 +1070,11 @@
     var boardFlow = (p.step === BOARD_REVIEW_STAGE)
       ? SE().boardActions(p, p.boardCounts) : null;
     if (boardFlow) storyboardHead = "";
-    var storyboardBody = storyboardHead + (cutRows.length
+    // 검수할 자리가 아니면 컷 목록을 띄우지 않는다. 다시 쓰라고 해 놓고 옛 컷을
+    // 나란히 보여 주면 「지금 무엇을 보는 것인가」가 흐려진다 — 새로 쓰는 중인지
+    // 옛것을 고치는 중인지 화면이 말해 주지 않게 된다.
+    var showCuts = !boardFlow || boardFlow.perCut;
+    var storyboardBody = storyboardHead + ((cutRows.length && showCuts)
       ? '<details class="stage-cuts"' +
         ((boardFlow && boardFlow.perCut) ? " open" : "") + ">" +
         '<summary>컷 사양 ' + cutRows.length + '개 — 글로 확인하기</summary>' +
@@ -1082,7 +1086,7 @@
             ? function (n) { return cutReviewBox(p, boardFlow.layer, n); }
             : null,
         }) + '</details>'
-      : (p.n_cuts ? '<p class="stage-empty">콘티 ' + p.n_cuts +
+      : ((p.n_cuts && showCuts) ? '<p class="stage-empty">콘티 ' + p.n_cuts +
           '컷이 있습니다. 컷 내용을 불러오지 못했습니다.</p>' : ""));
 
     // ★ 콘티 검수 링크 — **콘티 승인 단계 본문 안에서만** 뜬다.
