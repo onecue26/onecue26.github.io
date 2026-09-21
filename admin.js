@@ -273,6 +273,35 @@
         ? '<div class="review-strategy"><span>전략 한 줄</span><b>' + esc(p.strategy.one_message || "") + '</b>' +
           '<small>' + esc(p.strategy.insight || "") + '</small></div>'
         : "";
+      var replanBusy = p.job && p.job.step === "concepts";
+      // 재기획 범위 — 전부 다시 만들지, 아쉬운 안만 다시 만들지 고른다.
+      // 고르지 않은 안은 손대지 않는다(서버에서도 강제한다).
+      var conceptKeys = p.concepts.map(function (c) { return c.key; })
+        .sort(function (a, b) { return a.localeCompare(b); });
+      var pickBoxes = conceptKeys.map(function (k) {
+        return '<label class="replan-pick"><input type="checkbox" data-replan-key="' + esc(p.slug) +
+          '" value="' + esc(k) + '"><span>' + esc(k) + '</span></label>';
+      }).join("");
+      var replanBox = p.state === "pending"
+        ? (replanBusy
+          ? '<div class="replan-box busy"><b>새 콘셉트를 만드는 중입니다</b><span>완료되면 이 화면에 자동으로 교체됩니다.</span></div>'
+          : '<div class="replan-box" data-replan-form="' + esc(p.slug) + '">' +
+            '<b>다시 만들 범위</b>' +
+            '<div class="replan-scope">' +
+            '<label><input type="radio" name="replan-scope-' + esc(p.slug) + '" data-replan-scope="' +
+            esc(p.slug) + '" value="all" checked><span>전체 5안 다시 만들기</span></label>' +
+            '<label><input type="radio" name="replan-scope-' + esc(p.slug) + '" data-replan-scope="' +
+            esc(p.slug) + '" value="selected"><span>선택한 안만 다시 만들기</span></label>' +
+            '</div>' +
+            '<div class="replan-keys" data-replan-keys="' + esc(p.slug) + '" hidden>' +
+            '<span class="replan-keys-label">다시 만들 안</span>' + pickBoxes +
+            '<small>선택하지 않은 안은 그대로 둡니다.</small></div>' +
+            '<label for="replan-' + esc(p.slug) + '">어떤 점이 아쉬운지</label>' +
+            '<textarea id="replan-' + esc(p.slug) + '" data-replan-note="' + esc(p.slug) +
+            '" rows="3" placeholder="예: 제품 맛이 더 잘 느껴지고, 인물 없는 방향을 늘려 주세요."></textarea>' +
+            '<button class="btn ghost" type="button" data-replan="' + esc(p.slug) +
+            '">5안 전체 다시 만들기</button><small>이전 5안은 비교 기록으로 보존됩니다.</small></div>')
+        : "";
       conceptReview = '<section class="concept-review"><div class="review-head"><span>관리자 검토</span>' +
         '<h3>콘셉트 5안</h3><p>추천은 참고값입니다. 다섯 방향의 차이와 위험을 확인한 뒤 광고주에게 보내세요.</p></div>' +
         strategyLine + p.concepts.slice().sort(function (a, b) { return a.key.localeCompare(b.key); })
@@ -284,7 +313,7 @@
               '</dd><dt>위험</dt><dd>' + esc(c.risk) + '</dd></dl>' +
               (c.is_recommended && c.reco_reason ? '<small>추천 이유 · ' + esc(c.reco_reason) + '</small>' : '') +
               '</div></article>';
-          }).join("") + '</section>';
+          }).join("") + replanBox + '</section>';
     }
 
     // 1차 검수 — 정지점에 와 있으면 우리가 먼저 보고 광고주에게 넘긴다.
@@ -384,6 +413,112 @@
         send(b.dataset.send).then(load);
       });
     });
+    // 범위를 바꾸면 체크박스를 열고 닫고, 버튼 문구도 선택 상태를 따라간다
+    document.querySelectorAll("[data-replan-scope]").forEach(function (r) {
+      r.addEventListener("change", function () { syncReplanForm(r.dataset.replanScope); });
+    });
+    document.querySelectorAll("[data-replan-key]").forEach(function (k) {
+      k.addEventListener("change", function () { syncReplanForm(k.dataset.replanKey); });
+    });
+    document.querySelectorAll("[data-replan]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var slug = b.dataset.replan;
+        var field = document.querySelector('[data-replan-note="' + CSS.escape(slug) + '"]');
+        var note = field ? field.value.trim() : "";
+        var scope = replanScopeOf(slug);
+        var keys = replanKeysOf(slug);
+        if (scope === "selected" && !keys.length) {
+          window.alert("다시 만들 안을 하나 이상 골라 주세요.");
+          return;
+        }
+        if (!note) {
+          window.alert("어떤 점을 바꿀지 한 줄만 적어 주세요.");
+          if (field) field.focus();
+          return;
+        }
+        var label = b.textContent;
+        b.disabled = true; b.textContent = "재기획 요청 중…";
+        requestReplan(slug, note, scope, keys).then(load).catch(function (e) {
+          b.disabled = false; b.textContent = label;
+          window.alert("재기획을 요청하지 못했습니다 — " + (e.message || e));
+        });
+      });
+    });
+    document.querySelectorAll("[data-replan-form]").forEach(function (f) {
+      syncReplanForm(f.dataset.replanForm);
+    });
+  }
+
+  function replanScopeOf(slug) {
+    var picked = document.querySelector('[data-replan-scope="' + CSS.escape(slug) + '"]:checked');
+    return picked && picked.value === "selected" ? "selected" : "all";
+  }
+
+  function replanKeysOf(slug) {
+    return Array.prototype.slice
+      .call(document.querySelectorAll('[data-replan-key="' + CSS.escape(slug) + '"]:checked'))
+      .map(function (x) { return x.value; })
+      .sort(function (a, b) { return a.localeCompare(b); });
+  }
+
+  // 화면 상태를 한 곳에서 맞춘다 — 체크박스 노출과 버튼 문구
+  function syncReplanForm(slug) {
+    var scope = replanScopeOf(slug);
+    var keys = replanKeysOf(slug);
+    var box = document.querySelector('[data-replan-keys="' + CSS.escape(slug) + '"]');
+    if (box) box.hidden = scope !== "selected";
+    var btn = document.querySelector('[data-replan="' + CSS.escape(slug) + '"]');
+    if (!btn || btn.disabled) return;
+    btn.textContent = scope === "selected"
+      ? (keys.length ? "선택한 " + keys.length + "개 다시 만들기" : "다시 만들 안을 고르세요")
+      : "5안 전체 다시 만들기";
+  }
+
+  function requestReplan(slug, note, scope, keys) {
+    var p = ROWS.filter(function (x) { return x.slug === slug; })[0];
+    if (!p || p.step !== "concepts" || p.state !== "pending") {
+      return Promise.reject(new Error("지금은 콘셉트를 다시 만들 수 있는 단계가 아닙니다"));
+    }
+    if (p.job && p.job.step === "concepts") {
+      return Promise.reject(new Error("이미 새 콘셉트를 만들고 있습니다"));
+    }
+    var allKeys = (p.concepts || []).map(function (c) { return c.key; })
+      .sort(function (a, b) { return a.localeCompare(b); });
+    var selected = scope === "selected";
+    var replanKeys = selected ? (keys || []).slice() : allKeys.slice();
+    if (selected && !replanKeys.length) {
+      return Promise.reject(new Error("다시 만들 안을 하나 이상 골라 주세요"));
+    }
+    var unknown = replanKeys.filter(function (k) { return allKeys.indexOf(k) < 0; });
+    if (unknown.length) {
+      return Promise.reject(new Error("없는 콘셉트를 골랐습니다 — " + unknown.join(", ")));
+    }
+    var preserveKeys = allKeys.filter(function (k) { return replanKeys.indexOf(k) < 0; });
+    return Promise.all([
+      db.from("jobs").insert({
+        project_id: p.id, step: "concepts", kind: "text", state: "queued",
+        request: {
+          note: "관리자 재기획 요청", direction: note,
+          replan_scope: selected ? "selected" : "all",
+          replan_keys: replanKeys,
+          preserve_keys: preserveKeys,
+          supersedes_current_concepts: !selected,
+          preserve_previous_for_comparison: true,
+        },
+      }),
+      db.from("events").insert({
+        project_id: p.id, kind: "admin_replan_requested",
+        from_step: "concepts", to_step: "concepts",
+        payload: {
+          by: "admin_ui", note: note,
+          replan_scope: selected ? "selected" : "all",
+          replan_keys: replanKeys, preserve_keys: preserveKeys,
+        },
+      }),
+    ]).then(function (results) {
+      var failed = results.filter(function (x) { return x.error; })[0];
+      if (failed) throw failed.error;
+    });
   }
 
   // 1차 검수를 마쳤다 → 광고주 차례로 넘긴다. 이때 비로소 광고주 화면에 버튼이 뜬다
@@ -446,7 +581,7 @@
           Promise.all(counts.map(function (t) {
             return db.from(t[0]).select("project_id").in("project_id", ids);
           })),
-          db.from("assets").select("project_id,role,url,mime")
+          db.from("assets").select("project_id,role,url,storage_path,mime,meta")
             .eq("kind", "product_ref").in("project_id", ids),
           db.from("contacts").select("project_id,name,email,phone,title").in("project_id", ids),
           db.from("jobs").select("project_id,step,request").eq("state", "queued")
