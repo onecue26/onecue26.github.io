@@ -160,6 +160,77 @@
       ],
       "label": "구성·각본",
       "table": "developments"
+    },
+    "storyboard": {
+      "fields": [
+        {
+          "help": "한 줄이 한 컷입니다. 아래 칸들과 줄 수가 같아야 합니다",
+          "key": "cut_times",
+          "label": "컷 시간(초)",
+          "max_items": 20,
+          "max_length": 40,
+          "min_items": 1,
+          "min_length": 1,
+          "placeholder": "한 줄에 하나씩 · 예 · 0~1.6",
+          "plain_language": true,
+          "required": true,
+          "type": "list"
+        },
+        {
+          "help": "이 컷이 무슨 대목인지 짧게 적습니다",
+          "key": "cut_blocks",
+          "label": "컷 묶음",
+          "max_items": 20,
+          "max_length": 40,
+          "min_items": 1,
+          "min_length": 1,
+          "placeholder": "한 줄에 하나씩 · 예 · 훅",
+          "plain_language": true,
+          "required": false,
+          "type": "list"
+        },
+        {
+          "help": "그 컷에서 무엇이 어떻게 움직이는지 적습니다",
+          "key": "cut_actions",
+          "label": "컷에서 일어나는 일",
+          "max_items": 20,
+          "max_length": 500,
+          "min_items": 1,
+          "min_length": 1,
+          "placeholder": "한 줄에 하나씩 · 예 · 자몽 조각이 왼쪽에서 통통 뛰어 들어와 가운데에 선다",
+          "plain_language": true,
+          "required": true,
+          "type": "list"
+        },
+        {
+          "help": "왜 이 컷이 필요한지 적습니다",
+          "key": "cut_intents",
+          "label": "그 컷을 두는 까닭",
+          "max_items": 20,
+          "max_length": 400,
+          "min_items": 1,
+          "min_length": 1,
+          "placeholder": "한 줄에 하나씩 · 예 · 첫 1.6초 안에 사물이 살아 움직이는 재미를 보여준다",
+          "plain_language": true,
+          "required": false,
+          "type": "list"
+        },
+        {
+          "help": "그 컷 화면에 나오는 것들입니다. 사람이 아니어도 됩니다",
+          "key": "cut_elements",
+          "label": "등장 요소",
+          "max_items": 20,
+          "max_length": 300,
+          "min_items": 1,
+          "min_length": 1,
+          "placeholder": "한 줄에 하나씩 · 예 · 삼각형 자몽 조각, 뒤쪽의 RUSH 캔",
+          "plain_language": true,
+          "required": false,
+          "type": "list"
+        }
+      ],
+      "label": "콘티 · 컷 설계",
+      "table": "cuts"
     }
   },
   "version": "2026-09-21-v3"
