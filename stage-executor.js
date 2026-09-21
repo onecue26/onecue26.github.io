@@ -203,7 +203,12 @@
     if (!c.board) return c.boardRunning ? "board.working" : "board.make";
     if (!approved(project, "board", null)) return "board.review";
     // ③ 완성 — 보고 또 고칠 수 있다. 승인해야 전송이 뜬다.
-    return approved(project, "final", null) ? "final.sent" : "final.review";
+    // (3) 완성 — 보고 또 고칠 수 있다. 승인해야 전송이 뜬다.
+    //     그리고 **보낸 뒤**는 또 다른 자리다. 여기가 없어서, 이미 보낸 뒤에도
+    //     화면이 계속 「콘티 전송」을 권했다. 승인과 전송을 다른 일로 두었으면
+    //     보낸 뒤 자리도 있어야 앞뒤가 맞는다.
+    if (!approved(project, "final", null)) return "final.review";
+    return c.boardSent ? "final.done" : "final.sent";
   }
 
   // 그 자리에서 눌리는 것. 화면은 이 표를 그리기만 한다.
@@ -233,7 +238,9 @@
       showCuts: at !== "design.choose" && at !== "design.start"
         && at !== "design.working",
       send: at === "final.sent",
-      cancel: at === "final.review" || at === "final.sent",
+      // 보낸 것을 내린다. 고치기로 한 순간 광고주 화면의 옛 콘티는 거짓이 된다.
+      unsend: at === "final.done",
+      cancel: at === "final.review" || at === "final.sent" || at === "final.done",
     };
   }
 
