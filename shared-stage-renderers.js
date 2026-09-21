@@ -128,6 +128,11 @@
     var RANGE = /\d+(?:\.\d+)?(?:~|–|-)\d+(?:\.\d+)?초/g;
     var parts = body.replace(RANGE, MARK + "$&").split(MARK).filter(Boolean);
     var lead = (parts.shift() || "").trim();
+    // 앞머리의 「15초 · 6컷.」 은 핵심 아이디어가 아니라 사양이다. 게다가 초·컷수는
+    // 콘셉트 단계가 정하는 값이 아니라 다음 단계(구성·각본)가 정하는 값이다.
+    // 그대로 두면 다섯 카드의 첫 줄이 전부 같은 꼴의 숫자로 시작해 비교가 안 된다.
+    // 줄 전체가 사양이면 통째로, 뒤에 본문이 이어지면 사양만 떼어 낸다.
+    lead = lead.replace(/^\d+(?:\.\d+)?\s*초\s*[·,]?\s*\d+\s*컷\s*[.·,]?\s*/, "");
     var steps = parts.map(function (part) {
       var m = part.match(/^(\d+(?:\.\d+)?(?:~|–|-)\d+(?:\.\d+)?초)\s*([\s\S]*)$/);
       return m ? { at: m[1].trim(), what: m[2].trim() } : { at: "", what: part.trim() };
@@ -140,6 +145,26 @@
     return '<ol class="concept-timeline">' + steps.map(function (s) {
       return "<li>" + (s.at ? "<b>" + esc(s.at) + "</b>" : "<b></b>") +
         "<span>" + esc(s.what) + "</span></li>";
+    }).join("") + "</ol>";
+  }
+
+  // ── 콘셉트 단계는 「초」를 말하지 않는다 ────────────────────────────────────
+  // 콘셉트는 다섯 방향 중 하나를 고르는 단계다. 정확한 초·컷수·카메라는 다음
+  // 단계(구성·각본)가 정하는 것이고, 여기서 미리 못을 박으면 두 단계가 같은 말을
+  // 두 번 하면서 서로 어긋난다. 그래서 고를 때 필요한 만큼만 — 처음·가운데·끝
+  // 세 덩이로 묶어 시간 없이 보여 준다. 원문은 지우지 않고 아래 접힘에 남긴다.
+  function coarseFlow(steps) {
+    if (!steps || !steps.length) return "";
+    var names = ["처음", "가운데", "끝"];
+    var n = steps.length;
+    var groups = [[], [], []];
+    for (var i = 0; i < n; i++) groups[Math.min(2, Math.floor(i * 3 / n))].push(steps[i].what);
+    var rows = groups.map(function (g, i) {
+      return g.length ? { at: names[i], what: g.join(" ") } : null;
+    }).filter(Boolean);
+    if (!rows.length) return "";
+    return '<ol class="concept-timeline coarse">' + rows.map(function (r) {
+      return "<li><b>" + esc(r.at) + "</b><span>" + esc(r.what) + "</span></li>";
     }).join("") + "</ol>";
   }
 
@@ -195,11 +220,23 @@
         (has(row.axis) ? " <em>" + esc(text(row.axis)) + "</em>" : "") + "</span>" +
         '<span class="t">' + esc(text(row.title)) + "</span></header>" +
       part("idea", "핵심 아이디어", idea || "") +
-      part("flow", "시간 흐름", timelineList(flow.steps)) +
-      makeBox +
+      part("flow", "대략의 흐름", coarseFlow(flow.steps)) +
       part("hook", "첫 장면", has(row.hook) ? "<span>" + esc(text(row.hook)) + "</span>" : "") +
-      extra(opts, part("warn", "주의점",
-        has(row.risk) ? paragraphs(row.risk, "stage-para", 2) : "")) +
+      part("pay", "이렇게 끝난다",
+        has(row.payoff) ? "<span>" + esc(text(row.payoff)) + "</span>" : "") +
+      // 다섯 안을 **나란히 놓고 비교**하려면 칸 하나가 화면을 넘기면 안 된다.
+      // 위에 남긴 넷(발상·흐름·첫 장면·착지)이 고를 때 쓰는 값이고, 아래 셋은
+      // 하나를 정하고 나서 파고드는 값이다. 접는 것이지 빼는 것이 아니다 —
+      // 초 단위 원문도 지우지 않고 여기 그대로 둔다.
+      ((makeBox || has(row.risk) || flow.steps.length)
+        ? '<details class="cc-more"><summary>자세히</summary>' +
+          makeBox +
+          extra(opts, part("warn", "주의점",
+            has(row.risk) ? paragraphs(row.risk, "stage-para", 2) : "")) +
+          (flow.steps.length
+            ? part("full", "기존 상세 기록 (초 단위)", timelineList(flow.steps)) : "") +
+          "</details>"
+        : "") +
       // opts.actions 는 **데이터가 아니라 그 화면의 버튼 자리**다(광고주의 「이걸로
       // 하겠습니다」 같은 것). 기록에서 온 글이 여기로 들어가는 일은 없고, 두 역할의
       // 공통 구조를 비교할 때는 양쪽 다 비워 둔다
@@ -214,9 +251,14 @@
     var row = d || {};
     var arcList = (Array.isArray(row.arc) ? row.arc : [])
       .map(text).filter(function (x) { return x.length > 0; });
-    // 한 줄이 「0~3초 …」 꼴이면 시간 구간을 앞 칸으로 떼어 낸다. 아니면 그대로 한 행이다
+    // 한 줄이 「0~3초 …」 꼴이면 시간 구간을 앞 칸으로 떼어 낸다. 아니면 그대로 한 행이다.
+    // ★ 시간은 소수로 적힌다 — 실제 데이터가 "0.0–1.6초: …" 다. \d+ 만 받으면
+    //   한 줄도 안 맞아 시간 칸이 비고, 본문이 "0.0–1.6초: …" 째로 오른쪽 칸에
+    //   밀려 들어간다. 그러면 앞 칸에는 순번 1·2·3 만 남아 시간표가 아니게 된다.
+    //   timeline() 이 콘셉트 본문에서 쓰는 것과 같은 꼴을 쓴다.
     var arcRows = arcList.map(function (line) {
-      var m = line.match(/^(\d+(?:~|–|-)\d+\s*초|\d+\s*초)\s*[·:\-]?\s*([\s\S]*)$/);
+      var m = line.match(
+        /^(\d+(?:\.\d+)?(?:~|–|-)\d+(?:\.\d+)?\s*초|\d+(?:\.\d+)?\s*초)\s*[·:\-]?\s*([\s\S]*)$/);
       return m && m[2] ? { at: m[1].replace(/\s+/g, ""), what: m[2].trim() }
         : { at: "", what: line };
     });
@@ -286,26 +328,53 @@
     if (has(row.inherits)) cont.push(row.inherits + "번 컷에서 이어집니다");
     if (has(row.face)) cont.push("얼굴 기준 · " + text(row.face));
     var contHtml = cont.length ? itemList(cont, "stage-lines") : "";
+    // 「인물」이라고 부르면 사물 광고에서 말이 안 된다 — RUSH 컷1의 who 는
+    // "삼각형 자몽 조각, 뒤쪽의 RUSH 캔" 이다. 화면에 나오는 것 전부를 가리킨다.
+    var rows =
+      (has(row.dialogue) ? '<div class="cut-row line"><b>대사</b><span>' +
+        esc(text(row.dialogue)) + "</span></div>" : "") +
+      (has(row.intent) ? '<div class="cut-row why"><b>의도</b><span>' +
+        esc(text(row.intent)) + "</span></div>" : "") +
+      (has(row.who) ? '<div class="cut-row"><b>등장 요소</b><span>' + esc(text(row.who)) +
+        "</span></div>" : "") +
+      (cameraHtml ? '<div class="cut-row spec"><b>카메라</b>' + cameraHtml + "</div>" : "") +
+      (contHtml ? '<div class="cut-row cont"><b>이어지는 것</b>' + contHtml + "</div>" : "") +
+      extra(opts, has(row.note)
+        ? '<div class="cut-row memo"><b>제작 메모</b><span>' + esc(text(row.note)) +
+          "</span></div>"
+        : "");
+
+    // ── 압축 칸 (opts.compact) ────────────────────────────────────────────────
+    // 그림이 아직 없는 관리자 콘티는 컷 여섯 개가 글로만 세로로 늘어서서, 한
+    // 화면에 두 컷밖에 안 들어온다. 콘티를 보는 일은 컷 하나를 정독하는 게
+    // 아니라 **앞뒤가 맞나**를 훑는 것이라 이웃 컷이 같이 보여야 한다. 그래서
+    // 한 칸은 번호·묶음 / 무슨 일이 일어나나 / 움직임·길이 세 줄만 두고 나머지는
+    // 접는다. 접은 것은 버리는 게 아니라 `자세히` 안에 그대로 있다.
+    // ★ 광고주 화면은 이 길로 오지 않는다 — 거기는 콘티 그림과 완성 영상을
+    //   나란히 놓는 넓은 칸이라 지금 배치가 맞다. 멀쩡한 쪽을 같이 바꾸지 않는다.
+    if (opts && opts.compact) {
+      var beat = [text(row.move), when].filter(Boolean).join(" · ");
+      return '<figure class="cut panel' + (media ? "" : " noimg") + '">' +
+        (media || '<div class="cut-empty"><span>그림 준비 전</span></div>') +
+        '<figcaption class="body">' +
+        '<div class="head"><span class="n">' + esc(text(row.n)) + "</span>" +
+        (has(row.block) ? '<span class="blk">' + esc(text(row.block)) + "</span>" : "") +
+        "</div>" +
+        (has(row.action) ? '<p class="what">' + esc(text(row.action)) + "</p>" : "") +
+        (beat ? '<p class="beat">' + esc(beat) + "</p>" : "") +
+        (rows ? '<details class="cut-more"><summary>자세히</summary>' + rows + "</details>" : "") +
+        "</figcaption></figure>";
+    }
+
     return '<div class="cut' + (media ? "" : " noimg") + '">' +
       (media || '<div class="noimg-n">' + esc(text(row.n)) + "</div>") +
       '<div class="body">' +
       '<div class="head"><span class="n">' + esc(text(row.n)) + "</span>" +
       '<span class="tt">' + esc(when) + "</span>" +
       '<span class="blk">' + esc(text(row.block)) + "</span></div>" +
-      (has(row.who) ? '<div class="cut-row"><b>인물</b><span>' + esc(text(row.who)) +
-        "</span></div>" : "") +
       (has(row.action) ? '<div class="cut-row what"><b>행동</b><span>' +
         esc(text(row.action)) + "</span></div>" : "") +
-      (has(row.dialogue) ? '<div class="cut-row line"><b>대사</b><span>' +
-        esc(text(row.dialogue)) + "</span></div>" : "") +
-      (has(row.intent) ? '<div class="cut-row why"><b>의도</b><span>' +
-        esc(text(row.intent)) + "</span></div>" : "") +
-      (cameraHtml ? '<div class="cut-row spec"><b>카메라</b>' + cameraHtml + "</div>" : "") +
-      (contHtml ? '<div class="cut-row cont"><b>이어지는 것</b>' + contHtml + "</div>" : "") +
-      extra(opts, has(row.note)
-        ? '<div class="cut-row memo"><b>제작 메모</b><span>' + esc(text(row.note)) +
-          "</span></div>"
-        : "") +
+      rows +
       "</div></div>";
   }
 
@@ -314,7 +383,8 @@
   function cuts(list, opts, media) {
     var rows = (list || []).slice();
     if (!rows.length) return "";
-    return '<div class="cuts">' + rows.map(function (c) {
+    return '<div class="cuts' + (opts && opts.compact ? " compact" : "") + '">' +
+      rows.map(function (c) {
       return cut(c, opts, media ? media(c) : "");
     }).join("") + "</div>";
   }
