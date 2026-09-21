@@ -173,6 +173,9 @@
 .stage-data{display:grid;grid-template-columns:120px minmax(0,1fr);gap:7px 14px;margin:0;font-size:12px;line-height:1.55}
 .stage-data dt{color:var(--faint)}.stage-data dd{margin:0;color:var(--ink);overflow-wrap:anywhere}
 .flow-detail>.concept-review{margin-top:8px;border-top:1px solid var(--rule);padding-top:12px}
+.flow-detail>.check{display:grid;grid-template-columns:1fr auto;align-items:center;margin-top:12px}
+.flow-detail>.check .txt{grid-column:1/-1;min-width:0}
+.flow-detail>.check .btn{justify-self:end;width:auto;min-width:0}
 .flow-marker{font-family:"JetBrains Mono",monospace;font-size:9.5px;color:var(--faint)}
 .flow-step.done{border-color:color-mix(in srgb,var(--live) 45%,var(--rule));background:color-mix(in srgb,var(--live) 6%,var(--sunk))}
 .flow-step.done .flow-marker,.flow-step.done strong{color:var(--live)}
@@ -245,6 +248,6 @@
 <script src="config.js?v=d4d97baa"></script>
 <script src="auth.js?v=fa839557"></script>
 <script src="asset-access.js"></script>
-<script src="admin.js?v=unified-stage-workspace-1"></script>
+<script src="admin.js?v=unified-stage-workspace-2"></script>
 </body>
 </html>
