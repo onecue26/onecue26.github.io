@@ -882,6 +882,14 @@
         '<button class="btn ghost" type="button" data-lc="back"' + tag +
         ">취소 · 전 단계로</button>");
     }
+    if (act.phase === "final.done") {
+      return '<div class="lc lc-approved"' + tag + ">" +
+        head("광고주에게 보냈습니다", "광고주 화면에 콘티가 떠 있습니다") +
+        '<div class="lc-row">' +
+        '<button class="btn ghost" type="button" data-lc="back"' + tag +
+        ">내리고 다시 고치기</button></div>" +
+        '<span class="lc-msg" data-lc-msg></span></div>';
+    }
     if (act.phase === "final.sent") {
       return '<div class="lc lc-approved"' + tag + ">" +
         head("완성 콘티 승인됨", "이제 광고주에게 보낼 수 있습니다") +
@@ -1165,6 +1173,7 @@
       if (f.cut_n == null || !f.url) return;
       if (!panelBy[f.cut_n]) panelBy[f.cut_n] = f;
     });
+    var panelCount = Object.keys(panelBy).length;
     function boardPanel(c) {
       var f = panelBy[c && c.n];
       if (!f) return "";
@@ -1174,7 +1183,9 @@
     var storyboardBody = storyboardHead + ((cutRows.length && showCuts)
       ? '<details class="stage-cuts"' +
         ((boardFlow && boardFlow.perCut) ? " open" : "") + ">" +
-        '<summary>컷 사양 ' + cutRows.length + '개 — 글로 확인하기</summary>' +
+        '<summary>' + (panelCount
+          ? '콘티 확인하기 · ' + panelCount + '컷'
+          : '컷 사양 ' + cutRows.length + '개 — 글로 확인하기') + '</summary>' +
         R().cuts(cutRows, {
           role: "admin", compact: true,
           // 검수하는 자리에서만 컷마다 의견 칸이 붙는다. 볼 것이 없는 자리에
@@ -1933,6 +1944,11 @@
             p.boardCounts = {
               cuts: p.cuts.length,
               board: p.files.filter(function (f) { return f.kind === "board"; }).length,
+              // 보냈는가. approved 가 광고주 노출 스위치라, 콘티가 하나라도
+              // 켜져 있으면 광고주는 이미 보고 있다.
+              boardSent: p.files.some(function (f) {
+                return f.kind === "board" && f.approved;
+              }),
               boardRunning: !!(p.job && p.job.step === "storyboard" && p.job.kind === "image"),
             };
             p.stageResults = {
