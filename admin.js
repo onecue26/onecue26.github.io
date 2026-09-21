@@ -1106,7 +1106,10 @@
       strategy: strategyBody,
       concepts: conceptReview + check,
       develop: developBody,
-      storyboard: boardLink(BOARD_REVIEW_STAGE) + storyboardBody +
+      // 새 흐름이 도는 동안에는 「컷 설계 보기」 링크를 띄우지 않는다 —
+      // 검수할 컷 목록이 바로 아래 펼쳐져 있는데 같은 곳으로 가는 링크가 또 있으면
+      // 어느 쪽이 본 자리인지 모르게 된다.
+      storyboard: (boardFlow ? "" : boardLink(BOARD_REVIEW_STAGE)) + storyboardBody +
         (p.step === BOARD_REVIEW_STAGE ? productionAction : ""),
       anchors: p.step === "anchors" ? productionAction : "",
       video: p.step === "video" ? productionAction : "",
