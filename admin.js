@@ -651,6 +651,24 @@
         }).join("") + '</div>'
       : '<div class="executor-history empty"><strong>단계별 AI 작업 기록</strong><span>아직 모델 기록이 없습니다.</span></div>';
 
+    // 다섯 안을 늘 나란히 세우면 카드 하나가 좁아져 글이 세로로 길게 흐른다.
+    // 고른 안이 있으면 그 하나를 가로 전체로 펼치고 나머지는 접는다 — 광고주 화면이
+    // 이미 쓰는 방식이고, 관리자가 볼 것도 결국 "무엇을 골랐나" 하나다.
+    function conceptList(list) {
+      var rows = list.slice().sort(function (a, b) { return a.key.localeCompare(b.key); });
+      var card = function (c) { return R().concept(c, ADMIN); };
+      var chosen = rows.filter(function (c) { return c.is_chosen; })[0];
+      if (!chosen) return '<div class="concepts">' + rows.map(card).join("") + '</div>';
+      var others = rows.filter(function (c) { return !c.is_chosen; });
+      return '<div class="chosen-summary"><span class="chosen-label">선택한 방향</span>' +
+        card(chosen) + '</div>' +
+        (others.length
+          ? '<details class="other-concepts"><summary>다른 제안 ' + others.length +
+            '개 다시 보기</summary><div class="concepts">' + others.map(card).join("") +
+            '</div></details>'
+          : "");
+    }
+
     var conceptReview = "";
     if (p.concepts && p.concepts.length) {
       var strategyLine = p.strategy
@@ -697,10 +715,7 @@
         '<h3>콘셉트 5안</h3><p>' + (atConceptStage
           ? "추천은 참고값입니다. 다섯 방향의 차이와 위험을 확인한 뒤 광고주에게 보내세요."
           : "이 프로젝트에서 실제로 제안하고 선택한 콘셉트 기록입니다.") + '</p></div>' +
-        strategyLine + '<div class="concepts">' +
-        p.concepts.slice().sort(function (a, b) { return a.key.localeCompare(b.key); })
-          .map(function (c) { return R().concept(c, ADMIN); }).join("") +
-        '</div>' + replanBox + '</section>';
+        strategyLine + conceptList(p.concepts) + replanBox + '</section>';
     }
 
     // 1차 검수 — 정지점에 와 있으면 우리가 먼저 보고 광고주에게 넘긴다.
@@ -769,17 +784,29 @@
         }, ADMIN) + '</div>'
       : (p.step === "develop" ? stageWait(p, "develop", "구성·각본") : "");
 
-    // 콘티 — 컷을 한 줄에 이어 붙이지 않는다. 컷마다 번호·시간·장면·행동·대사·
-    // 의도·카메라·이어지는 것이 행으로 나뉘고, 제작 메모는 관리자에만 덧붙는다.
-    // 컷이 많으므로 접이식으로 두고 현재 단계일 때만 펼친다
+    // 콘티 — 이 단계의 주인공은 **그림**이다. 글로 된 컷 사양은 그림을 대조하는
+    // 보조 검사기이지 콘티 자체가 아니다. 그래서 맨 위에 「지금 어디까지 와 있나」
+    // 한 줄을 두고, 컷 전문은 접어 둔다. 그림이 없는데 「완료」라고 적지 않는다 —
+    // 컷 설계가 끝난 것과 시각 콘티가 나온 것은 다른 일이다.
     var cutRows = p.cuts || [];
-    var storyboardBody = cutRows.length
-      ? '<details class="stage-cuts"' +
-        (p.step === BOARD_REVIEW_STAGE ? ' open' : '') + '>' +
-        '<summary>콘티 ' + cutRows.length + '컷 — 펼쳐서 보기</summary>' +
-        R().cuts(cutRows, ADMIN) + '</details>'
+    var boardFiles = (p.files || []).filter(function (f) { return f.kind === "board"; });
+    var boardSheet = boardFiles.filter(function (f) { return f.cut_n == null; }).length;
+    var boardPanels = boardFiles.filter(function (f) { return f.cut_n != null; }).length;
+    var boardState = boardSheet
+      ? "콘티 시트 등록됨"
+      : (boardPanels ? "컷 그림 " + boardPanels + "장 등록됨" : "컷 설계 완료 · 시각 콘티 미제작");
+    var storyboardHead = cutRows.length
+      ? '<div class="board-state' + (boardSheet || boardPanels ? " ready" : "") + '">' +
+        '<span class="bs-what">' + esc(boardState) + '</span>' +
+        '<span class="bs-n">' + cutRows.length + '컷</span>' +
+        '</div>'
+      : "";
+    var storyboardBody = storyboardHead + (cutRows.length
+      ? '<details class="stage-cuts">' +
+        '<summary>컷 사양 ' + cutRows.length + '개 — 글로 확인하기</summary>' +
+        R().cuts(cutRows, { role: "admin", compact: true }) + '</details>'
       : (p.n_cuts ? '<p class="stage-empty">콘티 ' + p.n_cuts +
-          '컷이 있습니다. 컷 내용을 불러오지 못했습니다.</p>' : "");
+          '컷이 있습니다. 컷 내용을 불러오지 못했습니다.</p>' : ""));
 
     // ★ 콘티 검수 링크 — **콘티 승인 단계 본문 안에서만** 뜬다.
     //   조건 두 가지뿐이다: 콘티가 실제로 있는가(데이터), 그리고 지금 그 단계인가.
@@ -1316,7 +1343,9 @@
           Promise.all(counts.map(function (t) {
             return db.from(t[0]).select("project_id").in("project_id", ids);
           })),
-          db.from("assets").select("project_id,role,url,storage_path,mime,meta")
+          // kind·cut_n 을 같이 읽는다 — 콘티 단계가 「시각 콘티가 실제로 있는가」를
+          // 데이터로 답해야 한다. 없는데 「완료」라고 적으면 그게 거짓 보고다
+          db.from("assets").select("project_id,role,kind,cut_n,url,storage_path,mime,meta")
             .eq("kind", "product_ref").in("project_id", ids),
           db.from("contacts").select("project_id,name,email,phone,title").in("project_id", ids),
           db.from("jobs").select("project_id,step,request").eq("state", "queued")
