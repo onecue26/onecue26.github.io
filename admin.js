@@ -463,12 +463,15 @@
         var act = (s.key === LIFECYCLE_STEP && i === current)
           ? SE().actions(p, s.key, !!(p.stageResults && p.stageResults[s.key]))
           : null;
+        // 콘티는 두 겹이라 판단이 다르다 — 전용 상태기계를 쓴다
+        var bact = (s.key === BOARD_REVIEW_STAGE && i === current)
+          ? SE().boardActions(p, p.boardCounts) : null;
         var detail = '<div class="flow-detail">' +
-          (act ? lifecycleBar(p, s.key, act) : choiceGate(p, s.key)) +
+          (bact ? boardBar(p, bact) : act ? lifecycleBar(p, s.key, act) : choiceGate(p, s.key)) +
           '<span>수행 · ' + esc(worker) +
           '</span><span>결과를 검토하는 AI(핵심 검토 AI) · ' + esc(reviewer) + '</span>' +
           findingText + delivered +
-          execPicker(p, s.key) + deliverBox(p, s.key) +
+          (bact ? "" : execPicker(p, s.key)) + deliverBox(p, s.key) +
           (status === "upcoming" ? ''
             : (bodies[s.key] || '<p class="stage-empty">저장된 상세 내용이 없습니다.</p>')) +
           '</div>';
@@ -627,6 +630,13 @@
   // 016 은 「결과 등록이 단계를 옮기지 않는다」를 일부러 막아 두었다. 그래서
   // 앞으로 가는 일은 **사람이 누르는 한 동작**이다. 승인 뒤에만 눌린다.
   function stageNext(slug, step) { return rpc(slug, "onecue_stage_next", { p_step: step }); }
+  // 컷마다·겹마다 낸 판단. 덮어쓰지 않고 쌓는다 — 왜 고쳤는지가 남아야 한다.
+  function stageReview(slug, step, layer, cut, decision, note) {
+    return rpc(slug, "onecue_stage_review", {
+      p_step: step, p_layer: layer, p_cut_n: cut,
+      p_decision: decision, p_note: note || "",
+    });
+  }
   // 담당을 다시 고르는 것은 「아직 시작 전」일 때만 뜻이 있다. 시작한 뒤에는
   // 버튼 자체가 없다(상태표가 그렇게 정한다). 서버도 같은 이유로 거절한다.
   function clearStageChoice(slug, step) {
@@ -690,6 +700,100 @@
           ? '<div class="lc-row"><button class="btn" type="button" data-lc="next"' + tag +
             ">다음 단계로 이동</button></div>"
           : "") + "</div>";
+    }
+    return "";
+  }
+
+  // ── 콘티 단계 — 한 자리에 할 일 하나 ──────────────────────────────────────
+  //
+  // 절차 정본: agency_site/db/stage_storyboard_flow.md (Dan 지시 2026-09-21)
+  // Dan 이 옛 화면을 보고 한 말: "저렇게 한방에 다나오는게 아니라",
+  // "지금은 뒤죽박죽으로 나열해놧는데 뭐 어쩌란거야?"
+  // 자리(boardPhase)가 무엇을 띄울지 혼자 정한다. 여기서 조건을 다시 판단하지 않는다.
+  function boardBar(p, act) {
+    var tag = ' data-slug="' + esc(p.slug) + '" data-step="storyboard"';
+    var pick = SE().of(p, "storyboard");
+    var n = p.boardCounts || {};
+    var head = function (what, why) {
+      return '<div class="lc-head"><b>' + esc(what) + "</b>" +
+        (why ? "<span>" + esc(why) + "</span>" : "") + "</div>";
+    };
+    // 검수 칸 — 겹 전체에 대한 의견과 승인·수정. 컷마다는 컷 옆에 따로 붙는다.
+    var reviewBox = function (layer, what, why, extra) {
+      return '<div class="lc lc-review"' + tag + ' data-layer="' + esc(layer) + '">' +
+        head(what, why) +
+        '<textarea class="lc-note" data-lc-note placeholder="' +
+        esc("수정 요청은 무엇을 고칠지 적어야 보냅니다") + '"></textarea>' +
+        '<div class="lc-row">' +
+        '<button class="btn" type="button" data-lc="review-ok" data-layer="' + esc(layer) +
+        '"' + tag + ">승인</button>" +
+        '<button class="btn ghost" type="button" data-lc="review-revise" data-layer="' +
+        esc(layer) + '"' + tag + ">수정 요청</button>" +
+        (extra || "") + "</div>" +
+        '<span class="lc-msg" data-lc-msg></span></div>';
+    };
+
+    if (act.phase === "design.choose") {
+      return '<div class="lc lc-choose"' + tag + ">" +
+        head("컷 설계를 누가 씁니까", "고르기만 해서는 시작되지 않습니다") +
+        '<div class="lc-row">' +
+        '<button class="btn" type="button" data-lc="choose-ai"' + tag + ">AI에게 맡기기</button>" +
+        (act.chooseHuman
+          ? '<button class="btn ghost" type="button" data-lc="choose-human"' + tag +
+            ">작업자가 직접 쓰기</button>" : "") +
+        "</div></div>";
+    }
+    if (act.phase === "design.start") {
+      return '<div class="lc lc-start"' + tag + ">" +
+        head(pick.mode === "human" ? "작업자 · " + (pick.assignee || "미지정") : "AI가 씁니다",
+             "시작을 눌러야 실제로 진행됩니다") +
+        '<div class="lc-row">' +
+        '<button class="btn" type="button" data-lc="start"' + tag + ">" +
+        (pick.mode === "human" ? "작성 시작" : "AI 작업 시작") + "</button>" +
+        '<button class="btn ghost" type="button" data-lc="rechoose"' + tag +
+        ">담당 다시 고르기</button></div></div>";
+    }
+    if (act.phase === "design.working") {
+      return '<div class="lc lc-working"' + tag + ">" +
+        head(pick.mode === "human"
+          ? "작업자가 컷 설계를 쓰는 중 · " + (pick.assignee || "미지정")
+          : "AI가 컷 설계를 쓰는 중",
+          pick.started_at ? "시작 " + ago(pick.started_at) : "") + "</div>";
+    }
+    if (act.phase === "design.review") {
+      return reviewBox("design", "컷 설계를 검수해 주세요",
+        "컷 " + (n.cuts || 0) + "개 · 승인해야 그림을 뽑습니다. 컷마다 따로 요청하려면 아래 컷에서 적으세요");
+    }
+    if (act.phase === "board.make") {
+      return '<div class="lc lc-start"' + tag + ">" +
+        head("콘티 그림을 뽑습니다", "승인된 컷 설계 " + (n.cuts || 0) + "개를 기준으로 한 판 뽑아 컷마다 잘라 넣습니다") +
+        '<div class="lc-row">' +
+        '<button class="btn" type="button" data-lc="make-board"' + tag + ">콘티 뽑기</button>" +
+        "</div>" +
+        '<span class="lc-msg">유료 생성입니다 — 시점은 Dan 이 정합니다</span></div>';
+    }
+    if (act.phase === "board.working") {
+      return '<div class="lc lc-working"' + tag + ">" +
+        head("콘티 그림을 뽑는 중", "끝나면 컷마다 붙습니다") + "</div>";
+    }
+    if (act.phase === "board.review") {
+      return reviewBox("board", "콘티 그림을 검수해 주세요",
+        "그림 " + (n.board || 0) + "장 · 컷마다 따로 요청하면 그 컷만 다시 뽑습니다");
+    }
+    if (act.phase === "final.review") {
+      return reviewBox("final", "완성 콘티를 확인해 주세요",
+        "승인하면 광고주에게 보낼 수 있습니다",
+        '<button class="btn ghost" type="button" data-lc="back"' + tag +
+        ">취소 · 전 단계로</button>");
+    }
+    if (act.phase === "final.sent") {
+      return '<div class="lc lc-approved"' + tag + ">" +
+        head("완성 콘티 승인됨", "이제 광고주에게 보낼 수 있습니다") +
+        '<div class="lc-row">' +
+        '<button class="btn" type="button" data-lc="send-client"' + tag + ">콘티 전송</button>" +
+        '<button class="btn ghost" type="button" data-lc="back"' + tag +
+        ">취소 · 전 단계로</button></div>" +
+        '<span class="lc-msg">광고주 발송은 Dan 승인 사항입니다</span></div>';
     }
     return "";
   }
@@ -1142,6 +1246,14 @@
           return chooseStageExecutor(slug, step, "human", who, "").then(load).catch(fail(b, msg));
         }
         lock(b);
+        // 검수는 겹과 컷 번호를 같이 보낸다. 컷 번호가 없으면 그 겹 전체다.
+        if (what === "review-ok" || what === "review-revise") {
+          var layer = b.dataset.layer;
+          var cut = b.dataset.cut ? Number(b.dataset.cut) : null;
+          lock(b);
+          return stageReview(slug, step, layer, cut,
+            what === "review-ok" ? "ok" : "revise", text).then(load).catch(fail(b, msg));
+        }
         var call = what === "choose-ai" ? chooseStageExecutor(slug, step, "ai", "", "")
           : what === "rechoose" ? clearStageChoice(slug, step)
           : what === "start" ? stageStart(slug, step)
@@ -1573,6 +1685,10 @@
           // 따로 읽으면 017 전에는 이 칸만 비고 나머지는 예전 그대로 뜬다
           db.from("stage_executors").select("project_id,step,ai_job_id,chosen_at,started_at")
             .in("project_id", ids),
+          // 컷마다·겹마다 낸 판단. 기록은 쌓이므로 최신 한 줄이 지금 상태다.
+          db.from("stage_reviews")
+            .select("project_id,step,layer,cut_n,decision,note,decided_at")
+            .in("project_id", ids).order("decided_at"),
         ]).then(function (out) {
           if (out[1].error) throw out[1].error;
           return window.ONECUE_ASSETS.resolve(db, out[1].data || []).then(function (assets) {
@@ -1598,6 +1714,8 @@
           // 017 전에는 빈 목록이다 — 그러면 「AI 라고 적혔는데 작업이 없는 줄」은
           // 살아 있는 작업 기록으로 판정된다(choiceState 의 ranBefore)
           var jobLinks = (out[15] && !out[15].error && out[15].data) || [];
+          // 표가 아직 없는 서버(020 이전)에서도 화면은 그대로 떠야 한다
+          var reviewRows = (out[16] && !out[16].error && out[16].data) || [];
           jobLinks.forEach(function (link) {
             stageRows.forEach(function (row) {
               if (row.project_id === link.project_id && row.step === link.step) {
@@ -1612,6 +1730,12 @@
             p.cuts = cutRows.filter(function (x) { return x.project_id === p.id; });
             // 이 단계에 이미 결과가 있는가 — 기능이 생기기 전에 끝난 건을
             // 「선택 대기」로 되돌리지 않기 위한 증거다. 아무것도 되돌리지 않는다
+            p.reviews = reviewRows.filter(function (x) { return x.project_id === p.id; });
+            p.boardCounts = {
+              cuts: p.cuts.length,
+              board: (p.files || []).filter(function (f) { return f.kind === "board"; }).length,
+              boardRunning: !!(p.job && p.job.step === "storyboard" && p.job.kind === "image"),
+            };
             p.stageResults = {
               develop: !!p.development,
               storyboard: p.cuts.length > 0,
