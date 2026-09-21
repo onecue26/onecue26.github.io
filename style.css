@@ -137,17 +137,29 @@ h2::after{content:"";flex:1;height:1px;background:var(--rule)}
 .cc-part{display:grid;gap:4px}
 .cc-part b{font-size:11px;color:var(--faint);font-family:"JetBrains Mono",monospace;letter-spacing:.04em}
 .cc-part span{font-size:13.5px;color:var(--muted);line-height:1.65}
+.cc-part.idea>b{color:var(--cue);font-size:11.5px}
+.concept-lead{margin:0;color:var(--ink);font-size:14px;line-height:1.75}
+.concept-timeline{list-style:none;margin:12px 0 0;padding:0;border-top:1px solid var(--rule)}
+.concept-timeline li{display:grid;grid-template-columns:66px minmax(0,1fr);gap:12px;padding:9px 0;
+  border-bottom:1px solid var(--rule);align-items:start}
+.concept-timeline li b{font-family:"JetBrains Mono",monospace;color:var(--cue);font-size:11px;padding-top:2px}
+.concept-timeline li span{color:var(--ink);line-height:1.7}
+.concept-production{display:grid;grid-template-columns:66px minmax(0,1fr);gap:12px;margin-top:12px;
+  padding:10px 12px;background:var(--sunk);border-left:3px solid var(--live)}
+.concept-production b{font-size:11px;color:var(--live);font-family:"JetBrains Mono",monospace}
+.concept-production span{color:var(--muted)}
 .cc-part.hook{background:var(--sunk);border-radius:7px;padding:9px 10px}
 .cc-part.hook b{color:var(--cue)}
 .section-guide{margin:-6px 0 14px;color:var(--muted);font-size:13.5px}
 .chosen-summary{background:var(--cue-soft);border:1px solid var(--cue);border-radius:12px;padding:14px}
-.chosen-summary .cc{max-width:720px;border-color:transparent;background:var(--panel)}
+.chosen-summary .cc{width:100%;border-color:transparent;background:var(--panel)}
 .chosen-label{display:block;color:var(--cue);font-family:"JetBrains Mono",monospace;font-size:11px;
   font-weight:800;letter-spacing:.08em;margin:0 0 9px 2px}
 .other-concepts{margin-top:13px;border:1px solid var(--rule);border-radius:11px;background:var(--panel)}
 .other-concepts summary{cursor:pointer;padding:14px 17px;font-size:13.5px;font-weight:700;color:var(--muted)}
 .other-concepts[open] summary{border-bottom:1px solid var(--rule)}
 .other-concepts .concepts{padding:13px;background:var(--sunk);grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+@media(max-width:560px){.concept-timeline li,.concept-production{grid-template-columns:1fr;gap:3px}}
 
 /* 추천 배지 — 카드 오른쪽 위. 이유는 올려놓거나 눌러야 펼쳐진다 */
 .cc{position:relative}

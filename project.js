@@ -171,6 +171,24 @@
   function secConcepts(list, canPick) {
     if (!list || !list.length) return "";
     var chosen = list.filter(function (c) { return c.is_chosen; })[0];
+    function readableConcept(s) {
+      var raw = String(s || "").trim();
+      if (!raw) return "";
+      var production = "", at = raw.indexOf("제작:");
+      if (at >= 0) { production = raw.slice(at + 3).trim(); raw = raw.slice(0, at).trim(); }
+      var parts = raw.split(/(?=\d+(?:~|–|-)\d+초)/).filter(Boolean);
+      var main = parts.shift() || "";
+      var html = '<p class="concept-lead">' + esc(main) + "</p>";
+      if (parts.length) {
+        html += '<ol class="concept-timeline">' + parts.map(function (part) {
+          var m = part.match(/^(\d+(?:~|–|-)\d+초)\s*(.*)$/);
+          return m ? '<li><b>' + esc(m[1]) + '</b><span>' + esc(m[2]) + '</span></li>'
+            : '<li><span>' + esc(part) + '</span></li>';
+        }).join("") + "</ol>";
+      }
+      if (production) html += '<div class="concept-production"><b>제작 메모</b><span>' + esc(production) + "</span></div>";
+      return html;
+    }
     function card(c) {
       var pick = (canPick && !c.is_chosen)
         ? '<button class="btn ghost pickbtn" data-pick="' + esc(c.key) + '">이걸로 하겠습니다</button>'
@@ -187,7 +205,7 @@
         '<header class="cc-head"><span class="k">' + esc(c.key) + "안" +
           (c.axis ? ' <em>' + esc(c.axis) + "</em>" : "") + "</span>" +
           '<span class="t">' + esc(c.title || "") + "</span></header>" +
-        '<div class="cc-part"><b>핵심 아이디어</b><span>' + esc(c.body || "") + "</span></div>" +
+        '<div class="cc-part idea"><b>핵심 아이디어</b><div>' + readableConcept(c.body) + "</div></div>" +
         (c.visual ? '<div class="cc-part"><b>장면 방식</b><span>' + esc(c.visual) + "</span></div>" : "") +
         (c.hook ? '<div class="cc-part hook"><b>첫 장면</b><span>' + esc(c.hook) + "</span></div>" : "") +
         pick + "</article>";
