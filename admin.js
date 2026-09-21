@@ -1144,10 +1144,25 @@
     var boardFlow = (p.step === BOARD_REVIEW_STAGE)
       ? SE().boardActions(p, p.boardCounts) : null;
     if (boardFlow) storyboardHead = "";
-    // 검수할 자리가 아니면 컷 목록을 띄우지 않는다. 다시 쓰라고 해 놓고 옛 컷을
-    // 나란히 보여 주면 「지금 무엇을 보는 것인가」가 흐려진다 — 새로 쓰는 중인지
-    // 옛것을 고치는 중인지 화면이 말해 주지 않게 된다.
-    var showCuts = !boardFlow || boardFlow.perCut;
+    // 언제 띄울지는 상태기계가 정한다(boardActions.showCuts). 여기서 다시
+    // 판단하지 않는다 — 두 곳이 판단하면 두 곳이 갈린다.
+    //
+    // 여태 perCut 으로 갈음했더니 **그림 뽑는 자리에서 컷 글이 사라졌다.**
+    // 컷 글은 그림의 출처인데, 정작 그림을 만들 때 안 보이면 대조할 것이 없다.
+    var showCuts = !boardFlow || boardFlow.showCuts;
+    // 컷마다 그 컷 그림. 콘티 시트를 잘라 넣은 조각이 cut_n 을 달고 올라온다.
+    // 없으면 빈 칸을 렌더러가 알아서 그린다("그림 준비 전") — 여기서 지어내지 않는다.
+    var panelBy = {};
+    boardFiles.forEach(function (f) {
+      if (f.cut_n == null || !f.url) return;
+      if (!panelBy[f.cut_n]) panelBy[f.cut_n] = f;
+    });
+    function boardPanel(c) {
+      var f = panelBy[c && c.n];
+      if (!f) return "";
+      return '<img class="cut-panel" src="' + esc(f.url) + '" alt="컷 ' + esc(String(c.n)) +
+        ' 콘티" loading="lazy" data-big="' + esc(f.url) + '" data-kind="img">';
+    }
     var storyboardBody = storyboardHead + ((cutRows.length && showCuts)
       ? '<details class="stage-cuts"' +
         ((boardFlow && boardFlow.perCut) ? " open" : "") + ">" +
@@ -1159,7 +1174,7 @@
           cutActions: (boardFlow && boardFlow.perCut)
             ? function (n) { return cutReviewBox(p, boardFlow.layer, n); }
             : null,
-        }) + '</details>'
+        }, boardPanel) + '</details>'
       : ((p.n_cuts && showCuts) ? '<p class="stage-empty">콘티 ' + p.n_cuts +
           '컷이 있습니다. 컷 내용을 불러오지 못했습니다.</p>' : ""));
 

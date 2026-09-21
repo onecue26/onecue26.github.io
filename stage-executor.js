@@ -221,6 +221,17 @@
       // 검수는 겹마다 있고, 컷마다도 있다
       review: at === "design.review" || at === "board.review" || at === "final.review",
       perCut: at === "design.review" || at === "board.review",
+      // 승인된 컷 글을 계속 띄울 자리인가.
+      //
+      // 여태 이걸 perCut 으로 갈음했다. 그래서 그림을 뽑는 자리에 가면
+      // **무엇을 뽑는 건지가 화면에서 사라졌다.** 컷 글은 그림의 출처인데,
+      // 정작 그림을 만들 때 안 보이면 대조할 것이 없다.
+      //
+      // 가려야 하는 자리는 딱 하나다 — **컷 글을 지금 다시 쓰고 있을 때.**
+      // 다시 쓰라고 해 놓고 옛 컷을 나란히 두면 새것을 보는지 옛것을 보는지
+      // 알 수 없다. 그 밖에는(그림 뽑기·그림 검수·완성 검수·전송) 전부 띄운다.
+      showCuts: at !== "design.choose" && at !== "design.start"
+        && at !== "design.working",
       send: at === "final.sent",
       cancel: at === "final.review" || at === "final.sent",
     };
