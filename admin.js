@@ -429,13 +429,23 @@
 
   function render() {
     var fresh = ROWS.filter(function (r) { return r.isNew; });
-    el("alert").innerHTML = fresh.length
-      ? '<div class="newbar"><b>새 의뢰 ' + fresh.length + "건</b>" +
+    var updates = ROWS.filter(function (r) { return r.aiNeedsReview && !(r.job && r.job.step === r.step); });
+    var notices = '';
+    if (updates.length) {
+      notices += '<div class="newbar updatebar"><b>검토할 업데이트 ' + updates.length + '건</b>' +
+        updates.map(function (r) {
+          return '<a href="#c-' + esc(r.slug) + '">' +
+            esc([r.brand, r.product, STEP_NAME[r.step]].filter(Boolean).join(" · ")) + '</a>';
+        }).join("") + '</div>';
+    }
+    if (fresh.length) {
+      notices += '<div class="newbar"><b>새 의뢰 ' + fresh.length + "건</b>" +
         fresh.map(function (r) {
           return '<a href="#c-' + esc(r.slug) + '">' +
             esc([r.brand, r.product].filter(Boolean).join(" ")) + "</a>";
-        }).join("") + "</div>"
-      : "";
+        }).join("") + "</div>";
+    }
+    el("alert").innerHTML = notices;
 
     el("work").innerHTML = ROWS.length
       ? ROWS.map(function (p) {
