@@ -1425,11 +1425,39 @@
           'db/credit_rates.json</span>') + "</div>";
     }
 
+    // ★ 만든 것은 **단계가 지나가도 남는다.**
+    //
+    //   전에는 이 함수가 `p.step !== step` 이면 통째로 빈 문자열을 돌려줬다.
+    //   그래서 승인을 누르는 순간 다음 단계로 넘어가고, 앵커가 화면에서
+    //   **사라졌다** (Dan 2026-09-22: 「승인 눌렀더니 제작 자료에 있던 내용이
+    //   안보여 콘티처럼 보여야지」). 승인한 것을 다시 볼 수 없으면 무엇을
+    //   승인했는지 확인할 길이 없다.
+    //
+    //   콘티(storyboard)는 원래 이렇게 돈다 — 본문은 언제나 그리고, 누를 것만
+    //   현재 단계일 때 붙인다. 같은 방식으로 맞춘다.
+    //
+    //   갈라야 하는 이유: 누를 것까지 계속 두면 지나간 단계에 「유료 생성
+    //   시작」이나 「승인」이 살아 있게 된다.
     function paidStageBody(p, step) {
-      if (p.step !== step) return "";
-      var act = SE().actions(p, step, !!(p.stageResults && p.stageResults[step]));
-      return paidBody(p, step, act) + askNote(p, step) + blockedNote(p, step) +
-        assetList(p, step);
+      var here = p.step === step;
+      var buttons = "";
+      if (here) {
+        var act = SE().actions(p, step, !!(p.stageResults && p.stageResults[step]));
+        buttons = paidBody(p, step, act);
+      }
+      return buttons + doneNote(p, step) + askNote(p, step) +
+        blockedNote(p, step) + assetList(p, step);
+    }
+
+    // 지나간 유료 단계 — 언제 승인했는지 한 줄. 이게 없으면 그림만 남아서
+    // 「이거 승인한 건가」를 다시 헷갈린다.
+    function doneNote(p, step) {
+      if (p.step === step) return "";
+      var at = (SE().of(p, step) || {}).approved_at;
+      if (!at) return "";
+      return '<div class="done-note"><b>승인 완료</b>' +
+        '<span class="at">' + esc(when(at)) + " · " + esc(ago(at)) + "</span>" +
+        "</div>";
     }
 
     // 물어볼 것이 남아 있다 — **누가 정할 것인지가 먼저다.**
@@ -1556,10 +1584,10 @@
       // 그 자리에 적는다 — 광고주 승인이 그 근거다.
       // 유료 단계는 자기 본문을 갖는다. 「현재 절차에 따라 진행 중입니다」는
       // 아무것도 말해 주지 않는 문장이었고, 그 아래엔 누를 것이 없었다.
-      anchors: costLine(p, "anchors") +
-        (p.step === "anchors" ? paidStageBody(p, "anchors") : ""),
-      video: costLine(p, "video") +
-        (p.step === "video" ? paidStageBody(p, "video") : ""),
+      // 조건을 뺐다 — paidStageBody 가 안에서 「누를 것」만 가린다.
+      // 여기서 통째로 가리면 승인한 뒤 만든 것이 사라진다.
+      anchors: costLine(p, "anchors") + paidStageBody(p, "anchors"),
+      video: costLine(p, "video") + paidStageBody(p, "video"),
       // ★ 납품에는 **이 건 원가 합계**를 둔다. 광고 한 편에 얼마가 드는지
       //   모르면 서비스 가격을 정할 수 없다.
       deliver: totalLine(p) + (p.step === "deliver" ? productionAction : "")
