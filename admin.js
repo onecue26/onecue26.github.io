@@ -1328,12 +1328,28 @@
     // 전개는 시간 구간별 세로 목록으로, 카피는 한 문구 한 행으로,
     // 나레이션·슬로건·음악은 각각 별도 구획으로 그린다.
     // 「최종 편집 음악」(Codex 가 나눈 음악 워크플로)은 관리자에만 덧붙는다.
+    // ★ 구성·각본에는 **컷 전문이 들어가야 한다.**
+    //
+    //   여태 이 단계는 카피·톤·슬로건·음악만 보여 줬다. 그런데 각본의 본문은
+    //   컷이다 — 무슨 일이 일어나고, 무엇이 화면에 있고, 왜 그런가. 컷은
+    //   콘티 단계에만 그려져서, 구성·각본을 펼치면 껍데기만 보였다
+    //   (Dan 2026-09-22: 「구성 각본도 저게 전부인가 … 관리자쪽에선
+    //   다보이게해야지」).
+    //
+    //   광고주 화면은 그대로 둔다 — 여기에 붙는 것은 ADMIN 으로 그리므로
+    //   카메라 사양 같은 내부 말이 광고주에게 새지 않는다.
+    var scriptCuts = (p.cuts || []).length
+      ? '<div class="script-cuts">' +
+        '<span class="sc-lbl">컷 ' + (p.cuts || []).length + '개 · 각본 본문</span>' +
+        R().cuts(p.cuts, ADMIN) + "</div>"
+      : "";
     var developBody = hasDevelopment
       ? '<div class="stage-content">' + R().development({
           arc: d.arc, copies: d.copies, narration_tone: d.narration_tone,
           slogan: d.slogan, bgm: d.bgm,
-        }, ADMIN) + '</div>'
-      : (p.step === "develop" ? stageWait(p, "develop", "구성·각본") : "");
+        }, ADMIN) + scriptCuts + '</div>'
+      : (p.step === "develop"
+          ? stageWait(p, "develop", "구성·각본") + scriptCuts : scriptCuts);
 
     // 콘티 — 이 단계의 주인공은 **그림**이다. 글로 된 컷 사양은 그림을 대조하는
     // 보조 검사기이지 콘티 자체가 아니다. 그래서 맨 위에 「지금 어디까지 와 있나」
@@ -1702,6 +1718,56 @@
     return out;
   })();
 
+  // ── 접어 놓은 것은 접힌 채로 둔다 ──────────────────────────────────────────
+  //
+  // 접힘 여부는 원래 데이터에서 계산했다(진행 중이면 펼침). 그래서 알로하캔디
+  // 처럼 끝난 건을 접어 놔도 새로 읽으면 다시 펼쳐졌다
+  // (Dan 2026-09-22: 「접어놓은거 그대로 유지되게 하면좋을듯」).
+  //
+  // **사람이 직접 접거나 펼친 것은 계산보다 세다.** 손으로 정한 것을 계산이
+  // 덮으면, 화면이 사람 말을 안 듣는 것이 된다.
+  //
+  // 이 브라우저에만 남는다(localStorage). 다른 기기·다른 사람과 섞이지 않고,
+  // 사생활 모드나 저장이 막힌 경우엔 조용히 계산값으로 돌아간다.
+  var FOLD_KEY = "onecue.admin.folds";
+
+  function foldsRead() {
+    try { return JSON.parse(localStorage.getItem(FOLD_KEY) || "{}") || {}; }
+    catch (e) { return {}; }
+  }
+  function foldsWrite(map) {
+    try { localStorage.setItem(FOLD_KEY, JSON.stringify(map)); }
+    catch (e) { /* 사생활 모드 — 이번 화면에서만 기억된다 */ }
+  }
+
+  /** 상자마다 흔들리지 않는 이름. 자리(순서)로 하면 카드가 늘면 어긋난다. */
+  function foldKey(d) {
+    var card = d.closest('[id^="c-"]');
+    var who = card ? card.id : "?";
+    if (d.classList.contains("project-fold")) return who;      // 프로젝트 전체
+    var head = d.querySelector("summary");
+    return who + "|" + ((head && head.textContent) || "").trim().slice(0, 60);
+  }
+
+  /** 저장해 둔 것을 화면에 씌운다. 저장된 것이 없는 상자는 계산값을 둔다. */
+  function applyFolds() {
+    var saved = foldsRead();
+    document.querySelectorAll("#work details").forEach(function (d) {
+      var k = foldKey(d);
+      if (Object.prototype.hasOwnProperty.call(saved, k)) d.open = !!saved[k];
+      if (d.dataset.foldWired) return;
+      d.dataset.foldWired = "1";
+      d.addEventListener("toggle", function () {
+        var map = foldsRead();
+        map[foldKey(d)] = d.open;
+        foldsWrite(map);
+      });
+    });
+  }
+
+  // 마지막으로 그린 것. 같으면 다시 그리지 않는다 — 스크롤이 튀지 않게.
+  var LAST_HTML = "";
+
   // 30초마다 다시 읽는다. 화면을 열어 둔 동안 새로 올라온 것이 저절로 뜬다.
   // 무언가 입력하고 있는 중에는 다시 읽지 않는다 — 쓰던 글이 사라진다.
   var RELOAD_EVERY = 30000;
@@ -1736,12 +1802,29 @@
     }
     el("alert").innerHTML = notices;
 
-    el("work").innerHTML = ROWS.length
+    var html = ROWS.length
       ? ROWS.map(function (p) {
           return '<div id="c-' + esc(p.slug) + '">' + card(p) + "</div>";
         }).join("")
       : '<div class="empty"><span class="big">아직 들어온 의뢰가 없습니다</span>' +
         "광고주가 의뢰하면 여기에 뜹니다.</div>";
+
+    // ★ 바뀐 것이 없으면 **화면에 손을 대지 않는다.**
+    //
+    //   30초마다 다시 읽게 만들어 놨더니, 읽을 때마다 화면 전체를 갈아 끼워서
+    //   보고 있는 자리가 위로 튀었다 (Dan 2026-09-22: 「왜 저절로 내가 보는
+    //   창 스크롤 올라가면서 움직이지」). 대부분의 30초는 아무것도 안 바뀐다 —
+    //   그때는 다시 그릴 이유가 없다.
+    if (html === LAST_HTML) {
+      applyFolds();               // 접힘만 맞춰 두고 끝낸다
+      return;
+    }
+    LAST_HTML = html;
+
+    // 바뀐 것이 있어 다시 그릴 때도, 보던 자리는 지킨다.
+    var wasAt = window.scrollY || document.documentElement.scrollTop || 0;
+    el("work").innerHTML = html;
+    window.scrollTo(0, wasAt);
 
     document.querySelectorAll("[data-enroll]").forEach(function (b) {
       b.addEventListener("click", function () {
@@ -1976,6 +2059,10 @@
     });
 
     document.querySelectorAll("[data-exec-form]").forEach(function (f) { syncExecForm(f); });
+
+    // 사람이 접어 둔 것을 되살린다. 그린 **뒤에** 해야 한다 —
+    // 상자가 아직 없을 때 하면 아무것도 못 찾는다.
+    applyFolds();
 
     // ★ 그림을 다 그린 **뒤에** 「봤다」로 적는다. 그리기 전에 적으면
     //   이번에 새로 올라온 것이 표시되지 않은 채 사라진다.
