@@ -280,6 +280,18 @@ input[type=file]:focus{outline:2px solid var(--cue);outline-offset:1px}
           <input type="text" id="title" placeholder="마케팅팀 과장">
         </div>
       </div>
+      <!-- 홈페이지 — 브랜드 톤·색·기존 광고를 보러 가는 링크다.
+           만들 때 실제로 열어 보는 자리라 연락처 옆에 둔다. -->
+      <div class="field">
+        <label for="homepage">홈페이지 주소</label>
+        <span class="hint">선택 · 브랜드 분위기와 기존 자료를 보고 만듭니다.
+          제품 페이지가 따로 있으면 그 주소가 더 좋습니다</span>
+        <!-- type=url 이 아니라 text 다. url 은 https:// 가 없으면 제출 자체를
+             막는데, 사람은 보통 example.co.kr 이라고 적는다. 받아서
+             new.js 의 withScheme() 가 앞을 채운다 -->
+        <input type="text" id="homepage" inputmode="url"
+          placeholder="예 · https://www.example.co.kr">
+      </div>
       <p class="privacy">연락처는 이 광고 건을 진행하는 데에만 씁니다.
         <b>다른 사람에게 보이지 않도록 따로 보관</b>합니다.</p>
     </div>
@@ -309,6 +321,6 @@ input[type=file]:focus{outline:2px solid var(--cue);outline-offset:1px}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js?v=d4d97baa"></script>
 <script src="auth.js?v=fa839557"></script>
-<script src="new.js?v=rlsfix260920"></script>
+<script src="new.js?v=homepage260922"></script>
 </body>
 </html>

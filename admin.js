@@ -1312,6 +1312,12 @@
       "<b>" + esc(p.who.name) + "</b> " + esc(p.who.title || "") +
       ' · <a href="mailto:' + esc(p.who.email) + '">' + esc(p.who.email) + "</a>" +
       (p.who.phone ? " · " + esc(p.who.phone) : "") +
+      // ★ 홈페이지 — 만들기 전에 브랜드 톤을 보러 가는 자리다.
+      //   새 창으로 연다. 같은 창에서 열면 보던 화면을 잃는다.
+      (p.who.homepage
+        ? ' · <a href="' + esc(p.who.homepage) + '" target="_blank" ' +
+          'rel="noopener noreferrer">홈페이지 ↗</a>'
+        : "") +
       '<button class="btn ghost mailbtn" type="button" data-mail="' + esc(p.slug) +
       '">회신 문구</button></div>' : "";
 
@@ -3081,7 +3087,11 @@
           //   관리자는 그 건의 모든 자료를 보는 자리다. 종류로 미리 거르지 않는다.
           db.from("assets").select("id,project_id,role,kind,cut_n,url,storage_path,mime,meta,approved,created_at")
             .in("project_id", ids),
-          db.from("contacts").select("project_id,name,email,phone,title").in("project_id", ids),
+          db.from("contacts")
+            // ★ 화면이 쓰는 칸은 반드시 조회에 있어야 한다 — 빠뜨리면
+            //   값이 늘 undefined 라 링크가 조용히 안 뜬다
+            .select("project_id,name,email,phone,title,homepage")
+            .in("project_id", ids),
           db.from("jobs").select("project_id,step,request").eq("state", "queued")
             .in("project_id", ids),
           db.from("briefs").select("project_id,raw,goal,target,format").in("project_id", ids),
