@@ -539,7 +539,14 @@
         var bact = (s.key === BOARD_REVIEW_STAGE && i === current)
           ? SE().boardActions(p, p.boardCounts) : null;
         var detail = '<div class="flow-detail">' +
-          (bact ? boardBar(p, bact) : act ? lifecycleBar(p, s.key, act) : choiceGate(p, s.key)) +
+          // ★ 유료 단계는 본문 쪽 버튼 하나만 쓴다. 기존 바를 같이 띄우면
+          //   「AI 작업 시작」과 「제작 자료 만들기」가 나란히 뜨고, 둘 다 같은
+          //   함수를 부르는데 한쪽만 비용을 말한다. 값을 안 말하는 버튼을
+          //   누르면 얼마인지 모른 채 돈이 나간다.
+          (bact ? boardBar(p, bact)
+            : (act && !SE().isPaid(s.key)) ? lifecycleBar(p, s.key, act)
+            : SE().isPaid(s.key) ? ""
+            : choiceGate(p, s.key)) +
           '<span>수행 · ' + esc(worker) +
           '</span><span>결과를 검토하는 AI(핵심 검토 AI) · ' + esc(reviewer) + '</span>' +
           findingText + delivered +
