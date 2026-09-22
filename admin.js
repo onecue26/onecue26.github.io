@@ -652,21 +652,31 @@
   // 그리고 누르기 전에 **얼마인지** 적는다. 계획(render_plan)에 적힌 값을
   // 읽을 뿐이고 화면이 값을 지어내지 않는다 — 계획이 없으면 값도 없고,
   // 그때는 「계획이 먼저」라고 말한다.
-  /** 수정 요청 뒤에 **계획이 실제로 바뀌었는가.** 안 바뀌었으면 같은 문장이다. */
+  /** 고쳐 달라고 하신 뒤에 **계획이 실제로 손봐졌는가.** */
+  function planReady(p, s) {
+    var pick = SE().of(p, s) || {};
+    if (!pick.revision_at) return true;      // 처음 뽑는 자리는 해당 없음
+    var at = p.render_mode_at;
+    return !!(at && new Date(at) > new Date(pick.revision_at));
+  }
+
+  /** 그 사실을 한 줄로. 다시 뽑기 버튼이 눌리는지와 같은 판단을 쓴다 —
+   *  두 곳이 따로 판단하면 버튼은 눌리는데 글은 「아직」이라고 말한다. */
   function planChanged(p, s) {
     var pick = SE().of(p, s) || {};
     if (!pick.revision_at) return "";
-    var at = p.render_mode_at;
-    var after = at && new Date(at) > new Date(pick.revision_at);
-    if (after) {
-      return '<div class="plan-new"><b>제작 계획이 바뀌었습니다</b>' +
-        '<span>' + esc(when(at)) + " · " + esc(ago(at)) +
-        " — 고쳐 달라고 하신 뒤에 손봤습니다. 바뀐 문장으로 뽑습니다.</span></div>";
+    if (planReady(p, s)) {
+      var at = p.render_mode_at;
+      return '<div class="plan-new"><b>수정사항 적용 완료</b>' +
+        "<span>" + esc(when(at)) + " · " + esc(ago(at)) +
+        " — 고쳐 달라고 하신 것을 제작 계획에 넣었습니다. " +
+        "이제 <b>바뀐 문장으로</b> 뽑습니다. 누르시면 값이 나갑니다.</span></div>";
     }
-    return '<div class="plan-same"><b>제작 계획은 그대로입니다</b>' +
-      "<span>적으신 글은 기록에 남지만 <b>생성 문장을 바꾸지는 않습니다.</b> " +
-      "지금 누르시면 <b>같은 문장으로 한 번 더</b> 뽑습니다 — 굴림이 나빠서 " +
-      "다시 던지는 것이면 맞고, 내용을 바꾸실 거면 계획을 먼저 손봐야 합니다.</span></div>";
+    return '<div class="plan-same"><b>수정사항 반영 중입니다</b>' +
+      "<span>적으신 글은 기록에 남았습니다. 아직 <b>제작 계획에는 안 들어갔습니다</b> — " +
+      "지금 뽑으면 같은 문장으로 같은 값이 또 나갑니다. " +
+      "그래서 <b>다시 뽑기를 잠가 두었습니다.</b> 계획에 들어가면 " +
+      "「수정사항 적용 완료」가 뜨고 그때 눌리십니다.</span></div>";
   }
 
   function paidBody(p, s, act) {
@@ -736,7 +746,11 @@
           : "") +
         needs +
         '<div class="lc-row">' +
-        '<button class="btn" type="button" data-lc="start"' + tag + ">" +
+        // ★ 고쳐 달라고 하신 것이 계획에 반영되기 전에는 **못 누르게** 한다.
+        //   누르면 같은 문장으로 같은 값이 또 나간다. 버튼을 없애지는 않는다 —
+        //   없으면 「어디 갔지」가 되고, 회색으로 있으면 「아직」이 보인다.
+        '<button class="btn" type="button" data-lc="start"' + tag +
+        (again && !planReady(p, s) ? " disabled" : "") + ">" +
         (again ? (s === "anchors" ? "다시 만들기" : "다시 뽑기")
                : (s === "anchors" ? "제작 자료 만들기" : "영상 뽑기")) + "</button>" +
         "</div>" +
@@ -1876,14 +1890,29 @@
   // 30초마다 다시 읽는다. 화면을 열어 둔 동안 새로 올라온 것이 저절로 뜬다.
   // 무언가 입력하고 있는 중에는 다시 읽지 않는다 — 쓰던 글이 사라진다.
   var RELOAD_EVERY = 30000;
+  // ★ 저절로 다시 그리지 않는다.
+  //
+  //   30초마다 load() 를 불렀더니 화면이 통째로 갈리면서 보시던 자리가 튀었다.
+  //   스크롤을 되돌려 막아 보려 했지만, 그림이 실리면서 높이가 변해 끝까지
+  //   깔끔하지 않았다 (Dan: 「계속 refresh되면서 팅기는 문제」).
+  //
+  //   그래서 방향을 바꾼다 — **새 것이 있는지만 조용히 묻고, 알리기만 한다.**
+  //   다시 그리는 것은 사람이 누를 때만이다. 화면은 누르기 전까지 안 움직인다.
+  //   묻는 값도 가볍다: 가장 최근 기록 한 줄의 번호만 본다.
+  var LAST_SEEN_EVENT = null;
   function autoReload() {
     setInterval(function () {
-      if (!authorized) return;
-      if (document.hidden) return;              // 안 보고 있으면 아낀다
-      var el = document.activeElement;
-      if (el && (el.tagName === "TEXTAREA" || el.tagName === "INPUT" ||
-                 el.tagName === "SELECT")) return;
-      load();
+      if (!authorized || document.hidden) return;
+      db.from("events").select("id").order("id", { ascending: false }).limit(1)
+        .then(function (r) {
+          if (r.error || !r.data || !r.data.length) return;
+          var top = r.data[0].id;
+          if (LAST_SEEN_EVENT == null) { LAST_SEEN_EVENT = top; return; }
+          if (top === LAST_SEEN_EVENT) return;
+          LAST_SEEN_EVENT = top;
+          var bar = el("newsbar");
+          if (bar) bar.hidden = false;
+        });
     }, RELOAD_EVERY);
   }
 
@@ -1920,11 +1949,16 @@
     //   보고 있는 자리가 위로 튀었다 (Dan 2026-09-22: 「왜 저절로 내가 보는
     //   창 스크롤 올라가면서 움직이지」). 대부분의 30초는 아무것도 안 바뀐다 —
     //   그때는 다시 그릴 이유가 없다.
-    if (html === LAST_HTML) {
+    // ★ 「11분 전」 같은 시간 글자는 **매번 바뀐다.** 그대로 비교하면 30초마다
+    //   바뀐 걸로 읽혀 화면을 통째로 다시 그리고, 그때마다 보시던 자리가
+    //   튄다. 내용이 같은지를 보려면 **시간 글자를 뺀 채로** 비교해야 한다.
+    //   (Dan 2026-09-22: 「관리자 페이지 튀는거 여전한듯하고」)
+    var same = html.replace(/\d+(초|분|시간|일|주|개월)\s*전/g, "~");
+    if (same === LAST_HTML) {
       applyFolds();               // 접힘만 맞춰 두고 끝낸다
       return;
     }
-    LAST_HTML = html;
+    LAST_HTML = same;
 
     // 바뀐 것이 있어 다시 그릴 때도, 보던 자리는 지킨다.
     // ★ 스크롤은 **다 그리고 접힘까지 되살린 뒤에** 돌려놔야 한다.
@@ -1936,6 +1970,11 @@
     SCROLL_BACK = window.scrollY || document.documentElement.scrollTop || 0;
     el("work").innerHTML = html;
 
+    var ngo = el("newsgo");
+    if (ngo && !ngo.dataset.wired) {
+      ngo.dataset.wired = "1";
+      ngo.addEventListener("click", function () { load(); });
+    }
     document.querySelectorAll("[data-enroll]").forEach(function (b) {
       b.addEventListener("click", function () {
         b.disabled = true; b.textContent = "등록 요청 중…";
@@ -2170,15 +2209,39 @@
 
     document.querySelectorAll("[data-exec-form]").forEach(function (f) { syncExecForm(f); });
 
+    var nb = el("newsbar");
+    if (nb) nb.hidden = true;           // 방금 그렸으니 최신이다
+
     // 사람이 접어 둔 것을 되살린다. 그린 **뒤에** 해야 한다 —
     // 상자가 아직 없을 때 하면 아무것도 못 찾는다.
     applyFolds();
 
     // 접힘까지 되살려 문서 높이가 제자리로 온 뒤에 스크롤을 돌려놓는다.
+    //
+    // ★ 한 번으로는 모자란다. 그림이 아직 안 실려서 문서가 짧을 수 있고,
+    //   그러면 브라우저가 스크롤을 그 짧은 높이에 맞춰 깎는다. 실리는 대로
+    //   문서가 길어지므로, 다음 프레임과 잠깐 뒤에 한 번씩 더 돌려놓는다.
+    //   되돌리는 도중에 직접 스크롤하시면 **그 순간 그만둔다** — 사람이 움직인
+    //   것을 기계가 덮으면 그게 더 나쁘다.
     if (SCROLL_BACK != null) {
       var back = SCROLL_BACK;
       SCROLL_BACK = null;
-      window.scrollTo(0, back);
+      var give = false;
+      var stop = function () { give = true; };
+      window.addEventListener("wheel", stop, { once: true, passive: true });
+      window.addEventListener("touchstart", stop, { once: true, passive: true });
+      var put = function () {
+        if (give) return;
+        if (Math.abs((window.scrollY || 0) - back) > 2) window.scrollTo(0, back);
+      };
+      put();
+      requestAnimationFrame(put);
+      setTimeout(put, 120);
+      setTimeout(function () {
+        put();
+        window.removeEventListener("wheel", stop);
+        window.removeEventListener("touchstart", stop);
+      }, 600);
     }
 
     // ★ 그림을 다 그린 **뒤에** 「봤다」로 적는다. 그리기 전에 적으면
