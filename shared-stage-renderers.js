@@ -301,8 +301,29 @@
   // 관리자 추가 — 최종 편집 음악 워크플로
   function development(d, opts) {
     var row = d || {};
-    var arcList = (Array.isArray(row.arc) ? row.arc : [])
-      .map(text).filter(function (x) { return x.length > 0; });
+    // ★ arc 는 **객체 배열**이다 — {t_start, t_end, block, what, cuts}.
+    //   여태 이것을 text() 로 문자열화했는데, String({...}) 은
+    //   "[object Object]" 다. 길이가 0 이 아니므로 필터도 못 걸러서
+    //   시간 흐름 칸에 "[object Object]" 가 줄줄이 찍혔다 (알로하캔디에서 실제로
+    //   그랬다). RUSH 는 arc 가 비어 있어서 칸이 아예 안 보였고, 그래서
+    //   구성·각본이 껍데기처럼 보였다.
+    //
+    //   문자열도 계속 받는다 — 옛 데이터가 그 꼴일 수 있고, 모양을 하나로
+    //   강제하려면 옛 것을 먼저 고쳐야 한다.
+    var arcList = (Array.isArray(row.arc) ? row.arc : []).map(function (a) {
+      if (a && typeof a === "object") {
+        var span = (a.t_start != null && a.t_end != null)
+          ? a.t_start + "~" + a.t_end + "초"
+          : (a.t_start != null ? a.t_start + "초" : "");
+        var head = [text(a.block), text(a.what)].filter(function (x) {
+          return x.length > 0;
+        }).join(" — ");
+        var cutsOf = Array.isArray(a.cuts) && a.cuts.length
+          ? " (컷 " + a.cuts.join("·") + ")" : "";
+        return (span ? span + " · " : "") + head + cutsOf;
+      }
+      return text(a);
+    }).filter(function (x) { return x.length > 0; });
     // 한 줄이 「0~3초 …」 꼴이면 시간 구간을 앞 칸으로 떼어 낸다. 아니면 그대로 한 행이다.
     // ★ 시간은 소수로 적힌다 — 실제 데이터가 "0.0–1.6초: …" 다. \d+ 만 받으면
     //   한 줄도 안 맞아 시간 칸이 비고, 본문이 "0.0–1.6초: …" 째로 오른쪽 칸에
