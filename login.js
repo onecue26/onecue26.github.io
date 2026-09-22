@@ -203,9 +203,20 @@
       say('err', '로그인 상태를 확인하지 못했습니다. 새로고침해 주세요.');
     });
 
+    // 아이디만 치셔도 들어가게 한다. 로그인 칸은 메일 주소를 받는데,
+    // 안에서 쓰는 계정은 「psw」처럼 아이디로 부른다 — 사람이 쓰는 이름과
+    // 시스템이 쓰는 주소가 다르면 사람 쪽을 받아 준다.
+    // @ 가 있으면 그대로 둔다. 바깥 메일로 만든 계정이 대부분이다.
+    var HOUSE = "onecue.kr";
+    function asEmail(v) {
+      var s = String(v || "").trim();
+      if (!s || s.indexOf("@") >= 0) return s;
+      return s + "@" + HOUSE;
+    }
+
     el("form").addEventListener("submit", function (e) {
       e.preventDefault();
-      var email = el("email").value.trim(), pw = el("pw").value;
+      var email = asEmail(el("email").value), pw = el("pw").value;
       var nick = el("nick").value.trim();
       el("go").disabled = true;
       say("", mode === "in" ? "확인 중…" : "만드는 중…");

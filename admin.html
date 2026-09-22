@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="style.css?v=1f228d76">
-<link rel="stylesheet" href="stage-render.css?v=needs-260922-v22">
+<link rel="stylesheet" href="stage-render.css?v=needs-260922-v23">
 <style>
 /* 관리자 화면 — 훑고 조작하는 곳이라 정보 밀도를 우선한다 */
 
@@ -440,6 +440,33 @@
   background:var(--hold-soft);border-left:3px solid var(--hold);font-size:12.5px}
 .redo-note b{color:var(--ink)}
 .redo-note span{color:var(--muted);line-height:1.6;overflow-wrap:anywhere}
+
+/* 후반 작업 — 뽑은 뒤 보내기 전에 사람이 하는 일 */
+.post-work{display:grid;gap:12px}
+.pw-head{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.pw-head b{font-size:13.5px}
+.pw-head span{font-size:11.5px;color:var(--faint)}
+.pw-open{display:grid;gap:4px;padding:10px 13px;border-radius:6px;
+  background:var(--hold-soft);border-left:3px solid var(--hold);font-size:12.5px}
+.pw-open b{color:var(--ink)}
+.pw-open span{color:var(--muted)}
+.pw-list{margin:0;padding-left:20px;display:grid;gap:11px}
+.pw-list li{color:var(--ink)}
+.pw-list li b{font-size:13px}
+.pw-list .who{display:inline-block;margin-left:7px;padding:1px 6px;border-radius:3px;
+  background:var(--sunk);color:var(--muted);font:600 10.5px/1.6 inherit;font-style:normal}
+.pw-list .how,.pw-list .why,.pw-list .open{display:block;margin-top:3px;font-size:12px;
+  line-height:1.6;overflow-wrap:anywhere}
+.pw-list .how{color:var(--muted)}
+.pw-list .why{color:var(--faint)}
+.pw-list .open{color:var(--hold);font-weight:600}
+/* 다시 뽑기 — 계획이 바뀌었나 그대로인가 */
+.plan-new,.plan-same{display:grid;gap:3px;margin:0 0 10px;padding:9px 12px;
+  border-radius:6px;font-size:12.5px}
+.plan-new{background:var(--ok-soft,#eefbf2);border-left:3px solid var(--ok,#2f9e5e)}
+.plan-same{background:var(--hold-soft);border-left:3px solid var(--hold)}
+.plan-new b,.plan-same b{color:var(--ink)}
+.plan-new span,.plan-same span{color:var(--muted);line-height:1.6}
 </style>
 <link rel="stylesheet" href="studio.css?v=3"><script defer src="studio-shell.js?v=3"></script>
 <link rel="stylesheet" href="brand.css?v=red1"></head>
@@ -498,11 +525,11 @@
 <script src="asset-access.js"></script>
 <!-- 폼 계약은 stage-executor.js 보다 먼저 온다. 계약이 없으면 검사가 닫히는 쪽으로 실패한다 -->
 <script src="stage-form-contract.js?v=contract-260921-v3"></script>
-<script src="stage-executor.js?v=needs-260922-v22"></script>
-<script src="credit-rates.js?v=needs-260922-v22"></script>
-<script src="ad-type-materials.js?v=needs-260922-v22"></script>
-<script src="material-gaps.js?v=needs-260922-v22"></script>
+<script src="stage-executor.js?v=needs-260922-v23"></script>
+<script src="credit-rates.js?v=needs-260922-v23"></script>
+<script src="ad-type-materials.js?v=needs-260922-v23"></script>
+<script src="material-gaps.js?v=needs-260922-v23"></script>
 <script src="shared-stage-renderers.js?v=stage-read-260921-v16"></script>
-<script src="admin.js?v=needs-260922-v22"></script>
+<script src="admin.js?v=needs-260922-v23"></script>
 </body>
 </html>
