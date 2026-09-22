@@ -29,6 +29,18 @@
 
   function el(id) { return document.getElementById(id); }
   function val(id) { return el(id).value.trim(); }
+
+  /** 주소에 https:// 를 붙여 준다.
+   *
+   *  사람은 보통 `example.co.kr` 이라고 적는다. 그런데 input[type=url] 은
+   *  체계(scheme)가 없으면 아예 제출을 막고, 저장해 둬도 링크로 눌렀을 때
+   *  우리 사이트 안의 경로로 잘못 간다.
+   *  적으신 대로 받고 우리가 앞을 채운다 — 사람에게 형식을 배우게 하지 않는다. */
+  function withScheme(s) {
+    var v = (s || "").trim();
+    if (!v) return null;
+    return /^https?:\/\//i.test(v) ? v : "https://" + v.replace(/^\/+/, "");
+  }
   function checked(boxId) {
     return Array.prototype.slice
       .call(el(boxId).querySelectorAll("input:checked"))
@@ -315,6 +327,9 @@
             client_id: ctx.client.id, project_id: pid,
             name: val("cname"), email: val("email"),
             phone: val("phone") || null, title: val("title") || null,
+            // 홈페이지 — 브랜드 톤을 보러 갈 링크. 주소만 적어 주셔도
+            // 되게 앞에 https:// 를 붙여 둔다 (type="url" 은 없으면 막는다)
+            homepage: withScheme(val("homepage")),
           }),
           db.from("jobs").insert({
             project_id: pid, step: "facts", kind: "text",
