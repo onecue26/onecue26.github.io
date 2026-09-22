@@ -252,6 +252,13 @@
   function execPicker(p, key) {
     var s = SE(), pick = s.of(p, key);
     if (!s.editable(p, key)) return "";
+    // ★ 의뢰 접수는 **광고주가 쓴 것**이다. 우리가 수행하는 일이 아니므로
+    //   「누가 맡습니까」가 뜻이 없다. 그런데 물음이 떠 있었고, 고르고 저장하면
+    //   담당만 적히고 아무 일도 안 일어났다 — 이 단계를 앞으로 보내는 것은
+    //   「AI 제작 시작」이지 담당 고르기가 아니다.
+    //   Dan 2026-09-22: 「의뢰접수 AI진행 저장 눌럿는데 버튼만 눌리고 아무일도없어」
+    //   누를 수 있는 것이 그것뿐이면 그걸 누르신 게 맞다. 그래서 치운다.
+    if (key === "brief") return "";
     var human = pick.mode === "human";
     var name = "exec-" + p.slug + "-" + key;
     var tag = ' data-slug="' + esc(p.slug) + '" data-step="' + esc(key) + '"';
@@ -1875,7 +1882,18 @@
     }
 
     var stageBodies = {
-      brief: '<div class="stage-content">' + said + requirements + '</div>',
+      // ★ 「AI 제작 시작」을 여기 놓는다.
+      //
+      //   productionAction 은 brief 를 위해 계산되는데(1188~1199줄), 실제로
+      //   그려지는 자리는 **콘티와 납품 두 곳뿐**이었다. 그래서 새 의뢰가
+      //   들어오면 의뢰 접수 칸에 「누가 맡습니까 · 저장」만 보이고, 그걸
+      //   누르면 담당만 적히고 **아무 일도 안 일어났다.**
+      //
+      //   Dan 2026-09-22: 「환타 광고 새의뢰 들어와서 의뢰접수 AI진행 저장
+      //   눌럿는데 버튼만 눌리고 아무일도없어」 — 누를 것이 그것뿐이었으니
+      //   그걸 누르신 것이 맞다. 없던 것은 다음으로 보내는 버튼이다.
+      brief: '<div class="stage-content">' + said + requirements +
+        (p.step === "brief" ? productionAction : "") + '</div>',
       facts: factsBody,
       strategy: strategyBody,
       concepts: conceptReview + check,
