@@ -1585,8 +1585,48 @@
         var act = SE().actions(p, step, !!(p.stageResults && p.stageResults[step]));
         buttons = paidBody(p, step, act);
       }
-      return buttons + doneNote(p, step) + askNote(p, step) +
+      return buttons + readyNote(p, step) + doneNote(p, step) + askNote(p, step) +
         blockedNote(p, step) + assetList(p, step);
+    }
+
+    // ★ 준비물이 나오면 **화면이 말한다.** 내가 말해 드리는 게 아니다
+    //   (Dan 2026-09-22: 「앵커나오면 보고가아니라 화면이 바뀌어야하는거아냐?」).
+    //
+    //   영상보다 먼저 만드는 것(소품 앵커 같은 것)이 있다. 그게 나오면 작업기는
+    //   거기서 멈추는데, 화면이 그 사실을 말하지 않으면 사장님은 무엇을 보고
+    //   무엇을 눌러야 하는지 알 수 없다. 그림을 그 자리에 세우고, 다음에
+    //   무엇이 일어나는지 값과 함께 적는다.
+    function readyNote(p, step) {
+      if (step !== "video") return "";
+      var pick = SE().of(p, step) || {};
+      var mark = pick.approved_at || pick.revision_at;
+      // 이 단계가 쓰는 준비물 = 계획의 needs 중 우리가 뽑은 것(anchor)
+      var plan = (p.render_plan || {}).calls || [];
+      var wants = 0;
+      plan.forEach(function (c) {
+        (c.needs || []).forEach(function (n) { if (n.kind === "anchor") wants += 1; });
+      });
+      if (!wants) return "";
+      var got = (p.files || []).filter(function (f) {
+        if (f.kind !== "anchor" || !f.url) return false;
+        var made = f.created_at || (f.meta || {}).made_at;
+        return !!made && (!mark || String(made) > String(mark));
+      }).sort(function (x, y) {
+        return String(x.created_at) < String(y.created_at) ? 1 : -1;
+      });
+      if (!got.length) return "";
+      var f = got[0];
+      var m = f.meta || {};
+      return '<div class="ready"><b>영상에 물릴 준비물이 나왔습니다</b>' +
+        '<span class="when">' + esc(when(f.created_at)) + " · " + esc(ago(f.created_at)) +
+        (m.credits ? " · " + m.credits + " 크레딧" : "") + "</span>" +
+        '<img src="' + esc(f.url) + '" alt="' + esc(f.role || "준비물") +
+        '" loading="lazy" data-big="' + esc(f.url) + '">' +
+        '<span class="what"><b>' + esc(f.role || "준비물") + "</b>" +
+        (m.why ? " — " + esc(m.why) : "") + "</span>" +
+        '<span class="next">이것을 보시고 괜찮으면 <b>다시 뽑기</b>를 눌러 영상을 뽑습니다. ' +
+        "여기서 걸리는 게 있으면 눌러서 크게 보시고 말씀해 주십시오 — " +
+        "영상을 뽑은 뒤에는 이 물건을 못 바꿉니다.</span></div>";
     }
 
     // 지나간 유료 단계 — 언제 승인했는지 한 줄. 이게 없으면 그림만 남아서
