@@ -629,6 +629,10 @@
       return '<div class="lc-head"><b>' + esc(what) + "</b>" +
         (why ? "<span>" + why + "</span>" : "") + "</div>";
     };
+    // ★ act.phase 를 직접 본다. 예전에는 act.review / act.choose 같은 이름을
+    //   보았는데 그 필드가 없어서(실제 이름은 approve) 모든 분기가 빗나갔다.
+    //   앵커가 올라왔는데 버튼이 하나도 없던 이유가 이것이다.
+    var at = act.phase;
 
     // 계획이 없으면 무엇을 몇 장 만들지 알 수 없다. 그때 뽑으면 그때그때
     // 달라지고, 달라진 것을 아무도 기록하지 않는다.
@@ -639,23 +643,16 @@
         '<span class="lc-msg err">구성·각본 단계에서 제작 방식을 정해야 합니다.</span></div>';
     }
 
-    // 무엇을 왜 만드는지 — 앵커마다 쓰임새를 적는다. 그림만 올려 두면
-    // 관리자는 「이게 왜 필요한 건지」를 모르는 채로 승인하게 된다.
+    // 무엇을 왜 만드는지 — 만들기 전에는 계획이, 만든 뒤에는 자산의 설명이 말한다.
     var needs = plan.needs.length
       ? '<ul class="need-list">' + plan.needs.map(function (n) {
         return "<li><b>" + esc(n.what || n.kind) + "</b>" +
+          (n.credits_estimate ? '<em class="c">' + n.credits_estimate + " 크레딧</em>" : "") +
           (n.why ? '<span class="why">' + esc(n.why) + "</span>" : "") + "</li>";
       }).join("") + "</ul>"
       : "";
 
-    if (act.choose) {
-      return '<div class="lc lc-choose"' + tag + ">" +
-        head("누가 만듭니까", "고르기만 해서는 시작되지 않습니다") +
-        '<div class="lc-row">' +
-        '<button class="btn" type="button" data-lc="choose-ai"' + tag + ">AI에게 맡기기</button>" +
-        "</div></div>";
-    }
-    if (act.start) {
+    if (at === "start" || at === "choose") {
       return '<div class="lc lc-start"' + tag + ">" +
         head(s === "anchors" ? "제작 자료를 만듭니다" : "영상을 뽑습니다",
              "예상 " + money(plan.credits) +
@@ -669,18 +666,17 @@
         '보신 뒤 승인하거나 고칠 곳을 적으실 수 있습니다.</span>' +
         '<span class="lc-msg" data-lc-msg></span></div>';
     }
-    if (act.working) {
+    if (at === "working") {
       return '<div class="lc lc-working"' + tag + ">" +
         head(s === "anchors" ? "제작 자료를 만드는 중" : "영상을 뽑는 중",
              "끝나면 이 자리에 올라옵니다") + "</div>";
     }
-    if (act.review) {
+    if (at === "review") {
       return '<div class="lc lc-review"' + tag + ">" +
         head(s === "anchors" ? "제작 자료를 검수해 주세요" : "영상을 검수해 주세요",
-             s === "video" && act.reviseCostsAgain
+             s === "video"
                ? "수정 요청은 <b>다시 뽑기</b>입니다 — " + money(plan.credits) + "이 또 나갑니다"
-               : "고칠 곳을 적으시면 그 부분만 다시 만듭니다") +
-        needs +
+               : "고칠 곳을 적으시면 그것만 다시 만듭니다. 승인하면 다음 단계로 갑니다") +
         '<textarea class="lc-note" data-lc-note placeholder="' +
         esc("수정 요청은 무엇을 고칠지 적어야 보냅니다") + '"></textarea>' +
         '<div class="lc-row">' +
@@ -689,7 +685,7 @@
         "</div>" +
         '<span class="lc-msg" data-lc-msg></span></div>';
     }
-    if (act.next) {
+    if (at === "approved") {
       return '<div class="lc lc-approved"' + tag + ">" +
         head("승인 완료", "다음 단계로 넘길 수 있습니다") +
         '<div class="lc-row">' +
@@ -1416,26 +1412,56 @@
       return paidBody(p, step, act) + assetList(p, step);
     }
 
-    // 만든 것을 보여 준다. 승인은 보고 하는 것이고, 볼 것이 없으면 승인이
-    // 형식이 된다.
+    // 만든 것 — 승인은 **보고** 하는 것이다. 볼 것이 없으면 승인이 형식이 된다.
+    //
+    // 세 가지를 지킨다:
+    //   · 순서대로 — 컷 번호 순. 번호가 없는 것(시트 같은 것)은 뒤로.
+    //   · 눌러서 크게 — 앵커는 라벨 글자와 그림자를 보고 판정하는 물건이라
+    //     작은 칸에서는 판정이 안 된다.
+    //   · 각각 설명 — 무엇이고 왜 만들었는지. 그게 없으면 보고도 판단이 안 된다.
     function assetList(p, step) {
       var want = step === "anchors" ? ["anchor"] : ["clip", "final"];
       var mine = (p.files || []).filter(function (f) {
         return want.indexOf(f.kind) >= 0;
+      }).sort(function (x, y) {
+        var a1 = x.cut_n == null ? 9999 : Number(x.cut_n);
+        var b1 = y.cut_n == null ? 9999 : Number(y.cut_n);
+        return a1 - b1;
       });
       if (!mine.length) return "";
-      return '<div class="made-list"><span class="lbl">만든 것 ' + mine.length + "</span>" +
-        mine.map(function (f) {
+      return '<div class="made"><span class="made-lbl">만든 것 ' + mine.length +
+        " · 눌러서 크게 보실 수 있습니다</span>" +
+        mine.map(function (f, i) {
+          var m = f.meta || {};
           var vid = (f.mime || "").indexOf("video/") === 0;
+          var facts = [];
+          if (m.engine) facts.push(esc(m.engine));
+          if (m.credits) facts.push(m.credits + " 크레딧");
+          if (m.covers_cuts && m.covers_cuts.length) {
+            facts.push("컷 " + m.covers_cuts.join("·") + " 에 쓰입니다");
+          }
+          var checks = m.checks
+            ? '<dl class="made-checks">' + Object.keys(m.checks).map(function (k) {
+              return "<dt>" + esc(k) + "</dt><dd>" + esc(m.checks[k]) + "</dd>";
+            }).join("") + "</dl>"
+            : "";
           return '<figure class="made-one">' +
+            '<span class="made-n">' + (i + 1) + "</span>" +
             (f.url
               ? (vid
                 ? '<video src="' + esc(f.url) + '" controls preload="metadata"></video>'
                 : '<img src="' + esc(f.url) + '" alt="' + esc(f.role || f.kind) +
-                  '" loading="lazy" data-big="' + esc(f.url) + '" data-kind="img">')
-              : '<div class="none">—</div>') +
-            "<figcaption>" + esc(f.role || f.kind) +
-            (f.cut_n != null ? " · 컷" + f.cut_n : "") + "</figcaption></figure>";
+                  '" loading="lazy" data-big="' + esc(f.url) + '">')
+              : '<div class="none">파일을 불러오지 못했습니다</div>') +
+            '<figcaption><b>' + esc(f.role || f.kind) +
+            (f.cut_n != null ? " · 컷" + f.cut_n : "") + "</b>" +
+            (m.why ? '<span class="why">' + esc(m.why) + "</span>" : "") +
+            (m.camera_lock ? '<span class="lock">카메라 고정 — ' +
+              esc(m.camera_lock) + "</span>" : "") +
+            (facts.length ? '<span class="facts">' + facts.join(" · ") + "</span>" : "") +
+            checks +
+            (f.approved ? '<span class="ok">승인됨</span>' : "") +
+            "</figcaption></figure>";
         }).join("") + "</div>";
     }
 
@@ -1548,6 +1574,23 @@
             }
             load();
           });
+      });
+    });
+    // 눌러서 크게 — 여태 data-big 만 붙여 놓고 받는 쪽이 없었다.
+    // 앵커는 라벨 글자·그림자를 보고 판정하는 물건이라 작은 칸으로는 못 본다.
+    document.querySelectorAll("img[data-big]").forEach(function (img) {
+      img.addEventListener("click", function () {
+        var box = document.createElement("div");
+        box.className = "bigview";
+        box.innerHTML = '<img src="' + img.dataset.big + '" alt="크게 보기">';
+        function close() {
+          box.remove();
+          document.removeEventListener("keydown", onKey);
+        }
+        function onKey(e) { if (e.key === "Escape") close(); }
+        box.addEventListener("click", close);
+        document.addEventListener("keydown", onKey);
+        document.body.appendChild(box);
       });
     });
     document.querySelectorAll("[data-mail]").forEach(function (b) {
