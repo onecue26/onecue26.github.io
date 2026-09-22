@@ -267,15 +267,19 @@
         ? (c.needs || []).some(function (n) { return n.kind === "anchor"; })
         : c.kind === "generate";
     });
-    var credits = mine.reduce(function (a, c) {
-      return a + (Number(c.credits_estimate) || 0);
-    }, 0);
     var needs = [];
     mine.forEach(function (c) {
       (c.needs || []).forEach(function (n) {
         if (step !== "anchors" || n.kind === "anchor") needs.push(n);
       });
     });
+    // ★ 단계마다 **자기 비용**을 센다.
+    //   제작 자료는 앵커를 만드는 값이고, 영상 제작은 영상을 뽑는 값이다.
+    //   앵커 단계가 호출의 credits_estimate(영상값)를 읽으면 3 크레딧짜리를
+    //   36 이라고 적는다 — 그건 누르기를 망설이게 만드는 거짓말이다.
+    var credits = step === "anchors"
+      ? needs.reduce(function (a, n) { return a + (Number(n.credits_estimate) || 0); }, 0)
+      : mine.reduce(function (a, c) { return a + (Number(c.credits_estimate) || 0); }, 0);
     return { mode: project.render_mode || null, calls: mine,
              credits: credits, needs: needs };
   }
