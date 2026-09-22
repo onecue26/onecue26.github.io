@@ -22,7 +22,7 @@
   var STEP_NAME = {
     brief: "의뢰 접수", facts: "제품·자료 확인", strategy: "전략 설계",
     concepts: "콘셉트 5안", develop: "구성·각본", storyboard: "콘티 승인",
-    anchors: "제작 자료", video: "영상 제작", deliver: "납품",
+    anchors: "제작 자료", video: "영상 제작", post: "후반 작업", deliver: "납품",
   };
   var FLOW = [
     { key: "brief", owner: "광고주 → 관리자" },
@@ -33,6 +33,7 @@
     { key: "storyboard", owner: "AI/담당자 · 관리자" },
     { key: "anchors", owner: "AI · 제작 관리자" },
     { key: "video", owner: "AI · 제작 관리자" },
+    { key: "post", owner: "사람 손 · AI 검수" },
     { key: "deliver", owner: "관리자 → 광고주" },
   ];
   // 이 단계로 옮기면 광고주가 판단할 차례가 된다
@@ -638,6 +639,23 @@
   // 그리고 누르기 전에 **얼마인지** 적는다. 계획(render_plan)에 적힌 값을
   // 읽을 뿐이고 화면이 값을 지어내지 않는다 — 계획이 없으면 값도 없고,
   // 그때는 「계획이 먼저」라고 말한다.
+  /** 수정 요청 뒤에 **계획이 실제로 바뀌었는가.** 안 바뀌었으면 같은 문장이다. */
+  function planChanged(p, s) {
+    var pick = SE().of(p, s) || {};
+    if (!pick.revision_at) return "";
+    var at = p.render_mode_at;
+    var after = at && new Date(at) > new Date(pick.revision_at);
+    if (after) {
+      return '<div class="plan-new"><b>제작 계획이 바뀌었습니다</b>' +
+        '<span>' + esc(when(at)) + " · " + esc(ago(at)) +
+        " — 고쳐 달라고 하신 뒤에 손봤습니다. 바뀐 문장으로 뽑습니다.</span></div>";
+    }
+    return '<div class="plan-same"><b>제작 계획은 그대로입니다</b>' +
+      "<span>적으신 글은 기록에 남지만 <b>생성 문장을 바꾸지는 않습니다.</b> " +
+      "지금 누르시면 <b>같은 문장으로 한 번 더</b> 뽑습니다 — 굴림이 나빠서 " +
+      "다시 던지는 것이면 맞고, 내용을 바꾸실 거면 계획을 먼저 손봐야 합니다.</span></div>";
+  }
+
   function paidBody(p, s, act) {
     var tag = ' data-slug="' + esc(p.slug) + '" data-step="' + esc(s) + '"';
     var plan = act.plan;
@@ -686,6 +704,14 @@
         (again && note
           ? '<div class="redo-note"><b>고쳐 달라고 적으신 것</b>' +
             "<span>" + esc(note) + "</span></div>" : "") +
+        // ★ 수정 요청 글은 **프롬프트를 바꾸지 않는다.** 생성은 계획에 적힌
+        //   문장을 그대로 돌린다(035). 계획을 안 고치고 다시 누르면 **같은
+        //   문장으로 같은 값이 또 나간다.**
+        //
+        //   그렇다고 막지는 않는다 — 굴림이 나빠서 한 번 더 던지는 것은
+        //   정당하다. 대신 **어느 쪽인지 말한다.** 말해 주지 않으면 사장님은
+        //   적은 대로 바뀐 줄 아시고 누르게 된다.
+        (again ? planChanged(p, s) : "") +
         (again
           ? '<span class="lc-msg">아래 만든 것은 <b>그대로 남아 있습니다.</b> ' +
             '누르시면 그 위에 새로 뽑습니다 — 누르지 않으면 돈이 나가지 않습니다.</span>'
@@ -1469,6 +1495,37 @@
     //
     //   갈라야 하는 이유: 누를 것까지 계속 두면 지나간 단계에 「유료 생성
     //   시작」이나 「승인」이 살아 있게 된다.
+    // 후반 작업 — 뽑은 뒤 보내기 전에 사람이 하는 일. 돈은 안 나간다.
+    // 계획(render_plan.post)에 적힌 것을 그대로 세운다 — 화면이 목록을
+    // 따로 들고 있으면 계획과 갈린다.
+    function postBody(p) {
+      var list = ((p.render_plan || {}).post) || [];
+      if (!list.length) {
+        return '<div class="stage-content"><p class="none">' +
+          '후반에 할 일이 계획에 아직 없습니다 — 구성·각본 단계에서 정합니다.</p></div>';
+      }
+      var left = list.filter(function (x) { return x.unresolved; });
+      return '<div class="stage-content post-work">' +
+        '<div class="pw-head"><b>뽑은 뒤 보내기 전에 하는 일 ' + list.length + '가지</b>' +
+        '<span>전부 사람 손입니다 · 크레딧 0</span></div>' +
+        (left.length
+          ? '<div class="pw-open"><b>아직 안 정해진 것 ' + left.length + '건</b>' +
+            left.map(function (x) {
+              return "<span>" + esc(x.what) + " — " + esc(x.unresolved) + "</span>";
+            }).join("") + "</div>"
+          : "") +
+        '<ol class="pw-list">' + list.map(function (x) {
+          return "<li><b>" + esc(x.what) + "</b>" +
+            '<em class="who">' + esc(x.who === "human" ? "사람 손"
+              : x.who === "ai" ? "AI" : "AI + 사람") + "</em>" +
+            (x.how ? '<span class="how">' + esc(x.how) + "</span>" : "") +
+            (x.why ? '<span class="why">' + esc(x.why) + "</span>" : "") +
+            (x.unresolved ? '<span class="open">★ 안 정해짐 — ' +
+              esc(x.unresolved) + "</span>" : "") + "</li>";
+        }).join("") + "</ol>" +
+        (p.step === "post" ? lifecycleBar(p, "post") : "") + "</div>";
+    }
+
     function paidStageBody(p, step) {
       var here = p.step === step;
       var buttons = "";
@@ -1621,6 +1678,8 @@
       video: costLine(p, "video") + paidStageBody(p, "video"),
       // ★ 납품에는 **이 건 원가 합계**를 둔다. 광고 한 편에 얼마가 드는지
       //   모르면 서비스 가격을 정할 수 없다.
+      // 후반 — 계획에 적힌 할 일을 그대로 세운다. 여기서 지어내지 않는다.
+      post: postBody(p),
       deliver: totalLine(p) + (p.step === "deliver" ? productionAction : "")
     };
 

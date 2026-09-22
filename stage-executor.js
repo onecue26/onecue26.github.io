@@ -9,8 +9,12 @@
 (function (root) {
   "use strict";
 
+  // ★ post(후반)는 video 와 deliver 사이다. 뽑은 뒤이고 보내기 전이다.
+  //   영상이 나오면 절반이다 — 글자를 얹고 소리를 맞추고 이어붙인 것을 통째로
+  //   다시 봐야 나간다. 그 자리가 없으면 글자 없는 영상이 광고주에게 간다.
+  //   돈은 안 나간다(전부 사람 손) — 그래서 유료 단계 목록에 안 넣는다.
   var ORDER = ["brief", "facts", "strategy", "concepts", "develop",
-    "storyboard", "anchors", "video", "deliver"];
+    "storyboard", "anchors", "video", "post", "deliver"];
 
   var DEFAULT = { mode: "ai", assignee: "", reviewer_model: "", reviewer_note: "", state: "planned" };
 
