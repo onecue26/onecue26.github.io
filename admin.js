@@ -2720,6 +2720,43 @@
       });
     });
 
+    // ★ **적기 시작하면 다시 뽑기를 잠근다.**
+    //
+    //   「이 답변대로 갑니다」를 누르면 버튼이 열린다. 그런데 그 뒤에 의견을
+    //   더 적으시는 동안에는 아직 저장 전이라 DB 는 「정해짐」 그대로고,
+    //   버튼도 열려 있었다. 그 상태로 누르면 **방금 적으신 글이 반영되지
+    //   않은 채 45크레딧이 나간다.**
+    //   (Dan 2026-09-22: 「의견 더 적기 … 누르니까 다시 쓰는칸이 나오긴하는데
+    //   다시 뽑기 버튼이 안잠기네」)
+    //
+    //   저장 여부는 서버만 아는 것이 아니다 — **칸에 손을 댔는지**는 화면이
+    //   안다. textarea.defaultValue 가 저장된 값이므로 그것과 다르면 아직
+    //   저장 안 된 것이다.
+    document.querySelectorAll("[data-take-text]").forEach(function (t) {
+      var stage = t.closest("details.flow-step");
+      if (!stage) return;
+      var btn = stage.querySelector('[data-lc="start"]');
+      if (!btn) return;
+      // 원래 잠금 상태를 기억해 둔다. 손을 뗐을 때 함부로 열어 주지 않는다 —
+      // 계획 미반영·미결정 같은 다른 이유로 잠겨 있을 수 있다.
+      if (btn.dataset.lockBase == null) btn.dataset.lockBase = btn.disabled ? "1" : "";
+      var msg = stage.querySelector("[data-lc-msg]");
+      t.addEventListener("input", function () {
+        var dirty = false;
+        stage.querySelectorAll("[data-take-text]").forEach(function (x) {
+          if (x.value !== x.defaultValue) dirty = true;
+        });
+        btn.disabled = !!btn.dataset.lockBase || dirty;
+        if (msg) {
+          msg.textContent = dirty
+            ? "적으신 것이 아직 저장되지 않았습니다 — 「고쳐 저장」을 누르시면 "
+              + "답변을 다시 답니다. 그때까지 다시 뽑기는 잠급니다."
+            : "";
+          msg.classList.toggle("warn", dirty);
+        }
+      });
+    });
+
     document.querySelectorAll("[data-take-save]").forEach(function (b) {
       b.addEventListener("click", function () {
         var f = b.closest("[data-take-form]");

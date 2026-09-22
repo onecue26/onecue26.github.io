@@ -290,6 +290,9 @@ body.admin-wide .other-concepts .concepts {
 }
 .lc-msg { font-size: 11.5px; color: var(--muted); }
 .lc-msg.err { color: var(--hold); font-weight: 700; }
+/* 적었는데 아직 저장 안 하신 상태 — 이때 다시 뽑기를 누르면 그 글이
+   반영되지 않은 채 값이 나간다. 눈에 띄어야 한다 */
+.lc-msg.warn { color: var(--cue); font-weight: 700; line-height: 1.6; }
 
 /* 눌러야 하는 자리 — 고르기·시작·검수 */
 .lc-choose, .lc-start, .lc-review {
