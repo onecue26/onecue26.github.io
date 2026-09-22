@@ -290,7 +290,10 @@
     if (index(step) > index(project.step)) return "upcoming";
     var pick = of(project, step);
     if (hasResult) return pick.approved_at ? "approved" : "review";
-    if (!pick.chosen_at) return "choose";
+    // ★ 제작 자료·영상 제작은 **고르기를 묻지 않는다.** 사람이 대신할 길이
+    //   없다 — 앵커를 사람이 따로 만들어 올 수 없고, 영상도 그렇다.
+    //   고를 것이 하나뿐인 물음은 누르는 수만 늘린다. DB 도 같은 판단이다(030).
+    if (!pick.chosen_at) return isPaid(step) ? "start" : "choose";
     // 시작의 증거는 둘 중 하나다 — AI 는 만들어진 작업, 사람은 시작 시각.
     // 작업 큐에 지금 이 단계가 돌고 있으면 그것도 시작이다(기록보다 현실이 먼저다).
     var running = !!(project.job && project.job.step === step);

@@ -543,7 +543,10 @@
           '<span>수행 · ' + esc(worker) +
           '</span><span>결과를 검토하는 AI(핵심 검토 AI) · ' + esc(reviewer) + '</span>' +
           findingText + delivered +
-          (bact ? "" : execPicker(p, s.key)) + deliverBox(p, s.key) +
+          // 유료 단계는 고르기를 묻지 않으므로 선택 폼도 띄우지 않는다 —
+          // 띄우면 「사람이 직접 진행」이 보이고, 그 길은 없다.
+          (bact || SE().isPaid(s.key) ? "" : execPicker(p, s.key)) +
+          deliverBox(p, s.key) +
           (s.key === "facts" ? needsPanel(p) : "") +
           (status === "upcoming" ? ''
             : (bodies[s.key] || '<p class="stage-empty">저장된 상세 내용이 없습니다.</p>')) +
