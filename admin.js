@@ -423,7 +423,16 @@
       counts[f.kind] = (counts[f.kind] || 0) + 1;
     });
     var guessed = String(p.ad_type_by || "").indexOf("ai:") === 0;
-    var picker = '<div class="need-pick"><label>광고 종류</label><select data-adtype="' +
+    // 보기 전용에는 **무엇으로 보고 있는지만** 보여 준다. 고르는 칸과 누르는
+    // 것을 주면 눌러도 안 되는 것을 준 셈이고, 그게 화면을 못 믿게 만든다.
+    // 아래 「필요한 자료」 계산은 그대로 돈다 — 그건 읽는 것이라 막을 이유가 없다.
+    var picker = !canWrite
+      ? '<div class="need-pick ro"><label>광고 종류</label><b>' +
+        esc((p.ad_type && spec.types[p.ad_type] && spec.types[p.ad_type].label)
+            || "아직 정하지 않음") + "</b>" +
+        (guessed ? '<em class="need-guess">AI 짐작입니다 — 관리자 계정에서 확인합니다</em>'
+                 : "") + "</div>"
+      : '<div class="need-pick"><label>광고 종류</label><select data-adtype="' +
       esc(p.slug) + '">' +
       (p.ad_type ? "" : '<option value="">— 아직 정하지 않음 —</option>') +
       Object.keys(spec.types).map(function (k) {
@@ -1152,8 +1161,10 @@
       } else if (p.enrollRequested) {
         productionAction = '<span class="progress-state wait">등록 요청됨 · 로컬 처리 대기</span>';
       } else {
-        productionAction = '<button class="btn production-start" type="button" data-enroll="' +
-          esc(p.slug) + '">AI 제작 시작</button>';
+        productionAction = canWrite
+          ? '<button class="btn production-start" type="button" data-enroll="' +
+            esc(p.slug) + '">AI 제작 시작</button>'
+          : '<span class="progress-state">제작 시작은 관리자 계정에서 누릅니다</span>';
       }
     } else if (SE().awaitingChoice(p, p.step)) {
       // 고르기 전에는 작업이 하나도 만들어지지 않았다. 카드 맨 위에서 바로 보이게 한다
