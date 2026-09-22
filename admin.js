@@ -18,6 +18,10 @@
   }
 
   var cfg = window.ONECUE || {}, db = null, ROWS = [], authorized = false;
+  // ★ 볼 수는 있지만 **바꿀 수 없는** 계정이 있다 (보기 전용 관리자).
+  //   DB 는 이미 막지만, 화면이 누를 수 없는 버튼을 그리면 화면이 거짓말을
+  //   하는 것이다. 누르면 「권한 없음」이 뜨는 버튼은 안 그리는 게 맞다.
+  var canWrite = true;
 
   var STEP_NAME = {
     brief: "의뢰 접수", facts: "제품·자료 확인", strategy: "전략 설계",
@@ -657,6 +661,11 @@
   }
 
   function paidBody(p, s, act) {
+    if (!canWrite) {
+      var pl = act && act.plan;
+      return readOnlyRow("돈이 나가는 생성은 관리자 계정에서만 누릅니다" +
+        (pl && pl.credits ? " (이 단계 " + pl.credits + " 크레딧)" : "") + ".");
+    }
     var tag = ' data-slug="' + esc(p.slug) + '" data-step="' + esc(s) + '"';
     var plan = act.plan;
     var money = function (n) {
@@ -922,7 +931,16 @@
 
   // 자리마다 **할 일 하나**를 띄운다. 여러 개를 동시에 펼치지 않는다 —
   // 선택·실행·결과·검수·이동이 한꺼번에 서 있으면 무엇부터인지 알 수 없다.
+  /** 보기 전용이면 누를 것 대신 한 줄. 왜 없는지 말해 준다 —
+   *  버튼이 그냥 사라지면 「고장났나」가 된다. */
+  function readOnlyRow(what) {
+    return '<div class="ro-row"><b>보기 전용 계정입니다</b>' +
+      "<span>" + esc(what || "여기서 누르는 것은 바꿀 수 있는 계정에서만 됩니다.") +
+      "</span></div>";
+  }
+
   function lifecycleBar(p, key, act) {
+    if (!canWrite) return readOnlyRow("승인·수정 요청은 관리자 계정에서 합니다.");
     var tag = ' data-slug="' + esc(p.slug) + '" data-step="' + esc(key) + '"';
     var pick = SE().of(p, key);
     var head = function (what, why) {
@@ -2761,7 +2779,8 @@
       if (r.error && r.error.name !== 'AuthSessionMissingError') throw r.error;
       var user = r.data && r.data.user;
       if (!user) { accessNotice('로그인이 필요합니다', '관리자 계정으로 로그인해 주세요.', true); return false; }
-      return db.from("profiles").select("is_admin").eq("id", user.id).maybeSingle()
+      return db.from("profiles").select("is_admin,admin_can_write")
+        .eq("id", user.id).maybeSingle()
         .then(function (p) {
           if (p.error) throw p.error;
           if (!p.data || !p.data.is_admin) {
@@ -2769,6 +2788,7 @@
             return false;
           }
           authorized = true;
+          canWrite = p.data.admin_can_write !== false;
           return true;
         });
     });
