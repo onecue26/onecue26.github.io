@@ -490,13 +490,15 @@
         var boardMissing = s.key === BOARD_REVIEW_STAGE &&
           !(p.files || []).some(function (f) { return f.kind === "board"; });
         // ★ 돈이 드는 단계(제작 자료·영상)는 작업이 큐에 걸려 있어도 **아무도
-        //   집지 않는다.** 유료 생성은 사람이 누르는 자리라서다. 그걸 「AI 재작업
-        //   중」이라고 적으면 Dan 은 기다리고 시스템은 영영 안 한다.
+        //   집지 않는다.** 유료 생성은 사람이 누르는 자리라서다.
+        //   ⚠ 배지는 summary 안에 있어서 **누르면 단계가 접힌다.** 그래서
+        //   여기에 「눌러야 시작합니다」라고 적으면 안 된다 — 누르면 반대로
+        //   동작한다. 누를 것은 본문 안에 버튼으로 둔다.
         var paidStage = s.key === "anchors" || s.key === "video";
         var badge = needsPick ? '<em class="ai-update choice">실행 주체 선택 대기</em>'
           : (waitingHere ? '<em class="ai-update working">담당자 결과 대기</em>'
           : (working && paidStage
-            ? '<em class="ai-update choice">유료 생성 대기 — 눌러야 시작합니다</em>'
+            ? '<em class="ai-update choice">유료 생성 대기</em>'
           : (working ? '<em class="ai-update working">AI 재작업 중</em>'
           : (updated
             ? (boardMissing
@@ -528,7 +530,9 @@
         // 자리(phase)가 무엇을 보여 줄지 혼자 정한다. 화면은 그 표를 그리기만
         // 한다 — 여기서 조건을 다시 판단하지 않는다. 구성·각본 한 단계에만
         // 먼저 건다. 되는 것을 보고 나서 콘티로 옮긴다.
-        var act = (s.key === LIFECYCLE_STEP && i === current)
+        // 제작 자료·영상 제작도 같은 길을 쓴다. 029 로 DB 함수가 세 단계를
+        // 받게 됐으니 화면도 같이 넓힌다 — 한쪽만 넓히면 버튼이 눌리고 튕긴다.
+        var act = ((s.key === LIFECYCLE_STEP || SE().isPaid(s.key)) && i === current)
           ? SE().actions(p, s.key, !!(p.stageResults && p.stageResults[s.key]))
           : null;
         // 콘티는 두 겹이라 판단이 다르다 — 전용 상태기계를 쓴다
@@ -549,6 +553,95 @@
           esc(STEP_NAME[s.key]) + '</strong>' + versionBadge + personBadge + badge +
           '<small>' + esc(s.owner) + '</small></summary>' + detail + '</details>';
       }).join("") + '</div></div>';
+  }
+
+  // ── 돈이 나가는 단계의 본문 ───────────────────────────────────────────────
+  //
+  // 버튼은 **본문 안에** 둔다. summary 안에 두면 누르는 순간 단계가 접힌다 —
+  // 실제로 그렇게 만들어 놨었고, Dan 이 눌렀을 때 접혔다.
+  //
+  // 그리고 누르기 전에 **얼마인지** 적는다. 계획(render_plan)에 적힌 값을
+  // 읽을 뿐이고 화면이 값을 지어내지 않는다 — 계획이 없으면 값도 없고,
+  // 그때는 「계획이 먼저」라고 말한다.
+  function paidBody(p, s, act) {
+    var tag = ' data-slug="' + esc(p.slug) + '" data-step="' + esc(s) + '"';
+    var plan = act.plan;
+    var money = function (n) {
+      return n ? '<b class="cost">' + n + ' 크레딧</b>' : '<b class="cost free">비용 없음</b>';
+    };
+    var head = function (what, why) {
+      return '<div class="lc-head"><b>' + esc(what) + "</b>" +
+        (why ? "<span>" + why + "</span>" : "") + "</div>";
+    };
+
+    // 계획이 없으면 무엇을 몇 장 만들지 알 수 없다. 그때 뽑으면 그때그때
+    // 달라지고, 달라진 것을 아무도 기록하지 않는다.
+    if (!plan || !plan.calls.length) {
+      return '<div class="lc lc-start"' + tag + ">" +
+        head("제작 계획이 먼저 필요합니다",
+             "한 판으로 뽑을지 컷별로 뽑을지에 따라 만들 것이 달라집니다") +
+        '<span class="lc-msg err">구성·각본 단계에서 제작 방식을 정해야 합니다.</span></div>';
+    }
+
+    // 무엇을 왜 만드는지 — 앵커마다 쓰임새를 적는다. 그림만 올려 두면
+    // 관리자는 「이게 왜 필요한 건지」를 모르는 채로 승인하게 된다.
+    var needs = plan.needs.length
+      ? '<ul class="need-list">' + plan.needs.map(function (n) {
+        return "<li><b>" + esc(n.what || n.kind) + "</b>" +
+          (n.why ? '<span class="why">' + esc(n.why) + "</span>" : "") + "</li>";
+      }).join("") + "</ul>"
+      : "";
+
+    if (act.choose) {
+      return '<div class="lc lc-choose"' + tag + ">" +
+        head("누가 만듭니까", "고르기만 해서는 시작되지 않습니다") +
+        '<div class="lc-row">' +
+        '<button class="btn" type="button" data-lc="choose-ai"' + tag + ">AI에게 맡기기</button>" +
+        "</div></div>";
+    }
+    if (act.start) {
+      return '<div class="lc lc-start"' + tag + ">" +
+        head(s === "anchors" ? "제작 자료를 만듭니다" : "영상을 뽑습니다",
+             "예상 " + money(plan.credits) +
+             (plan.mode ? " · 방식 " + esc(plan.mode) : "")) +
+        needs +
+        '<div class="lc-row">' +
+        '<button class="btn" type="button" data-lc="start"' + tag + ">" +
+        (s === "anchors" ? "제작 자료 만들기" : "영상 뽑기") + "</button>" +
+        "</div>" +
+        '<span class="lc-msg">누르면 크레딧이 나갑니다. 만들어지면 여기에 올라오고, ' +
+        '보신 뒤 승인하거나 고칠 곳을 적으실 수 있습니다.</span>' +
+        '<span class="lc-msg" data-lc-msg></span></div>';
+    }
+    if (act.working) {
+      return '<div class="lc lc-working"' + tag + ">" +
+        head(s === "anchors" ? "제작 자료를 만드는 중" : "영상을 뽑는 중",
+             "끝나면 이 자리에 올라옵니다") + "</div>";
+    }
+    if (act.review) {
+      return '<div class="lc lc-review"' + tag + ">" +
+        head(s === "anchors" ? "제작 자료를 검수해 주세요" : "영상을 검수해 주세요",
+             s === "video" && act.reviseCostsAgain
+               ? "수정 요청은 <b>다시 뽑기</b>입니다 — " + money(plan.credits) + "이 또 나갑니다"
+               : "고칠 곳을 적으시면 그 부분만 다시 만듭니다") +
+        needs +
+        '<textarea class="lc-note" data-lc-note placeholder="' +
+        esc("수정 요청은 무엇을 고칠지 적어야 보냅니다") + '"></textarea>' +
+        '<div class="lc-row">' +
+        '<button class="btn" type="button" data-lc="approve"' + tag + ">승인</button>" +
+        '<button class="btn ghost" type="button" data-lc="revise"' + tag + ">수정 요청</button>" +
+        "</div>" +
+        '<span class="lc-msg" data-lc-msg></span></div>';
+    }
+    if (act.next) {
+      return '<div class="lc lc-approved"' + tag + ">" +
+        head("승인 완료", "다음 단계로 넘길 수 있습니다") +
+        '<div class="lc-row">' +
+        '<button class="btn" type="button" data-lc="next"' + tag + ">다음 단계로</button>" +
+        "</div>" +
+        '<span class="lc-msg" data-lc-msg></span></div>';
+    }
+    return "";
   }
 
   function readable(value) {
@@ -1245,6 +1338,35 @@
         encodeURIComponent(p.slug) + '">' + label + '</a></div>';
     }
 
+    function paidStageBody(p, step) {
+      if (p.step !== step) return "";
+      var act = SE().actions(p, step, !!(p.stageResults && p.stageResults[step]));
+      return paidBody(p, step, act) + assetList(p, step);
+    }
+
+    // 만든 것을 보여 준다. 승인은 보고 하는 것이고, 볼 것이 없으면 승인이
+    // 형식이 된다.
+    function assetList(p, step) {
+      var want = step === "anchors" ? ["anchor"] : ["clip", "final"];
+      var mine = (p.files || []).filter(function (f) {
+        return want.indexOf(f.kind) >= 0;
+      });
+      if (!mine.length) return "";
+      return '<div class="made-list"><span class="lbl">만든 것 ' + mine.length + "</span>" +
+        mine.map(function (f) {
+          var vid = (f.mime || "").indexOf("video/") === 0;
+          return '<figure class="made-one">' +
+            (f.url
+              ? (vid
+                ? '<video src="' + esc(f.url) + '" controls preload="metadata"></video>'
+                : '<img src="' + esc(f.url) + '" alt="' + esc(f.role || f.kind) +
+                  '" loading="lazy" data-big="' + esc(f.url) + '" data-kind="img">')
+              : '<div class="none">—</div>') +
+            "<figcaption>" + esc(f.role || f.kind) +
+            (f.cut_n != null ? " · 컷" + f.cut_n : "") + "</figcaption></figure>";
+        }).join("") + "</div>";
+    }
+
     var stageBodies = {
       brief: '<div class="stage-content">' + said + requirements + '</div>',
       facts: factsBody,
@@ -1258,8 +1380,10 @@
         (p.step === BOARD_REVIEW_STAGE ? productionAction : ""),
       // 제작 자료는 **돈이 나가는 첫 자리**다. 무엇을 근거로 시작하는지를
       // 그 자리에 적는다 — 광고주 승인이 그 근거다.
-      anchors: p.step === "anchors" ? productionAction : "",
-      video: p.step === "video" ? productionAction : "",
+      // 유료 단계는 자기 본문을 갖는다. 「현재 절차에 따라 진행 중입니다」는
+      // 아무것도 말해 주지 않는 문장이었고, 그 아래엔 누를 것이 없었다.
+      anchors: p.step === "anchors" ? paidStageBody(p, "anchors") : "",
+      video: p.step === "video" ? paidStageBody(p, "video") : "",
       deliver: p.step === "deliver" ? productionAction : ""
     };
 
@@ -1851,7 +1975,7 @@
     el("stamp").textContent = new Date().toISOString().slice(0, 16).replace("T", " ");
 
     return db.from("projects")
-      .select("id,slug,brand,product,step,state,running_sec,cut_count,aspects,created_at,ad_type,ad_type_by")
+      .select("id,slug,brand,product,step,state,running_sec,cut_count,aspects,created_at,ad_type,ad_type_by,render_mode,render_plan,render_mode_by")
       .order("created_at", { ascending: false })
       .then(function (r) {
         if (r.error) { setConn("bad", "불러오기 실패"); return; }
@@ -1991,6 +2115,12 @@
             p.stageResults = {
               develop: !!p.development,
               storyboard: p.cuts.length > 0,
+              // ★ 유료 단계도 「결과가 왔는가」를 봐야 승인 자리가 뜬다.
+              //   이게 없어서 앵커를 올려도 화면은 계속 「시작하세요」였다.
+              anchors: p.files.some(function (f) { return f.kind === "anchor"; }),
+              video: p.files.some(function (f) {
+                return f.kind === "clip" || f.kind === "final";
+              }),
             };
             counts.forEach(function (t, i) {
               var d = cs[i].data || [];
