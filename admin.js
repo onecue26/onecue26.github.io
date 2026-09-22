@@ -1819,12 +1819,12 @@
           // ★ 지난 판에는 **정할 것을 주지 않는다** (아래 draw 의 셋째 인자).
           //   ★★ `.map(one)` 으로 넘기면 안 된다 — map 은 셋째 인자로 **배열**을
           //      주고, 배열은 참이라 지금 판까지 지난 판으로 그려진다.
-          '<div class="made">' + older.map(function (f, i) {
+          '<div class="made" data-made-step="' + esc(step) + '" data-made-old="1">' + older.map(function (f, i) {
             return one(f, i, true);
           }).join("") + "</div></details>";
       }
       if (!mine.length) return oldBox();
-      return '<div class="made"><span class="made-lbl">만든 것 ' + mine.length +
+      return '<div class="made" data-made-step="' + esc(step) + '"><span class="made-lbl">만든 것 ' + mine.length +
         " (지금 v" + (verOf[mine[mine.length - 1].id] || mine.length) +
         ") · 눌러서 크게 · 영상은 두 번 누르십시오</span>" +
         mine.map(function (f, i) { return one(f, i, false); }).join("") +
