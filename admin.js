@@ -299,7 +299,14 @@
     return '<div class="exec-pick" data-exec-form' + tag + '>' +
       '<div class="exec-line">' +
       '<b>누가 맡습니까</b>' +
-      '<div class="exec-modes">' + modes + '</div>' +
+      '<div class="exec-modes">' + modes +
+      // ★ 고를 것이 하나뿐이면 **왜 하나뿐인지 그 자리에서** 말한다.
+      //   전에는 이 설명이 「검토 AI · 담당자 설정」 접힌 칸 안에 있었다.
+      //   그래서 화면에는 「AI 진행」 하나만 서 있고 이유는 안 보였다
+      //   (Dan 2026-09-22: 「선택이 ai진행 뿐이야」).
+      (personOk ? "" : '<span class="exec-only">담당자 진행은 아직 고를 수 ' +
+        "없습니다 — " + esc(pickable.note || offLabel) + "</span>") +
+      "</div>" +
       '<button class="btn ghost" type="button" data-exec-save' + tag + '>저장</button>' +
       '</div>' +
       '<details class="exec-more"><summary>검토 AI · 담당자 설정</summary>' +
@@ -1756,17 +1763,23 @@
           " — 눌러서 펼치면 그대로 보실 수 있습니다</summary>" +
           (why ? '<div class="old-why"><b>고쳐 달라고 적으신 것</b><span>' +
             esc(why) + "</span></div>" : "") +
-          '<div class="made">' + older.map(one).join("") + "</div></details>";
+          // ★ 지난 판에는 **정할 것을 주지 않는다** (아래 draw 의 셋째 인자).
+          //   ★★ `.map(one)` 으로 넘기면 안 된다 — map 은 셋째 인자로 **배열**을
+          //      주고, 배열은 참이라 지금 판까지 지난 판으로 그려진다.
+          '<div class="made">' + older.map(function (f, i) {
+            return one(f, i, true);
+          }).join("") + "</div></details>";
       }
       if (!mine.length) return oldBox();
       return '<div class="made"><span class="made-lbl">만든 것 ' + mine.length +
         " (지금 v" + (verOf[mine[mine.length - 1].id] || mine.length) +
         ") · 눌러서 크게 · 영상은 두 번 누르십시오</span>" +
-        mine.map(one).join("") + "</div>" + oldBox();
+        mine.map(function (f, i) { return one(f, i, false); }).join("") +
+        "</div>" + oldBox();
 
       // 한 장을 그리는 법. 지금 것과 이전 판이 **같은 함수**를 쓴다 —
       // 두 벌로 두면 한쪽만 고치고 다른 쪽은 그대로 남는다.
-      function one(f, i) {
+      function one(f, i, isOld) {
           var m = f.meta || {};
           var vid = (f.mime || "").indexOf("video/") === 0;
           var facts = [];
@@ -1799,7 +1812,7 @@
             (f.approved ? '<span class="ok">승인됨</span>' : "") +
             (m.made_why ? '<span class="madewhy">' + esc(m.made_why) + "</span>" : "") +
             addedLater(p, step, f) +
-            verdictOf(f) +
+            verdictOf(f, isOld) +
             "</figcaption></figure>";
       }
 
@@ -1824,7 +1837,7 @@
       }
 
       /** 검수에서 걸린 것·물어볼 것이 있는 것에 **무엇이 걸렸는지**를 붙인다. */
-      function verdictOf(f) {
+      function verdictOf(f, isOld) {
         var m = f.meta || {};
         var v = m.review || "";
         if (v !== "blocked" && v !== "ask") return "";
@@ -1859,9 +1872,21 @@
            *  누르기 **전에** 적을 수 있어야 한다. 적어 주신 말이 다음 판의
            *  근거가 되는데, 뽑은 뒤에 적으면 이미 그 말 없이 뽑힌 것이다.
            *  저장은 생성과 완전히 따로 돈다 — 이 버튼은 돈을 쓰지 않는다. */
-          danTakeBox(f, m) +
-          '<span class="call">보시고 정하십시오 — <b>다시 뽑기</b>(값이 또 나갑니다) ' +
-          "또는 <b>이대로 승인</b>.</span></div>";
+          /* ★ 지난 판에는 **정할 것을 주지 않는다.**
+           *
+           *  판정과 그때 적어 주신 말은 남긴다 — 왜 이 판을 버렸는지가
+           *  다음 판의 근거이기 때문이다. 하지만 **쓰는 칸과 「보시고
+           *  정하십시오」는 뺀다.** 이미 지나간 판을 두고 정할 것은 없다.
+           *
+           *  Dan 2026-09-22: 「v2가 아래로 내려가긴햇는데 의견 쓰는부분이
+           *  여전히 잇고 버튼도 동작해」 — 접어 두기만 하고 그 안의 것을
+           *  그대로 둔 것이 잘못이다. 접힌 것은 **기록**이지 할 일이 아니다. */
+          (isOld
+            ? '<span class="call gone">지난 판입니다 — 여기서 정하실 것은 ' +
+              "없습니다. 왜 이 판을 버렸는지 남겨 둔 것입니다.</span></div>"
+            : danTakeBox(f, m) +
+              '<span class="call">보시고 정하십시오 — <b>다시 뽑기</b>' +
+              "(값이 또 나갑니다) 또는 <b>이대로 승인</b>.</span></div>");
       }
 
       /** 사장님이 누르기 전에 의견을 적는 칸. 저장은 생성과 따로 돈다. */
