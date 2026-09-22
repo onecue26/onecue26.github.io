@@ -1778,6 +1778,17 @@
     //   · 눌러서 크게 — 앵커는 라벨 글자와 그림자를 보고 판정하는 물건이라
     //     작은 칸에서는 판정이 안 된다.
     //   · 각각 설명 — 무엇이고 왜 만들었는지. 그게 없으면 보고도 판단이 안 된다.
+    /** 같은 자리를 덮는 더 새 판이 있는가. 있으면 이건 지난 판이다. */
+    function replacedLater(p, want, f) {
+      var call = (f.meta || {}).covers_call || "";
+      if (!call) return false;           // 어느 자리인지 모르면 건드리지 않는다
+      return (p.files || []).some(function (g) {
+        return g.id !== f.id && want.indexOf(g.kind) >= 0 &&
+          ((g.meta || {}).covers_call || "") === call &&
+          String(g.created_at || "") > String(f.created_at || "");
+      });
+    }
+
     function assetList(p, step) {
       var want = step === "anchors" ? ["anchor"] : ["clip", "final"];
       // ★ 판을 **버전으로 쌓는다.** 「이전 판 1개」가 아니라 v1·v2·v3… 이다 —
@@ -1797,6 +1808,12 @@
         // ★ 고쳐 달라고 하기 전에 만든 것은 접어 둔다. 지우지 않는다 —
         //   무엇이 나아졌는지 견주려면 옛것이 남아 있어야 한다.
         if (superseded(p, step, f)) { older.push(f); return false; }
+        // ★ **같은 자리를 덮는 새 판이 있으면 옛 판이다.**
+        //   앵커는 영상 단계에서 만들어진다. 그래서 「제작 자료」 단계의
+        //   누름 시각으로는 갈리지 않아, 버리고 다시 뽑은 앵커까지 나란히
+        //   펼쳐져 있었다 (Dan: 「다 늘어져잇잖아」).
+        //   덮는 자리(covers_call)가 같고 더 나중에 만든 것이 있으면 접는다.
+        if (replacedLater(p, want, f)) { older.push(f); return false; }
         // ★ 검수에서 걸린 것도 **올린다.** 전에는 감췄는데, 감추면 사장님께는
         //   「치명 1건」이라는 말만 남고 정할 것이 없어진다.
         //   검수는 찾아서 설명하는 일이고 **결정은 사장님이** 하신다
