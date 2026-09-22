@@ -555,6 +555,52 @@
       }).join("") + '</div></div>';
   }
 
+  // ── 돈 ────────────────────────────────────────────────────────────────────
+  //
+  // 원화는 **단가가 정해졌을 때만** 붙인다. 공개 가격표를 넣어 두면 Dan 이
+  // 실제 내는 금액과 다를 수 있고(연간 할인·보너스), 틀린 원가로 서비스 가격을
+  // 정하는 것은 원가를 모르는 것보다 나쁘다. 단가는 db/credit_rates.json 에 있다.
+  function krwPerCredit() {
+    var r = window.ONECUE_CREDIT_RATES;
+    var v = r && r.krw_per_credit;
+    return (typeof v === "number" && v > 0) ? v : null;
+  }
+
+  function won(credits) {
+    var rate = krwPerCredit();
+    if (!rate || !credits) return "";
+    return " · ₩" + Math.round(credits * rate).toLocaleString();
+  }
+
+  /** 이 단계에서 실제로 나간 크레딧. */
+  function spentOn(p, step) {
+    return (p.spends || []).filter(function (x) { return x.step === step; })
+      .reduce(function (a, x) { return a + (Number(x.credits) || 0); }, 0);
+  }
+
+  function spentAll(p) {
+    return (p.spends || []).reduce(function (a, x) {
+      return a + (Number(x.credits) || 0);
+    }, 0);
+  }
+
+  /** 단계 이름 옆에 붙는 한 줄. 쓴 것이 없으면 예상을 보여 준다. */
+  function costLine(p, step) {
+    var used = spentOn(p, step);
+    var plan = SE().isPaid(step) ? SE().planFor(p, step) : null;
+    var est = plan ? plan.credits : 0;
+    if (!used && !est) return "";
+    var rows = (p.spends || []).filter(function (x) { return x.step === step; });
+    return '<div class="cost-line">' +
+      (used
+        ? '<b>' + used + " 크레딧" + won(used) + "</b>" +
+          '<span class="cost-what">' + rows.map(function (x) {
+            return esc(x.what || x.engine) + " · " + x.credits;
+          }).join(" / ") + "</span>"
+        : '<b class="est">예상 ' + est + " 크레딧" + won(est) + "</b>") +
+      "</div>";
+  }
+
   // ── 돈이 나가는 단계의 본문 ───────────────────────────────────────────────
   //
   // 버튼은 **본문 안에** 둔다. summary 안에 두면 누르는 순간 단계가 접힌다 —
@@ -1338,6 +1384,22 @@
         encodeURIComponent(p.slug) + '">' + label + '</a></div>';
     }
 
+    function totalLine(p) {
+      var all = spentAll(p);
+      if (!all) return "";
+      var byStep = {};
+      (p.spends || []).forEach(function (x) {
+        byStep[x.step] = (byStep[x.step] || 0) + (Number(x.credits) || 0);
+      });
+      return '<div class="cost-total"><b>이 건 원가 ' + all + " 크레딧" + won(all) + "</b>" +
+        '<span class="cost-what">' + Object.keys(byStep).map(function (k) {
+          return esc(STEP_NAME[k] || k) + " " + byStep[k];
+        }).join(" · ") + "</span>" +
+        (krwPerCredit() ? "" :
+          '<span class="cost-note">원화는 크레딧 단가를 정하면 같이 뜹니다 — ' +
+          'db/credit_rates.json</span>') + "</div>";
+    }
+
     function paidStageBody(p, step) {
       if (p.step !== step) return "";
       var act = SE().actions(p, step, !!(p.stageResults && p.stageResults[step]));
@@ -1376,15 +1438,20 @@
       // 새 흐름이 도는 동안에는 「컷 설계 보기」 링크를 띄우지 않는다 —
       // 검수할 컷 목록이 바로 아래 펼쳐져 있는데 같은 곳으로 가는 링크가 또 있으면
       // 어느 쪽이 본 자리인지 모르게 된다.
-      storyboard: (boardFlow ? "" : boardLink(BOARD_REVIEW_STAGE)) + storyboardBody +
+      storyboard: costLine(p, "storyboard") +
+        (boardFlow ? "" : boardLink(BOARD_REVIEW_STAGE)) + storyboardBody +
         (p.step === BOARD_REVIEW_STAGE ? productionAction : ""),
       // 제작 자료는 **돈이 나가는 첫 자리**다. 무엇을 근거로 시작하는지를
       // 그 자리에 적는다 — 광고주 승인이 그 근거다.
       // 유료 단계는 자기 본문을 갖는다. 「현재 절차에 따라 진행 중입니다」는
       // 아무것도 말해 주지 않는 문장이었고, 그 아래엔 누를 것이 없었다.
-      anchors: p.step === "anchors" ? paidStageBody(p, "anchors") : "",
-      video: p.step === "video" ? paidStageBody(p, "video") : "",
-      deliver: p.step === "deliver" ? productionAction : ""
+      anchors: costLine(p, "anchors") +
+        (p.step === "anchors" ? paidStageBody(p, "anchors") : ""),
+      video: costLine(p, "video") +
+        (p.step === "video" ? paidStageBody(p, "video") : ""),
+      // ★ 납품에는 **이 건 원가 합계**를 둔다. 광고 한 편에 얼마가 드는지
+      //   모르면 서비스 가격을 정할 수 없다.
+      deliver: totalLine(p) + (p.step === "deliver" ? productionAction : "")
     };
 
     var openProject = isNew || p.aiNeedsReview || !!p.job || (p.state !== "done" && p.step !== "deliver");
@@ -2015,6 +2082,9 @@
           db.from("events").select("project_id,kind,to_step,ts,payload")
             .in("kind", ["production_enroll_requested", "production_enrolled", "astra_draft"])
             .in("project_id", ids).order("ts", { ascending: false }),
+          // 실제로 나간 크레딧. 예상은 계획에 있고, 이건 쓴 것이다.
+          db.from("credit_spend").select("project_id,step,engine,credits,what,spent_at")
+            .in("project_id", ids).order("spent_at"),
           db.from("product_facts").select("project_id,facts,label_text,claims,product_lock,device_note")
             .in("project_id", ids),
           db.from("strategies").select("project_id,insight,insight_flip,usp,one_message,tone")
@@ -2070,14 +2140,15 @@
           var revises = out[5].data || [];
           var sents = out[6].data || [];
           var enrollEvents = out[7].data || [];
-          var productFacts = out[8].data || [];
-          var strategies = out[9].data || [];
-          var concepts = out[10].data || [];
-          var completedJobs = out[11].data || [];
+          var spends = out[8].data || [];
+          var productFacts = out[9].data || [];
+          var strategies = out[10].data || [];
+          var concepts = out[11].data || [];
+          var completedJobs = out[12].data || [];
           // 표가 아직 없는 서버(마이그레이션 016 이전)에서도 화면은 그대로 떠야 한다
-          var stageRows = (out[12] && !out[12].error && out[12].data) || [];
-          var developments = (out[13] && !out[13].error && out[13].data) || [];
-          var cutRows = (out[14] && !out[14].error && out[14].data) || [];
+          var stageRows = (out[12] && !out[12].error && out[13].data) || [];
+          var developments = (out[13] && !out[13].error && out[14].data) || [];
+          var cutRows = (out[14] && !out[14].error && out[15].data) || [];
           // 017 전에는 빈 목록이다 — 그러면 「AI 라고 적혔는데 작업이 없는 줄」은
           // 살아 있는 작업 기록으로 판정된다(choiceState 의 ranBefore)
           var jobLinks = (out[15] && !out[15].error && out[15].data) || [];
@@ -2136,6 +2207,9 @@
             // 광고주가 내린 판단 전부. 「말을 남겼는가」와 「무엇을 정했는가」는
             // 다른 물음이라 따로 둔다 — 아래 p.redo 는 말이 있는 것만 고른다.
             p.approvals = revises.filter(function (a) { return a.project_id === p.id; });
+            // 단계마다 얼마 썼나. 합계는 화면이 더한다 — 더하는 값은 칼럼이라야
+            // 빠진 값과 0 을 구별할 수 있다.
+            p.spends = spends.filter(function (x) { return x.project_id === p.id; });
             // 광고주가 실제로 남긴 말 중 가장 최근 것.
             // 자동으로 채워 넣은 문구(「…선택」·「남기신 말씀 없음」)는 말이 아니다
             p.redo = revises.filter(function (a) {
