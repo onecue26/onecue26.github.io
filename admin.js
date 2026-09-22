@@ -1341,7 +1341,7 @@
     var scriptCuts = (p.cuts || []).length
       ? '<div class="script-cuts">' +
         '<span class="sc-lbl">컷 ' + (p.cuts || []).length + '개 · 각본 본문</span>' +
-        R().cuts(p.cuts, ADMIN) + "</div>"
+        R().cuts(p.cuts, { role: "admin", textOnly: true }) + "</div>"
       : "";
     var developBody = hasDevelopment
       ? '<div class="stage-content">' + R().development({
