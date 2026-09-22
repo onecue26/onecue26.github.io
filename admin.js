@@ -1829,6 +1829,14 @@
       var older = [];
       var mine = (p.files || []).filter(function (f) {
         if (want.indexOf(f.kind) < 0) return false;
+        // ★ **사장님이 말씀을 남긴 판은 접지 않는다.**
+        //
+        //   v4 가 나오자 v3 가 지난 판으로 접혔다. 그런데 v3 에는 사장님
+        //   의견과 그에 대한 답변이 붙어 있다 — 그 대화가 곧 v4 를 만든
+        //   근거다. 접으면 **무엇과 견주어 나아졌는지**를 볼 수가 없다.
+        //   그리고 둘 다 이미 45크레딧씩 나간 결과물이다. 나간 것은 나란히
+        //   보여야 한다 (Dan 2026-09-22: 「v3랑 v4둘다 올려야지」).
+        if ((f.meta || {}).dan_take) return true;
         // ★ 고쳐 달라고 하기 전에 만든 것은 접어 둔다. 지우지 않는다 —
         //   무엇이 나아졌는지 견주려면 옛것이 남아 있어야 한다.
         if (superseded(p, step, f)) { older.push(f); return false; }
