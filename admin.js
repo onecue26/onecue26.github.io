@@ -1767,6 +1767,8 @@
 
   // 마지막으로 그린 것. 같으면 다시 그리지 않는다 — 스크롤이 튀지 않게.
   var LAST_HTML = "";
+  // 다시 그리기 전에 보던 자리. 접힘을 되살린 **뒤에** 돌려놓는다.
+  var SCROLL_BACK = null;
 
   // 30초마다 다시 읽는다. 화면을 열어 둔 동안 새로 올라온 것이 저절로 뜬다.
   // 무언가 입력하고 있는 중에는 다시 읽지 않는다 — 쓰던 글이 사라진다.
@@ -1822,9 +1824,14 @@
     LAST_HTML = html;
 
     // 바뀐 것이 있어 다시 그릴 때도, 보던 자리는 지킨다.
-    var wasAt = window.scrollY || document.documentElement.scrollTop || 0;
+    // ★ 스크롤은 **다 그리고 접힘까지 되살린 뒤에** 돌려놔야 한다.
+    //   여기서 바로 돌려놨더니 소용이 없었다 — 그 순간엔 접힌 상자들이
+    //   아직 펼쳐지지 않아 문서가 짧고, 브라우저가 스크롤을 그 짧은 높이에
+    //   맞춰 깎는다. 그 뒤에 펼쳐져서 문서가 길어져도 스크롤은 깎인 채 남는다.
+    //   그래서 Dan 이 영상 뽑기를 눌렀을 때 화면이 맨 위로 튀었고, 바뀐 자리가
+    //   눈에서 벗어나 「반응이 없다」로 보였다. 실제로는 돌고 있었다.
+    SCROLL_BACK = window.scrollY || document.documentElement.scrollTop || 0;
     el("work").innerHTML = html;
-    window.scrollTo(0, wasAt);
 
     document.querySelectorAll("[data-enroll]").forEach(function (b) {
       b.addEventListener("click", function () {
@@ -2063,6 +2070,13 @@
     // 사람이 접어 둔 것을 되살린다. 그린 **뒤에** 해야 한다 —
     // 상자가 아직 없을 때 하면 아무것도 못 찾는다.
     applyFolds();
+
+    // 접힘까지 되살려 문서 높이가 제자리로 온 뒤에 스크롤을 돌려놓는다.
+    if (SCROLL_BACK != null) {
+      var back = SCROLL_BACK;
+      SCROLL_BACK = null;
+      window.scrollTo(0, back);
+    }
 
     // ★ 그림을 다 그린 **뒤에** 「봤다」로 적는다. 그리기 전에 적으면
     //   이번에 새로 올라온 것이 표시되지 않은 채 사라진다.
