@@ -449,6 +449,25 @@
         "</figcaption></figure>";
     }
 
+    // ★ 그림을 아예 기대하지 않는 자리에서는 왼쪽 칸을 두지 않는다.
+    //   그 칸은 **그림이 들어올 자리**를 컷 번호로 대신 채우는 것이다. 글만
+    //   보는 구성·각본에서는 들어올 그림이 없으므로, 번호가 머리에도 있고
+    //   왼쪽 칸에도 있어서 **두 번 찍혔다** ("1 / 1 / 0–1.6초").
+    if (opts && opts.textOnly) {
+      return '<div class="cut text-only">' +
+        '<div class="body"><div class="head"><span class="n">' +
+        esc(text(row.n)) + "</span>" +
+        (when ? '<span class="tt">' + esc(when) + "</span>" : "") +
+        (has(row.block) ? '<span class="blk">' + esc(text(row.block)) + "</span>" : "") +
+        "</div>" +
+        (has(row.action) ? '<div class="cut-row what"><b>행동</b><span>' +
+          esc(text(row.action)) + "</span></div>" : "") +
+        // ★ 여기서 mine 을 쓰지 않는다 — 그 변수는 panel 분기 **안에서만**
+        //   정의된다. 썼다가 배포 전에 걸렸다. admin.js 에서 held 로 같은
+        //   실수를 한 직후였다: 범위를 안 보고 이름만 보면 이렇게 된다.
+        rows + "</div></div>";
+    }
+
     return '<div class="cut' + (media ? "" : " noimg") + '">' +
       (media || '<div class="noimg-n">' + esc(text(row.n)) + "</div>") +
       '<div class="body">' +
