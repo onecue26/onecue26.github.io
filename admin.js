@@ -672,14 +672,29 @@
       : "";
 
     if (at === "start" || at === "choose") {
+      // 수정 요청을 받고 아직 다시 안 누른 자리인가. 그렇다면 이 버튼은
+      // **처음 뽑기가 아니라 다시 뽑기**이고, 값이 또 나갑니다. 같은 문구를
+      // 쓰면 이미 나간 돈을 잊게 됩니다.
+      var again = !!(SE().of(p, s) || {}).revision_at;
+      var note = (SE().of(p, s) || {}).revision_note || "";
       return '<div class="lc lc-start"' + tag + ">" +
-        head(s === "anchors" ? "제작 자료를 만듭니다" : "영상을 뽑습니다",
-             "예상 " + money(plan.credits) +
+        head(again
+              ? (s === "anchors" ? "제작 자료를 다시 만듭니다" : "영상을 다시 뽑습니다")
+              : (s === "anchors" ? "제작 자료를 만듭니다" : "영상을 뽑습니다"),
+             (again ? "<b>또</b> " : "예상 ") + money(plan.credits) +
              (plan.mode ? " · 방식 " + esc(plan.mode) : "")) +
+        (again && note
+          ? '<div class="redo-note"><b>고쳐 달라고 적으신 것</b>' +
+            "<span>" + esc(note) + "</span></div>" : "") +
+        (again
+          ? '<span class="lc-msg">아래 만든 것은 <b>그대로 남아 있습니다.</b> ' +
+            '누르시면 그 위에 새로 뽑습니다 — 누르지 않으면 돈이 나가지 않습니다.</span>'
+          : "") +
         needs +
         '<div class="lc-row">' +
         '<button class="btn" type="button" data-lc="start"' + tag + ">" +
-        (s === "anchors" ? "제작 자료 만들기" : "영상 뽑기") + "</button>" +
+        (again ? (s === "anchors" ? "다시 만들기" : "다시 뽑기")
+               : (s === "anchors" ? "제작 자료 만들기" : "영상 뽑기")) + "</button>" +
         "</div>" +
         '<span class="lc-msg">누르면 크레딧이 나갑니다. 만들어지면 여기에 올라오고, ' +
         '보신 뒤 승인하거나 고칠 곳을 적으실 수 있습니다.</span>' +

@@ -289,6 +289,18 @@
     if (index(step) < index(project.step)) return "past";
     if (index(step) > index(project.step)) return "upcoming";
     var pick = of(project, step);
+    // ★ 돈이 나가는 단계에서 수정 요청이 들어오면 **다시 뽑기는 저절로 돌지
+    //   않는다.** 만들어 둔 것은 화면에 그대로 두고, 다시 돌리려면 버튼을
+    //   다시 눌러야 한다 (Dan 2026-09-22: 「제작 다시하는것은 우선 결과
+    //   사이트에 올리고 내가 다시 승인(사이트버튼)하면 돌리게」).
+    //
+    //   버튼 한 번이 생성 한 번입니다. 수정 요청만으로 36 크레딧이 또 나가면
+    //   그건 승인 없이 쓴 것입니다.
+    //
+    //   수정 요청은 started_at 을 지우고 revision_at 을 찍습니다. 다시 누르면
+    //   started_at 이 다시 찍히므로, 이 조건은 「수정 요청을 받았고 아직 다시
+    //   안 눌렀다」에만 맞습니다.
+    if (isPaid(step) && pick.revision_at && !pick.started_at) return "start";
     if (hasResult) return pick.approved_at ? "approved" : "review";
     // ★ 제작 자료·영상 제작은 **고르기를 묻지 않는다.** 사람이 대신할 길이
     //   없다 — 앵커를 사람이 따로 만들어 올 수 없고, 영상도 그렇다.
