@@ -1968,7 +1968,13 @@
     //   누르신 것 자체가 「이것 말고 새 것」이라는 뜻이므로, 누른 시각보다
     //   먼저 만든 것은 전부 지난 버전이다. 시작 기록이 없을 때만 수정 요청
     //   시각으로 돌아간다.
-    var at = pick.started_at || pick.revision_at;
+    //   ★ 051 — 기준선은 **pressed_at** 이다. started_at 은 일이 끝나면
+    //     지워지므로(046 의 stage_pause), 그것만 보면 화면을 놓아 드리는
+    //     순간 기준선이 옛 수정 요청 시각까지 밀린다. 그러면 그 사이에 만든
+    //     **지난 판들이 전부 「지금 판」으로 되살아난다.** 실제로 그랬다 —
+    //     2판(14:29, 걸림)과 3판(16:16)이 나란히 떠서 어느 것이 지금 것인지
+    //     알 수 없었다 (Dan 2026-09-22).
+    var at = pick.pressed_at || pick.started_at || pick.revision_at;
     if (!at) return false;
     var made = f.created_at || (f.meta || {}).made_at;
     return !!made && String(made) < String(at);
@@ -2901,8 +2907,13 @@
               //   화면이 돌고 있는 줄을 모르고 **다시 뽑기 버튼을 또 내민다** —
               //   누르면 크레딧이 두 번 나간다 (Dan 2026-09-22 지적).
               //   화면이 판단에 쓰는 칸은 반드시 조회에 있어야 한다.
-              "chosen_at,started_at,approved_at,approved_by,revision_at,revision_note," +
-              "ai_job_id")
+              //   ★ pressed_at 은 **지워지지 않는 누름 기록**이다 (051).
+              //     started_at 은 「지금 돌고 있다」는 뜻도 같이 져서, 일이 끝나
+              //     화면을 놓아 줄 때 지워진다. 그걸 기준선으로 쓰다가 기준이
+              //     옛 수정 요청 시각까지 밀렸고, **이미 죽은 2판이 「지금 판」으로
+              //     되살아났다** (Dan: 「V2랑 V3 둘다 아래쪽에 잇어서 몰랏네」).
+              "chosen_at,started_at,pressed_at,approved_at,approved_by," +
+              "revision_at,revision_note,ai_job_id")
             .in("project_id", ids),
           // 구성·각본 결과 — 등록되면 그 단계 안에서 상세로 펼친다
           db.from("developments").select("project_id,arc,copies,narration_tone,slogan,bgm")
