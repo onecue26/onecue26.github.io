@@ -697,7 +697,18 @@
   function takeSettled(p, s) {
     var live = openTakes(p, s);
     if (!live.length) return true;         // 적으신 것이 없으면 해당 없음
-    return live.every(function (f) { return !!(f.meta || {}).settled_at; });
+    return live.every(function (f) {
+      var at = (f.meta || {}).settled_at;
+      if (!at) return false;               // 아직 안 정하셨다
+      // ★ **정했다고 곧바로 열리지 않는다.**
+      //   「이 답변대로 갑니다」는 합의일 뿐이고, 그 합의를 프롬프트 문장으로
+      //   옮기는 일이 남는다. 그 사이에 누르면 **합의 이전 문장으로** 값이
+      //   나간다 — 실제로 그럴 뻔했다 (작업기가 죽어 있어 안 나갔을 뿐이다).
+      //   Dan 2026-09-22: 「이 답변대로합니다 하면 프롬프트 변경되는거잖아.
+      //   그렇게 설계해야지. 그다음에 다시 뽑기 누르기가 활성화되야지」
+      return !!(p.render_mode_at &&
+        new Date(p.render_mode_at) > new Date(at));
+    });
   }
 
   /** 잠긴 이유를 한 줄로. 버튼과 **같은 판단**을 쓴다. */
@@ -707,11 +718,18 @@
       return !(x.meta || {}).settled_at;
     })[0];
     var m = (f && f.meta) || {};
+    // ★ 정하신 뒤 — 합의를 프롬프트로 옮기는 중이다
+    if (m.settled_at) {
+      return '<div class="plan-same"><b>프롬프트에 반영하는 중입니다</b><span>' +
+        "정해 주신 대로 제작 문장을 고치고 있습니다. 끝나면 <b>무엇이 어떻게 " +
+        "바뀌었는지</b> 보여 드리고 그때 다시 뽑기가 열립니다. " +
+        "지금 누르면 <b>정하기 전 문장</b>으로 값이 나갑니다.</span></div>";
+    }
     return m.our_reply
       ? '<div class="plan-same"><b>답변을 보시고 정하실 차례입니다</b><span>' +
         "적어 주신 것에 답을 달아 두었습니다. 결과물 아래에서 " +
-        "<b>「이 답변대로 갑니다」</b>를 누르시면 다시 뽑기가 열립니다. " +
-        "아니면 의견을 더 적어 주십시오.</span></div>"
+        "<b>「이 답변대로 갑니다」</b>를 누르시면 제작 문장을 고치기 시작합니다." +
+        "</span></div>"
       : '<div class="plan-same"><b>답변을 준비하고 있습니다</b><span>' +
         "적어 주신 것을 보고, 무엇에 동의하고 무엇을 어떻게 고칠지 " +
         "결과물 아래에 답을 답니다. <b>그때까지 다시 뽑기는 잠겨 있습니다</b> — " +
@@ -2016,9 +2034,15 @@
           threadStep(3, "정하기", "done") +
           '<div class="mytake reply"><b>제작 쪽 답변</b><span>' +
           esc(reply) + "</span></div>" +
-          '<p class="thread-ok"><b>정해졌습니다 · ' + esc(when(m.settled_at)) +
-          "</b><span>이제 <b>다시 뽑기</b>를 누르시면 이 답변대로 바뀐 문장으로 " +
-          "뽑습니다. 누르시면 값이 나갑니다.</span></p>" +
+          (planAfter(p, m)
+            ? '<p class="thread-ok"><b>반영 완료 · ' +
+              esc(when(p.render_mode_at)) + "</b><span>정해 주신 대로 제작 " +
+              "문장을 고쳤습니다. 이제 <b>다시 뽑기</b>를 누르시면 바뀐 문장으로 " +
+              "뽑습니다. 누르시면 값이 나갑니다.</span></p>"
+            : '<p class="thread-now"><b>프롬프트에 반영하는 중입니다</b><span>' +
+              "정하신 것은 " + esc(when(m.settled_at)) + " 에 기록했습니다. " +
+              "지금 제작 문장을 고치고 있고, 끝나면 여기에 <b>무엇이 어떻게 " +
+              "바뀌었는지</b> 적습니다. 그때까지 다시 뽑기는 잠급니다.</span></p>") +
           writeBox(f, m, true) + "</div>";
       }
 
@@ -2031,6 +2055,12 @@
       //   화면은 멀쩡해 보였고 시험 210개도 다 통과했다. 코드를 읽어서는 못
       //   찾았고, 화면에 「이 목록을 그린 step 이 무엇이냐」를 박아 물어보고서야
       //   나왔다 (checks/where_boxes.cjs).
+      /** 정하신 **뒤에** 계획이 고쳐졌는가. 두 곳이 같은 판단을 써야 한다. */
+      function planAfter(p, m) {
+        return !!(m.settled_at && p.render_mode_at &&
+          new Date(p.render_mode_at) > new Date(m.settled_at));
+      }
+
       function threadStep(n, label, state) {
         return '<span class="thread-step s-' + state + '"><b>' + n + "</b>" +
           esc(label) + "</span>";
