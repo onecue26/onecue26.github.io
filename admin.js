@@ -495,7 +495,21 @@
         //   여기에 「눌러야 시작합니다」라고 적으면 안 된다 — 누르면 반대로
         //   동작한다. 누를 것은 본문 안에 버튼으로 둔다.
         var paidStage = s.key === "anchors" || s.key === "video";
-        var badge = needsPick ? '<em class="ai-update choice">실행 주체 선택 대기</em>'
+        // ★ 유료 단계 배지는 **자리(phase)를 그대로 말한다.** 앵커가 올라와
+        //   본문이 「검수해 주세요」인데 머리가 「유료 생성 대기」였다 —
+        //   머리와 본문이 다른 말을 하면 둘 다 못 믿게 된다.
+        var paidAt = (paidStage && i === current && act) ? act.phase : "";
+        var paidBadge = paidAt === "review"
+            ? '<em class="ai-update done">생성 완료 · 검수 대기</em>'
+          : paidAt === "working"
+            ? '<em class="ai-update working">만드는 중</em>'
+          : paidAt === "approved"
+            ? '<em class="ai-update done">승인 완료</em>'
+          : (paidAt === "start" || paidAt === "choose")
+            ? '<em class="ai-update choice">유료 생성 대기</em>'
+          : "";
+        var badge = paidBadge ? paidBadge
+          : needsPick ? '<em class="ai-update choice">실행 주체 선택 대기</em>'
           : (waitingHere ? '<em class="ai-update working">담당자 결과 대기</em>'
           : (working && paidStage
             ? '<em class="ai-update choice">유료 생성 대기</em>'
@@ -1409,7 +1423,22 @@
     function paidStageBody(p, step) {
       if (p.step !== step) return "";
       var act = SE().actions(p, step, !!(p.stageResults && p.stageResults[step]));
-      return paidBody(p, step, act) + assetList(p, step);
+      return paidBody(p, step, act) + blockedNote(p, step) + assetList(p, step);
+    }
+
+    // 검수에서 걸려 다시 만드는 중이라는 것은 **숨기지 않는다.** 숨기면
+    // 화면이 비어 보이고, 비어 보이면 「멈췄나」가 된다.
+    function blockedNote(p, step) {
+      var want = step === "anchors" ? ["anchor"] : ["clip", "final"];
+      var bad = (p.files || []).filter(function (f) {
+        return want.indexOf(f.kind) >= 0 && ((f.meta || {}).review || "") === "blocked";
+      });
+      if (!bad.length) return "";
+      var m = bad[0].meta || {};
+      return '<div class="blocked-note"><b>검수에서 걸려 다시 만들고 있습니다</b>' +
+        (m.critical ? '<span class="n">치명 ' + m.critical + "건</span>" : "") +
+        (m.why ? '<span class="why">' + esc(m.why) + "</span>" : "") +
+        '<span class="who">검토 · ' + esc(m.reviewer || "독립 검토") + "</span></div>";
     }
 
     // 만든 것 — 승인은 **보고** 하는 것이다. 볼 것이 없으면 승인이 형식이 된다.
@@ -1422,7 +1451,12 @@
     function assetList(p, step) {
       var want = step === "anchors" ? ["anchor"] : ["clip", "final"];
       var mine = (p.files || []).filter(function (f) {
-        return want.indexOf(f.kind) >= 0;
+        if (want.indexOf(f.kind) < 0) return false;
+        // ★ 독립 검수에서 걸린 것은 관리자에게 올리지 않는다.
+        //   한 번 그 순서를 거꾸로 해서, 치명 3건짜리 앵커를 승인 대기로
+        //   띄워 놓았다 (2026-09-22). 관리자가 보는 것은 **이미 걸러진 것**이어야
+        //   하고, 그러지 않으면 관리자가 1차 검수자가 된다.
+        return ((f.meta || {}).review || "") !== "blocked";
       }).sort(function (x, y) {
         var a1 = x.cut_n == null ? 9999 : Number(x.cut_n);
         var b1 = y.cut_n == null ? 9999 : Number(y.cut_n);
@@ -1510,9 +1544,94 @@
       '" target="_blank" rel="noopener">광고주 화면 ↗</a></div>' +
       // ★ 광고주가 무엇을 언제 정했는지는 **카드를 열자마자** 보여야 한다.
       //   단계 안에 숨겨 두면 흐름을 펼쳐야 보이고, 그때는 이미 늦다.
-      clientSaid + redo + who +
+      clientSaid + freshLine(p) + redo + who +
       '<div class="mailbox" id="mail-' + esc(p.slug) + '" hidden></div>' +
       flow(p, stageBodies) + "</div></details>";
+  }
+
+  // ── 새로 올라온 것을 알아차리게 한다 ────────────────────────────────────
+  //
+  // 두 겹이다. 하나만으로는 각자 새는 데가 있다 —
+  //   · 30초마다 다시 읽기: 화면을 열어 둔 동안 저절로 바뀐다.
+  //     닫아 뒀던 동안은 못 본다.
+  //   · 「안 본 것」 표시: 닫아 뒀다 열어도 무엇이 새로 생겼는지 보인다.
+  //     열어 둔 채로는 갱신되지 않는다.
+  // 브라우저 팝업은 쓰지 않는다 — 권한을 물어야 하고, 탭이 살아 있어야 하고,
+  // 한 번 거절하면 조용히 안 온다. 화면 안에서 보이는 것이 확실하다.
+  var SEEN_KEY = "onecue.admin.seen";
+
+  function lastSeen() {
+    try { return localStorage.getItem(SEEN_KEY) || ""; } catch (e) { return ""; }
+  }
+  function markSeen(when) {
+    try { if (when) localStorage.setItem(SEEN_KEY, when); } catch (e) { /* 사생활 모드 */ }
+  }
+
+  /** 마지막으로 본 뒤에 올라온 것. 내가 만든 것도 포함한다 — 그게 알릴 것이다. */
+  function freshFiles(p) {
+    var since = lastSeen();
+    return (p.files || []).filter(function (f) {
+      if (((f.meta || {}).review || "") === "blocked") return false;
+      var at = f.created_at || (f.meta || {}).made_at;
+      return !!at && (!since || String(at) > since);
+    });
+  }
+
+  function newestStamp() {
+    var top = "";
+    ROWS.forEach(function (p) {
+      (p.files || []).forEach(function (f) {
+        var at = f.created_at || "";
+        if (at > top) top = at;
+      });
+    });
+    return top;
+  }
+
+  /** 카드 맨 위 한 줄 — 마지막으로 본 뒤에 무엇이 올라왔는지. */
+  function freshLine(p) {
+    var got = freshFiles(p);
+    if (!got.length) return "";
+    var what = {};
+    got.forEach(function (f) {
+      var name = KIND_NAME[f.kind] || f.kind;
+      what[name] = (what[name] || 0) + 1;
+    });
+    return '<div class="client-said fresh"><b>새로 올라왔습니다</b>' +
+      '<span class="at">' + Object.keys(what).map(function (k) {
+        return esc(k) + " " + what[k] + "개";
+      }).join(" · ") + "</span>" +
+      '<span class="said">마지막으로 보신 뒤에 만들어진 것입니다. ' +
+      '화면을 새로 읽으면 이 표시는 사라집니다.</span></div>';
+  }
+
+  // 자산 종류를 사람 말로. 계약(ad-type-materials.js)이 들고 있는 것을 쓰고,
+  // 없는 것만 여기서 채운다 — 같은 이름을 두 곳에 적지 않는다.
+  var KIND_NAME_EXTRA = { anchor: "제작 자료", board: "콘티", clip: "영상", final: "완성본" };
+  var KIND_NAME = (function () {
+    var out = {};
+    var spec = window.ONECUE_AD_TYPE_MATERIALS;
+    if (spec && spec.kinds) {
+      Object.keys(spec.kinds).forEach(function (k) { out[k] = spec.kinds[k].label; });
+    }
+    Object.keys(KIND_NAME_EXTRA).forEach(function (k) {
+      if (!out[k]) out[k] = KIND_NAME_EXTRA[k];
+    });
+    return out;
+  })();
+
+  // 30초마다 다시 읽는다. 화면을 열어 둔 동안 새로 올라온 것이 저절로 뜬다.
+  // 무언가 입력하고 있는 중에는 다시 읽지 않는다 — 쓰던 글이 사라진다.
+  var RELOAD_EVERY = 30000;
+  function autoReload() {
+    setInterval(function () {
+      if (!authorized) return;
+      if (document.hidden) return;              // 안 보고 있으면 아낀다
+      var el = document.activeElement;
+      if (el && (el.tagName === "TEXTAREA" || el.tagName === "INPUT" ||
+                 el.tagName === "SELECT")) return;
+      load();
+    }, RELOAD_EVERY);
   }
 
   function render() {
@@ -1747,6 +1866,10 @@
     });
 
     document.querySelectorAll("[data-exec-form]").forEach(function (f) { syncExecForm(f); });
+
+    // ★ 그림을 다 그린 **뒤에** 「봤다」로 적는다. 그리기 전에 적으면
+    //   이번에 새로 올라온 것이 표시되지 않은 채 사라진다.
+    markSeen(newestStamp());
     document.querySelectorAll("[data-exec-mode]").forEach(function (r) {
       r.addEventListener("change", function () {
         syncExecForm(r.closest("[data-exec-form]"));
@@ -2120,7 +2243,7 @@
           //     · boardCounts.board 가 늘 0 이라 그림을 올려도 다음 자리로 안 갔고,
           //     · 「필요한 자료」가 제품 사진 말고는 아무것도 못 셌다.
           //   관리자는 그 건의 모든 자료를 보는 자리다. 종류로 미리 거르지 않는다.
-          db.from("assets").select("id,project_id,role,kind,cut_n,url,storage_path,mime,meta,approved")
+          db.from("assets").select("id,project_id,role,kind,cut_n,url,storage_path,mime,meta,approved,created_at")
             .in("project_id", ids),
           db.from("contacts").select("project_id,name,email,phone,title").in("project_id", ids),
           db.from("jobs").select("project_id,step,request").eq("state", "queued")
@@ -2362,6 +2485,9 @@
         .finally(function () { el('reload').disabled = !authorized; });
     }
     el("reload").addEventListener("click", refresh);
+    // ★ 스스로 다시 읽기를 컴다. 이것을 안 부르면 함수만 있고 도지 않는다 —
+    //   실제로 한 번 그랬다.
+    autoReload();
     db.auth.onAuthStateChange(function (event) {
       if (event === 'SIGNED_OUT') accessNotice('로그인이 필요합니다', '관리자 계정으로 로그인해 주세요.', true);
     });
