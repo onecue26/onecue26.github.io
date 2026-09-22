@@ -1650,8 +1650,15 @@
     //   · 각각 설명 — 무엇이고 왜 만들었는지. 그게 없으면 보고도 판단이 안 된다.
     function assetList(p, step) {
       var want = step === "anchors" ? ["anchor"] : ["clip", "final"];
+      var older = [];
       var mine = (p.files || []).filter(function (f) {
         if (want.indexOf(f.kind) < 0) return false;
+        // ★ 고쳐 달라고 하기 전에 만든 것은 접어 둔다. 지우지 않는다 —
+        //   무엇이 나아졌는지 견주려면 옛것이 남아 있어야 한다.
+        if (superseded(p, step, f)) {
+          if (((f.meta || {}).review || "") !== "blocked") older.push(f);
+          return false;
+        }
         // ★ 독립 검수에서 걸린 것은 관리자에게 올리지 않는다.
         //   한 번 그 순서를 거꾸로 해서, 치명 3건짜리 앵커를 승인 대기로
         //   띄워 놓았다 (2026-09-22). 관리자가 보는 것은 **이미 걸러진 것**이어야
@@ -1662,10 +1669,20 @@
         var b1 = y.cut_n == null ? 9999 : Number(y.cut_n);
         return a1 - b1;
       });
-      if (!mine.length) return "";
+      function oldBox() {
+        if (!older.length) return "";
+        return '<details class="made-old"><summary>이전 판 ' + older.length +
+          "개 — 고쳐 달라고 하시기 전에 만든 것입니다</summary>" +
+          '<div class="made">' + older.map(one).join("") + "</div></details>";
+      }
+      if (!mine.length) return oldBox();
       return '<div class="made"><span class="made-lbl">만든 것 ' + mine.length +
-        " · 눌러서 크게 보실 수 있습니다</span>" +
-        mine.map(function (f, i) {
+        " · 눌러서 크게 · 영상은 두 번 누르십시오</span>" +
+        mine.map(one).join("") + "</div>" + oldBox();
+
+      // 한 장을 그리는 법. 지금 것과 이전 판이 **같은 함수**를 쓴다 —
+      // 두 벌로 두면 한쪽만 고치고 다른 쪽은 그대로 남는다.
+      function one(f, i) {
           var m = f.meta || {};
           var vid = (f.mime || "").indexOf("video/") === 0;
           var facts = [];
@@ -1683,7 +1700,8 @@
             '<span class="made-n">' + (i + 1) + "</span>" +
             (f.url
               ? (vid
-                ? '<video src="' + esc(f.url) + '" controls preload="metadata"></video>'
+                ? '<video src="' + esc(f.url) + '" controls preload="metadata" ' +
+                  'data-big="' + esc(f.url) + '" data-vid="1"></video>'
                 : '<img src="' + esc(f.url) + '" alt="' + esc(f.role || f.kind) +
                   '" loading="lazy" data-big="' + esc(f.url) + '">')
               : '<div class="none">파일을 불러오지 못했습니다</div>') +
@@ -1696,7 +1714,7 @@
             checks +
             (f.approved ? '<span class="ok">승인됨</span>' : "") +
             "</figcaption></figure>";
-        }).join("") + "</div>";
+      }
     }
 
     var stageBodies = {
@@ -1770,6 +1788,23 @@
   //   불렀는데, 범위가 달라서 render 가 ReferenceError 로 죽었다. 그런데
   //   그 오류가 load() 의 catch 로 떨어져 화면에는 「불러오지 못했습니다」만
   //   떴다 — 조회가 실패한 것처럼 보였다. 아래 catch 도 같이 고쳤다.
+  // ★ 수정 요청 **전에** 만든 것은 「지금 것」이 아니다.
+  //
+  //   다시 뽑기를 누른 뒤에도 옛 영상이 결과로 세어져서, 화면이 바로
+  //   「영상을 검수해 주세요 · 승인」을 내밀었다. 그걸 누르면 **고쳐 달라고
+  //   한 그 영상을 승인**하게 된다 (Dan 2026-09-22: 「예전 자료로 승인되면
+  //   안되니까」). 작업기도 같은 이유로 「이미 있다」고 보고 다시 안 뽑았다.
+  //
+  //   지우지는 않는다 — 비교할 것이 있어야 하므로 「이전 판」으로 접어 둔다.
+  //   칸을 새로 만들지 않고 **만든 시각과 수정 요청 시각을 견준다.**
+  //   따로 적어 두는 칸은 적기를 잊으면 틀리는데, 시각은 늘 맞다.
+  function superseded(p, step, f) {
+    var at = (SE().of(p, step) || {}).revision_at;
+    if (!at) return false;
+    var made = f.created_at || (f.meta || {}).made_at;
+    return !!made && String(made) < String(at);
+  }
+
   function held(f) {
     var r = ((f.meta || {}).review || "");
     return r === "blocked" || r === "ask";
@@ -2011,11 +2046,17 @@
     });
     // 눌러서 크게 — 여태 data-big 만 붙여 놓고 받는 쪽이 없었다.
     // 앵커는 라벨 글자·그림자를 보고 판정하는 물건이라 작은 칸으로는 못 본다.
-    document.querySelectorAll("img[data-big]").forEach(function (img) {
-      img.addEventListener("click", function () {
+    // ★ 영상도 받는다. 「눌러서 크게 보실 수 있습니다」라고 써 놓고 그림만
+    //   받고 있었다 — 영상을 누르면 아무 일도 안 났다 (Dan 2026-09-22).
+    //   영상은 재생 단추를 눌러야 하므로 **두 번 누르기**로 크게 연다.
+    document.querySelectorAll("[data-big]").forEach(function (img) {
+      var isVid = img.dataset.vid === "1";
+      img.addEventListener(isVid ? "dblclick" : "click", function () {
         var box = document.createElement("div");
         box.className = "bigview";
-        box.innerHTML = '<img src="' + img.dataset.big + '" alt="크게 보기">';
+        box.innerHTML = isVid
+          ? '<video src="' + img.dataset.big + '" controls autoplay></video>'
+          : '<img src="' + img.dataset.big + '" alt="크게 보기">';
         function close() {
           box.remove();
           document.removeEventListener("keydown", onKey);
@@ -2752,10 +2793,11 @@
               //   결과로 세면 승인 버튼이 뜨고, 관리자가 아직 안 정해진 것을
               //   승인하게 된다. ASK 는 답하기 전까지 다음이 없다.
               anchors: p.files.some(function (f) {
-                return f.kind === "anchor" && !held(f);
+                return f.kind === "anchor" && !held(f) && !superseded(p, "anchors", f);
               }),
               video: p.files.some(function (f) {
-                return (f.kind === "clip" || f.kind === "final") && !held(f);
+                return (f.kind === "clip" || f.kind === "final") && !held(f) &&
+                  !superseded(p, "video", f);
               }),
             };
             counts.forEach(function (t, i) {
