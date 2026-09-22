@@ -759,9 +759,18 @@
         '<span class="lc-msg" data-lc-msg></span></div>';
     }
     if (at === "working") {
+      var began = (SE().of(p, s) || {}).started_at;
       return '<div class="lc lc-working"' + tag + ">" +
         head(s === "anchors" ? "제작 자료를 만드는 중" : "영상을 뽑는 중",
-             "끝나면 이 자리에 올라옵니다") + "</div>";
+             (began ? esc(when(began)) + " 에 시작 · " : "") +
+             "끝나면 이 자리에 올라옵니다") +
+        // ★ 돌고 있는 동안에는 **누를 것을 두지 않는다.** 버튼이 남아 있으면
+        //   또 눌리고, 그때마다 크레딧이 나간다. 잠긴 버튼조차 두지 않는다 —
+        //   여기서는 기다리는 것 말고 할 일이 없다.
+        '<span class="lc-msg">지금 돌고 있습니다. <b>여기서 하실 일은 없습니다</b> — ' +
+        '끝나면 이 자리에 결과와 함께 승인·수정 요청이 뜹니다. ' +
+        '이 단계에서는 다시 뽑기 버튼을 두지 않습니다 (두 번 나가는 것을 막습니다).</span>' +
+        "</div>";
     }
     if (at === "review") {
       return '<div class="lc lc-review"' + tag + ">" +
@@ -2704,7 +2713,12 @@
               "delivered_at,delivered_note,client_summary,plain_language_ok," +
               // 상태기계가 보는 네 시각. 이것이 없으면 phase() 는 늘 「고르세요」로
               // 판정한다 — 골랐다는 사실도, 시작했다는 사실도 화면에 없기 때문이다.
-              "chosen_at,started_at,approved_at,approved_by,revision_at,revision_note")
+              // ★ ai_job_id 가 「지금 돌고 있다」의 증거다. 이걸 안 읽어 오면
+              //   화면이 돌고 있는 줄을 모르고 **다시 뽑기 버튼을 또 내민다** —
+              //   누르면 크레딧이 두 번 나간다 (Dan 2026-09-22 지적).
+              //   화면이 판단에 쓰는 칸은 반드시 조회에 있어야 한다.
+              "chosen_at,started_at,approved_at,approved_by,revision_at,revision_note," +
+              "ai_job_id")
             .in("project_id", ids),
           // 구성·각본 결과 — 등록되면 그 단계 안에서 상세로 펼친다
           db.from("developments").select("project_id,arc,copies,narration_tone,slogan,bgm")
@@ -2743,15 +2757,24 @@
           var strategies = out[10].data || [];
           var concepts = out[11].data || [];
           var completedJobs = out[12].data || [];
-          // 표가 아직 없는 서버(마이그레이션 016 이전)에서도 화면은 그대로 떠야 한다
-          var stageRows = (out[12] && !out[12].error && out[13].data) || [];
-          var developments = (out[13] && !out[13].error && out[14].data) || [];
-          var cutRows = (out[14] && !out[14].error && out[15].data) || [];
-          // 017 전에는 빈 목록이다 — 그러면 「AI 라고 적혔는데 작업이 없는 줄」은
-          // 살아 있는 작업 기록으로 판정된다(choiceState 의 ranBefore)
-          var jobLinks = (out[15] && !out[15].error && out[15].data) || [];
-          // 표가 아직 없는 서버(020 이전)에서도 화면은 그대로 떠야 한다
-          var reviewRows = (out[16] && !out[16].error && out[16].data) || [];
+          // ★ 번호로 꺼내면 반드시 어긋난다. 실제로 어긋나 있었다 (2026-09-22):
+          //   jobLinks 가 **컷 목록**을, reviewRows 가 **실행기 목록**을 받고
+          //   있었다. 그래서 「지금 돌고 있다」를 못 읽어 다시 뽑기 버튼이 또
+          //   떴고(누르면 45 크레딧이 두 번), 검수 기록도 못 읽었다.
+          //
+          //   조회를 하나 끼워 넣을 때마다 그 아래 번호가 전부 밀리는데,
+          //   밀린 것을 눈으로 세어 고치는 일은 언젠가 틀린다. **이름으로
+          //   꺼낸다** — 순서가 바뀌어도 이름은 안 바뀐다.
+          function pick(name, n) {
+            var r = out[n];
+            if (!r || r.error) return [];   // 그 표가 아직 없는 서버도 있다
+            return r.data || [];
+          }
+          var stageRows = pick("stage_executors", 13);
+          var developments = pick("developments", 14);
+          var cutRows = pick("admin_cuts", 15);
+          var jobLinks = pick("stage_executors(ai_job_id)", 16);
+          var reviewRows = pick("stage_reviews", 17);
           jobLinks.forEach(function (link) {
             stageRows.forEach(function (row) {
               if (row.project_id === link.project_id && row.step === link.step) {
