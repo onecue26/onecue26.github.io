@@ -2541,6 +2541,18 @@
       });
     });
     // 의견 저장 — **돈이 안 나가는 버튼이다.** 생성과 완전히 따로 돈다.
+    // ★ 지난 버전은 **언제나 접힌 채로 시작한다.**
+    //
+    //   마크업에 open 을 안 줬는데도 새로고침하면 펼쳐져 있었다. 크롬이
+    //   details 의 열림 상태를 되살려 주기 때문이다. 한 번 펼쳐 보면
+    //   그다음부터 계속 펼쳐진 채로 떠서 화면이 길어진다
+    //   (Dan 2026-09-22: 「지난 버전 default값을 접혀잇게해」).
+    //
+    //   지난 판은 **기록**이다. 찾아볼 때만 펼치면 된다. 그릴 때마다 닫는다.
+    document.querySelectorAll("details.made-old[open]").forEach(function (d) {
+      d.open = false;
+    });
+
     document.querySelectorAll("[data-take-save]").forEach(function (b) {
       b.addEventListener("click", function () {
         var f = b.closest("[data-take-form]");
