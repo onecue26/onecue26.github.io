@@ -32,7 +32,9 @@
     if (!row) {
       return { mode: "ai", assignee: "", reviewer_model: "", reviewer_note: "",
         state: "planned", ai_job_id: null, delivered_at: null, delivered_note: "",
-        client_summary: "", plain_language_ok: false };
+        client_summary: "", plain_language_ok: false,
+        chosen_at: null, started_at: null, pressed_at: null,
+        approved_at: null, revision_at: null, revision_note: "" };
     }
     return {
       mode: row.mode === "human" ? "human" : "ai",
@@ -51,6 +53,15 @@
       // 상태기계가 보는 네 가지 시각. 없으면 null 이고, null 은 「아직 안 했다」다.
       chosen_at: row.chosen_at || null,
       started_at: row.started_at || null,
+      // ★ pressed_at — **지워지지 않는 누름 기록**이다 (051).
+      //   started_at 은 일이 끝나면 지워지므로, 「어느 것이 지금 판인가」를
+      //   그걸로 가르면 화면을 놓아 주는 순간 지난 판들이 되살아난다.
+      //
+      //   ★★ 이 함수는 행을 **다시 조립한다.** 여기 안 적은 칸은 조회에
+      //      있어도 화면까지 오지 못한다. 실제로 그랬다 — 조회에 넣고
+      //      superseded() 도 고쳤는데 값이 늘 undefined 라서 2판이 계속
+      //      떴다 (Dan 2026-09-22: 「v2도 여전히 나오는데」).
+      pressed_at: row.pressed_at || null,
       approved_at: row.approved_at || null,
       revision_at: row.revision_at || null,
       revision_note: row.revision_note || "",
