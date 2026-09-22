@@ -937,6 +937,14 @@
     return db.rpc(name, body).then(rpcOk);
   }
 
+  // 사장님이 결과물에 적어 주신 말. **건 단위가 아니라 자산 단위**라서
+  // rpc() 를 못 쓴다 — rpc() 는 p_project_id 를 끼워 넣는데 이 함수는 그 인자를
+  // 받지 않아 PostgREST 가 못 찾는다고 한다. 그래서 직접 부른다.
+  function assetDanTake(assetId, take) {
+    return db.rpc("onecue_asset_dan_take", { p_asset_id: assetId, p_take: take })
+      .then(rpcOk);
+  }
+
   function stageStart(slug, step) { return rpc(slug, "onecue_stage_start", { p_step: step }); }
   function stageApprove(slug, step) { return rpc(slug, "onecue_stage_approve", { p_step: step }); }
   function stageRevise(slug, step, note) {
@@ -1836,8 +1844,33 @@
             ? '<div class="mytake dan"><b>사장님 의견</b><span>' +
               esc(m.dan_take) + "</span></div>"
             : "") +
+          /* ★ **적을 자리가 있어야 적으신다.**
+           *
+           *  사장님 의견을 보여 주는 칸은 만들어 놓고 **쓰는 칸을 안 만들었다.**
+           *  그래서 「다시 뽑기 누르기전에 의견쓰는부분이 없네 두군데
+           *  지적하려고햇는데」가 나왔다 (2026-09-22).
+           *
+           *  누르기 **전에** 적을 수 있어야 한다. 적어 주신 말이 다음 판의
+           *  근거가 되는데, 뽑은 뒤에 적으면 이미 그 말 없이 뽑힌 것이다.
+           *  저장은 생성과 완전히 따로 돈다 — 이 버튼은 돈을 쓰지 않는다. */
+          danTakeBox(f, m) +
           '<span class="call">보시고 정하십시오 — <b>다시 뽑기</b>(값이 또 나갑니다) ' +
           "또는 <b>이대로 승인</b>.</span></div>";
+      }
+
+      /** 사장님이 누르기 전에 의견을 적는 칸. 저장은 생성과 따로 돈다. */
+      function danTakeBox(f, m) {
+        if (!canWrite) return "";
+        var has = !!m.dan_take;
+        return '<div class="takebox" data-take-form>' +
+          "<b>" + (has ? "의견 고쳐 쓰기" : "의견 적기") +
+          " — <i>적고 저장하신 뒤에 누르십시오. 저장만으로는 값이 나가지 않습니다</i></b>" +
+          '<textarea data-take-text rows="3" placeholder="' +
+          "무엇이 잘못됐는지, 어떻게 했으면 하는지 적어 주십시오. " +
+          '여러 건이면 줄을 나눠 적으셔도 됩니다.">' +
+          esc(m.dan_take || "") + "</textarea>" +
+          '<button class="ghost" data-take-save="' + esc(f.id) + '">' +
+          (has ? "고쳐 저장" : "의견 저장") + "</button></div>";
       }
     }
 
@@ -2459,6 +2492,27 @@
           });
       });
     });
+    // 의견 저장 — **돈이 안 나가는 버튼이다.** 생성과 완전히 따로 돈다.
+    document.querySelectorAll("[data-take-save]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var f = b.closest("[data-take-form]");
+        var t = (f.querySelector("[data-take-text]").value || "").trim();
+        if (!t) {
+          window.alert("적으신 내용이 없습니다.");
+          f.querySelector("[data-take-text]").focus();
+          return;
+        }
+        var label = b.textContent;
+        b.disabled = true; b.textContent = "저장 중…";
+        assetDanTake(b.dataset.takeSave, t)
+          .then(load)
+          .catch(function (e) {
+            b.disabled = false; b.textContent = label;
+            window.alert("의견을 저장하지 못했습니다 — " + (e.message || e));
+          });
+      });
+    });
+
     document.querySelectorAll("[data-deliver-save]").forEach(function (b) {
       b.addEventListener("click", function () {
         var f = b.closest("[data-deliver-form]");
