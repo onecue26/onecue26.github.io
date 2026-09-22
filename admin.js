@@ -77,6 +77,16 @@
     var p = el("conn"); p.className = "pill" + (k ? " " + k : "");
     p.innerHTML = '<span class="dot"></span>' + esc(t);
   }
+  // 그 자리의 시계로 적는다. DB 는 UTC 라 그대로 찍으면 아홉 시간 어긋나고,
+  // 「00:06 에 승인」은 새벽에 승인한 것처럼 읽힌다 — 실제로는 아침 9시다.
+  function when(ts) {
+    if (!ts) return "";
+    var d = new Date(ts);
+    if (isNaN(d.getTime())) return "";
+    function two(n) { return (n < 10 ? "0" : "") + n; }
+    return d.getFullYear() + "-" + two(d.getMonth() + 1) + "-" + two(d.getDate()) +
+      " " + two(d.getHours()) + ":" + two(d.getMinutes());
+  }
   function ago(ts) {
     var m = Math.floor((Date.now() - new Date(ts).getTime()) / 60000);
     if (m < 1) return "방금";
@@ -479,14 +489,20 @@
         //   본문이 서로 다른 말을 하면 둘 다 못 믿게 된다 — 머리를 본문에 맞춘다.
         var boardMissing = s.key === BOARD_REVIEW_STAGE &&
           !(p.files || []).some(function (f) { return f.kind === "board"; });
+        // ★ 돈이 드는 단계(제작 자료·영상)는 작업이 큐에 걸려 있어도 **아무도
+        //   집지 않는다.** 유료 생성은 사람이 누르는 자리라서다. 그걸 「AI 재작업
+        //   중」이라고 적으면 Dan 은 기다리고 시스템은 영영 안 한다.
+        var paidStage = s.key === "anchors" || s.key === "video";
         var badge = needsPick ? '<em class="ai-update choice">실행 주체 선택 대기</em>'
           : (waitingHere ? '<em class="ai-update working">담당자 결과 대기</em>'
+          : (working && paidStage
+            ? '<em class="ai-update choice">유료 생성 대기 — 눌러야 시작합니다</em>'
           : (working ? '<em class="ai-update working">AI 재작업 중</em>'
           : (updated
             ? (boardMissing
               ? '<em class="ai-update working">콘티 준비 중</em>'
               : '<em class="ai-update done">NEW · 업데이트 완료</em>')
-            : '')));
+            : ''))));
         var personBadge = pick.mode === "human"
           ? '<em class="stage-person">담당자 ' + esc(pick.assignee || "미지정") +
             (pick.state === "delivered" ? " · 등록 완료" : "") + '</em>' : '';
@@ -926,6 +942,22 @@
       productionAction = '<span class="progress-state">현재 절차에 따라 진행 중입니다</span>';
     }
 
+    // ★ 광고주가 정한 것 — 우리에게 보낸 유일한 말이다. 조용히 단계만 넘어가면
+    //   무슨 일이 있었는지 알려면 DB 를 봐야 한다.
+    var GATE_NAME = { concepts: "콘셉트", storyboard: "콘티", video: "영상", strategy: "방향" };
+    var decided = (p.approvals || []).slice().sort(function (a, b) {
+      return String(b.decided_at).localeCompare(String(a.decided_at));
+    })[0];
+    var clientSaid = decided
+      ? '<div class="client-said ' + (decided.decision === "ok" ? "ok" : "revise") + '">' +
+        '<b>광고주가 ' + esc(GATE_NAME[decided.gate] || decided.gate) +
+        (decided.decision === "ok" ? "를 승인했습니다" : " 수정을 요청했습니다") + "</b>" +
+        '<span class="at">' + esc(when(decided.decided_at)) +
+        " · " + esc(ago(decided.decided_at)) + "</span>" +
+        (decided.note ? '<span class="said">“' + esc(decided.note) + '”</span>' : "") +
+        "</div>"
+      : "";
+
     // 이제 p.files 에 우리가 만든 것(콘티·앵커·영상)도 들어 있다. 카드의 이 줄은
     // **광고주가 보낸 것**만 세는 자리라, 여기서 골라야 한다. 안 그러면
     // 콘티를 뽑을 때마다 「광고주가 올린 것」 숫자가 같이 늘어난다.
@@ -1224,6 +1256,8 @@
       // 어느 쪽이 본 자리인지 모르게 된다.
       storyboard: (boardFlow ? "" : boardLink(BOARD_REVIEW_STAGE)) + storyboardBody +
         (p.step === BOARD_REVIEW_STAGE ? productionAction : ""),
+      // 제작 자료는 **돈이 나가는 첫 자리**다. 무엇을 근거로 시작하는지를
+      // 그 자리에 적는다 — 광고주 승인이 그 근거다.
       anchors: p.step === "anchors" ? productionAction : "",
       video: p.step === "video" ? productionAction : "",
       deliver: p.step === "deliver" ? productionAction : ""
@@ -1247,7 +1281,9 @@
       '<div class="project-body"><div class="ways project-ways">' +
       '<a class="btn ghost" href="' + esc(siteUrl(p.slug)) +
       '" target="_blank" rel="noopener">광고주 화면 ↗</a></div>' +
-      redo + who +
+      // ★ 광고주가 무엇을 언제 정했는지는 **카드를 열자마자** 보여야 한다.
+      //   단계 안에 숨겨 두면 흐름을 펼쳐야 보이고, 그때는 이미 늦다.
+      clientSaid + redo + who +
       '<div class="mailbox" id="mail-' + esc(p.slug) + '" hidden></div>' +
       flow(p, stageBodies) + "</div></details>";
   }
@@ -1967,6 +2003,9 @@
               return j.project_id === p.id && j.step === "facts";
             });
             p.job = jobs.filter(function (j) { return j.project_id === p.id; })[0] || null;
+            // 광고주가 내린 판단 전부. 「말을 남겼는가」와 「무엇을 정했는가」는
+            // 다른 물음이라 따로 둔다 — 아래 p.redo 는 말이 있는 것만 고른다.
+            p.approvals = revises.filter(function (a) { return a.project_id === p.id; });
             // 광고주가 실제로 남긴 말 중 가장 최근 것.
             // 자동으로 채워 넣은 문구(「…선택」·「남기신 말씀 없음」)는 말이 아니다
             p.redo = revises.filter(function (a) {
