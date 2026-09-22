@@ -498,7 +498,12 @@
         // ★ 유료 단계 배지는 **자리(phase)를 그대로 말한다.** 앵커가 올라와
         //   본문이 「검수해 주세요」인데 머리가 「유료 생성 대기」였다 —
         //   머리와 본문이 다른 말을 하면 둘 다 못 믿게 된다.
-        var paidAt = (paidStage && i === current && act) ? act.phase : "";
+        // ★ act 는 이 아래에서 만들어진다. 배지가 그것을 보려 했으니 늘 빈값이라
+        //   자리를 모르는 채 「유료 생성 대기」로 굳었다. 자리만 여기서 따로 구한다 —
+        //   act 를 위로 끌어올리면 그 위의 판단들이 순서에 얽힌다.
+        var paidAt = (paidStage && i === current)
+          ? SE().phase(p, s.key, !!(p.stageResults && p.stageResults[s.key]))
+          : "";
         var paidBadge = paidAt === "review"
             ? '<em class="ai-update done">생성 완료 · 검수 대기</em>'
           : paidAt === "working"
@@ -2364,9 +2369,15 @@
               storyboard: p.cuts.length > 0,
               // ★ 유료 단계도 「결과가 왔는가」를 봐야 승인 자리가 뜬다.
               //   이게 없어서 앵커를 올려도 화면은 계속 「시작하세요」였다.
-              anchors: p.files.some(function (f) { return f.kind === "anchor"; }),
+              // ★ 독립 검수에서 걸린 것은 **결과가 아니다.** 이것을 결과로 세면
+              //   검수가 막아 둔 것에 승인 버튼이 뜬다 — 실제로 그랬다.
+              //   관리자는 걸린 것을 승인할 수 있어서는 안 된다.
+              anchors: p.files.some(function (f) {
+                return f.kind === "anchor" && ((f.meta || {}).review || "") !== "blocked";
+              }),
               video: p.files.some(function (f) {
-                return f.kind === "clip" || f.kind === "final";
+                return (f.kind === "clip" || f.kind === "final") &&
+                  ((f.meta || {}).review || "") !== "blocked";
               }),
             };
             counts.forEach(function (t, i) {
