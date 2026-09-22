@@ -1595,8 +1595,15 @@
       if (p.step === step) return "";
       var at = (SE().of(p, step) || {}).approved_at;
       if (!at) return "";
+      var want = step === "anchors" ? ["anchor"] : ["clip", "final"];
+      var more = (p.files || []).filter(function (f) {
+        var made = f.created_at || (f.meta || {}).made_at;
+        return want.indexOf(f.kind) >= 0 && made && String(made) > String(at);
+      }).length;
       return '<div class="done-note"><b>승인 완료</b>' +
         '<span class="at">' + esc(when(at)) + " · " + esc(ago(at)) + "</span>" +
+        (more ? '<span class="at more">그 뒤 보충 ' + more +
+          "장 — 모자란 것을 더했습니다. 승인은 그대로입니다</span>" : "") +
         "</div>";
     }
 
@@ -1737,8 +1744,29 @@
             checks +
             (f.approved ? '<span class="ok">승인됨</span>' : "") +
             (m.made_why ? '<span class="madewhy">' + esc(m.made_why) + "</span>" : "") +
+            addedLater(p, step, f) +
             verdictOf(f) +
             "</figcaption></figure>";
+      }
+
+      /** ★ 승인 **뒤에** 들어온 자료는 「보충」이라고 말한다.
+       *
+       *  단계를 되돌리지 않고 자료만 더할 때가 있다. 있던 것이 틀린 게 아니라
+       *  **모자랐을 때**다 (Dan 2026-09-22 규칙: 「바꾸는 것이면 되돌아가고,
+       *  더하는 것이면 보충한다」). 그때 뒷 단계 승인은 풀지 않는다 — 더한다고
+       *  앞 것이 틀려지지 않기 때문이다.
+       *
+       *  대신 **여기 쌓인다.** 그러지 않으면 이 단계가 「완료」라고 말하면서
+       *  실제로는 계속 늘어나는 거짓말을 한다. 그리고 왜 승인 뒤에 한 장이 더
+       *  있는지 아무도 모르게 된다. */
+      function addedLater(p, step, f) {
+        var at = (SE().of(p, step) || {}).approved_at;
+        if (!at) return "";
+        var made = f.created_at || (f.meta || {}).made_at;
+        if (!made || String(made) <= String(at)) return "";
+        return '<span class="added"><b>보충</b> — 이 단계를 승인하신 뒤에 ' +
+          "모자란 것이 있어 더한 것입니다. 있던 것이 틀린 게 아니라서 " +
+          "승인은 그대로 둡니다 · " + esc(when(made)) + "</span>";
       }
 
       /** 검수에서 걸린 것·물어볼 것이 있는 것에 **무엇이 걸렸는지**를 붙인다. */
