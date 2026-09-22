@@ -1678,8 +1678,11 @@
       });
       function oldBox() {
         if (!older.length) return "";
+        var why = (SE().of(p, step) || {}).revision_note || "";
         return '<details class="made-old"><summary>이전 판 ' + older.length +
           "개 — 고쳐 달라고 하시기 전에 만든 것입니다</summary>" +
+          (why ? '<div class="old-why"><b>고쳐 달라고 적으신 것</b><span>' +
+            esc(why) + "</span></div>" : "") +
           '<div class="made">' + older.map(one).join("") + "</div></details>";
       }
       if (!mine.length) return oldBox();
@@ -1720,6 +1723,7 @@
             (facts.length ? '<span class="facts">' + facts.join(" · ") + "</span>" : "") +
             checks +
             (f.approved ? '<span class="ok">승인됨</span>' : "") +
+            (m.made_why ? '<span class="madewhy">' + esc(m.made_why) + "</span>" : "") +
             verdictOf(f) +
             "</figcaption></figure>";
       }
@@ -1737,6 +1741,14 @@
           (m.dropped ? '<details class="kept"><summary>안 잡은 것과 그 이유</summary>' +
             "<span>" + esc(m.dropped) + "</span></details>" : "") +
           '<span class="who">검토 · ' + esc(m.reviewer || "독립 검토") + "</span>" +
+          // ★ 검수는 「무엇이 걸렸나」까지다. 그다음 「그래서 어떻게 하는 게
+          //   좋겠나」는 만드는 쪽이 말해야 한다 (Dan 2026-09-22: 「검수사항 및
+          //   너의의견 … 같이 써놓고」). 판정만 있고 의견이 없으면 사장님이
+          //   혼자 값을 저울질하시게 된다.
+          (m.my_take
+            ? '<div class="mytake"><b>제작 쪽 의견</b><span>' +
+              esc(m.my_take) + "</span></div>"
+            : "") +
           '<span class="call">보시고 정하십시오 — <b>다시 뽑기</b>(값이 또 나갑니다) ' +
           "또는 <b>이대로 승인</b>.</span></div>";
       }
