@@ -1664,15 +1664,13 @@
         if (want.indexOf(f.kind) < 0) return false;
         // ★ 고쳐 달라고 하기 전에 만든 것은 접어 둔다. 지우지 않는다 —
         //   무엇이 나아졌는지 견주려면 옛것이 남아 있어야 한다.
-        if (superseded(p, step, f)) {
-          if (((f.meta || {}).review || "") !== "blocked") older.push(f);
-          return false;
-        }
-        // ★ 독립 검수에서 걸린 것은 관리자에게 올리지 않는다.
-        //   한 번 그 순서를 거꾸로 해서, 치명 3건짜리 앵커를 승인 대기로
-        //   띄워 놓았다 (2026-09-22). 관리자가 보는 것은 **이미 걸러진 것**이어야
-        //   하고, 그러지 않으면 관리자가 1차 검수자가 된다.
-        return ((f.meta || {}).review || "") !== "blocked";
+        if (superseded(p, step, f)) { older.push(f); return false; }
+        // ★ 검수에서 걸린 것도 **올린다.** 전에는 감췄는데, 감추면 사장님께는
+        //   「치명 1건」이라는 말만 남고 정할 것이 없어진다.
+        //   검수는 찾아서 설명하는 일이고 **결정은 사장님이** 하신다
+        //   (Dan 2026-09-22: 「업로드 후 검수사항을 명시하고 내가 본다음
+        //   결정하게해야지」). 무엇이 걸렸는지는 그 그림 바로 밑에 적는다.
+        return true;
       }).sort(function (x, y) {
         var a1 = x.cut_n == null ? 9999 : Number(x.cut_n);
         var b1 = y.cut_n == null ? 9999 : Number(y.cut_n);
@@ -1722,7 +1720,25 @@
             (facts.length ? '<span class="facts">' + facts.join(" · ") + "</span>" : "") +
             checks +
             (f.approved ? '<span class="ok">승인됨</span>' : "") +
+            verdictOf(f) +
             "</figcaption></figure>";
+      }
+
+      /** 검수에서 걸린 것·물어볼 것이 있는 것에 **무엇이 걸렸는지**를 붙인다. */
+      function verdictOf(f) {
+        var m = f.meta || {};
+        var v = m.review || "";
+        if (v !== "blocked" && v !== "ask") return "";
+        return '<div class="verdict v-' + esc(v) + '">' +
+          "<b>" + (v === "blocked"
+            ? "검수에서 걸렸습니다 · 치명 " + (m.critical || 0) + "건"
+            : "정해야 할 것 " + (m.asks || 0) + "건") + "</b>" +
+          (m.why ? '<span class="what">' + esc(m.why) + "</span>" : "") +
+          (m.dropped ? '<details class="kept"><summary>안 잡은 것과 그 이유</summary>' +
+            "<span>" + esc(m.dropped) + "</span></details>" : "") +
+          '<span class="who">검토 · ' + esc(m.reviewer || "독립 검토") + "</span>" +
+          '<span class="call">보시고 정하십시오 — <b>다시 뽑기</b>(값이 또 나갑니다) ' +
+          "또는 <b>이대로 승인</b>.</span></div>";
       }
     }
 
@@ -1814,9 +1830,12 @@
     return !!made && String(made) < String(at);
   }
 
+  // ★ 걸린 것도 **결과다.** 결과로 안 세면 승인 버튼이 아예 안 떠서,
+  //   사장님께 남는 선택이 「다시 뽑기」뿐이 된다. 그건 검수가 결정까지
+  //   하는 것이다. 검수는 찾아서 설명하고, **고르는 것은 사장님**이다.
+  //   무엇이 걸렸는지는 그림 바로 밑에 크게 적으므로 모르고 누르실 일은 없다.
   function held(f) {
-    var r = ((f.meta || {}).review || "");
-    return r === "blocked" || r === "ask";
+    return false;
   }
 
   function lastSeen() {
