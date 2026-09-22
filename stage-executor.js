@@ -244,6 +244,42 @@
     };
   }
 
+  // ── 돈이 나가는 단계 ──────────────────────────────────────────────────────
+  //
+  // 제작 자료와 영상 제작은 앞 단계들과 길이 같다(고르기 → 시작 → 검수 → 승인).
+  // 다만 **시작을 누르는 순간 크레딧이 나간다.** 그래서 두 가지가 더 필요하다:
+  //
+  //   · 누르기 전에 얼마인지 — 계획(render_plan)에 적힌 값을 읽는다.
+  //     화면이 값을 지어내지 않는다. 계획이 없으면 값도 없고, 그러면 누를 수 없다.
+  //   · 계획이 먼저 있어야 한다 — 방식(한 판/구간/컷별)에 따라 만들 것이 다르다.
+  //     계획 없이 뽑으면 무엇을 몇 장 뽑는지가 그때그때 달라진다.
+  var PAID = { anchors: "material", video: "render" };
+
+  function isPaid(step) { return !!PAID[step]; }
+
+  /** 이 단계의 호출 계획과 예상 크레딧. 계획에 있는 것만 읽는다. */
+  function planFor(project, step) {
+    var plan = (project && project.render_plan) || null;
+    if (!plan || !plan.calls) return null;
+    // 제작 자료는 앵커가 필요한 호출만, 영상 제작은 생성 호출만 본다.
+    var mine = plan.calls.filter(function (c) {
+      return step === "anchors"
+        ? (c.needs || []).some(function (n) { return n.kind === "anchor"; })
+        : c.kind === "generate";
+    });
+    var credits = mine.reduce(function (a, c) {
+      return a + (Number(c.credits_estimate) || 0);
+    }, 0);
+    var needs = [];
+    mine.forEach(function (c) {
+      (c.needs || []).forEach(function (n) {
+        if (step !== "anchors" || n.kind === "anchor") needs.push(n);
+      });
+    });
+    return { mode: project.render_mode || null, calls: mine,
+             credits: credits, needs: needs };
+  }
+
   function phase(project, step, hasResult) {
     if (!project || index(step) < 0) return "upcoming";
     if (index(step) < index(project.step)) return "past";
@@ -265,7 +301,15 @@
   // 「승인이 있고 수정이 있고 다음 단계는 없다」를 잡아야 한다.
   function actions(project, step, hasResult) {
     var at = phase(project, step, hasResult);
+    var paid = isPaid(step) ? planFor(project, step) : null;
     return {
+      // 돈이 나가는 단계인가, 그리고 얼마인가. 계획이 없으면 null 이고
+      // 화면은 「계획이 먼저」라고 말한다 — 값을 지어내지 않는다.
+      paid: !!isPaid(step),
+      plan: paid,
+      // ★ 영상은 12초 한 판이라 앞 3초만 고칠 수 없다. 그래서 「수정 요청」이
+      //   사실상 다시 뽑기고, 누를 때마다 같은 값이 또 나간다.
+      reviseCostsAgain: step === "video",
       phase: at,
       chooseAi: at === "choose",
       chooseHuman: at === "choose" && humanAllowed(step),
@@ -629,6 +673,7 @@
   }
 
   root.ONECUE_STAGE = {
+    isPaid: isPaid, planFor: planFor,
     ORDER: ORDER, DEFAULT: DEFAULT, index: index, nextStep: nextStep,
     of: of, isHuman: isHuman, performer: performer, reviewer: reviewer,
     editable: editable, waiting: waiting, canDeliver: canDeliver,
