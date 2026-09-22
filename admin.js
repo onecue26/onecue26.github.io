@@ -673,6 +673,51 @@
     return !!(at && new Date(at) > new Date(pick.revision_at));
   }
 
+  /** ★ 적어 주신 의견이 **답을 받고 정해졌는가.**
+   *
+   *  절차를 칸에 그려 놓기만 하면 건너뛸 수 있고, 건너뛸 수 있는 절차는
+   *  없는 것과 같다. 그래서 순서가 곧 잠금이다 — 의견이 있는데 답변이
+   *  없거나, 답변을 보시고 아직 안 정하셨으면 **다시 뽑기가 안 눌린다.**
+   *  (Dan 2026-09-22: 「결정 난다음 재생성하는 단계가있으면 좋겟음」)
+   *
+   *  보는 것은 **지금 판**뿐이다. 지난 판에 적어 두신 말은 이미 지나갔다. */
+  // 이 단계가 내놓는 것이 무엇인가. 앵커에 적어 주신 말이 영상을 잠그면
+  // 안 된다 — 잠그는 이유와 잠기는 대상이 어긋나면 풀 길을 못 찾는다.
+  function stageKinds(s) {
+    return s === "anchors" ? ["anchor"] : ["clip", "final"];
+  }
+  function openTakes(p, s) {
+    var kinds = stageKinds(s);
+    return (p.files || []).filter(function (f) {
+      return kinds.indexOf(f.kind) >= 0 && !superseded(p, s, f) &&
+        ((f.meta || {}).dan_take || "");
+    });
+  }
+
+  function takeSettled(p, s) {
+    var live = openTakes(p, s);
+    if (!live.length) return true;         // 적으신 것이 없으면 해당 없음
+    return live.every(function (f) { return !!(f.meta || {}).settled_at; });
+  }
+
+  /** 잠긴 이유를 한 줄로. 버튼과 **같은 판단**을 쓴다. */
+  function takeWaiting(p, s) {
+    if (takeSettled(p, s)) return "";
+    var f = openTakes(p, s).filter(function (x) {
+      return !(x.meta || {}).settled_at;
+    })[0];
+    var m = (f && f.meta) || {};
+    return m.our_reply
+      ? '<div class="plan-same"><b>답변을 보시고 정하실 차례입니다</b><span>' +
+        "적어 주신 것에 답을 달아 두었습니다. 결과물 아래에서 " +
+        "<b>「이 답변대로 갑니다」</b>를 누르시면 다시 뽑기가 열립니다. " +
+        "아니면 의견을 더 적어 주십시오.</span></div>"
+      : '<div class="plan-same"><b>답변을 준비하고 있습니다</b><span>' +
+        "적어 주신 것을 보고, 무엇에 동의하고 무엇을 어떻게 고칠지 " +
+        "결과물 아래에 답을 답니다. <b>그때까지 다시 뽑기는 잠겨 있습니다</b> — " +
+        "답 없이 뽑으면 적어 주신 말이 반영될 자리가 없습니다.</span></div>";
+  }
+
   /** 그 사실을 한 줄로. 다시 뽑기 버튼이 눌리는지와 같은 판단을 쓴다 —
    *  두 곳이 따로 판단하면 버튼은 눌리는데 글은 「아직」이라고 말한다. */
   function planChanged(p, s) {
@@ -752,7 +797,7 @@
         //   그렇다고 막지는 않는다 — 굴림이 나빠서 한 번 더 던지는 것은
         //   정당하다. 대신 **어느 쪽인지 말한다.** 말해 주지 않으면 사장님은
         //   적은 대로 바뀐 줄 아시고 누르게 된다.
-        (again ? planChanged(p, s) : "") +
+        (again ? planChanged(p, s) + takeWaiting(p, s) : "") +
         (again
           ? '<span class="lc-msg">아래 만든 것은 <b>그대로 남아 있습니다.</b> ' +
             '누르시면 그 위에 새로 뽑습니다 — 누르지 않으면 돈이 나가지 않습니다.</span>'
@@ -762,8 +807,11 @@
         // ★ 고쳐 달라고 하신 것이 계획에 반영되기 전에는 **못 누르게** 한다.
         //   누르면 같은 문장으로 같은 값이 또 나간다. 버튼을 없애지는 않는다 —
         //   없으면 「어디 갔지」가 되고, 회색으로 있으면 「아직」이 보인다.
+        // ★ 052 — 적어 주신 의견이 답을 받고 정해지기 전에도 못 누르게 한다.
+        //   계획이 바뀌었는지(planReady)와 **따로** 본다 — 계획은 내가 고칠 수
+        //   있지만 정하는 것은 사장님 몫이라, 둘은 다른 물음이다.
         '<button class="btn" type="button" data-lc="start"' + tag +
-        (again && !planReady(p, s) ? " disabled" : "") + ">" +
+        (again && (!planReady(p, s) || !takeSettled(p, s)) ? " disabled" : "") + ">" +
         (again ? (s === "anchors" ? "다시 만들기" : "다시 뽑기")
                : (s === "anchors" ? "제작 자료 만들기" : "영상 뽑기")) + "</button>" +
         "</div>" +
@@ -956,6 +1004,11 @@
   function assetDanTake(assetId, take) {
     return db.rpc("onecue_asset_dan_take", { p_asset_id: assetId, p_take: take })
       .then(rpcOk);
+  }
+  // 「이 답변대로 갑니다」 — 이때부터 다시 뽑기가 열린다 (052)
+  function assetSettle(assetId) {
+    return db.rpc("onecue_asset_settle",
+      { p_asset_id: assetId, p_by: "dan" }).then(rpcOk);
   }
 
   function stageStart(slug, step) { return rpc(slug, "onecue_stage_start", { p_step: step }); }
@@ -1889,19 +1942,87 @@
               "(값이 또 나갑니다) 또는 <b>이대로 승인</b>.</span></div>");
       }
 
-      /** 사장님이 누르기 전에 의견을 적는 칸. 저장은 생성과 따로 돈다. */
+      /** 의견 → 답변 → 결정. **이 순서가 곧 잠금이다.**
+       *
+       *  Dan 2026-09-22: 「그냥 일방적으로 내가 말한거 그대로 하는게 아니라
+       *  의견에 대한 너의 답변을 피드백 달고 뭔가 결정 난다음 재생성하는
+       *  단계가있으면 좋겟음 그 절차를 칸안에 넣어주라」
+       *
+       *  전에는 셋이 각각 다른 곳에 있었다 — 의견은 화면에, 답변은 채팅에,
+       *  계획 변경은 DB 에. 나중에 「그때 왜 그렇게 정했나」를 되짚으려면
+       *  세 군데를 맞춰 봐야 했다. 한 칸에 모은다. */
       function danTakeBox(f, m) {
         if (!canWrite) return "";
+        var take = m.dan_take || "";
+        var reply = m.our_reply || "";
+        var settled = !!m.settled_at;
+
+        // ① 아직 아무 말씀도 없을 때 — 적는 칸만
+        if (!take) return writeBox(f, m, false);
+
+        // ② 적으셨는데 답변이 아직일 때 — 다시 뽑기는 잠겨 있다
+        if (!reply) {
+          return '<div class="thread">' + step(1, "사장님 의견", "done") +
+            arrow() + step(2, "제작 쪽 답변", "now") + arrow() +
+            step(3, "정하기", "wait") +
+            '<p class="thread-now"><b>답변을 준비하고 있습니다.</b>' +
+            "<span>적어 주신 것을 하나씩 보고, 무엇에 동의하고 무엇을 어떻게 " +
+            "고칠지 여기에 답을 답니다. <b>그때까지 다시 뽑기는 잠겨 있습니다</b> — " +
+            "답 없이 뽑으면 적어 주신 말이 반영될 자리가 없습니다.</span></p>" +
+            writeBox(f, m, true) + "</div>";
+        }
+
+        // ③ 답변이 붙었고 아직 안 정하셨을 때 — 여기서 정하신다
+        if (!settled) {
+          return '<div class="thread">' + step(1, "사장님 의견", "done") +
+            arrow() + step(2, "제작 쪽 답변", "done") + arrow() +
+            step(3, "정하기", "now") +
+            '<div class="mytake reply"><b>제작 쪽 답변' +
+            (m.our_reply_at ? " · " + esc(when(m.our_reply_at)) : "") +
+            "</b><span>" + esc(reply) + "</span></div>" +
+            '<p class="thread-now"><b>이 답변대로 가시겠습니까.</b>' +
+            "<span>괜찮으시면 아래를 누르십시오. 그때 다시 뽑기가 열립니다. " +
+            "아니면 의견을 더 적어 주십시오 — 다시 답을 답니다.</span></p>" +
+            '<button class="btn" data-take-settle="' + esc(f.id) + '">' +
+            "이 답변대로 갑니다</button>" + writeBox(f, m, true) + "</div>";
+        }
+
+        // ④ 정해졌다 — 이제 다시 뽑기가 열린다
+        return '<div class="thread settled">' + step(1, "사장님 의견", "done") +
+          arrow() + step(2, "제작 쪽 답변", "done") + arrow() +
+          step(3, "정하기", "done") +
+          '<div class="mytake reply"><b>제작 쪽 답변</b><span>' +
+          esc(reply) + "</span></div>" +
+          '<p class="thread-ok"><b>정해졌습니다 · ' + esc(when(m.settled_at)) +
+          "</b><span>이제 <b>다시 뽑기</b>를 누르시면 이 답변대로 바뀐 문장으로 " +
+          "뽑습니다. 누르시면 값이 나갑니다.</span></p>" +
+          writeBox(f, m, true) + "</div>";
+      }
+
+      function step(n, label, state) {
+        return '<span class="thread-step s-' + state + '"><b>' + n + "</b>" +
+          esc(label) + "</span>";
+      }
+      function arrow() { return '<span class="thread-arrow">→</span>'; }
+
+      /** 적는 칸. 답변이 오간 뒤에는 「더 적기」로 접어 둔다. */
+      function writeBox(f, m, folded) {
         var has = !!m.dan_take;
-        return '<div class="takebox" data-take-form>' +
-          "<b>" + (has ? "의견 고쳐 쓰기" : "의견 적기") +
-          " — <i>적고 저장하신 뒤에 누르십시오. 저장만으로는 값이 나가지 않습니다</i></b>" +
+        var inner = '<div class="takebox" data-take-form>' +
+          (folded ? "" : "<b>의견 적기 — <i>적고 저장하신 뒤에 누르십시오. " +
+            "저장만으로는 값이 나가지 않습니다</i></b>") +
           '<textarea data-take-text rows="3" placeholder="' +
           "무엇이 잘못됐는지, 어떻게 했으면 하는지 적어 주십시오. " +
           '여러 건이면 줄을 나눠 적으셔도 됩니다.">' +
           esc(m.dan_take || "") + "</textarea>" +
           '<button class="ghost" data-take-save="' + esc(f.id) + '">' +
           (has ? "고쳐 저장" : "의견 저장") + "</button></div>";
+        if (!folded) return inner;
+        // ★ 고쳐 저장하면 답변과 결정이 풀린다 — DB 가 그렇게 한다(052).
+        //   여기서도 그 사실을 미리 말해 둔다.
+        return '<details class="take-more"><summary>의견 더 적기 · 고쳐 쓰기' +
+          " — 고쳐 저장하면 답변과 결정이 풀리고 다시 답을 답니다</summary>" +
+          inner + "</details>";
       }
     }
 
@@ -2551,6 +2672,20 @@
     //   지난 판은 **기록**이다. 찾아볼 때만 펼치면 된다. 그릴 때마다 닫는다.
     document.querySelectorAll("details.made-old[open]").forEach(function (d) {
       d.open = false;
+    });
+
+    // 「이 답변대로 갑니다」 — 돈은 안 나간다. 다시 뽑기를 **열어 줄 뿐**이다.
+    document.querySelectorAll("[data-take-settle]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var label = b.textContent;
+        b.disabled = true; b.textContent = "정하는 중…";
+        assetSettle(b.dataset.takeSettle)
+          .then(load)
+          .catch(function (e) {
+            b.disabled = false; b.textContent = label;
+            window.alert("정하지 못했습니다 — " + (e.message || e));
+          });
+      });
     });
 
     document.querySelectorAll("[data-take-save]").forEach(function (b) {

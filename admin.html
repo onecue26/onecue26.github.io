@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="style.css?v=1f228d76">
-<link rel="stylesheet" href="stage-render.css?v=needs-260922-v42">
+<link rel="stylesheet" href="stage-render.css?v=needs-260922-v43">
 <style>
 /* 관리자 화면 — 훑고 조작하는 곳이라 정보 밀도를 우선한다 */
 
@@ -544,6 +544,38 @@
 .takebox textarea:focus{outline:none;border-color:var(--cue)}
 .takebox button{justify-self:start}
 
+/* 의견 → 답변 → 결정. 지금 어디에 와 있는지가 한눈에 보여야 한다 */
+.thread{display:grid;gap:9px;margin-top:8px}
+.thread-step{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;
+  color:var(--faint)}
+.thread-step b{display:inline-flex;align-items:center;justify-content:center;
+  width:16px;height:16px;border-radius:50%;background:var(--sunk);
+  border:1px solid var(--rule);font-size:10px;font-weight:700}
+.thread-step.s-done{color:var(--live)}
+.thread-step.s-done b{background:var(--live-soft);border-color:var(--live);color:var(--live)}
+.thread-step.s-now{color:var(--cue);font-weight:700}
+.thread-step.s-now b{background:var(--cue);border-color:var(--cue);color:#fff}
+.thread-arrow{color:var(--faint);font-size:11px;margin:0 2px}
+.thread>.thread-step,.thread>.thread-arrow{display:inline-flex}
+.thread>.thread-step:first-child{margin-top:2px}
+/* 단계 줄은 한 줄로 흐르게 */
+.thread{grid-template-columns:auto auto auto auto auto 1fr;align-items:center}
+.thread>p,.thread>div,.thread>details,.thread>button{grid-column:1/-1}
+.thread-now,.thread-ok{display:grid;gap:3px;margin:0;padding:9px 11px;
+  border-radius:5px;font-size:12px;line-height:1.65}
+.thread-now{background:var(--cue-soft);border:1px solid var(--cue)}
+.thread-ok{background:var(--live-soft);border:1px solid var(--live)}
+.thread-now b,.thread-ok b{font-size:12.5px}
+.thread-now span,.thread-ok span{color:var(--ink)}
+.mytake.reply{border-style:solid;border-color:var(--rule)}
+.mytake.reply span{white-space:pre-wrap}
+.thread>button{justify-self:start}
+.take-more>summary{cursor:pointer;font-size:11.5px;color:var(--muted);
+  padding:4px 0;list-style:none}
+.take-more>summary::-webkit-details-marker{display:none}
+.take-more>summary::before{content:"▸ ";color:var(--faint)}
+.take-more[open]>summary::before{content:"▾ "}
+
 /* 지난 판 — 기록이지 할 일이 아니다. 정할 것을 주지 않는다 */
 .verdict .call.gone{color:var(--muted);font-style:normal}
 /* 고를 것이 하나뿐일 때 그 이유를 그 자리에서 말한다 */
@@ -629,11 +661,11 @@
 <script src="asset-access.js"></script>
 <!-- 폼 계약은 stage-executor.js 보다 먼저 온다. 계약이 없으면 검사가 닫히는 쪽으로 실패한다 -->
 <script src="stage-form-contract.js?v=contract-260921-v3"></script>
-<script src="stage-executor.js?v=needs-260922-v42"></script>
-<script src="credit-rates.js?v=needs-260922-v42"></script>
-<script src="ad-type-materials.js?v=needs-260922-v42"></script>
-<script src="material-gaps.js?v=needs-260922-v42"></script>
+<script src="stage-executor.js?v=needs-260922-v43"></script>
+<script src="credit-rates.js?v=needs-260922-v43"></script>
+<script src="ad-type-materials.js?v=needs-260922-v43"></script>
+<script src="material-gaps.js?v=needs-260922-v43"></script>
 <script src="shared-stage-renderers.js?v=stage-read-260921-v16"></script>
-<script src="admin.js?v=needs-260922-v42"></script>
+<script src="admin.js?v=needs-260922-v43"></script>
 </body>
 </html>
