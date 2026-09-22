@@ -1659,6 +1659,17 @@
     //   · 각각 설명 — 무엇이고 왜 만들었는지. 그게 없으면 보고도 판단이 안 된다.
     function assetList(p, step) {
       var want = step === "anchors" ? ["anchor"] : ["clip", "final"];
+      // ★ 판을 **버전으로 쌓는다.** 「이전 판 1개」가 아니라 v1·v2·v3… 이다 —
+      //   앞으로 더 나올 것이고, 무엇이 언제 왜 나왔는지 다 남아야 견줄 수 있다
+      //   (Dan 2026-09-22: 「버전을 붙여서 예전것들은 계속 쌓여서 볼수잇게」).
+      //   만든 차례가 곧 버전이다. 지우지 않으므로 번호가 비지 않는다.
+      var verOf = {};
+      (p.files || []).filter(function (f) { return want.indexOf(f.kind) >= 0; })
+        .sort(function (x, y) {
+          return String(x.created_at || "") < String(y.created_at || "") ? -1 : 1;
+        })
+        .forEach(function (f, i) { verOf[f.id] = i + 1; });
+
       var older = [];
       var mine = (p.files || []).filter(function (f) {
         if (want.indexOf(f.kind) < 0) return false;
@@ -1679,15 +1690,17 @@
       function oldBox() {
         if (!older.length) return "";
         var why = (SE().of(p, step) || {}).revision_note || "";
-        return '<details class="made-old"><summary>이전 판 ' + older.length +
-          "개 — 고쳐 달라고 하시기 전에 만든 것입니다</summary>" +
+        var names = older.map(function (f) { return "v" + verOf[f.id]; }).join(" · ");
+        return '<details class="made-old"><summary>지난 버전 ' + names +
+          " — 눌러서 펼치면 그대로 보실 수 있습니다</summary>" +
           (why ? '<div class="old-why"><b>고쳐 달라고 적으신 것</b><span>' +
             esc(why) + "</span></div>" : "") +
           '<div class="made">' + older.map(one).join("") + "</div></details>";
       }
       if (!mine.length) return oldBox();
       return '<div class="made"><span class="made-lbl">만든 것 ' + mine.length +
-        " · 눌러서 크게 · 영상은 두 번 누르십시오</span>" +
+        " (지금 v" + (verOf[mine[mine.length - 1].id] || mine.length) +
+        ") · 눌러서 크게 · 영상은 두 번 누르십시오</span>" +
         mine.map(one).join("") + "</div>" + oldBox();
 
       // 한 장을 그리는 법. 지금 것과 이전 판이 **같은 함수**를 쓴다 —
@@ -1707,7 +1720,7 @@
             }).join("") + "</dl>"
             : "";
           return '<figure class="made-one">' +
-            '<span class="made-n">' + (i + 1) + "</span>" +
+            '<span class="made-n">v' + (verOf[f.id] || (i + 1)) + "</span>" +
             (f.url
               ? (vid
                 ? '<video src="' + esc(f.url) + '" controls preload="metadata" ' +
@@ -1748,6 +1761,12 @@
           (m.my_take
             ? '<div class="mytake"><b>제작 쪽 의견</b><span>' +
               esc(m.my_take) + "</span></div>"
+            : "") +
+          // 사장님이 보시고 적어 주신 것도 같은 자리에 남긴다 — 다음 판을
+          // 만들 때 이 말이 근거가 된다
+          (m.dan_take
+            ? '<div class="mytake dan"><b>사장님 의견</b><span>' +
+              esc(m.dan_take) + "</span></div>"
             : "") +
           '<span class="call">보시고 정하십시오 — <b>다시 뽑기</b>(값이 또 나갑니다) ' +
           "또는 <b>이대로 승인</b>.</span></div>";
