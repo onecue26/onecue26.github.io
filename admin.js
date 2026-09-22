@@ -1425,10 +1425,53 @@
           'db/credit_rates.json</span>') + "</div>";
     }
 
+    // 아직 관리자에게 「결과」로 올릴 수 없는 것. 판단이 한 곳에만 있어야
+    // 화면 여러 군데가 서로 다른 말을 하지 않는다.
+    function held(f) {
+      var r = ((f.meta || {}).review || "");
+      return r === "blocked" || r === "ask";
+    }
+
     function paidStageBody(p, step) {
       if (p.step !== step) return "";
       var act = SE().actions(p, step, !!(p.stageResults && p.stageResults[step]));
-      return paidBody(p, step, act) + blockedNote(p, step) + assetList(p, step);
+      return paidBody(p, step, act) + askNote(p, step) + blockedNote(p, step) +
+        assetList(p, step);
+    }
+
+    // 물어볼 것이 남아 있다 — **누가 정할 것인지가 먼저다.**
+    //
+    // 제작 판단은 우리 것이다 (Dan: 「이런건 나한테 묻는게아니라 ai 니네가
+    // 한거니까 니네가 맞춰서 하는거지」). 그래서 ASK 는 기본이 우리 몫이고,
+    // 화면에는 **그 사실만** 알린다. Dan 이 눌러야 하는 것은 광고주의 사실
+    // 관계(제품 진실·의무 표기·브랜드)일 때뿐이다.
+    //
+    // ASK 가 열려 있으면 다음 유료 생성이 DB 에서 막힌다 (034). 화면이 조용히
+    // 있으면 「왜 안 나가지」가 되므로 멈춘 이유를 여기 적는다.
+    function askNote(p, step) {
+      var want = step === "anchors" ? ["anchor"] : ["clip", "final"];
+      var asked = (p.files || []).filter(function (f) {
+        return want.indexOf(f.kind) >= 0 && ((f.meta || {}).review || "") === "ask";
+      });
+      if (!asked.length) return "";
+      var m = asked[0].meta || {};
+      var who = m.ask_who || "us";
+      var mine = who === "us";
+      return '<div class="ask-note' + (mine ? " ours" : "") + '">' +
+        "<b>" + (mine ? "정해야 할 것이 있어 멈춰 있습니다"
+                      : "정해 주셔야 다음으로 갑니다") + "</b>" +
+        (m.asks ? '<span class="n">' + m.asks + "건</span>" : "") +
+        (m.why ? '<span class="why">' + esc(m.why) + "</span>" : "") +
+        '<span class="who">검토 · ' + esc(m.reviewer || "독립 검토") +
+        (mine ? " · 제작 쪽에서 정합니다" : " · 사장님께서 정하실 부분입니다") +
+        "</span>" +
+        (mine ? "" :
+          '<div class="ask-form"><textarea data-ask-note="' + esc(p.slug) +
+          '" rows="2" placeholder="무엇으로 정하는지 적어 주십시오 — 다음 판정의 근거가 됩니다"></textarea>' +
+          '<button class="btn" type="button" data-ask-answer="' + esc(p.slug) +
+          '">이렇게 정합니다</button>' +
+          '<span class="msg" data-ask-msg="' + esc(p.slug) + '"></span></div>') +
+        "</div>";
     }
 
     // 검수에서 걸려 다시 만드는 중이라는 것은 **숨기지 않는다.** 숨기면
@@ -1715,6 +1758,34 @@
         box.addEventListener("click", close);
         document.addEventListener("keydown", onKey);
         document.body.appendChild(box);
+      });
+    });
+    // ASK 에 답한다 — 답을 적어야 받는다. 무엇으로 정했는지가 판례다.
+    document.querySelectorAll("[data-ask-answer]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var slug = b.dataset.askAnswer;
+        var box = document.querySelector('[data-ask-note="' + slug + '"]');
+        var msg = document.querySelector('[data-ask-msg="' + slug + '"]');
+        var row = ROWS.filter(function (x) { return x.slug === slug; })[0];
+        if (!box || !row) return;
+        if (!box.value.trim()) {
+          msg.className = "msg err";
+          msg.textContent = "무엇으로 정하는지 적어 주십시오.";
+          return;
+        }
+        var label = b.textContent;
+        b.disabled = true; b.textContent = "적는 중…";
+        db.rpc("onecue_ask_answered",
+               { p_project_id: row.id, p_answer: box.value.trim() })
+          .then(function (r) {
+            if (r.error) {
+              b.disabled = false; b.textContent = label;
+              msg.className = "msg err";
+              msg.textContent = "적지 못했습니다 — " + r.error.message;
+              return;
+            }
+            load();
+          });
       });
     });
     document.querySelectorAll("[data-mail]").forEach(function (b) {
@@ -2372,12 +2443,14 @@
               // ★ 독립 검수에서 걸린 것은 **결과가 아니다.** 이것을 결과로 세면
               //   검수가 막아 둔 것에 승인 버튼이 뜬다 — 실제로 그랬다.
               //   관리자는 걸린 것을 승인할 수 있어서는 안 된다.
+              // ★ 걸린 것(blocked)과 **물어볼 것이 남은 것(ask)** 은 결과가 아니다.
+              //   결과로 세면 승인 버튼이 뜨고, 관리자가 아직 안 정해진 것을
+              //   승인하게 된다. ASK 는 답하기 전까지 다음이 없다.
               anchors: p.files.some(function (f) {
-                return f.kind === "anchor" && ((f.meta || {}).review || "") !== "blocked";
+                return f.kind === "anchor" && !held(f);
               }),
               video: p.files.some(function (f) {
-                return (f.kind === "clip" || f.kind === "final") &&
-                  ((f.meta || {}).review || "") !== "blocked";
+                return (f.kind === "clip" || f.kind === "final") && !held(f);
               }),
             };
             counts.forEach(function (t, i) {
