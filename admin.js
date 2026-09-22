@@ -1962,9 +1962,9 @@
 
         // ② 적으셨는데 답변이 아직일 때 — 다시 뽑기는 잠겨 있다
         if (!reply) {
-          return '<div class="thread">' + step(1, "사장님 의견", "done") +
-            arrow() + step(2, "제작 쪽 답변", "now") + arrow() +
-            step(3, "정하기", "wait") +
+          return '<div class="thread">' + threadStep(1, "사장님 의견", "done") +
+            arrow() + threadStep(2, "제작 쪽 답변", "now") + arrow() +
+            threadStep(3, "정하기", "wait") +
             '<p class="thread-now"><b>답변을 준비하고 있습니다.</b>' +
             "<span>적어 주신 것을 하나씩 보고, 무엇에 동의하고 무엇을 어떻게 " +
             "고칠지 여기에 답을 답니다. <b>그때까지 다시 뽑기는 잠겨 있습니다</b> — " +
@@ -1974,9 +1974,9 @@
 
         // ③ 답변이 붙었고 아직 안 정하셨을 때 — 여기서 정하신다
         if (!settled) {
-          return '<div class="thread">' + step(1, "사장님 의견", "done") +
-            arrow() + step(2, "제작 쪽 답변", "done") + arrow() +
-            step(3, "정하기", "now") +
+          return '<div class="thread">' + threadStep(1, "사장님 의견", "done") +
+            arrow() + threadStep(2, "제작 쪽 답변", "done") + arrow() +
+            threadStep(3, "정하기", "now") +
             '<div class="mytake reply"><b>제작 쪽 답변' +
             (m.our_reply_at ? " · " + esc(when(m.our_reply_at)) : "") +
             "</b><span>" + esc(reply) + "</span></div>" +
@@ -1988,9 +1988,9 @@
         }
 
         // ④ 정해졌다 — 이제 다시 뽑기가 열린다
-        return '<div class="thread settled">' + step(1, "사장님 의견", "done") +
-          arrow() + step(2, "제작 쪽 답변", "done") + arrow() +
-          step(3, "정하기", "done") +
+        return '<div class="thread settled">' + threadStep(1, "사장님 의견", "done") +
+          arrow() + threadStep(2, "제작 쪽 답변", "done") + arrow() +
+          threadStep(3, "정하기", "done") +
           '<div class="mytake reply"><b>제작 쪽 답변</b><span>' +
           esc(reply) + "</span></div>" +
           '<p class="thread-ok"><b>정해졌습니다 · ' + esc(when(m.settled_at)) +
@@ -1999,7 +1999,16 @@
           writeBox(f, m, true) + "</div>";
       }
 
-      function step(n, label, state) {
+      // ★★ 이름을 threadStep 으로 둔다. 처음에 `step` 이라고 지었다가
+      //   **감싸는 assetList(p, step) 의 매개변수를 가려 버렸다.**
+      //   함수 선언은 같은 스코프의 매개변수를 덮어쓴다. 그래서 step 이
+      //   "video" 대신 이 함수가 됐고, 그 순간
+      //     · superseded(p, step, f) 가 늘 거짓 → 지난 판이 되살아나고
+      //     · want = step === "anchors" 가 늘 거짓 → 제작 자료 칸에 영상이 떴다
+      //   화면은 멀쩡해 보였고 시험 210개도 다 통과했다. 코드를 읽어서는 못
+      //   찾았고, 화면에 「이 목록을 그린 step 이 무엇이냐」를 박아 물어보고서야
+      //   나왔다 (checks/where_boxes.cjs).
+      function threadStep(n, label, state) {
         return '<span class="thread-step s-' + state + '"><b>' + n + "</b>" +
           esc(label) + "</span>";
       }
