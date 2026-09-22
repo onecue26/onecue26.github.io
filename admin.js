@@ -1425,13 +1425,6 @@
           'db/credit_rates.json</span>') + "</div>";
     }
 
-    // 아직 관리자에게 「결과」로 올릴 수 없는 것. 판단이 한 곳에만 있어야
-    // 화면 여러 군데가 서로 다른 말을 하지 않는다.
-    function held(f) {
-      var r = ((f.meta || {}).review || "");
-      return r === "blocked" || r === "ask";
-    }
-
     function paidStageBody(p, step) {
       if (p.step !== step) return "";
       var act = SE().actions(p, step, !!(p.stageResults && p.stageResults[step]));
@@ -1607,6 +1600,19 @@
   // 브라우저 팝업은 쓰지 않는다 — 권한을 물어야 하고, 탭이 살아 있어야 하고,
   // 한 번 거절하면 조용히 안 온다. 화면 안에서 보이는 것이 확실하다.
   var SEEN_KEY = "onecue.admin.seen";
+
+  // 아직 관리자에게 「결과」로 올릴 수 없는 것 — 검수에서 걸렸거나(blocked),
+  // 정해야 할 것이 남았거나(ask). 판단이 한 곳에만 있어야 화면 여러 군데가
+  // 서로 다른 말을 하지 않는다.
+  //
+  // ★ 여기가 **바깥 자리**여야 한다. 처음엔 card() 안에 두고 load() 에서
+  //   불렀는데, 범위가 달라서 render 가 ReferenceError 로 죽었다. 그런데
+  //   그 오류가 load() 의 catch 로 떨어져 화면에는 「불러오지 못했습니다」만
+  //   떴다 — 조회가 실패한 것처럼 보였다. 아래 catch 도 같이 고쳤다.
+  function held(f) {
+    var r = ((f.meta || {}).review || "");
+    return r === "blocked" || r === "ask";
+  }
 
   function lastSeen() {
     try { return localStorage.getItem(SEEN_KEY) || ""; } catch (e) { return ""; }
@@ -2522,8 +2528,14 @@
           setConn("ok", "새 의뢰 " + ROWS.filter(function (x) { return x.isNew; }).length);
           render();
         });
-      }).catch(function () {
-        accessNotice('불러오지 못했습니다', '잠시 후 새로고침해 주세요.', false);
+      }).catch(function (e) {
+        // ★ 이유를 삼키지 않는다. 이 catch 는 조회 실패만 잡는 게 아니라
+        //   **그리는 중에 난 오류까지** 잡는다. 실제로 render 안의
+        //   ReferenceError 가 여기로 떨어져 화면에는 「불러오지 못했습니다」만
+        //   떴고, 조회가 죽은 것처럼 보였다. 이유를 못 보면 엉뚱한 데를 판다.
+        if (window.console) console.error("admin load/render 실패", e);
+        accessNotice('불러오지 못했습니다',
+          '잠시 후 새로고침해 주세요. (' + String((e && e.message) || e) + ')', false);
       });
   }
 
