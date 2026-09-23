@@ -45,7 +45,8 @@
 
   // 진행 막대 — 9칸 중 몇 칸까지 왔나
   function bar(step) {
-    var at = STEP_IDX[step] == null ? 0 : STEP_IDX[step];
+    // 닫은 프로젝트(068)는 전부 채운다
+    var at = step === "__done" ? STEPS.length : (STEP_IDX[step] == null ? 0 : STEP_IDX[step]);
     return '<span class="bar">' + STEPS.map(function (s, i) {
       var cls = i < at ? "done" : (i === at ? "now" : "");
       return '<i class="' + cls + '" title="' + esc(s[1]) + '"></i>';
@@ -55,7 +56,8 @@
   function card(r) {
     var title = [r.brand, r.product].filter(Boolean).join(" ") || r.slug;
     var waiting = r.state === "ready" && GATES[r.step];
-    var badge = waiting
+    var badge = r.state === "done" ? '<span class="tag calm">완료</span>'
+      : waiting
       ? '<span class="tag hold">' + esc(GATES[r.step]) + " 대기</span>"
       : '<span class="tag calm">' + esc(STEP_NAME[r.step] || r.step) + "</span>";
     var asp = (r.aspects && r.aspects.length) ? r.aspects.join(" / ") : (r.aspect || "");
@@ -68,7 +70,7 @@
     return '<a class="proj" href="project.html?slug=' + encodeURIComponent(r.slug) + '">' +
       '<div class="proj-main"><div class="name">' + esc(title) + "</div>" +
       '<div class="meta mono">' + esc(meta) + "</div>" +
-      bar(r.step) + "</div>" +
+      bar(r.state === "done" ? "__done" : r.step) + "</div>" +
       '<div class="proj-side">' + badge + '<span class="go">열기 →</span></div></a>';
   }
 
@@ -107,8 +109,8 @@
           return '<a class="proj" href="project.html?slug=' + encodeURIComponent(p.slug) + '">' +
             '<div class="proj-main"><div class="name">' +
             esc([p.brand, p.product].filter(Boolean).join(" ")) + "</div>" +
-            '<div class="meta mono">' + esc(STEP_NAME[p.step] || p.step) + "</div>" +
-            bar(p.step) + "</div><div class=\"proj-side\">" +
+            '<div class="meta mono">' + (p.state === "done" ? "완료" : esc(STEP_NAME[p.step] || p.step)) + "</div>" +
+            bar(p.state === "done" ? "__done" : p.step) + "</div><div class=\"proj-side\">" +
             (waiting ? '<span class="tag hold">' + esc(GATES[p.step]) + " 대기</span>" : "") +
             '<span class="go">열기 →</span></div></a>';
         }).join("");

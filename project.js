@@ -100,6 +100,8 @@
   // 「제작 설계 진행 중」뿐이다. 그때 막대만 「콘티 확인」으로 가 있으면
   // 「확인하라면서 볼 게 없다」가 된다. 막대를 볼 것에 맞춘다.
   function clientNow() {
+    // 프로젝트를 닫으면(068) 막대 전부 「완료」 — 마지막 칸이 빨갛게 남아 진행 중처럼 보였다
+    if (P && P.state === "done") return CLIENT_FLOW.length;
     var i = clientAt(P ? P.step : "brief");
     var board = CLIENT_FLOW.findIndex
       ? CLIENT_FLOW.findIndex(function (s) { return s.key === "board"; })
@@ -786,7 +788,7 @@
       }
       if (auth.error) throw auth.error;
       LOGGED_IN = true;
-      return db.from("projects").select("id,client_id,slug,brand,product,running_sec,cut_count,aspect,aspects,channels,step,state,ad_type,ad_type_by").eq("slug", slug).maybeSingle();
+      return db.from("projects").select("id,client_id,slug,brand,product,running_sec,cut_count,aspect,aspects,channels,step,state,ad_type,ad_type_by,closed_at").eq("slug", slug).maybeSingle();
     })
       .then(function (r) {
         if (!r) return;
@@ -839,7 +841,10 @@
               ((P.channels && P.channels.length) ? " · " + esc(P.channels.join(" ")) : "") +
               "</div>" +
               bar(P.step) + "</div></div>" +
-            secGate(P, x[5].data) + flow(x) +
+            (P.state === "done"
+              ? '<div class="gate done"><div class="txt"><b>프로젝트가 완료되었습니다</b><small>' +
+                esc(String(P.closed_at || "").slice(0, 10)) + " · 함께해 주셔서 감사합니다. 완성본은 아래 납품 칸에서 언제든 받으실 수 있습니다.</small></div></div>"
+              : secGate(P, x[5].data)) + flow(x) +
             '<footer><span><a href="index.html">← 목록</a></span>' +
             '<span class="mono">' + new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 16) +
             "</span></footer>";
