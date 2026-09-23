@@ -383,8 +383,11 @@
       // ★ 상태 글자를 박아 두지 않는다. 「진행 중」으로 고정돼 있어서 영상
       //   제작 중인 건에도 제작 설계가 「진행 중」이라고 떴다 (Dan 2026-09-23).
       box("design", "제작 설계", now.design ? "진행 중" : "완료",
-        (!boardOpen && shown("develop")) ? secDesigning() : "", now.design),
-      box("board", "콘티 확인", "확인하실 차례",
+        // 지난 뒤에도 칸은 남긴다 — 콘티가 뜨자 이 칸이 통째로 사라졌다
+        now.design ? secDesigning()
+          : (shown("develop") ? '<p class="muted">제작 설계를 마쳤습니다. ' +
+            "설계한 컷은 아래 콘티에서 보실 수 있습니다.</p>" : ""), now.design),
+      box("board", "콘티 확인", now.board ? "확인하실 차례" : "확인 완료",
         boardOpen ? secBoard(assets) + secCuts(cuts, assets) : "", now.board),
       box("making", "영상 제작", "진행 중",
         (now.making && !HAS_FINAL)
