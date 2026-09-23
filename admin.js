@@ -614,7 +614,7 @@
           // ★ 간단한 「누가 맡습니까」가 떠 있으면 옛 선택 양식은 띄우지 않는다 —
           //   두 개가 떴다 (Dan 09-23: 「아래쪽이 더맘에드는데 … 심플하게 나오니깐」)
           // 아직 오지 않은 단계에도 옛 선택 양식이 떴다 — 고르기는 그 단계에 들어와서
-          (bact || act || SE().isPaid(s.key) || status === "upcoming" || s.key === "deliver" ? "" : execPicker(p, s.key)) +
+          (bact || act || SE().isPaid(s.key) || status === "upcoming" || s.key === "deliver" || s.key === "brief" || s.key === "facts" ? "" : execPicker(p, s.key)) +
           deliverBox(p, s.key) +
           (s.key === "facts" ? needsPanel(p) : "") +
           (status === "upcoming" ? ''
@@ -1489,8 +1489,12 @@
         '누가 진행할지 고르기 전까지 작업이 시작되지 않습니다</span>';
     } else if (SE().waiting(p, p.step)) {
       productionAction = '<span class="progress-state wait">담당자 진행 — 결과 등록 대기</span>';
+    } else if (p.step === "brief" && p.productionEnrolled && p.n_facts) {
+      // 제품·자료 확인 결과는 올라왔는데 기획 초안(전략·콘셉트)을 만들 쪽이 멈춰 있다 (09-23 환타)
+      productionAction = '<span class="progress-state wait">제품·자료 확인 결과 등록됨 · 전략·콘셉트 초안 대기 — ' +
+        '초안을 만드는 제작 세션이 멈춰 있으면 여기서 멈춥니다</span>';
     } else {
-      productionAction = '<span class="progress-state">현재 절차에 따라 진행 중입니다</span>';
+      productionAction = '<span class="progress-state">' + esc((STEP_NAME[p.step] || p.step)) + ' 진행 중</span>';
     }
 
     // ★ 광고주가 정한 것 — 우리에게 보낸 유일한 말이다. 조용히 단계만 넘어가면
@@ -1544,10 +1548,7 @@
     // 의뢰 원문 — 관리자가 제일 먼저 읽어야 할 것이라 카드 안에 그대로 편다
     var said = p.brief_raw
       ? '<div class="said"><span class="lbl">광고주가 쓴 것</span>' +
-        esc(p.brief_raw) +
-        (p.brief_goal ? '<span class="sub">목표 · ' + esc(p.brief_goal) + "</span>" : "") +
-        (p.brief_target ? '<span class="sub">대상 · ' + esc(p.brief_target) + "</span>" : "") +
-        "</div>"
+        esc(p.brief_raw) + "</div>"   // 목표·대상은 아래 「의뢰 조건」에만 (09-23 두 번 보였다)
       : "";
 
     var request = (p.job && p.job.request) || {};
@@ -3745,7 +3746,7 @@
     el("stamp").textContent = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 16);
 
     return db.from("projects")
-      .select("id,slug,brand,product,step,state,running_sec,cut_count,aspects,created_at,ad_type,ad_type_by,render_mode,render_plan,render_mode_by,render_mode_at,closed_at,closed_by")
+      .select("id,slug,brand,product,step,state,running_sec,cut_count,aspects,created_at,ad_type,ad_type_by,render_mode,render_plan,render_mode_by,render_mode_at,closed_at,closed_by,channels")
       // ★ render_mode_at 을 안 읽어 오면 「수정사항 적용 완료」가 영원히
       //   안 뜬다 — 계획이 언제 손봐졌는지를 모르니 늘 「아직」이 되고,
       //   다시 뽑기 버튼이 계속 잠긴 채로 남는다. 화면이 쓰는 칸은
