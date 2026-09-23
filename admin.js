@@ -1482,11 +1482,11 @@
             esc(p.slug) + '">AI 제작 시작</button>'
           : '<span class="progress-state">제작 시작은 관리자 계정에서 누릅니다</span>';
       }
-    } else if (SE().awaitingChoice(p, p.step)) {
+    } else if (SE().awaitingChoice(p, p.step) && ["facts", "strategy", "concepts"].indexOf(p.step) < 0) {   // 기획 단계는 아래 두 갈래 선택이 대신한다
       // 고르기 전에는 작업이 하나도 만들어지지 않았다. 카드 맨 위에서 바로 보이게 한다
       productionAction = '<span class="progress-state pick">실행 주체 선택 대기 — ' +
         '누가 진행할지 고르기 전까지 작업이 시작되지 않습니다</span>';
-    } else if (SE().waiting(p, p.step)) {
+    } else if (SE().waiting(p, p.step) && ["facts", "strategy", "concepts"].indexOf(p.step) < 0) {
       productionAction = '<span class="progress-state wait">담당자 진행 — 결과 등록 대기</span>';
     } else if (p.job && p.job.request && p.job.request.plan) {
       // AI 가 기획을 쓰는 중 (074 · plan_writer.py) — 무엇을 쓰는지 갈래대로 말한다
@@ -2674,9 +2674,10 @@
       //   그걸 누르신 것이 맞다. 없던 것은 다음으로 보내는 버튼이다.
       brief: '<div class="stage-content">' + said + requirements + clientReplies(p) + clientFiles(p) +
         (p.step === "brief" ? productionAction : "") + '</div>',
-      facts: factsBody,
-      strategy: strategyBody,
-      concepts: conceptReview + check,
+      // 기획 두 갈래(074) — 전략·콘셉트 칸에도 「누가 맡습니까」를 그 칸 안에 그린다
+      facts: factsBody + (p.step === "facts" ? productionAction : ""),
+      strategy: strategyBody + (p.step === "strategy" ? productionAction : ""),
+      concepts: (p.step === "concepts" && !(p.concepts && p.concepts.length) ? productionAction : "") + conceptReview + check,
       develop: developBody,
       // 새 흐름이 도는 동안에는 「컷 설계 보기」 링크를 띄우지 않는다 —
       // 검수할 컷 목록이 바로 아래 펼쳐져 있는데 같은 곳으로 가는 링크가 또 있으면
