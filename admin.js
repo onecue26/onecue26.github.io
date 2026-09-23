@@ -1489,17 +1489,36 @@
     } else if (SE().waiting(p, p.step)) {
       productionAction = '<span class="progress-state wait">담당자 진행 — 결과 등록 대기</span>';
     } else if (p.job && p.job.request && p.job.request.plan) {
-      // 기획 시작을 눌렀다 — 작업기가 전략 + 콘셉트 5안을 쓰는 중 (072 · plan_writer.py)
-      productionAction = '<span class="progress-state working st-run">기획 초안 쓰는 중 — 전략 + 콘셉트 5안 · 끝나면 콘셉트 검토로 넘어갑니다</span>';
+      // AI 가 기획을 쓰는 중 (074 · plan_writer.py) — 무엇을 쓰는지 갈래대로 말한다
+      var rq = p.job.request;
+      productionAction = '<span class="progress-state working st-run">' + (rq.strategy_only
+        ? "AI가 전략 설계를 쓰는 중 — 끝나면 콘셉트 5안을 누가 쓸지 고릅니다"
+        : rq.keep_strategy
+          ? "AI가 콘셉트 5안을 쓰는 중 — 정해진 전략 그대로 · 끝나면 콘셉트 검토로 넘어갑니다"
+          : "AI가 전략 + 콘셉트 5안을 쓰는 중 — 끝나면 콘셉트 검토로 넘어갑니다") + "</span>";
     } else if ((p.step === "brief" || p.step === "facts") && p.productionEnrolled && p.n_facts) {
-      // 의뢰 확정 → 기획 시작 (072). 광고주 답이 반영된 조건이 함께 넘어간다 (Dan 09-24)
-      // ★ 콘셉트가 나오기 전에 누가 맡을지 고른다 (Dan 09-24) — AI 면 작업기가 5안을 쓰고,
-      //   사람이면 양식과 작성 안내만 준다. 둘 다 콘셉트 검토로 모인다.
+      // 의뢰 확정 → 전략 설계 (074). 전략·콘셉트 각각 AI / 사람을 고른다 (Dan 09-24 두 갈래)
       productionAction = canWrite
-        ? '<div class="plan-start"><b>콘셉트 — 누가 맡습니까</b>' +
-          '<div class="lc-row"><button class="btn" type="button" data-plan-start="' + esc(p.id) + '">AI에게 맡기기</button>' +
-          '<button class="btn ghost" type="button" data-plan-human="' + esc(p.id) + '">사람이 직접 쓰기</button></div>' +
-          '<span>AI: 광고주 답 조건을 반영해 전략과 콘셉트 5안을 씁니다 · 사람: 아래 양식으로 씁니다</span></div>' +
+        ? '<div class="plan-start"><b>의뢰 확정</b>' +
+          '<button class="btn" type="button" data-brief-confirm="' + esc(p.id) + '">의뢰 확정 → 전략 설계로</button>' +
+          '<span>다음 칸에서 전략을 AI가 쓸지 사람이 쓸지 고릅니다</span></div>'
+        : '<span class="progress-state wait">의뢰 확정 대기</span>';
+    } else if (p.step === "strategy" && p.state !== "running") {
+      productionAction = canWrite
+        ? '<div class="plan-start"><b>전략 설계 — 누가 맡습니까</b>' +
+          '<div class="lc-row"><button class="btn" type="button" data-plan-start="' + esc(p.id) + '" data-plan-what="strategy">AI에게 맡기기</button>' +
+          '<button class="btn ghost" type="button" data-toggle-form="ms-' + esc(p.id) + '">사람이 직접 쓰기</button></div>' +
+          '<span>AI: 광고주 답 조건을 반영해 전략만 씁니다 · 사람: 아래 양식 — 어느 쪽이든 다음 칸에서 콘셉트 5안을 누가 쓸지 다시 고릅니다</span></div>' +
+          manualStrategyForm(p)
+        : '<span class="progress-state wait">전략 설계 담당 선택 대기</span>';
+    } else if (p.step === "concepts" && !(p.concepts && p.concepts.length)) {
+      productionAction = canWrite
+        ? strategySummary(p) +
+          '<div class="plan-start"><b>콘셉트 5안 — 누가 맡습니까</b>' +
+          '<div class="lc-row"><button class="btn" type="button" data-plan-start="' + esc(p.id) + '" data-plan-what="concepts">AI에게 맡기기</button>' +
+          '<button class="btn ghost" type="button" data-toggle-form="mc-' + esc(p.id) + '">사람이 직접 쓰기</button>' +
+          '<button class="btn ghost" type="button" data-back-strategy="' + esc(p.id) + '">전략부터 다시</button></div>' +
+          '<span>AI: 위 전략을 그대로 받아 5안을 씁니다 · 사람: 아래 양식으로 씁니다</span></div>' +
           manualConceptForm(p)
         : '<span class="progress-state wait">콘셉트 담당 선택 대기</span>';
     } else {
@@ -1671,7 +1690,11 @@
         '<h3>콘셉트 5안</h3><p>' + (atConceptStage
           ? "추천은 참고값입니다. 다섯 방향의 차이와 위험을 확인한 뒤 광고주에게 보내세요."
           : "이 프로젝트에서 실제로 제안하고 선택한 콘셉트 기록입니다.") + '</p></div>' +
-        strategyLine + conceptList(p.concepts) + replanBox + '</section>';
+        strategyLine + conceptList(p.concepts) + replanBox +
+        (atConceptStage && canWrite && !p.concepts.some(function (c) { return c.is_chosen; })
+          ? '<div class="replan-box"><b>전략부터 다시</b><span>전략 설계로 돌아가 AI / 사람을 다시 고릅니다. 새 전략을 올리면 지금 5안은 지워집니다.</span>' +
+            '<button class="btn ghost" type="button" data-back-strategy="' + esc(p.id) + '">전략 설계로 돌아가기</button></div>'
+          : "") + '</section>';
     }
 
     // 1차 검수 — 정지점에 와 있으면 우리가 먼저 보고 광고주에게 넘긴다.
@@ -1895,6 +1918,37 @@
     /** 광고주가 올린 자료를 그림으로 — 글자(「제품 사진 1개」)만 보여서 무엇이 왔는지 몰랐다 (09-23 환타).
      *  누르면 크게(data-big). 어떤 종류가 광고주 몫인지는 계약(ad-type-materials.js)이 정한다. */
     /** 광고주가 메시지로 보낸 답 — 의뢰 내용에 붙는다 (Dan 09-23 「의뢰 접수 부분에 내용이 업데이트되야지」) */
+    /** 정해진 전략 — 콘셉트를 누가 쓰든 이걸 받아 쓴다 (074) */
+    function strategySummary(p) {
+      var st = p.strategy;
+      if (!st) return "";
+      var row = function (k, v) { return v ? '<span><b>' + k + '</b> ' + esc(v) + '</span>' : ""; };
+      return '<div class="ms-summary"><div class="ms-by">전략 설계 · ' + (st.written_by === "human" ? "사람이 씀" : "AI가 씀") + '</div>' +
+        row("핵심 메시지", st.one_message) + row("인사이트", st.insight) + row("강점(USP)", st.usp) +
+        row("톤", st.tone) + row("방향·그 외", st.direction) + "</div>";
+    }
+
+    /** 사람이 전략을 쓰는 양식 (074). 있던 전략이 있으면 채워 둔다 — 고쳐 쓰기 쉽게. */
+    function manualStrategyForm(p) {
+      var st = p.strategy || {};
+      var f = function (k, ph, rows) {
+        return rows
+          ? '<textarea data-ms="' + k + '" rows="' + rows + '" placeholder="' + esc(ph) + '">' + esc(st[k] || "") + "</textarea>"
+          : '<input data-ms="' + k + '" placeholder="' + esc(ph) + '" value="' + esc(st[k] || "") + '">';
+      };
+      return '<div class="mc-form" id="ms-' + esc(p.id) + '" hidden>' +
+        '<div class="mc-guide"><b>쓰는 법</b>' +
+        "<span>· 콘셉트 5안이 이걸 그대로 받아 씁니다 — AI가 쓰든 사람이 쓰든</span>" +
+        "<span>· 핵심 메시지·인사이트·방향 중 하나는 꼭. 나머지는 비워도 됩니다</span>" +
+        "<span>· 가진 자료 안에서 — 광고주에게 새 자료를 요구하는 방향은 쓰지 않습니다</span></div>" +
+        f("one_message", "핵심 메시지 — 이 광고가 남길 한마디") +
+        f("insight", "인사이트 — 누구의 어떤 순간을 건드리나", 2) +
+        f("usp", "강점(USP) — 이 제품만 줄 수 있는 것") +
+        f("tone", "톤 — 예: 유쾌하고 시원한, 과장된 코믹") +
+        f("direction", "방향·그 외 — 꼭 넣을 것, 피할 것, 참고할 결", 3) +
+        '<button class="btn" type="button" data-ms-save="' + esc(p.id) + '">전략 올리기 → 콘셉트 5안</button></div>';
+    }
+
     /** 사람이 콘셉트를 쓰는 양식 (073). 쓰는 법 안내를 같이 둔다. */
     function manualConceptForm(p) {
       var one = function (i) {
@@ -3191,19 +3245,49 @@
           .catch(function (e) { b.disabled = false; b.textContent = "광고주에게 보내기"; window.alert("보내지 못했습니다 — " + (e.message || e)); });
       });
     });
+    document.querySelectorAll("[data-brief-confirm]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        b.disabled = true; b.textContent = "넘기는 중…";
+        db.rpc("onecue_brief_confirm", { p_project_id: b.dataset.briefConfirm })
+          .then(function (r) { if (r.error) throw r.error; return load(); })
+          .catch(function (e) { b.disabled = false; b.textContent = "의뢰 확정 → 전략 설계로"; window.alert("넘기지 못했습니다 — " + (e.message || e)); });
+      });
+    });
     document.querySelectorAll("[data-plan-start]").forEach(function (b) {
       b.addEventListener("click", function () {
-        if (!window.confirm("의뢰를 확정하고 기획(전략 + 콘셉트 5안)을 시작합니다. 광고주 답에서 정리한 조건이 함께 넘어갑니다.")) return;
+        var what = b.dataset.planWhat === "concepts" ? "위 전략을 그대로 받아 콘셉트 5안을" : "전략 설계를";
+        if (!window.confirm("AI가 " + what + " 씁니다. 광고주 답에서 정리한 조건이 함께 넘어갑니다.")) return;
         b.disabled = true; b.textContent = "시작하는 중…";
         db.rpc("onecue_plan_start", { p_project_id: b.dataset.planStart })
           .then(function (r) { if (r.error) throw r.error; return load(); })
-          .catch(function (e) { b.disabled = false; b.textContent = "의뢰 확정 → 기획 시작"; window.alert("시작하지 못했습니다 — " + (e.message || e)); });
+          .catch(function (e) { b.disabled = false; b.textContent = "AI에게 맡기기"; window.alert("시작하지 못했습니다 — " + (e.message || e)); });
       });
     });
-    document.querySelectorAll("[data-plan-human]").forEach(function (b) {
+    document.querySelectorAll("[data-toggle-form]").forEach(function (b) {
       b.addEventListener("click", function () {
-        var f = document.getElementById("mc-" + b.dataset.planHuman);
+        var f = document.getElementById(b.dataset.toggleForm);
         if (f) f.hidden = !f.hidden;
+      });
+    });
+    document.querySelectorAll("[data-back-strategy]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (!window.confirm("전략 설계로 돌아갑니다. 전략을 새로 올리면 지금 콘셉트는 지워집니다.")) return;
+        b.disabled = true;
+        db.rpc("onecue_back_to_strategy", { p_project_id: b.dataset.backStrategy })
+          .then(function (r) { if (r.error) throw r.error; return load(); })
+          .catch(function (e) { b.disabled = false; window.alert("돌아가지 못했습니다 — " + (e.message || e)); });
+      });
+    });
+    document.querySelectorAll("[data-ms-save]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var id = b.dataset.msSave, form = document.getElementById("ms-" + id), v = {};
+        form.querySelectorAll("[data-ms]").forEach(function (x) { v[x.dataset.ms] = (x.value || "").trim(); });
+        if (!v.one_message && !v.insight && !v.direction) { window.alert("핵심 메시지·인사이트·방향 중 하나는 써 주십시오."); return; }
+        b.disabled = true; b.textContent = "올리는 중…";
+        db.rpc("onecue_strategy_manual", { p_project_id: id, p_insight: v.insight, p_one_message: v.one_message,
+          p_usp: v.usp, p_tone: v.tone, p_direction: v.direction })
+          .then(function (r) { if (r.error) throw r.error; return load(); })
+          .catch(function (e) { b.disabled = false; b.textContent = "전략 올리기 → 콘셉트 5안"; window.alert("올리지 못했습니다 — " + (e.message || e)); });
       });
     });
     document.querySelectorAll("[data-mc-save]").forEach(function (b) {
@@ -3995,7 +4079,7 @@
             .in("project_id", ids).order("spent_at"),
           db.from("product_facts").select("project_id,facts,label_text,claims,product_lock,device_note")
             .in("project_id", ids),
-          db.from("strategies").select("project_id,insight,insight_flip,usp,one_message,tone")
+          db.from("strategies").select("project_id,insight,insight_flip,usp,one_message,tone,direction,written_by")
             .in("project_id", ids),
           // axis·payoff·is_chosen 이 빠져 있었다. 그래서 고른 안을 전체폭으로 펼치는
           // 배치가 한 번도 걸리지 않았고(is_chosen 이 늘 undefined), 카드의 「이렇게
