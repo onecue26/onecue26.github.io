@@ -1881,6 +1881,26 @@
     /** 납품 칸의 원가 명세서 — **실패한 것까지** 결제 한 건 한 건, 단계별 소계, 총계.
      *  Dan 09-23: 「그게 바로 원가거든」 「명세서처럼 제대로 읽히도록 세세하게」.
      *  합계는 힉스필드 결제 내역과 같아야 한다(RUSH 271cr 대조 완료). 원화는 확정 단가가 없으면 추정. */
+    /** 광고주가 올린 자료를 그림으로 — 글자(「제품 사진 1개」)만 보여서 무엇이 왔는지 몰랐다 (09-23 환타).
+     *  누르면 크게(data-big). 어떤 종류가 광고주 몫인지는 계약(ad-type-materials.js)이 정한다. */
+    function clientFiles(p) {
+      var spec = window.ONECUE_AD_TYPE_MATERIALS || {};
+      var mine = (p.files || []).filter(function (f) {
+        var k = spec.kinds && spec.kinds[f.kind];
+        return f.url && (!k || k.by === "client" || k.by === "both") &&
+          ["product_ref", "logo", "brand_guide", "mood_ref", "place_ref", "char_ref", "screen_ref", "legal_text", "doc"].indexOf(f.kind) >= 0;
+      });
+      if (!mine.length) return '<div class="said"><span class="lbl">광고주가 올린 자료</span><span class="sub">없음</span></div>';
+      return '<div class="said"><span class="lbl">광고주가 올린 자료 ' + mine.length + '개</span><div class="client-files">' +
+        mine.map(function (f) {
+          var img = /^image\//.test(f.mime || "") || /\.(jpe?g|png|webp|gif)(\?|$)/i.test(f.url);
+          return '<figure>' + (img
+            ? '<img src="' + esc(f.url) + '" loading="lazy" data-big="' + esc(f.url) + '" data-kind="img" alt="">'
+            : '<a href="' + esc(f.url) + '" target="_blank" rel="noopener">파일 열기</a>') +
+            '<figcaption>' + esc(f.role || f.kind) + '</figcaption></figure>';
+        }).join("") + "</div></div>";
+    }
+
     function totalLine(p) {
       var all = spentAll(p);
       if (!all) return "";
@@ -2553,7 +2573,7 @@
       //   Dan 2026-09-22: 「환타 광고 새의뢰 들어와서 의뢰접수 AI진행 저장
       //   눌럿는데 버튼만 눌리고 아무일도없어」 — 누를 것이 그것뿐이었으니
       //   그걸 누르신 것이 맞다. 없던 것은 다음으로 보내는 버튼이다.
-      brief: '<div class="stage-content">' + said + requirements +
+      brief: '<div class="stage-content">' + said + requirements + clientFiles(p) +
         (p.step === "brief" ? productionAction : "") + '</div>',
       facts: factsBody,
       strategy: strategyBody,
