@@ -1149,6 +1149,8 @@
 
   function lifecycleBar(p, key, act) {
     if (!canWrite) return readOnlyRow("승인·수정 요청은 관리자 계정에서 합니다.");
+    // 부르는 쪽이 상태를 빠뜨려도 화면 전체가 죽지 않게 여기서 채운다
+    act = act || SE().actions(p, key, !!(p.stageResults && p.stageResults[key]));
     var tag = ' data-slug="' + esc(p.slug) + '" data-step="' + esc(key) + '"';
     var pick = SE().of(p, key);
     var head = function (what, why) {
@@ -1757,7 +1759,10 @@
             (x.unresolved ? '<span class="open">★ 안 정해짐 — ' +
               esc(x.unresolved) + "</span>" : "") + "</li>";
         }).join("") + "</ol>" +
-        (p.step === "post" ? lifecycleBar(p, "post") : "") + "</div>";
+        // ★ 세 번째 인자(단계 상태)를 안 넘겨서 후반 단계에 들어가는 순간 화면이 통째로
+        //   죽었다 — 「Cannot read properties of undefined (reading 'phase')」 (Dan 09-23).
+        (p.step === "post" ? lifecycleBar(p, "post",
+          SE().actions(p, "post", !!(p.stageResults && p.stageResults.post))) : "") + "</div>";
     }
 
     function paidStageBody(p, step) {
