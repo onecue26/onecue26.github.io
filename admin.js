@@ -621,7 +621,7 @@
         return '<details class="flow-step ' + status + '"' + (status === "current" ? ' open' : '') + '>' +
           '<summary class="flow-summary"><span class="flow-marker">' + marker + '</span><strong>' +
           esc(STEP_NAME[s.key]) + '</strong>' + versionBadge + personBadge + badge +
-          '<small>' + esc(s.owner) + '</small>' + signoff(p, s.key) + '</summary>' + detail + '</details>';
+          '<small>' + esc(s.owner) + '</small>' + costChip(p, s.key) + signoff(p, s.key) + '</summary>' + detail + '</details>';
       }).join("") + '</div></div>';
   }
 
@@ -636,10 +636,26 @@
     return (typeof v === "number" && v > 0) ? v : null;
   }
 
+  // ★ 확정 단가(krw_per_credit)가 없으면 공개 요금으로 잡은 추정 단가를 「약 · 추정」으로 보인다.
+  //   Dan 09-23: 「크레딧별 가격 파악해서 원화로 환산한 대략적 가격까지」. 근거는 credit_rates.json estimate_basis
+  function krwEstimate() {
+    var r = window.ONECUE_CREDIT_RATES, v = r && r.krw_per_credit_estimate;
+    return (typeof v === "number" && v > 0) ? v : null;
+  }
   function won(credits) {
+    if (!credits) return "";
     var rate = krwPerCredit();
-    if (!rate || !credits) return "";
-    return " · ₩" + Math.round(credits * rate).toLocaleString();
+    if (rate) return " · ₩" + Math.round(credits * rate).toLocaleString();
+    var est = krwEstimate();
+    return est ? " · 약 ₩" + Math.round(credits * est).toLocaleString() : "";
+  }
+  /** 단계 제목 줄에 붙는 크레딧 — 돈이 나간 단계에만, 모든 단계 같은 자리 (Dan 09-23 「일관되게」) */
+  function costChip(p, step) {
+    var rows = (p.spends || []).filter(function (x) { return spendStage(x) === step; });
+    if (!rows.length) return "";
+    var all = 0, gone = 0;
+    rows.forEach(function (x) { var c = Number(x.credits) || 0; all += c; if (x.outcome === "discarded") gone += c; });
+    return '<small class="cost-chip">' + all + "cr" + (gone ? " · 버린 판 " + gone : "") + "</small>";
   }
 
   /** 이 단계에서 실제로 나간 크레딧. */
@@ -680,7 +696,8 @@
           '<span class="cost-what">생성 ' + rows.length + "번</span>" +
           '<details class="cost-list"><summary>내역</summary><ol>' + rows.map(function (x) {
             return "<li>" + esc(hhmm(x.spent_at)) + " · " + esc(tidy(x)) + " · <b>" +
-              Number(x.credits) + "cr</b></li>";
+              Number(x.credits) + "cr</b>" + (x.outcome === "discarded" ? ' <em class="gone">버린 판</em>'
+              : x.outcome === "used" ? ' <em class="kept">채택</em>' : "") + "</li>";
           }).join("") + "</ol></details>"
         : '<b class="est">예상 ' + est + " 크레딧" + won(est) + "</b>") +
       "</div>";
@@ -1848,32 +1865,65 @@
           ? '<small>광고주에게 보낸 완성본은 거둬들입니다.</small>' : "") + "</details>";
     }
 
+    /** 납품 칸의 원가 명세서 — **실패한 것까지** 결제 한 건 한 건, 단계별 소계, 총계.
+     *  Dan 09-23: 「그게 바로 원가거든」 「명세서처럼 제대로 읽히도록 세세하게」.
+     *  합계는 힉스필드 결제 내역과 같아야 한다(RUSH 271cr 대조 완료). 원화는 확정 단가가 없으면 추정. */
     function totalLine(p) {
       var all = spentAll(p);
       if (!all) return "";
-      var byStep = {};
-      (p.spends || []).forEach(function (x) {
-        byStep[x.step] = (byStep[x.step] || 0) + (Number(x.credits) || 0);
+      var rows = (p.spends || []).slice().sort(function (a, b) { return a.spent_at < b.spent_at ? -1 : 1; });
+      var used = 0, gone = 0, open = 0, groups = [], byKey = {};
+      rows.forEach(function (x) {
+        var c = Number(x.credits) || 0, k = spendStage(x);
+        if (!byKey[k]) { byKey[k] = { key: k, rows: [], all: 0, used: 0, gone: 0 }; groups.push(byKey[k]); }
+        var g = byKey[k]; g.rows.push(x); g.all += c;
+        if (x.outcome === "used") { used += c; g.used += c; }
+        else if (x.outcome === "discarded") { gone += c; g.gone += c; }
+        else open += c;
       });
-      // ★ 버린 판도 원가다 (Dan 09-23 「우리가 실패한 가격도 포함해서 기재」). 납품할 때 067 이 가른다
-      var used = 0, gone = 0, goneStep = {};
-      (p.spends || []).forEach(function (x) {
-        var c = Number(x.credits) || 0;
-        if (x.outcome === "used") used += c;
-        if (x.outcome === "discarded") { gone += c; goneStep[x.step] = (goneStep[x.step] || 0) + c; }
-      });
-      var split = (used || gone)
-        ? '<span class="cost-what">채택 ' + used + " · <b>버린 판 " + gone + "</b> (" +
-          Object.keys(goneStep).map(function (k) { return esc(STEP_NAME[k] || k) + " " + goneStep[k]; }).join(" · ") +
-          ")</span>" : "";
-      return '<div class="cost-total"><b>이 건 원가 ' + all + " 크레딧" + won(all) + "</b>" + split +
-        '<span class="cost-what">' + Object.keys(byStep).map(function (k) {
-          return esc(STEP_NAME[k] || k) + " " + byStep[k];
-        }).join(" · ") + "</span>" +
-        (krwPerCredit() ? "" :
-          '<span class="cost-note">원화는 크레딧 단가를 정하면 같이 뜹니다 — ' +
-          'db/credit_rates.json</span>') + "</div>";
+      var est = !krwPerCredit() && krwEstimate();
+      var basis = (window.ONECUE_CREDIT_RATES || {}).estimate_basis || {};
+      function krw(c) { return esc(won(c).replace(/^ · /, "")) || "—"; }
+      function item(x) {
+        var w = String(x.what || "").split("★")[0]
+          .replace(/^[0-9A-Za-z_]+ · (video|anchors|storyboard) · /, "").trim();
+        return w || x.engine || "";
+      }
+      function mark(x) {
+        return x.outcome === "discarded" ? '<span class="st gone">버린 판</span>'
+          : x.outcome === "used" ? '<span class="st kept">채택</span>' : '<span class="st">—</span>';
+      }
+      var body = groups.map(function (g) {
+        return '<tr class="grp"><th colspan="6">' + esc(STEP_NAME[g.key] || g.key) + "</th></tr>" +
+          g.rows.map(function (x, i) {
+            var c = Number(x.credits) || 0;
+            return '<tr class="' + (x.outcome || "") + '"><td class="n">' + (i + 1) + "</td><td>" +
+              esc(item(x)) + '<div class="sub">' + esc(x.engine || "") + " · " + esc(when(x.spent_at)) +
+              "</div></td><td>" + mark(x) + '</td><td class="num">' + c + '</td><td class="num">' + krw(c) +
+              "</td></tr>";
+          }).join("") +
+          '<tr class="subtotal"><td></td><td>' + esc(STEP_NAME[g.key] || g.key) + " 소계" +
+          (g.gone ? ' <span class="sub">(채택 ' + g.used + " · 버린 판 " + g.gone + ")</span>" : "") +
+          '</td><td></td><td class="num">' + g.all + '</td><td class="num">' + krw(g.all) + "</td></tr>";
+      }).join("");
+      return '<div class="cost-statement"><h4>제작 원가 명세</h4>' +
+        '<table class="stmt"><thead><tr><th class="n">#</th><th>항목 · 엔진 · 시각</th><th>결과</th>' +
+        '<th class="num">크레딧</th><th class="num">원화</th></tr></thead><tbody>' + body + "</tbody></table>" +
+        '<table class="stmt total"><tbody>' +
+        '<tr><td>채택 (완성본에 들어간 것)</td><td class="num">' + used + '</td><td class="num">' + krw(used) + "</td></tr>" +
+        '<tr class="discarded"><td>버린 판 (만들었지만 쓰지 않은 것 — 돈은 나갔다)</td><td class="num">' + gone +
+        '</td><td class="num">' + krw(gone) + "</td></tr>" +
+        (open ? '<tr><td>아직 안 가름</td><td class="num">' + open + '</td><td class="num">' + krw(open) + "</td></tr>" : "") +
+        '<tr class="grand"><td>총 원가 · 결제 ' + rows.length + '건</td><td class="num">' + all +
+        ' cr</td><td class="num">' + krw(all) + "</td></tr></tbody></table>" +
+        '<p class="stmt-note">' +
+        (est ? "원화는 <b>추정</b>입니다 — 1크레딧 ≈ ₩" + est + " (" + esc(basis.usd_per_credit_source || "") +
+          " · 환율 $1 = ₩" + esc(String(basis.krw_per_usd || "")) + "). 실제 월 결제액을 넣으면 확정값으로 바뀝니다."
+          : (krwPerCredit() ? "원화는 확정 단가 기준입니다." : "원화 단가가 없습니다 — db/credit_rates.json")) +
+        " 영상 생성 외 비용(그록 구독 · AI 사용료)은 포함하지 않았습니다.</p></div>";
     }
+
+
 
     // ★ 만든 것은 **단계가 지나가도 남는다.**
     //
