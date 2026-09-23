@@ -2509,7 +2509,8 @@
       //   버튼만 있고 영상이 없었다 (09-23 15:26)
       post: postFor(p) + (p.step === "post" || (SE().of(p, "post") || {}).approved_at
         ? assetList(p, "post") : "") + (p.step === "post" ? backBox(p) : ""),
-      deliver: totalLine(p) + (p.step === "deliver" ? deliverBody(p) : "")
+      // 한 칸으로 묶어 위에서 아래로 쌓는다 — 원가 → 완성본 → 보내기 → 되돌리기 (격자 두 칸에 흩어져 나란히 섰다)
+      deliver: '<div class="deliver-wrap">' + totalLine(p) + (p.step === "deliver" ? deliverBody(p) : "") + "</div>"
     };
 
     var openProject = isNew || p.aiNeedsReview || !!p.job || (p.state !== "done" && p.step !== "deliver");
