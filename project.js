@@ -353,7 +353,10 @@
   function box(key, title, state, body, open) {
     body = stripHead(body);
     if (!body.trim()) return "";
-    return '<details class="cstep' + (open ? " now" : "") + '"' + (open ? " open" : "") +
+    // 닫은 프로젝트(068)의 납품 칸은 펼쳐 두되 「지금 할 일」 강조(빨강)는 빼다
+    var closedOpen = key === "done" && P && P.state === "done";
+    if (closedOpen) open = false;
+    return '<details class="cstep' + (open ? " now" : "") + '"' + (open || closedOpen ? " open" : "") +
       ' data-step="' + esc(key) + '">' +
       '<summary class="cstep-head"><span class="cstep-t">' + esc(title) + "</span>" +
       (state ? '<span class="cstep-s">' + esc(state) + "</span>" : "") +
