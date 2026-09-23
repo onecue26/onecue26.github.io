@@ -1795,10 +1795,10 @@
       // 자막·엔드카드 계획(auto_post 가 읽는 모양)이면 그대로 보여 준다
       if (raw && !Array.isArray(raw) && (raw.captions || raw.endcard)) {
         var caps = (raw.captions || []).map(function (c) {
-          return "<li><b>" + esc(c.from) + "~" + esc(c.to) + "초 자막</b><span>" + esc(c.text) + "</span></li>";
+          return "<li><b>" + esc(c.from) + "~" + esc(c.to) + "초 자막</b> — <span>" + esc(c.text) + "</span></li>";
         }).join("");
         var ec = raw.endcard || {};
-        var end = (ec.lines || []).length ? "<li><b>" + esc(ec.from) + "초부터 엔드카드</b><span>" +
+        var end = (ec.lines || []).length ? "<li><b>" + esc(ec.from) + "초부터 엔드카드</b> — <span>" +
           (ec.lines || []).map(esc).join(" / ") + "</span></li>" : "";
         return '<div class="stage-content post-work"><div class="pw-head"><b>후반에서 입힐 것</b>' +
           (raw.source ? "<span>영상 " + esc(raw.source) + " 에</span>" : "") + "</div>" +
