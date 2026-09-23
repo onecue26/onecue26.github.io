@@ -2322,10 +2322,12 @@
           return '<div class="thread">' + threadStep(1, "사장님 의견", "done") +
             arrow() + threadStep(2, "제작 쪽 답변", "now") + arrow() +
             threadStep(3, "정하기", "wait") +
-            '<p class="thread-now"><b>답변을 준비하고 있습니다.</b>' +
-            "<span>적어 주신 것을 하나씩 보고, 무엇에 동의하고 무엇을 어떻게 " +
-            "고칠지 여기에 답을 답니다. <b>그때까지 다시 뽑기는 잠겨 있습니다</b> — " +
-            "답 없이 뽑으면 적어 주신 말이 반영될 자리가 없습니다.</span></p>" +
+            // ★ 시작 시각과 끝날 때쯤을 적는다 — 없으니 「안 돌고 있다」로 보였다(09-23 Dan)
+            '<p class="thread-now"><b>답변 쓰는 중' +
+            (m.dan_take_at ? " · " + esc(hhmm(m.dan_take_at)) + " 시작 · " +
+              esc(hhmm(m.dan_take_at, 6)) + " 쯤 붙습니다" : "") + '</b>' +
+            "<span>끝나면 이 화면에 저절로 뜹니다(새로고침 필요 없음). " +
+            "그때까지 다시 뽑기는 잠겨 있습니다.</span></p>" +
             writeBox(f, m, true) + "</div>";
         }
 
@@ -2662,7 +2664,37 @@
   //   다시 그리는 것은 사람이 누를 때만이다. 화면은 누르기 전까지 안 움직인다.
   //   묻는 값도 가볍다: 가장 최근 기록 한 줄의 번호만 본다.
   var LAST_SEEN_EVENT = null;
+  // ★ 2026-09-23 다시 **저절로 다시 읽는다** — 이번엔 신호가 올 때만.
+  //   Dan: 「refresh안해도 뭔가 니가해서 업데이트하면 자동으로 보이는 기능을 넣어라」
+  //   작업기가 답변을 달아도 화면은 새로고침 전까지 그대로라 「안 돌고 있다」로 보였다.
+  //   · events 표를 실시간 구독(063) — 한 줄 들어오는 순간 다시 읽는다(타이머 아님).
+  //   · 튀던 문제는 render() 가 이미 막는다: 바뀐 게 없으면 손대지 않고, 바뀌면 보던 자리로 돌려놓는다.
+  //   · 글을 쓰는 중이면 다시 읽지 않는다 — 쓰던 글이 사라진다. 그때만 알림 막대를 띄운다.
+  //   · 실시간이 끊겨도 30초마다 가장 최근 번호를 한 번 물어 같은 일을 한다(안전망).
+  function typing() {
+    var a = document.activeElement;
+    return !!(a && (a.tagName === "TEXTAREA" || a.tagName === "INPUT") && (a.value || "").trim());
+  }
+  var RELOAD_SOON = null;
+  function freshen() {
+    if (!authorized) return;
+    if (typing()) { var bar = el("newsbar"); if (bar) bar.hidden = false; return; }
+    clearTimeout(RELOAD_SOON);
+    RELOAD_SOON = setTimeout(function () {       // 한꺼번에 여러 줄이 오면 한 번만 읽는다
+      var bar = el("newsbar"); if (bar) bar.hidden = true;
+      load();
+    }, 600);
+  }
   function autoReload() {
+    try {
+      db.channel("onecue-events")
+        .on("postgres_changes", { event: "INSERT", schema: "public", table: "events" },
+            function (msg) {
+              if (msg && msg.new && msg.new.id) LAST_SEEN_EVENT = msg.new.id;
+              freshen();
+            })
+        .subscribe();
+    } catch (e) { /* 실시간이 없으면 아래 안전망만 */ }
     setInterval(function () {
       if (!authorized || document.hidden) return;
       db.from("events").select("id").order("id", { ascending: false }).limit(1)
@@ -2672,10 +2704,13 @@
           if (LAST_SEEN_EVENT == null) { LAST_SEEN_EVENT = top; return; }
           if (top === LAST_SEEN_EVENT) return;
           LAST_SEEN_EVENT = top;
-          var bar = el("newsbar");
-          if (bar) bar.hidden = false;
+          freshen();
         });
     }, RELOAD_EVERY);
+    // 다른 탭에 있다 돌아오면 바로 한 번 맞춘다
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden) freshen();
+    });
   }
 
   function render() {
