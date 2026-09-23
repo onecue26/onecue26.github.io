@@ -63,3 +63,12 @@ body.studio-layout>header{background:#fff;border-color:var(--rule)}
 .studio-layout .tag:not(.pending):not(.ok):not(.now){background:#eee;color:#5b5b5b}
 .studio-layout button:focus-visible,.studio-layout a:focus-visible{outline-color:var(--brand-strong)}
 @media(prefers-contrast:more){:root{--muted:#404040;--faint:#555;--rule:#888}.studio-rail nav a{color:#333}}
+
+/* ── 상태 색 기준 (2026-09-23 · Dan 「상태 칸에 좀더 가독성 좋게 색과 글씨」) ──
+   빨강 = 광고주가 할 일 · 파랑 = 우리가 진행 중 · 초록 = 끝남 · 주황 = 수정 중·광고주 답을 기다림(관리자 쪽)
+   전에는 .tag 를 전부 회색(#eee)으로 덮어 어느 건이 급한지 안 보였다. */
+.st-act,.studio-layout .tag.st-act,.cstep-s.st-act{background:#fde3dc!important;color:#b42318!important;border:1px solid #f5b7a8!important;font-weight:700!important}
+.st-run,.studio-layout .tag.st-run,.cstep-s.st-run{background:#e5efff!important;color:#1d4ed8!important;border:1px solid #bcd3fb!important;font-weight:600!important}
+.st-done,.studio-layout .tag.st-done,.cstep-s.st-done{background:#e3f4ea!important;color:#1f7a4d!important;border:1px solid #b5dfc6!important;font-weight:600!important}
+.st-fix,.studio-layout .tag.st-fix,.cstep-s.st-fix{background:#fff1db!important;color:#a15c00!important;border:1px solid #f5d39b!important;font-weight:600!important}
+.st-act,.st-run,.st-done,.st-fix{border-radius:999px!important;padding:3px 10px!important;font-size:12px!important;font-family:inherit!important;letter-spacing:0!important}
