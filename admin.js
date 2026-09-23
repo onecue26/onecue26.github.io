@@ -1831,14 +1831,17 @@
     // ASK 가 열려 있으면 다음 유료 생성이 DB 에서 막힌다 (034). 화면이 조용히
     // 있으면 「왜 안 나가지」가 되므로 멈춘 이유를 여기 적는다.
     function askNote(p, step) {
-      var want = step === "anchors" ? ["anchor"] : ["clip", "final"];
-      var asked = (p.files || []).filter(function (f) {
-        return want.indexOf(f.kind) >= 0 && ((f.meta || {}).review || "") === "ask";
+      // ★ **가장 새 판만** 본다. 그리고 영상은 판 카드에 검수가 이미 나오므로
+      //   우리 몫이면 위에 또 띄우지 않는다 — v5 검수가 두 번 떴다
+      //   (Dan 2026-09-23: 「이거 2개는 왜 계속 떠잇는거냐」).
+      var asked = newestTakes(p, step).filter(function (f) {
+        return ((f.meta || {}).review || "") === "ask";
       });
       if (!asked.length) return "";
       var m = asked[0].meta || {};
       var who = m.ask_who || "us";
       var mine = who === "us";
+      if (mine && step !== "anchors") return "";
       return '<div class="ask-note' + (mine ? " ours" : "") + '">' +
         "<b>" + (mine ? "정해야 할 것이 있어 멈춰 있습니다"
                       : "정해 주셔야 다음으로 갑니다") + "</b>" +
@@ -1859,9 +1862,12 @@
     // 검수에서 걸려 다시 만드는 중이라는 것은 **숨기지 않는다.** 숨기면
     // 화면이 비어 보이고, 비어 보이면 「멈췄나」가 된다.
     function blockedNote(p, step) {
-      var want = step === "anchors" ? ["anchor"] : ["clip", "final"];
-      var bad = (p.files || []).filter(function (f) {
-        return want.indexOf(f.kind) >= 0 && ((f.meta || {}).review || "") === "blocked";
+      // ★ **가장 새 판만** 본다. 전에는 모든 판에서 찾아서, v5 가 나온 뒤에도
+      //   v4 의 옛 판정이 「다시 만들고 있습니다」로 떠 있었다 — 사실도 아니었다.
+      //   영상은 판 카드에 판정이 나오므로 위에 또 띄우지 않는다.
+      if (step !== "anchors") return "";
+      var bad = newestTakes(p, step).filter(function (f) {
+        return ((f.meta || {}).review || "") === "blocked";
       });
       if (!bad.length) return "";
       var m = bad[0].meta || {};
