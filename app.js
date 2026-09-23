@@ -84,7 +84,7 @@
       return '<a class="proj" href="project.html?slug=' + encodeURIComponent(m.slug) + '">' +
         '<div class="proj-main"><div class="name">' +
         esc([m.brand, m.product].filter(Boolean).join(" ")) + "</div>" +
-        '<div class="meta mono">' + esc(when.toISOString().slice(0, 10)) + " 접수</div></div>" +
+        '<div class="meta mono">' + esc(when.toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 10)) + " 접수</div></div>" +
         '<div class="proj-side"><span class="go">진행 상황 →</span></div></a>';
     }).join("");
   }
@@ -123,7 +123,7 @@
   }
 
   function boot() {
-    el("stamp").textContent = new Date().toISOString().slice(0, 16).replace("T", " ");
+    el("stamp").textContent = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 16);
 
     if (!cfg.supabaseUrl || !window.supabase) {
       setConn("bad", "연결 설정 없음");

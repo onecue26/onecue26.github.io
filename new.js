@@ -222,7 +222,7 @@
   }
 
   function boot() {
-    el("stamp").textContent = new Date().toISOString().slice(0, 16).replace("T", " ");
+    el("stamp").textContent = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 16);
     syncPlacements();
 
     el("files").addEventListener("change", previewFiles);

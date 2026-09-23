@@ -127,7 +127,7 @@
   }
 
   function boot() {
-    el("stamp").textContent = new Date().toISOString().slice(0, 16).replace("T", " ");
+    el("stamp").textContent = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 16);
 
     if (!window.supabase || !cfg.supabaseUrl) { setConn("bad", "연결 설정 없음"); return; }
     db = shared();

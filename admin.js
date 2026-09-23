@@ -3331,7 +3331,7 @@
   // ── 불러오기 ──────────────────────────────────────────────────────────────
   function load() {
     if (!authorized) return Promise.resolve();
-    el("stamp").textContent = new Date().toISOString().slice(0, 16).replace("T", " ");
+    el("stamp").textContent = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 16);
 
     return db.from("projects")
       .select("id,slug,brand,product,step,state,running_sec,cut_count,aspects,created_at,ad_type,ad_type_by,render_mode,render_plan,render_mode_by,render_mode_at")
