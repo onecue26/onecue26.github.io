@@ -350,6 +350,12 @@
     return String(html || "").replace(/^\s*<h2>[\s\S]*?<\/h2>/, "");
   }
 
+  // 상태 색 — 빨강: 광고주가 할 일 · 파랑: 진행 중 · 초록: 끝남 · 주황: 수정 중 (brand.css · 09-23)
+  function stClass(t) {
+    return /차례|부탁|확인하실/.test(t) ? "st-act" : /완료|접수됨/.test(t) ? "st-done"
+      : /수정|다시/.test(t) ? "st-fix" : "st-run";
+  }
+
   function box(key, title, state, body, open) {
     body = stripHead(body);
     if (!body.trim()) return "";
@@ -359,7 +365,7 @@
     return '<details class="cstep' + (open ? " now" : "") + '"' + (open || closedOpen ? " open" : "") +
       ' data-step="' + esc(key) + '">' +
       '<summary class="cstep-head"><span class="cstep-t">' + esc(title) + "</span>" +
-      (state ? '<span class="cstep-s">' + esc(state) + "</span>" : "") +
+      (state ? '<span class="cstep-s ' + stClass(state) + '">' + esc(state) + "</span>" : "") +
       '<span class="cstep-x" aria-hidden="true"></span></summary>' +
       '<div class="cstep-body">' + body + "</div></details>";
   }
