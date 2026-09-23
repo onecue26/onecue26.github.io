@@ -2675,9 +2675,9 @@
       brief: '<div class="stage-content">' + said + requirements + clientReplies(p) + clientFiles(p) +
         (p.step === "brief" ? productionAction : "") + '</div>',
       // 기획 두 갈래(074) — 전략·콘셉트 칸에도 「누가 맡습니까」를 그 칸 안에 그린다
-      facts: factsBody + (p.step === "facts" ? productionAction : ""),
-      strategy: strategyBody + (p.step === "strategy" ? productionAction : ""),
-      concepts: (p.step === "concepts" && !(p.concepts && p.concepts.length) ? productionAction : "") + conceptReview + check,
+      facts: factsBody + (p.step === "facts" ? '<div class="plan-wrap">' + productionAction + "</div>" : ""),
+      strategy: strategyBody + (p.step === "strategy" ? '<div class="plan-wrap">' + productionAction + "</div>" : ""),
+      concepts: (p.step === "concepts" && !(p.concepts && p.concepts.length) ? '<div class="plan-wrap">' + productionAction + "</div>" : "") + conceptReview + check,
       develop: developBody,
       // 새 흐름이 도는 동안에는 「컷 설계 보기」 링크를 띄우지 않는다 —
       // 검수할 컷 목록이 바로 아래 펼쳐져 있는데 같은 곳으로 가는 링크가 또 있으면
