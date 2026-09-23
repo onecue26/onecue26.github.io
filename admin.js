@@ -1193,14 +1193,12 @@
    *  심플하게 나오니깐 … 기능은 거기에 맞게구현하고」. 사람을 못 고르는 단계는 버튼 대신
    *  이유 한 줄을 둔다(버튼이 그냥 없으면 「고장났나」가 된다). */
   /** 고른 뒤, 시작 전까지 **서로 바꾸는** 칸 (Dan 09-23: 「둘다 서로 선택햇다가 되돌아갈수잇게」) */
+  /** ②·③ 에서 ① 로 — 고른 것과 요청사항을 풀고 처음 고르는 화면으로 (062).
+   *  단계: ①고르기 전 → ②AI / ③사람(요청) → ④시작 후(바꾸기 없음) → ⑤결과.
+   *  Dan 09-23: 「취소하면 ai가 맡습니다가아니라 ai에게 맡기기가 떠야」 「단계를 정확히」 */
   function switchChoice(p, key) {
     var tag = ' data-slug="' + esc(p.slug) + '" data-step="' + esc(key) + '"';
-    var pick = SE().of(p, key) || {};
-    if (pick.directions) {
-      return '<button class="btn ghost" type="button" data-lc="undirect"' + tag +
-        ">AI에게 맡기기로 바꾸기</button>";
-    }
-    return directForm(tag, "사람이 직접 진행으로 바꾸기");
+    return '<button class="btn ghost" type="button" data-lc="unchoose"' + tag + ">다시 고르기</button>";
   }
   function directForm(tag, label) {
     return '<details class="lc-direct"><summary class="btn ghost">' + esc(label) + "</summary>" +
@@ -2894,6 +2892,14 @@
         if (what === "direct-cancel") {
           var d = b.closest("details"); if (d) d.open = false;
           return;
+        }
+        // 062 — 다시 고르기: ②·③ → ① (시작 전까지)
+        if (what === "unchoose") {
+          lock(b);
+          return rpc(slug, "onecue_stage_unchoose", { p_step: step })
+            .then(function (r) {
+              if (r && r.ok === false) throw new Error(r.why || "되돌리지 못했습니다");
+            }).then(load).catch(fail(b, msg));
         }
         // 061 — 사람 → AI 로 되돌린다 (시작 전까지)
         if (what === "undirect") {
