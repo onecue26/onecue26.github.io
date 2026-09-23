@@ -643,8 +643,15 @@
   }
 
   /** 이 단계에서 실제로 나간 크레딧. */
+  // ★ 기록은 「돈이 나간 때의 단계」로 남는다. 영상 단계 중에 만든 소품 앵커(이미지)가
+  //   영상 몫으로 잡혀 제작 자료 3cr · 영상 263cr 로 보였다(실제 5 · 261). **무엇을
+  //   만들었나**로 나눈다 — 영상 엔진이면 영상, 이미지면 제작 자료 (Dan 09-23 지적).
+  function spendStage(x) {
+    if (x.step !== "video" && x.step !== "anchors") return x.step;
+    return /seedance|kling|veo|video|hailuo|wan/i.test(x.engine || "") ? "video" : "anchors";
+  }
   function spentOn(p, step) {
-    return (p.spends || []).filter(function (x) { return x.step === step; })
+    return (p.spends || []).filter(function (x) { return spendStage(x) === step; })
       .reduce(function (a, x) { return a + (Number(x.credits) || 0); }, 0);
   }
 
@@ -660,13 +667,21 @@
     var plan = SE().isPaid(step) ? SE().planFor(p, step) : null;
     var est = plan ? plan.credits : 0;
     if (!used && !est) return "";
-    var rows = (p.spends || []).filter(function (x) { return x.step === step; });
+    var rows = (p.spends || []).filter(function (x) { return spendStage(x) === step; });
+    // 기록 원문(건 이름·메모)을 이어 붙이면 읽을 수 없다 — 합계 한 줄, 내역은 접는다
+    function tidy(x) {
+      var w = String(x.what || x.engine || "").split("★")[0];
+      w = w.replace(/^[0-9A-Za-z_]+ · (video|anchors|storyboard) · /, "").trim();
+      return w.length > 40 ? w.slice(0, 40) + "…" : w;
+    }
     return '<div class="cost-line">' +
       (used
         ? '<b>' + used + " 크레딧" + won(used) + "</b>" +
-          '<span class="cost-what">' + rows.map(function (x) {
-            return esc(x.what || x.engine) + " · " + x.credits;
-          }).join(" / ") + "</span>"
+          '<span class="cost-what">생성 ' + rows.length + "번</span>" +
+          '<details class="cost-list"><summary>내역</summary><ol>' + rows.map(function (x) {
+            return "<li>" + esc(hhmm(x.spent_at)) + " · " + esc(tidy(x)) + " · <b>" +
+              Number(x.credits) + "cr</b></li>";
+          }).join("") + "</ol></details>"
         : '<b class="est">예상 ' + est + " 크레딧" + won(est) + "</b>") +
       "</div>";
   }
@@ -798,6 +813,16 @@
 
   /** 그 사실을 한 줄로. 다시 뽑기 버튼이 눌리는지와 같은 판단을 쓴다 —
    *  두 곳이 따로 판단하면 버튼은 눌리는데 글은 「아직」이라고 말한다. */
+  /** 요청사항(060)이 들어왔는데 아직 계획에 반영되지 않았는가 — 그동안 「시작」을 잠근다.
+   *  반영 전에 누르면 요청사항 없는 문장으로 값이 나간다. 영상·제작 자료·후반만 해당. */
+  function directionsPending(p, s) {
+    var pick = SE().of(p, s) || {};
+    if (!pick.directions_at || ["anchors", "video", "post"].indexOf(s) < 0) return false;
+    return !p.render_mode_at || new Date(p.render_mode_at) < new Date(pick.directions_at);
+  }
+  var DIR_WAIT = '<span class="lc-msg">적어 주신 요청사항을 계획에 반영하는 중입니다 — ' +
+    "끝나면 이 버튼이 열립니다.</span>";
+
   /** 그 시각 **뒤에** 만든 판이 있는가 — 있으면 그 시각의 소식은 이미 쓰였다. */
   function usedAfter(p, s, at) {
     if (!at) return false;
@@ -886,6 +911,9 @@
               : (s === "anchors" ? "제작 자료를 만듭니다" : "영상을 뽑습니다"),
              (again ? "누르면 <b>또</b> " : "예상 ") + money(plan.credits) +
              (plan.mode ? " · 방식 " + esc(plan.mode) : "")) +
+        ((SE().of(p, s) || {}).directions
+          ? '<div class="redo-note"><b>사장님 요청사항 — 이대로 만듭니다</b><span>' +
+            esc((SE().of(p, s) || {}).directions) + "</span></div>" : "") +
         (again && note
           ? '<div class="redo-note"><b>고쳐 달라고 적으신 것</b>' +
             "<span>" + esc(note) + "</span></div>" : "") +
@@ -911,7 +939,8 @@
         //   계획이 바뀌었는지(planReady)와 **따로** 본다 — 계획은 내가 고칠 수
         //   있지만 정하는 것은 사장님 몫이라, 둘은 다른 물음이다.
         '<button class="btn" type="button" data-lc="start"' + tag +
-        (again && (!planReady(p, s) || !takeSettled(p, s)) ? " disabled" : "") + ">" +
+        ((again && (!planReady(p, s) || !takeSettled(p, s))) || directionsPending(p, s)
+          ? " disabled" : "") + ">" +
         (again ? (s === "anchors" ? "다시 만들기" : "다시 뽑기")
                : (s === "anchors" ? "제작 자료 만들기" : "영상 뽑기")) + "</button>" +
         // ★ 검수가 붙은 새 판이 있으면 **이대로 승인**도 여기서 누른다.
@@ -1162,22 +1191,20 @@
    *  심플하게 나오니깐 … 기능은 거기에 맞게구현하고」. 사람을 못 고르는 단계는 버튼 대신
    *  이유 한 줄을 둔다(버튼이 그냥 없으면 「고장났나」가 된다). */
   function simpleChoose(p, key) {
+    // Dan 2026-09-23: 「ai한테 맡기기랑 사람이 하는거 2개로 나뉘라고햇는데 … 과정은 동일하되
+    //   사람이 하는것도 같은 폼으로 … 사람이 요청사항을 넣거나 하면 니가 그걸로 작업하는거고」
+    //   → 두 버튼은 **항상** 있다. 사람 쪽은 요청사항 칸이 열리고, 그 뒤 절차는 AI 와 같다.
     var tag = ' data-slug="' + esc(p.slug) + '" data-step="' + esc(key) + '"';
-    var can = SE().assignable(key) || {};
     return '<div class="lc lc-choose"' + tag + ">" +
       '<div class="lc-head"><b>누가 맡습니까</b><span>고르기만 해서는 작업이 시작되지 않습니다</span></div>' +
       '<div class="lc-row">' +
       '<button class="btn" type="button" data-lc="choose-ai"' + tag + ">AI에게 맡기기</button>" +
-      (can.ok
-        ? '<button class="btn ghost" type="button" data-lc="choose-human"' + tag +
-          ">사람이 직접 진행</button>"
-        : "") + "</div>" +
-      (can.ok ? "" : '<span class="lc-msg">사람 진행은 아직 안 됩니다 — ' +
-        esc({ out_of_scope: "사람이 결과를 올릴 칸이 아직 없습니다",
-              blocked: "광고주 의뢰와 바로 묶여 있어 사람이 대신할 수 없습니다",
-              contract_missing: "양식을 못 불러왔습니다. 새로고침해 주십시오" }[can.reason] ||
-            "이 단계는 AI 만 맡습니다") + "</span>") +
-      "</div>";
+      '<details class="lc-direct"><summary class="btn ghost">사람이 직접 진행</summary>' +
+      '<textarea class="lc-note" data-lc-note rows="3" placeholder="' +
+      esc("요청사항을 적어 주십시오 — 적으신 대로 반영해서 만듭니다") + '"></textarea>' +
+      '<button class="btn" type="button" data-lc="direct"' + tag + ">이 요청대로 진행</button>" +
+      "</details></div>" +
+      '<span class="lc-msg" data-lc-msg></span></div>';
   }
 
   function lifecycleBar(p, key, act) {
@@ -1193,13 +1220,18 @@
     if (act.phase === "choose") return simpleChoose(p, key);
     if (act.phase === "start") {
       return '<div class="lc lc-start"' + tag + ">" +
-        head(pick.mode === "human" ? "담당자 · " + (pick.assignee || "미지정") : "AI가 맡습니다",
+        head(pick.directions ? "사장님 요청대로 진행합니다"
+               : pick.mode === "human" ? "담당자 · " + (pick.assignee || "미지정") : "AI가 맡습니다",
              "시작을 눌러야 실제로 진행됩니다") +
+        (pick.directions ? '<div class="redo-note"><b>요청사항</b><span>' +
+          esc(pick.directions) + "</span></div>" : "") +
         '<div class="lc-row">' +
-        '<button class="btn" type="button" data-lc="start"' + tag + ">" +
-        (pick.mode === "human" ? "작성 시작" : "AI 작업 시작") + "</button>" +
+        '<button class="btn" type="button" data-lc="start"' + tag +
+        (directionsPending(p, key) ? " disabled" : "") + ">" +
+        (pick.directions ? "요청대로 시작" : pick.mode === "human" ? "작성 시작" : "AI 작업 시작") + "</button>" +
         '<button class="btn ghost" type="button" data-lc="rechoose"' + tag +
-        ">담당 다시 고르기</button></div></div>";
+        ">담당 다시 고르기</button></div>" +
+        (directionsPending(p, key) ? DIR_WAIT : "") + "</div>";
     }
     if (act.phase === "working") {
       return '<div class="lc lc-working"' + tag + ">" +
@@ -1996,9 +2028,24 @@
         return superseded(p, step, f);
       }
 
+      // 지금 영상 계획이 참고 이미지로 쓰는 것 — Image 번호까지
+      var inPlan = {};
+      ((p.render_plan || {}).calls || []).forEach(function (c) {
+        (c.image_reference_paths || []).forEach(function (path, k) { inPlan[path] = "Image " + (k + 1); });
+      });
+      var anyInPlan = Object.keys(inPlan).length > 0;
+
       var older = [];
       var mine = (p.files || []).filter(function (f) {
         if (want.indexOf(f.kind) < 0) return false;
+        // ★ 제작 자료는 **지금 계획에 들어가 있는가**가 기준이다. 빠진 것은 지난 버전.
+        //   v1 시작 프레임이 「12초 한 판의 출발점」이라는 옛 설명으로만 떠서 지난 판처럼
+        //   보였는데, 실제로는 지금 계획의 Image 1(세트 기준)이다 (09-23).
+        if (step === "anchors" && anyInPlan) {
+          if (inPlan[f.storage_path]) return true;
+          older.push(f);
+          return false;
+        }
         if (rank[f.id] != null) {
           // ★ 2026-09-23 두 번째 — **새 판 하나만 펼친다.** 나머지는 전부 지난 버전.
           //   Dan: 「새로운 버전 올라오면, 나중 버전은 저절로 지난버전으로 가게
@@ -2099,6 +2146,8 @@
             (m.why && !(m.review === "blocked" || m.review === "ask" ||
                         (!isOld && m.review && m.review !== "pending"))
               ? '<span class="why">' + esc(m.why) + "</span>" : "") +
+            (inPlan[f.storage_path] ? '<span class="ok">지금 영상에 ' + esc(inPlan[f.storage_path]) +
+              " 로 쓰는 중</span>" : "") +
             (m.camera_lock ? '<span class="lock">카메라 고정 — ' +
               esc(m.camera_lock) + "</span>" : "") +
             (facts.length ? '<span class="facts">' + facts.join(" · ") + "</span>" : "") +
@@ -2811,6 +2860,19 @@
           if (note) note.focus();
           return;
         }
+        // 060 — 「사람이 직접 진행」: 요청사항을 적고 그대로 진행한다
+        if (what === "direct") {
+          if (!text) {
+            if (msg) { msg.className = "lc-msg err"; msg.textContent = "요청사항을 적어 주십시오."; }
+            if (note) note.focus();
+            return;
+          }
+          lock(b);
+          return rpc(slug, "onecue_stage_directions", { p_step: step, p_text: text })
+            .then(function (r) {
+              if (r && r.ok === false) throw new Error(r.why || "저장하지 못했습니다");
+            }).then(load).catch(fail(b, msg));
+        }
         if (what === "choose-human") {
           var who = (window.prompt("담당자 이름을 적어 주세요.") || "").trim();
           if (!who) return;
@@ -3415,7 +3477,7 @@
               //     화면을 놓아 줄 때 지워진다. 그걸 기준선으로 쓰다가 기준이
               //     옛 수정 요청 시각까지 밀렸고, **이미 죽은 2판이 「지금 판」으로
               //     되살아났다** (Dan: 「V2랑 V3 둘다 아래쪽에 잇어서 몰랏네」).
-              "chosen_at,started_at,pressed_at,approved_at,approved_by," +
+              "chosen_at,started_at,pressed_at,approved_at,approved_by,directions,directions_at," +
               "revision_at,revision_note,ai_job_id")
             .in("project_id", ids),
           // 구성·각본 결과 — 등록되면 그 단계 안에서 상세로 펼친다
