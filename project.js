@@ -393,18 +393,39 @@
             "설계한 컷은 아래 콘티에서 보실 수 있습니다.</p>" : ""), now.design),
       box("board", "콘티 확인", now.board ? "확인하실 차례" : "확인 완료",
         boardOpen ? secBoard(assets) + secCuts(cuts, assets) : "", now.board),
-      box("making", "영상 제작", "진행 중",
-        (now.making && !HAS_FINAL)
-          // ★ 광고주에게는 한 줄이면 된다 — 자료·영상·후반을 나눠 알릴 필요 없다
-          //   (Dan 09-23: 「너무 디테일하게 알려줄 필요없는것 같은데」)
-          ? '<div class="stage-read development-notice">' +
-            '<section class="stage-block status"><h4>영상 제작 중입니다</h4>' +
-            "<p>완성되면 이 화면에서 바로 보실 수 있습니다.</p></section></div>"
+      // ★ 지나간 뒤에도 칸은 남긴다 — 납품 단계로 넘어가자 「영상 제작」 칸이 통째로 사라졌다(09-23).
+      //   펼친 내용은 한 줄이면 된다 (Dan 09-23: 「너무 디테일하게 알려줄 필요없는」)
+      box("making", "영상 제작", now.making ? "진행 중" : "완료",
+        (now.making || at >= IDX.deliver)
+          ? '<div class="stage-read development-notice"><section class="stage-block status">' +
+            (now.making
+              ? "<h4>영상 제작 중입니다</h4><p>완성되면 이 화면에서 바로 보실 수 있습니다.</p>"
+              : "<h4>영상 제작을 마쳤습니다</h4>") + "</section></div>"
           : "",
         now.making),
-      box("done", "완성 영상", "도착",
-        secFinal(assets), now.done),
+      // 납품 — 관리자가 보내기 전(준비 중) · 보낸 뒤(확인하실 차례) · 승인 뒤(완료)가 다르게 보인다 (065)
+      box("done", "납품",
+        P.state === "ready" ? "확인하실 차례" : (P.state === "idle" ? "승인 완료" : "준비 중"),
+        P.step !== "deliver" ? ""
+          : P.state === "ready" && HAS_FINAL
+            ? secFinal(assets) + deliverForm()
+          : P.state === "idle"
+            ? secFinal(assets) + '<p class="muted">승인해 주셔서 감사합니다. 완성본은 이 화면에서 언제든 받으실 수 있습니다.</p>'
+          : '<div class="stage-read development-notice"><section class="stage-block status">' +
+            "<h4>납품을 준비하고 있습니다</h4><p>납품되면 이 화면에서 확인하실 수 있습니다.</p></section></div>",
+        now.done),
     ].join("");
+  }
+
+  function deliverForm() {
+    if (!MINE) return "";
+    return '<div class="gate col"><div class="txt"><b>납품되었습니다</b>' +
+      '<small>완성본을 확인하시고 승인해 주세요. 고칠 곳이 있으면 적어 주세요.</small></div>' +
+      '<label for="finalNote">남기실 말씀</label>' +
+      '<textarea id="finalNote" maxlength="1000" placeholder="고칠 곳이 있으면 적어 주세요"></textarea>' +
+      '<div class="acts"><button class="btn" id="approveFinal">확인했습니다 · 승인</button>' +
+      '<button class="btn ghost" id="reviseFinal">고쳐주세요</button></div>' +
+      '<span class="hint" id="finalMsg" role="status" aria-live="polite"></span></div>';
   }
 
   function secConcepts(list, canPick) {
@@ -624,32 +645,9 @@
         '<button class="btn ghost" id="reviseVideo">고쳐주세요</button></div>' +
         '<span class="hint" id="videoMsg" role="status" aria-live="polite"></span></div>';
     }
-    // ★ 납품 — 관리자가 승인해 보내기 전과 후를 다르게 보인다 (065 · Dan 09-23)
-    //   「광고주는 영상 승인이아니라 영상 제작 완료. 납품을 준비하고 있습니다. 가 맞고 …
-    //    납품이 된 후에 납품되엇으니 확인 및 승인바란다고떠야 맞는거지」
-    if (p.step === "deliver" && p.state === "ready" && HAS_FINAL) {
-      if (!MINE) return look;
-      return '<div class="gate col"><div class="txt"><b>납품되었습니다</b>' +
-        '<small>완성본을 확인하시고 승인해 주세요. 고칠 곳이 있으면 적어 주세요.</small></div>' +
-        '<label for="finalNote">남기실 말씀</label>' +
-        '<textarea id="finalNote" maxlength="1000" placeholder="고칠 곳이 있으면 적어 주세요"></textarea>' +
-        '<div class="acts"><button class="btn" id="approveFinal">확인했습니다 · 승인</button>' +
-        '<button class="btn ghost" id="reviseFinal">고쳐주세요</button></div>' +
-        '<span class="hint" id="finalMsg" role="status" aria-live="polite"></span></div>';
-    }
-    if (p.step === "deliver" && p.state === "idle") {
-      return '<div class="gate done"><div class="txt"><b>납품 완료</b>' +
-        '<small>승인해 주셔서 감사합니다. 완성본은 이 화면에서 언제든 받으실 수 있습니다.</small></div></div>';
-    }
-    if (p.step === "deliver") {
-      return '<div class="gate done"><div class="txt"><b>영상 제작 완료</b>' +
-        '<small>납품을 준비하고 있습니다. 납품되면 이 화면에서 확인하실 수 있습니다.</small></div></div>';
-    }
-    // 제작 자료·영상·후반은 광고주에게 한 가지로 보인다 (Dan 09-23 「너무 디테일하게 알려줄 필요없는」)
-    if (p.step === "anchors" || p.step === "video" || p.step === "post") {
-      return '<div class="gate done"><div class="txt"><b>영상 제작 중입니다</b>' +
-        '<small>완성되면 이 화면에서 바로 보실 수 있습니다.</small></div></div>';
-    }
+    // ★ 제작·납품은 맨 위에 띄우지 않는다 — 목록 칸(영상 제작 → 납품)에서 순서대로 보인다.
+    //   맨 위에 「영상 제작 완료」를 따로 띄웠다가 Dan: 「맨위에 쌩뚱맞게」 「순서대로 가야할꺼아냐」 (09-23)
+    if (p.step === "anchors" || p.step === "video" || p.step === "post" || p.step === "deliver") return "";
     if (done.storyboard) {
       return '<div class="gate done"><div class="txt"><b>콘티 승인 완료</b>' +
         "<small>제작에 들어갑니다. 영상이 준비되면 여기에 올라옵니다.</small>" +
