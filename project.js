@@ -627,9 +627,26 @@
         '<button class="btn ghost" id="reviseVideo">고쳐주세요</button></div>' +
         '<span class="hint" id="videoMsg" role="status" aria-live="polite"></span></div>';
     }
+    // ★ 납품 — 관리자가 승인해 보내기 전과 후를 다르게 보인다 (065 · Dan 09-23)
+    //   「광고주는 영상 승인이아니라 영상 제작 완료. 납품을 준비하고 있습니다. 가 맞고 …
+    //    납품이 된 후에 납품되엇으니 확인 및 승인바란다고떠야 맞는거지」
+    if (p.step === "deliver" && p.state === "ready" && HAS_FINAL) {
+      if (!MINE) return look;
+      return '<div class="gate col"><div class="txt"><b>납품되었습니다</b>' +
+        '<small>완성본을 확인하시고 승인해 주세요. 고칠 곳이 있으면 적어 주세요.</small></div>' +
+        '<label for="finalNote">남기실 말씀</label>' +
+        '<textarea id="finalNote" maxlength="1000" placeholder="고칠 곳이 있으면 적어 주세요"></textarea>' +
+        '<div class="acts"><button class="btn" id="approveFinal">확인했습니다 · 승인</button>' +
+        '<button class="btn ghost" id="reviseFinal">고쳐주세요</button></div>' +
+        '<span class="hint" id="finalMsg" role="status" aria-live="polite"></span></div>';
+    }
+    if (p.step === "deliver" && p.state === "idle") {
+      return '<div class="gate done"><div class="txt"><b>납품 완료</b>' +
+        '<small>승인해 주셔서 감사합니다. 완성본은 이 화면에서 언제든 받으실 수 있습니다.</small></div></div>';
+    }
     if (p.step === "deliver") {
-      return '<div class="gate done"><div class="txt"><b>영상 승인 완료</b><small>' +
-        (p.state === "ready" ? "납품이 준비되었습니다." : "납품을 준비하고 있습니다.") + '</small></div></div>';
+      return '<div class="gate done"><div class="txt"><b>영상 제작 완료</b>' +
+        '<small>납품을 준비하고 있습니다. 납품되면 이 화면에서 확인하실 수 있습니다.</small></div></div>';
     }
     // ★ 후반 단계 안내가 없어서 「콘티 승인 완료 — 앵커 이미지와…」가 떴다 (09-23)
     if (p.step === "post") {
@@ -694,6 +711,26 @@
         el("videoMsg").textContent = "저장하지 못했습니다. 진행 상태를 확인한 뒤 다시 시도해주세요.";
       });
     }
+    var fa = el("approveFinal"), fr = el("reviseFinal");
+    function finalDecision(decision) {
+      if (!MINE || !HAS_FINAL || P.step !== "deliver" || P.state !== "ready" || fa.disabled) return;
+      var note = el("finalNote").value.trim();
+      if (decision === "revise" && !note) {
+        el("finalMsg").textContent = "고칠 내용을 적어주세요.";
+        el("finalNote").focus();
+        return;
+      }
+      fa.disabled = fr.disabled = true;
+      el("finalMsg").textContent = "처리 중…";
+      db.rpc("onecue_final_decide", { p_project_id: P.id, p_decision: decision, p_note: note })
+        .then(function (r) { if (r.error) throw r.error; return load(); })
+        .catch(function () {
+          fa.disabled = fr.disabled = false;
+          el("finalMsg").textContent = "저장하지 못했습니다. 진행 상태를 확인한 뒤 다시 시도해주세요.";
+        });
+    }
+    if (fa) fa.addEventListener("click", function () { finalDecision("ok"); });
+    if (fr) fr.addEventListener("click", function () { finalDecision("revise"); });
     if (av) av.addEventListener("click", function () { videoDecision("ok"); });
     if (vr) vr.addEventListener("click", function () { videoDecision("revise"); });
     document.querySelectorAll("[data-pick]").forEach(function (b) {
