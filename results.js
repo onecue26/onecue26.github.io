@@ -27,7 +27,7 @@ async function load(){try{
 // ★ 2026-09-23 — 가로로 긴 줄(제작 단계 목록과 같은 모양)로 바꿨다. 누르면 결과물 · 제작 후기 · 개선점.
 //   Dan: 「파도에 이어서 순서대로 … 가로로 긴 탭으로 해서 열면 결과물과 후기가 잇는걸로. 그리고 개선점을 넣고」
 //   순서는 작품 번호순(P0001 파도 → P0002 → P0003 …). 완료된 원큐 프로젝트는 작업기가 닫는 순간 이어서 붙인다.
-const KIND={test:'자체 제작 테스트',client:'광고주 납품'};
+const KIND={test:'자체 제작 테스트',experiment:'실험',delivery:'광고주 납품'};
 const open=new Map();   // work_id → 보고 있는 판·칸
 function latestOf(id){return rows.filter(r=>r.work_id===id).sort((a,b)=>b.revision-a.revision);}
 function prose(text){if(!text)return '<p class="empty">기록 없음</p>';
