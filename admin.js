@@ -686,6 +686,33 @@
   function stageKinds(s) {
     return s === "anchors" ? ["anchor"] : ["clip", "final"];
   }
+  /** 자리(covers_call)마다 **가장 새 판**. 다시 뽑기의 잠금은 이것을 본다. */
+  function newestTakes(p, s) {
+    var kinds = stageKinds(s);
+    var all = (p.files || []).filter(function (f) { return kinds.indexOf(f.kind) >= 0; });
+    return all.filter(function (f) {
+      var call = (f.meta || {}).covers_call || "";
+      return !all.some(function (g) {
+        return g.id !== f.id && ((g.meta || {}).covers_call || "") === call &&
+          String(g.created_at || "") > String(f.created_at || "");
+      });
+    });
+  }
+  /** 새 판이 나왔는데 아직 **검수가 안 붙었거나 사장님이 안 보신** 것.
+   *
+   *  Dan 2026-09-23: 「v5는 너의 피드백과 함께 내가 그다음 수정요청할지
+   *  여부를 쓰게 나와야하는데, 지금은 그냥 아무것도 안써있고 하물며
+   *  다시뽑기 버튼은 활성화 되어있음」
+   *  전에는 **의견을 적으신 판만** 잠갔다. 그래서 막 나온 v5 — 검수도 없고
+   *  의견도 아직 없는 판 — 은 잠글 이유가 없는 것으로 보였다. 거꾸로다.
+   *  아무도 안 본 판이야말로 다시 뽑으면 안 되는 판이다. */
+  function unseenTake(p, s) {
+    if (s === "anchors") return null;
+    return newestTakes(p, s).filter(function (f) {
+      var m = f.meta || {};
+      return !m.review || m.review === "pending" || !m.dan_take;
+    })[0] || null;
+  }
   function openTakes(p, s) {
     var kinds = stageKinds(s);
     return (p.files || []).filter(function (f) {
@@ -695,6 +722,7 @@
   }
 
   function takeSettled(p, s) {
+    if (unseenTake(p, s)) return false;
     var live = openTakes(p, s);
     if (!live.length) return true;         // 적으신 것이 없으면 해당 없음
     return live.every(function (f) {
@@ -714,6 +742,19 @@
   /** 잠긴 이유를 한 줄로. 버튼과 **같은 판단**을 쓴다. */
   function takeWaiting(p, s) {
     if (takeSettled(p, s)) return "";
+    var u = unseenTake(p, s);
+    if (u) {
+      var um = u.meta || {};
+      return (!um.review || um.review === "pending")
+        ? '<div class="plan-same"><b>새 판을 검수하고 있습니다</b><span>' +
+          "방금 나온 판을 잘게 끊어 보고 소리까지 확인해서, 결과물 아래에 " +
+          "<b>검수와 제작 쪽 의견</b>을 붙입니다. 그때까지 다시 뽑기는 잠겨 " +
+          "있습니다 — 아무도 안 본 판을 두고 또 값을 쓰지 않습니다.</span></div>"
+        : '<div class="plan-same"><b>보시고 정하실 차례입니다</b><span>' +
+          "결과물 아래 칸에 <b>다음 판에서 고칠 것</b>을 적어 주시면 답을 달고, " +
+          "정하시면 프롬프트에 옮긴 뒤 다시 뽑기가 열립니다. 이대로 좋으시면 " +
+          "승인하시면 됩니다.</span></div>";
+    }
     var f = openTakes(p, s).filter(function (x) {
       return !(x.meta || {}).settled_at;
     })[0];
@@ -1826,9 +1867,40 @@
         })
         .forEach(function (f, i) { verOf[f.id] = i + 1; });
 
+      // ★ 자리(covers_call)마다 **새 것부터 몇 번째인가.** 0 = 지금 판, 1 = 직전 판.
+      //
+      //   Dan 2026-09-23: 「v5가 v4 위로 (아래서부터 순서대로니까) 나오고,
+      //   v4제외한 나머지는 저절로 지난버전으로 가야하고」
+      //   펼쳐 두는 것은 **지금 판과 그 직전 판** 둘이다 — 무엇이 나아졌는지
+      //   견주는 데 필요한 것이 그 둘이다. 그 아래는 사장님 말씀이 붙어
+      //   있어도 접는다(접어도 지우지 않는다 — 펼치면 그대로 있다).
+      var rank = {};
+      var byCall = {};
+      (p.files || []).filter(function (f) {
+        return want.indexOf(f.kind) >= 0 && (f.meta || {}).covers_call;
+      }).forEach(function (f) {
+        var c = f.meta.covers_call;
+        (byCall[c] = byCall[c] || []).push(f);
+      });
+      Object.keys(byCall).forEach(function (c) {
+        byCall[c].sort(function (x, y) {
+          return String(x.created_at || "") > String(y.created_at || "") ? -1 : 1;
+        }).forEach(function (f, i) { rank[f.id] = i; });
+      });
+      /** 정할 것을 줄 판인가. 지금 판이라도 다시 뽑기를 누르신 뒤면 지난 판이다. */
+      function isPast(f) {
+        if (rank[f.id] != null && rank[f.id] > 0) return true;
+        return superseded(p, step, f);
+      }
+
       var older = [];
       var mine = (p.files || []).filter(function (f) {
         if (want.indexOf(f.kind) < 0) return false;
+        if (rank[f.id] != null) {
+          if (rank[f.id] <= 1) return true;
+          older.push(f);
+          return false;
+        }
         // ★ **사장님이 말씀을 남긴 판은 접지 않는다.**
         //
         //   v4 가 나오자 v3 가 지난 판으로 접혔다. 그런데 v3 에는 사장님
@@ -1836,7 +1908,7 @@
         //   근거다. 접으면 **무엇과 견주어 나아졌는지**를 볼 수가 없다.
         //   그리고 둘 다 이미 45크레딧씩 나간 결과물이다. 나간 것은 나란히
         //   보여야 한다 (Dan 2026-09-22: 「v3랑 v4둘다 올려야지」).
-        if ((f.meta || {}).dan_take) return true;
+        //   → 09-23 부터는 위의 rank 가 맡는다: 지금 판과 직전 판을 펼친다.
         // ★ 고쳐 달라고 하기 전에 만든 것은 접어 둔다. 지우지 않는다 —
         //   무엇이 나아졌는지 견주려면 옛것이 남아 있어야 한다.
         if (superseded(p, step, f)) { older.push(f); return false; }
@@ -1855,7 +1927,13 @@
       }).sort(function (x, y) {
         var a1 = x.cut_n == null ? 9999 : Number(x.cut_n);
         var b1 = y.cut_n == null ? 9999 : Number(y.cut_n);
-        return a1 - b1;
+        if (a1 !== b1) return a1 - b1;
+        // 같은 컷이면 **새 판이 위.** 전에는 여기서 순서가 정해지지 않아
+        // v5 가 v4 아래로 갔다.
+        return String(x.created_at || "") > String(y.created_at || "") ? -1 : 1;
+      });
+      older.sort(function (x, y) {
+        return String(x.created_at || "") > String(y.created_at || "") ? -1 : 1;
       });
       function oldBox() {
         if (!older.length) return "";
@@ -1874,9 +1952,9 @@
       }
       if (!mine.length) return oldBox();
       return '<div class="made" data-made-step="' + esc(step) + '"><span class="made-lbl">만든 것 ' + mine.length +
-        " (지금 v" + (verOf[mine[mine.length - 1].id] || mine.length) +
+        " (지금 v" + Math.max.apply(null, mine.map(function (f) { return verOf[f.id] || 0; })) +
         ") · 눌러서 크게 · 영상은 두 번 누르십시오</span>" +
-        mine.map(function (f, i) { return one(f, i, false); }).join("") +
+        mine.map(function (f, i) { return one(f, i, isPast(f)); }).join("") +
         "</div>" + oldBox();
 
       // 한 장을 그리는 법. 지금 것과 이전 판이 **같은 함수**를 쓴다 —
@@ -1942,11 +2020,19 @@
       function verdictOf(f, isOld) {
         var m = f.meta || {};
         var v = m.review || "";
-        if (v !== "blocked" && v !== "ask") return "";
-        return '<div class="verdict v-' + esc(v) + '">' +
-          "<b>" + (v === "blocked"
-            ? "검수에서 걸렸습니다 · 치명 " + (m.critical || 0) + "건"
-            : "정해야 할 것 " + (m.asks || 0) + "건") + "</b>" +
+        // ★ **지금 판은 검수 결과가 무엇이든 칸을 낸다.**
+        //   전에는 「걸렸다·물어볼 것」일 때만 칸을 냈다. 그래서 막 나온 v5
+        //   (검수 전 = pending)는 의견도, 적을 칸도 없이 영상만 떴다
+        //   (Dan 2026-09-23: 「지금은 그냥 아무것도 안써있고」).
+        //   지난 판은 전처럼 걸린 것만 기록으로 남긴다.
+        if (v !== "blocked" && v !== "ask" && (isOld || !f.kind || f.kind === "anchor")) return "";
+        var head = v === "blocked"
+          ? "검수에서 걸렸습니다 · 치명 " + (m.critical || 0) + "건"
+          : v === "ask" ? "정해야 할 것 " + (m.asks || 0) + "건"
+          : (!v || v === "pending") ? "검수하고 있습니다 — 끝나면 여기에 검수와 제작 쪽 의견이 붙습니다"
+          : "검수 통과 — 치명적인 것은 없습니다";
+        return '<div class="verdict v-' + esc(v || "pending") + '">' +
+          "<b>" + head + "</b>" +
           (m.why ? '<span class="what">' + esc(m.why) + "</span>" : "") +
           (m.dropped ? '<details class="kept"><summary>안 잡은 것과 그 이유</summary>' +
             "<span>" + esc(m.dropped) + "</span></details>" : "") +
