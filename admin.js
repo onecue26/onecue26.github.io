@@ -1761,10 +1761,9 @@
             (x.unresolved ? '<span class="open">★ 안 정해짐 — ' +
               esc(x.unresolved) + "</span>" : "") + "</li>";
         }).join("") + "</ol>" +
-        // ★ 세 번째 인자(단계 상태)를 안 넘겨서 후반 단계에 들어가는 순간 화면이 통째로
-        //   죽었다 — 「Cannot read properties of undefined (reading 'phase')」 (Dan 09-23).
-        (p.step === "post" ? lifecycleBar(p, "post",
-          SE().actions(p, "post", !!(p.stageResults && p.stageResults.post))) : "") + "</div>";
+        // 후반 단계의 「누가 맡습니까」는 단계 머리(execPicker 자리)가 이미 그린다 — 여기서
+        //   또 그리면 두 번 뜬다 (Dan 09-23: 「맨위랑 맨아래 두개가 뜬다」).
+        "</div>";
     }
 
     function paidStageBody(p, step) {
