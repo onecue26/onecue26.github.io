@@ -380,7 +380,9 @@
           ? secConcepts(concepts, MINE && P.step === "concepts" && P.state === "ready")
           : "",
         now.pick),
-      box("design", "제작 설계", "진행 중",
+      // ★ 상태 글자를 박아 두지 않는다. 「진행 중」으로 고정돼 있어서 영상
+      //   제작 중인 건에도 제작 설계가 「진행 중」이라고 떴다 (Dan 2026-09-23).
+      box("design", "제작 설계", now.design ? "진행 중" : "완료",
         (!boardOpen && shown("develop")) ? secDesigning() : "", now.design),
       box("board", "콘티 확인", "확인하실 차례",
         boardOpen ? secBoard(assets) + secCuts(cuts, assets) : "", now.board),
