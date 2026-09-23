@@ -845,7 +845,8 @@
           db.from("assets").select("kind,approved,url,storage_path,role,mime,cut_n,meta").eq("project_id", id).or("kind.neq.final,approved.eq.true"),
           db.from("approvals").select("gate,decision,note,decided_at").eq("project_id", id).order("decided_at"),
           // onecue 에서 보낸 메시지와 광고주 답 (070) — 초안은 서버가 안 내준다
-          db.from("project_messages").select("id,author,kind,body,sent_at").eq("project_id", id).order("created_at"),
+          // ★ 보낸 것만 — 관리자·읽기 전용 계정으로 볼 때 초안까지 떠서 광고주가 보는 것과 달랐다(09-23)
+          db.from("project_messages").select("id,author,kind,body,sent_at").eq("project_id", id).not("sent_at", "is", null).order("created_at"),
         ]).then(function (x) {
           x.forEach(function (r) { if (r.error) throw r.error; });
           if (!window.ONECUE_ASSETS) throw new Error("자료 접근 설정을 불러오지 못했습니다.");
