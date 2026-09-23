@@ -955,6 +955,8 @@
           ? '<button class="btn ghost" type="button" data-lc="approve"' + tag +
             ">이대로 승인</button>"
           : "") +
+        // 시작 전이면 AI ↔ 사람(요청사항)을 서로 바꿀 수 있다
+        switchChoice(p, s) +
         "</div>" +
         (locked ? "" : '<span class="lc-msg">누르면 크레딧이 나갑니다. 만들어지면 여기에 올라오고, ' +
         '보신 뒤 승인하거나 고칠 곳을 적으실 수 있습니다.</span>') +
@@ -1190,6 +1192,25 @@
    *  Dan 2026-09-23: 「모든 작업은 ai or 사람 둘중 선택하는 창부터」 「아래쪽이 더맘에드는데
    *  심플하게 나오니깐 … 기능은 거기에 맞게구현하고」. 사람을 못 고르는 단계는 버튼 대신
    *  이유 한 줄을 둔다(버튼이 그냥 없으면 「고장났나」가 된다). */
+  /** 고른 뒤, 시작 전까지 **서로 바꾸는** 칸 (Dan 09-23: 「둘다 서로 선택햇다가 되돌아갈수잇게」) */
+  function switchChoice(p, key) {
+    var tag = ' data-slug="' + esc(p.slug) + '" data-step="' + esc(key) + '"';
+    var pick = SE().of(p, key) || {};
+    if (pick.directions) {
+      return '<button class="btn ghost" type="button" data-lc="undirect"' + tag +
+        ">AI에게 맡기기로 바꾸기</button>";
+    }
+    return directForm(tag, "사람이 직접 진행으로 바꾸기");
+  }
+  function directForm(tag, label) {
+    return '<details class="lc-direct"><summary class="btn ghost">' + esc(label) + "</summary>" +
+      '<textarea class="lc-note" data-lc-note rows="3" placeholder="' +
+      esc("요청사항을 적어 주십시오 — 적으신 대로 반영해서 만듭니다") + '"></textarea>' +
+      '<button class="btn" type="button" data-lc="direct"' + tag + ">이 요청대로 진행</button> " +
+      '<button class="btn ghost" type="button" data-lc="direct-cancel">취소</button>' +
+      "</details>";
+  }
+
   function simpleChoose(p, key) {
     // Dan 2026-09-23: 「ai한테 맡기기랑 사람이 하는거 2개로 나뉘라고햇는데 … 과정은 동일하되
     //   사람이 하는것도 같은 폼으로 … 사람이 요청사항을 넣거나 하면 니가 그걸로 작업하는거고」
@@ -1199,11 +1220,7 @@
       '<div class="lc-head"><b>누가 맡습니까</b><span>고르기만 해서는 작업이 시작되지 않습니다</span></div>' +
       '<div class="lc-row">' +
       '<button class="btn" type="button" data-lc="choose-ai"' + tag + ">AI에게 맡기기</button>" +
-      '<details class="lc-direct"><summary class="btn ghost">사람이 직접 진행</summary>' +
-      '<textarea class="lc-note" data-lc-note rows="3" placeholder="' +
-      esc("요청사항을 적어 주십시오 — 적으신 대로 반영해서 만듭니다") + '"></textarea>' +
-      '<button class="btn" type="button" data-lc="direct"' + tag + ">이 요청대로 진행</button>" +
-      "</details></div>" +
+      directForm(tag, "사람이 직접 진행") + "</div>" +
       '<span class="lc-msg" data-lc-msg></span></div>';
   }
 
@@ -1229,8 +1246,7 @@
         '<button class="btn" type="button" data-lc="start"' + tag +
         (directionsPending(p, key) ? " disabled" : "") + ">" +
         (pick.directions ? "요청대로 시작" : pick.mode === "human" ? "작성 시작" : "AI 작업 시작") + "</button>" +
-        '<button class="btn ghost" type="button" data-lc="rechoose"' + tag +
-        ">담당 다시 고르기</button></div>" +
+        switchChoice(p, key) + "</div>" +
         (directionsPending(p, key) ? DIR_WAIT : "") + "</div>";
     }
     if (act.phase === "working") {
@@ -2859,6 +2875,19 @@
           if (msg) { msg.className = "lc-msg err"; msg.textContent = "무엇을 고칠지 적어 주세요."; }
           if (note) note.focus();
           return;
+        }
+        // 잘못 눌렀으면 칸만 접는다 — 아무것도 저장하지 않는다
+        if (what === "direct-cancel") {
+          var d = b.closest("details"); if (d) d.open = false;
+          return;
+        }
+        // 061 — 사람 → AI 로 되돌린다 (시작 전까지)
+        if (what === "undirect") {
+          lock(b);
+          return rpc(slug, "onecue_stage_directions_clear", { p_step: step })
+            .then(function (r) {
+              if (r && r.ok === false) throw new Error(r.why || "바꾸지 못했습니다");
+            }).then(load).catch(fail(b, msg));
         }
         // 060 — 「사람이 직접 진행」: 요청사항을 적고 그대로 진행한다
         if (what === "direct") {
