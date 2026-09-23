@@ -910,7 +910,7 @@
           el("main").innerHTML =
             '<div class="hero"><div>' + brand + '<h1>' + esc(title) + "</h1>" +
               '<div class="sub mono">' + esc(P.slug) + " · " + P.running_sec +
-              "초 · " + P.cut_count + "컷 · " +
+              "초 · " +   // 컷 수는 광고주가 준 값이 아니다(길이로 자동 계산) — 머리줄에서 뺀다 (Dan 09-24)
               esc((P.aspects && P.aspects.length) ? P.aspects.join(" / ") : P.aspect) +
               ((P.channels && P.channels.length) ? " · " + esc(P.channels.join(" ")) : "") +
               "</div>" +

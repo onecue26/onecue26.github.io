@@ -63,7 +63,6 @@
     var asp = (r.aspects && r.aspects.length) ? r.aspects.join(" / ") : (r.aspect || "");
     var meta = [
       (r.running_sec || 0) + "초",
-      (r.cut_count || 0) + "컷",
       asp,
     ].filter(Boolean).join(" · ");
 
