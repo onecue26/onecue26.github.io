@@ -2398,7 +2398,9 @@
       // ★ 납품에는 **이 건 원가 합계**를 둔다. 광고 한 편에 얼마가 드는지
       //   모르면 서비스 가격을 정할 수 없다.
       // 후반 — 계획에 적힌 할 일을 그대로 세운다. 여기서 지어내지 않는다.
-      post: postBody(p),
+      // 후반 계획은 AI 에게 맡긴 뒤에 보인다 — 고르기 전에 떠 있으면 이미 정해진 것처럼 읽힌다
+      //   (Dan 09-23: 「후반에서 입힐것은 ai한테 맞겻을때 하는건데 아래 계속떠잇네?」)
+      post: (SE().of(p, "post") || {}).chosen_at ? postBody(p) : "<span></span>",
       deliver: totalLine(p) + (p.step === "deliver" ? productionAction : "")
     };
 
@@ -3213,8 +3215,12 @@
       return Promise.reject(new Error(
         "폼 계약을 불러오지 못해 누가 맡는지 정할 수 없습니다 — 새로고침한 뒤 다시 시도해 주세요"));
     }
-    if (!SE().choiceRequired(step)) {
-      return Promise.reject(new Error("이 단계는 실행 주체를 따로 고르지 않습니다"));
+    // ★ AI 로 맡기는 것은 **어느 단계든** 된다. 「사람 양식이 있는 단계만 고를 수 있다」는
+    //   검사가 AI 까지 막아서, 후반 단계에서 「AI에게 맡기기」가 요청도 안 보내고 조용히
+    //   멈췄다 (Dan 09-23: 「ai에게 맡기기 눌럿는데 반응없는데」). 양식 검사는 담당자가
+    //   결과를 직접 올리는 옛 방식(mode=human)에만 건다.
+    if (mode === "human" && !SE().choiceRequired(step)) {
+      return Promise.reject(new Error("이 단계는 담당자 양식이 없습니다 — 「사람이 직접 진행」(요청사항)을 쓰십시오"));
     }
     if (mode === "human") {
       var pickable = SE().assignable(step);
