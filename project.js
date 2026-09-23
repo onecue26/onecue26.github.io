@@ -631,13 +631,18 @@
       return '<div class="gate done"><div class="txt"><b>영상 승인 완료</b><small>' +
         (p.state === "ready" ? "납품이 준비되었습니다." : "납품을 준비하고 있습니다.") + '</small></div></div>';
     }
+    // ★ 후반 단계 안내가 없어서 「콘티 승인 완료 — 앵커 이미지와…」가 떴다 (09-23)
+    if (p.step === "post") {
+      return '<div class="gate done"><div class="txt"><b>마무리 편집 중입니다</b>' +
+        '<small>영상에 자막과 마지막 화면을 입히고 있습니다. 끝나면 완성본이 올라옵니다.</small></div></div>';
+    }
     if (p.step === "video") {
       return '<div class="gate done"><div class="txt"><b>영상을 준비하고 있습니다</b>' +
         '<small>검수가 끝나면 완성본이 올라옵니다.</small></div></div>';
     }
     if (done.storyboard) {
       return '<div class="gate done"><div class="txt"><b>콘티 승인 완료</b>' +
-        "<small>제작에 들어갑니다. 앵커 이미지와 영상이 준비되면 여기에 올라옵니다.</small>" +
+        "<small>제작에 들어갑니다. 영상이 준비되면 여기에 올라옵니다.</small>" +
         "</div></div>";
     }
     if (p.step === "develop" && done.concepts) {
@@ -808,7 +813,7 @@
               bar(P.step) + "</div></div>" +
             secGate(P, x[5].data) + flow(x) +
             '<footer><span><a href="index.html">← 목록</a></span>' +
-            '<span class="mono">' + new Date().toISOString().slice(0, 16).replace("T", " ") +
+            '<span class="mono">' + new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 16) +
             "</span></footer>";
           wire();
           remember(P);
