@@ -858,7 +858,9 @@
       }).join("") + "</ul>"
       : "";
 
-    if (at === "start" || at === "choose") {
+    // 누가 맡는지부터 — 고르는 칸은 다른 단계와 같은 것을 쓴다
+    if (at === "choose") return lifecycleBar(p, s, act);
+    if (at === "start") {
       // 수정 요청을 받고 아직 다시 안 누른 자리인가. 그렇다면 이 버튼은
       // **처음 뽑기가 아니라 다시 뽑기**이고, 값이 또 나갑니다. 같은 문구를
       // 쓰면 이미 나간 돈을 잊게 됩니다.
@@ -1952,6 +1954,9 @@
           (!m.review || m.review === "pending");
       }
       function isPast(f) {
+        // ★ 단계를 승인했거나 이미 넘어갔으면 이 단계의 판은 전부 기록이다.
+        //   승인 뒤에도 v6 에 의견 저장이 살아 있었다 (Dan 2026-09-23).
+        if (p.step !== step || (SE().of(p, step) || {}).approved_at) return true;
         if (rank[f.id] != null && rank[f.id] > 0) return true;
         return superseded(p, step, f);
       }
