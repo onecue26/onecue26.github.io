@@ -34,6 +34,7 @@
         state: "planned", ai_job_id: null, delivered_at: null, delivered_note: "",
         client_summary: "", plain_language_ok: false,
         chosen_at: null, started_at: null, pressed_at: null,
+        directions: "", directions_at: null,
         approved_at: null, revision_at: null, revision_note: "" };
     }
     return {
@@ -62,6 +63,9 @@
       //      superseded() 도 고쳤는데 값이 늘 undefined 라서 2판이 계속
       //      떴다 (Dan 2026-09-22: 「v2도 여전히 나오는데」).
       pressed_at: row.pressed_at || null,
+      // 060 — 사장님 요청사항. 있으면 「사람이 직접 진행」(요청대로), 없으면 AI 가 알아서
+      directions: row.directions || "",
+      directions_at: row.directions_at || null,
       approved_at: row.approved_at || null,
       revision_at: row.revision_at || null,
       revision_note: row.revision_note || "",
