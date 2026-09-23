@@ -35,7 +35,7 @@
         client_summary: "", plain_language_ok: false,
         chosen_at: null, started_at: null, pressed_at: null,
         directions: "", directions_at: null,
-        approved_at: null, revision_at: null, revision_note: "" };
+        approved_at: null, approved_by: "", revision_at: null, revision_note: "" };
     }
     return {
       mode: row.mode === "human" ? "human" : "ai",
@@ -67,6 +67,8 @@
       directions: row.directions || "",
       directions_at: row.directions_at || null,
       approved_at: row.approved_at || null,
+      // 누가 승인했나 — 단계 줄에 아이디로 보인다 (066 · Dan 09-23)
+      approved_by: row.approved_by || "",
       revision_at: row.revision_at || null,
       revision_note: row.revision_note || "",
     };
