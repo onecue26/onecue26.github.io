@@ -431,11 +431,15 @@
     var open = last.author === "admin";            // 우리 말이 마지막이면 답을 기다리는 중
     return '<section class="msgs"><h2>onecue 에서 온 메시지</h2>' + list.map(function (m) {
       return '<div class="msg ' + (m.author === "admin" ? "in" : "out") + '"><div class="msg-head"><b>' +
-        esc(MSG_KIND[m.kind] || m.kind) + "</b> · " + esc(String(m.sent_at || "").slice(0, 16).replace("T", " ")) +
+        esc(MSG_KIND[m.kind] || m.kind) + "</b> · " + esc(m.sent_at ? new Date(m.sent_at).toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 16) : "") +
         '</div><div class="msg-body">' + esc(m.body) + "</div></div>";
     }).join("") +
       (MINE ? '<div class="msg-reply"><textarea id="msgReply" rows="3" maxlength="4000" placeholder="' +
         (open ? "답을 적어 주세요" : "더 하실 말씀이 있으면 적어 주세요") + '"></textarea>' +
+        // 첨부 — 자료를 요청받으면 답하면서 바로 올린다 (Dan 09-23 「첨부자료도 추가하도록」)
+        '<div class="msg-attach"><select id="msgFileKind"><option value="product_ref">제품 사진</option>' +
+        '<option value="mood_ref">참고 이미지·영상</option><option value="doc">문서·기타</option></select>' +
+        '<input type="file" id="msgFiles" multiple accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.zip"></div>' +
         '<button class="btn" id="msgSend" data-reply-to="' + esc(last.id) + '">보내기</button>' +
         '<span class="hint" id="msgMsg" role="status" aria-live="polite"></span></div>' : "") + "</section>";
   }
@@ -728,9 +732,25 @@
     var ms = el("msgSend");
     if (ms) ms.addEventListener("click", function () {
       var body = (el("msgReply").value || "").trim();
-      if (!body) { el("msgMsg").textContent = "보낼 말을 적어 주세요."; return; }
-      ms.disabled = true; el("msgMsg").textContent = "보내는 중…";
-      db.rpc("onecue_message_reply", { p_project_id: P.id, p_body: body, p_reply_to: ms.dataset.replyTo || null })
+      var files = el("msgFiles") ? Array.prototype.slice.call(el("msgFiles").files || []) : [];
+      var kind = el("msgFileKind") ? el("msgFileKind").value : "product_ref";
+      if (!body && !files.length) { el("msgMsg").textContent = "보낼 말을 적거나 파일을 골라 주세요."; return; }
+      ms.disabled = true; el("msgMsg").textContent = files.length ? "파일을 올리는 중…" : "보내는 중…";
+      // 파일을 먼저 올리고(의뢰 때와 같은 방식 · 광고주가 올린 자료 칸에 붙는다) 답에 첨부 목록을 적는다
+      Promise.all(files.map(function (file) {
+        var ext = (file.name.split(".").pop() || "bin").toLowerCase().slice(0, 8);
+        var key = P.id + "/" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10) + "." + ext;
+        return db.storage.from("uploads").upload(key, file, { contentType: file.type }).then(function (r) {
+          if (r.error) throw r.error;
+          var url = db.storage.from("uploads").getPublicUrl(key).data.publicUrl;
+          return db.from("assets").insert({ project_id: P.id, kind: kind, role: file.name, storage_path: key,
+            url: url, mime: file.type, bytes: file.size, meta: { by: "client", via: "message" } })
+            .then(function (saved) { if (saved.error) throw saved.error; return file.name; });
+        });
+      })).then(function (names) {
+        var text = (body || "(자료를 보냅니다)") + (names.length ? "\n\n[첨부 " + names.length + "개] " + names.join(", ") : "");
+        return db.rpc("onecue_message_reply", { p_project_id: P.id, p_body: text, p_reply_to: ms.dataset.replyTo || null });
+      })
         .then(function (r) { if (r.error) throw r.error; return load(); })
         .catch(function () { ms.disabled = false; el("msgMsg").textContent = "보내지 못했습니다. 잠시 뒤 다시 시도해 주세요."; });
     });
@@ -879,7 +899,7 @@
               bar(P.step) + "</div></div>" +
             (P.state === "done"
               ? '<div class="gate done"><div class="txt"><b>프로젝트가 완료되었습니다</b><small>' +
-                esc(String(P.closed_at || "").slice(0, 10)) + " · 함께해 주셔서 감사합니다. 완성본은 아래 납품 칸에서 언제든 받으실 수 있습니다.</small></div></div>"
+                esc(P.closed_at ? new Date(P.closed_at).toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 10) : "") + " · 함께해 주셔서 감사합니다. 완성본은 아래 납품 칸에서 언제든 받으실 수 있습니다.</small></div></div>"
               : secGate(P, x[5].data)) + secMessages(x[6].data) + flow(x) +
             '<footer><span><a href="index.html">← 목록</a></span>' +
             '<span class="mono">' + new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 16) +
