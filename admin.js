@@ -1830,13 +1830,13 @@
       }
       if (p.state === "done") {
         return '<div class="close-box done"><b>프로젝트 완료</b>' +
-          '<span>' + esc(who(p.closed_by)) + " · " + esc(when(p.closed_at)) + " · 총 원가 " + spentAll(p) +
+          '<span>' + esc(personName(p.closed_by)) + " · " + esc(when(p.closed_at)) + " · 총 원가 " + spentAll(p) +
           "cr" + won(spentAll(p)) + "</span></div>";
       }
       if (p.state === "idle" && last && last.decision === "ok") {
         // ★ 광고주 승인으로 끝나지 않는다 — 관리자가 닫아야 한 건이 끝난다 (068 · Dan 09-23)
         return '<div class="close-box"><b>광고주가 납품본을 승인했습니다</b>' +
-          '<span>' + esc(who(last.decided_by)) + " · " + esc(when(last.decided_at)) +
+          '<span>' + esc(personName(last.decided_by)) + " · " + esc(when(last.decided_at)) +
           (last.note ? " · 「" + esc(last.note) + "」" : "") + "</span>" +
           '<p>남은 일이 없으면 프로젝트를 닫습니다. 닫으면 목록 아래 「완료된 프로젝트」로 내려가고, ' +
           "이 건의 원가·판 수가 제작 기록에 남습니다.</p>" +
@@ -3716,7 +3716,8 @@
       (r.data || []).forEach(function (x) { PEOPLE[x.id] = x.email; });
     });
   }
-  function who(uid) {
+  // ★ 이름을 personName 으로 — `who` 는 card() 안의 변수 이름이라 그 안에서 부르면 가려졌다(09-23 화면 깨짐)
+  function personName(uid) {
     if (!uid) return "기록 없음";
     var e = PEOPLE[uid];
     return e ? e.split("@")[0] : String(uid).slice(0, 8);
@@ -3724,16 +3725,16 @@
   function signoff(p, key) {
     var out = [];
     var r = SE().of(p, key);
-    if (r && r.approved_at) out.push("승인 " + who(r.approved_by) + " · " + hhmm(r.approved_at));
+    if (r && r.approved_at) out.push("승인 " + personName(r.approved_by) + " · " + hhmm(r.approved_at));
     var gate = (p.approvals || []).filter(function (a) { return a.gate === key; })[0];
     if (gate) out.push("광고주 " + (gate.decision === "ok" ? "승인" : "수정 요청") + " " +
-      who(gate.decided_by) + " · " + hhmm(gate.decided_at));
+      personName(gate.decided_by) + " · " + hhmm(gate.decided_at));
     if (key === "deliver") {
       var sent = (p.sents || []).filter(function (e) {
         return e.payload && e.payload.what === "final";
       })[0];
-      if (sent) out.unshift("납품 " + who(sent.payload.by_uid) + " · " + hhmm(sent.ts));
-      if (p.closed_at) out.push("마감 " + who(p.closed_by) + " · " + hhmm(p.closed_at));
+      if (sent) out.unshift("납품 " + personName(sent.payload.by_uid) + " · " + hhmm(sent.ts));
+      if (p.closed_at) out.push("마감 " + personName(p.closed_by) + " · " + hhmm(p.closed_at));
     }
     return out.length ? '<small class="signoff">' + esc(out.join("  /  ")) + "</small>" : "";
   }
