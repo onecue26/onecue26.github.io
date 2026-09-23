@@ -84,6 +84,12 @@
   }
   // 그 자리의 시계로 적는다. DB 는 UTC 라 그대로 찍으면 아홉 시간 어긋나고,
   // 「00:06 에 승인」은 새벽에 승인한 것처럼 읽힌다 — 실제로는 아침 9시다.
+  /** 한국 시각 「오전 10:19」. plusMin 만큼 뒤의 시각도 낸다. */
+  function hhmm(ts, plusMin) {
+    var d = new Date(new Date(ts).getTime() + (plusMin || 0) * 60000);
+    return d.toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul",
+      hour: "numeric", minute: "2-digit" });
+  }
   function when(ts) {
     if (!ts) return "";
     var d = new Date(ts);
@@ -746,10 +752,12 @@
     if (u) {
       var um = u.meta || {};
       return (!um.review || um.review === "pending")
-        ? '<div class="plan-same"><b>새 판을 검수하고 있습니다</b><span>' +
-          "방금 나온 판을 잘게 끊어 보고 소리까지 확인해서, 결과물 아래에 " +
-          "<b>검수와 제작 쪽 의견</b>을 붙입니다. 그때까지 다시 뽑기는 잠겨 " +
-          "있습니다 — 아무도 안 본 판을 두고 또 값을 쓰지 않습니다.</span></div>"
+        ? '<div class="plan-same"><b>새 판이 ' + esc(hhmm(u.created_at)) +
+          "에 나왔습니다 — " + esc(hhmm(u.created_at, 20)) +
+          "쯤 검수와 함께 올라옵니다</b><span>" +
+          "잘게 끊어 보고 소리를 확인한 뒤 페이블이 판정합니다. <b>검수가 붙은 뒤에 " +
+          "영상·의견·적으실 칸이 한꺼번에</b> 여기에 올라옵니다. 그때까지 다시 " +
+          "뽑기는 잠겨 있습니다.</span></div>"
         : '<div class="plan-same"><b>보시고 정하실 차례입니다</b><span>' +
           "결과물 아래 칸에 <b>다음 판에서 고칠 것</b>을 적어 주시면 답을 달고, " +
           "정하시면 프롬프트에 옮긴 뒤 다시 뽑기가 열립니다. 이대로 좋으시면 " +
@@ -1888,6 +1896,11 @@
         }).forEach(function (f, i) { rank[f.id] = i; });
       });
       /** 정할 것을 줄 판인가. 지금 판이라도 다시 뽑기를 누르신 뒤면 지난 판이다. */
+      function unreviewed(f) {
+        var m = f.meta || {};
+        return step !== "anchors" && rank[f.id] === 0 &&
+          (!m.review || m.review === "pending");
+      }
       function isPast(f) {
         if (rank[f.id] != null && rank[f.id] > 0) return true;
         return superseded(p, step, f);
@@ -1897,7 +1910,15 @@
       var mine = (p.files || []).filter(function (f) {
         if (want.indexOf(f.kind) < 0) return false;
         if (rank[f.id] != null) {
-          if (rank[f.id] <= 1) return true;
+          // ★ 2026-09-23 두 번째 — **새 판 하나만 펼친다.** 나머지는 전부 지난 버전.
+          //   Dan: 「새로운 버전 올라오면, 나중 버전은 저절로 지난버전으로 가게
+          //   만들고 새로운 버전 하나만 니 의견과 함께 뜨고 의견란뜨는」
+          // ★ 그리고 **검수가 붙기 전에는 올리지 않는다.** 영상만 먼저 뜨고
+          //   「검수하고 있습니다」가 붙으면 언제까지 기다리란 건지 모른다.
+          //   Dan: 「검수결과가 나오고 한꺼번에 올라와야지」
+          //   그동안은 버튼 옆에 「몇 시에 나왔고 언제쯤 올라온다」만 적는다.
+          if (unreviewed(f)) return false;
+          if (rank[f.id] === 0) return true;
           older.push(f);
           return false;
         }
