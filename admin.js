@@ -3771,8 +3771,8 @@
     function li(title, arr) {
       return arr && arr.length ? "<b>" + title + "</b>" + arr.map(function (x) { return "<span>· " + esc(x) + "</span>"; }).join("") : "";
     }
-    return '<div class="msg-digest">' + li("반영된 조건", d.conditions) + li("결정", d.decisions) +
-      li("다시 물어볼 것", d.follow_up) + "</div>";
+    // 재확인 칸은 두지 않는다 — 모든 조건을 다 맞출 수는 없다 (Dan 09-24)
+    return '<div class="msg-digest">' + li("반영된 조건", d.conditions) + li("결정", d.decisions) + "</div>";
   }
   /** 모든 광고주 답의 반영 조건 — 의뢰 조건 칸에 붙인다. 기획이 이것까지 읽는다 */
   function digestConditions(p) {
