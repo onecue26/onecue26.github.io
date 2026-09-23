@@ -1917,9 +1917,12 @@
         '<tr class="grand"><td>총 원가 · 결제 ' + rows.length + '건</td><td class="num">' + all +
         ' cr</td><td class="num">' + krw(all) + "</td></tr></tbody></table>" +
         '<p class="stmt-note">' +
-        (est ? "원화는 <b>추정</b>입니다 — 1크레딧 ≈ ₩" + est + " (" + esc(basis.usd_per_credit_source || "") +
-          " · 환율 $1 = ₩" + esc(String(basis.krw_per_usd || "")) + "). 실제 월 결제액을 넣으면 확정값으로 바뀝니다."
-          : (krwPerCredit() ? "원화는 확정 단가 기준입니다." : "원화 단가가 없습니다 — db/credit_rates.json")) +
+        (krwPerCredit()
+          ? "원화 환산: 1크레딧 ≈ ₩" + krwPerCredit() + " — " +
+            esc(((window.ONECUE_CREDIT_RATES || {}).rate_basis || {}).plan || "") + " · " +
+            esc(((window.ONECUE_CREDIT_RATES || {}).rate_basis || {}).calc || "") +
+            " (환율 " + esc(((window.ONECUE_CREDIT_RATES || {}).rate_basis || {}).krw_source || "") + ")."
+          : (est ? "원화는 추정 — 1크레딧 ≈ ₩" + est + "." : "원화 단가가 없습니다 — db/credit_rates.json")) +
         " 영상 생성 외 비용(그록 구독 · AI 사용료)은 포함하지 않았습니다.</p></div>";
     }
 
