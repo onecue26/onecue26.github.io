@@ -231,6 +231,8 @@
         '<b>실행 주체 미정</b><small>이 단계에 들어오면 그때 고르셔도 됩니다. ' +
         '미리 정해 두면 들어오는 순간 그대로 시작합니다.</small></div>';
     }
+    return simpleChoose(p, key);
+    /* 옛 선택 양식(담당자 이름·검토 AI 를 한꺼번에 받던 것) — 쓰지 않는다 */
     return '<div class="choice-gate" data-choice-form' + tag + '>' +
       '<b>이 단계를 누가 진행할지 먼저 골라 주세요(실행 주체)</b>' +
       '<small>고르기 전까지 AI 작업 큐에 아무것도 올라가지 않습니다. ' +
@@ -584,7 +586,7 @@
         // 먼저 건다. 되는 것을 보고 나서 콘티로 옮긴다.
         // 제작 자료·영상 제작도 같은 길을 쓴다. 029 로 DB 함수가 세 단계를
         // 받게 됐으니 화면도 같이 넓힌다 — 한쪽만 넓히면 버튼이 눌리고 튕긴다.
-        var act = ((s.key === LIFECYCLE_STEP || SE().isPaid(s.key)) && i === current)
+        var act = ((s.key === LIFECYCLE_STEP || s.key === "post" || SE().isPaid(s.key)) && i === current)
           ? SE().actions(p, s.key, !!(p.stageResults && p.stageResults[s.key]))
           : null;
         // 콘티는 두 겹이라 판단이 다르다 — 전용 상태기계를 쓴다
@@ -604,7 +606,9 @@
           findingText + delivered +
           // 유료 단계는 고르기를 묻지 않으므로 선택 폼도 띄우지 않는다 —
           // 띄우면 「사람이 직접 진행」이 보이고, 그 길은 없다.
-          (bact || SE().isPaid(s.key) ? "" : execPicker(p, s.key)) +
+          // ★ 간단한 「누가 맡습니까」가 떠 있으면 옛 선택 양식은 띄우지 않는다 —
+          //   두 개가 떴다 (Dan 09-23: 「아래쪽이 더맘에드는데 … 심플하게 나오니깐」)
+          (bact || act || SE().isPaid(s.key) ? "" : execPicker(p, s.key)) +
           deliverBox(p, s.key) +
           (s.key === "facts" ? needsPanel(p) : "") +
           (status === "upcoming" ? ''
@@ -1149,6 +1153,29 @@
       "</span></div>";
   }
 
+  /** 「누가 맡습니까」 — 모든 단계가 이 하나를 쓴다.
+   *  Dan 2026-09-23: 「모든 작업은 ai or 사람 둘중 선택하는 창부터」 「아래쪽이 더맘에드는데
+   *  심플하게 나오니깐 … 기능은 거기에 맞게구현하고」. 사람을 못 고르는 단계는 버튼 대신
+   *  이유 한 줄을 둔다(버튼이 그냥 없으면 「고장났나」가 된다). */
+  function simpleChoose(p, key) {
+    var tag = ' data-slug="' + esc(p.slug) + '" data-step="' + esc(key) + '"';
+    var can = SE().assignable(key) || {};
+    return '<div class="lc lc-choose"' + tag + ">" +
+      '<div class="lc-head"><b>누가 맡습니까</b><span>고르기만 해서는 작업이 시작되지 않습니다</span></div>' +
+      '<div class="lc-row">' +
+      '<button class="btn" type="button" data-lc="choose-ai"' + tag + ">AI에게 맡기기</button>" +
+      (can.ok
+        ? '<button class="btn ghost" type="button" data-lc="choose-human"' + tag +
+          ">사람이 직접 진행</button>"
+        : "") + "</div>" +
+      (can.ok ? "" : '<span class="lc-msg">사람 진행은 아직 안 됩니다 — ' +
+        esc({ out_of_scope: "사람이 결과를 올릴 칸이 아직 없습니다",
+              blocked: "광고주 의뢰와 바로 묶여 있어 사람이 대신할 수 없습니다",
+              contract_missing: "양식을 못 불러왔습니다. 새로고침해 주십시오" }[can.reason] ||
+            "이 단계는 AI 만 맡습니다") + "</span>") +
+      "</div>";
+  }
+
   function lifecycleBar(p, key, act) {
     if (!canWrite) return readOnlyRow("승인·수정 요청은 관리자 계정에서 합니다.");
     // 부르는 쪽이 상태를 빠뜨려도 화면 전체가 죽지 않게 여기서 채운다
@@ -1159,16 +1186,7 @@
       return '<div class="lc-head"><b>' + esc(what) + "</b>" +
         (why ? "<span>" + esc(why) + "</span>" : "") + "</div>";
     };
-    if (act.phase === "choose") {
-      return '<div class="lc lc-choose"' + tag + ">" +
-        head("누가 맡습니까", "고르기만 해서는 작업이 시작되지 않습니다") +
-        '<div class="lc-row">' +
-        '<button class="btn" type="button" data-lc="choose-ai"' + tag + ">AI에게 맡기기</button>" +
-        (act.chooseHuman
-          ? '<button class="btn ghost" type="button" data-lc="choose-human"' + tag +
-            ">사람이 직접 진행</button>"
-          : "") + "</div></div>";
-    }
+    if (act.phase === "choose") return simpleChoose(p, key);
     if (act.phase === "start") {
       return '<div class="lc lc-start"' + tag + ">" +
         head(pick.mode === "human" ? "담당자 · " + (pick.assignee || "미지정") : "AI가 맡습니다",
@@ -3465,6 +3483,11 @@
             };
             p.stageResults = {
               develop: !!p.development,
+              // 후반: 완성본(final)이 올라왔고 검수가 붙었으면 결과다
+              post: p.files.some(function (f) {
+                var rv = (f.meta || {}).review || "";
+                return f.kind === "final" && f.url && !held(f) && rv && rv !== "pending";
+              }),
               storyboard: p.cuts.length > 0,
               // ★ 유료 단계도 「결과가 왔는가」를 봐야 승인 자리가 뜬다.
               //   이게 없어서 앵커를 올려도 화면은 계속 「시작하세요」였다.
