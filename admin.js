@@ -621,7 +621,7 @@
         return '<details class="flow-step ' + status + '"' + (status === "current" ? ' open' : '') + '>' +
           '<summary class="flow-summary"><span class="flow-marker">' + marker + '</span><strong>' +
           esc(STEP_NAME[s.key]) + '</strong>' + versionBadge + personBadge + badge +
-          '<small>' + esc(s.owner) + '</small></summary>' + detail + '</details>';
+          '<small>' + esc(s.owner) + '</small>' + signoff(p, s.key) + '</summary>' + detail + '</details>';
       }).join("") + '</div></div>';
   }
 
@@ -1799,6 +1799,67 @@
         encodeURIComponent(p.slug) + '">' + label + '</a></div>';
     }
 
+    /** 납품 — 관리자가 승인해야 광고주에게 나간다. 광고주는 그 뒤에 확인·승인한다 (065).
+     *  Dan 09-23: 「납품 단계에서 관리자가 승인을 해야 납품이 되는거고 서로 다르게 시간차를 두고봐야함」
+     *  pending = 아직 안 보냄 · ready = 보냄, 광고주 확인 대기 · idle = 광고주가 승인 */
+    function deliverBody(p) {
+      var last = (p.approvals || []).filter(function (a) { return a.gate === "deliver"; })[0];
+      if (p.state === "ready") {
+        return '<div class="lc-box"><b>광고주 확인 기다리는 중</b>' +
+          '<span class="lc-msg">납품 ' + esc(p.sentAt ? hhmm(p.sentAt) : "") +
+          ' · 광고주 화면에 「납품되었습니다 · 확인 및 승인」이 떠 있습니다</span></div>';
+      }
+      if (p.state === "idle" && last && last.decision === "ok") {
+        return '<div class="lc-box ok"><b>납품 완료 · 광고주 승인</b>' +
+          '<span class="lc-msg">' + esc(hhmm(last.decided_at)) +
+          (last.note ? " · 「" + esc(last.note) + "」" : "") + '</span></div>';
+      }
+      if (!canWrite) return "";
+      return '<div class="lc-box"><b>완성본을 광고주에게 보냅니다</b>' +
+        '<span class="lc-msg">누르면 가장 새 완성본 한 편이 광고주 화면에 뜨고, 광고주가 확인·승인합니다. ' +
+        '보내기 전까지 광고주에게는 「영상 제작 완료 · 납품을 준비하고 있습니다」로 보입니다.</span>' +
+        '<div class="lc-row"><button class="btn" type="button" data-final-send="' + esc(p.id) +
+        '">승인하고 광고주에게 납품</button></div></div>';
+    }
+
+    /** 단계마다 누가 승인·납품했나 (Dan 09-23: 「승인자 아이디가 단계별로 보이도록」) */
+    var PEOPLE = {};
+    function loadPeople() {
+      var ids = {};
+      ROWS.forEach(function (p) {
+        (p.approvals || []).forEach(function (a) { if (a.decided_by) ids[a.decided_by] = 1; });
+        (p.sents || []).forEach(function (e) { var u = e.payload && e.payload.by_uid; if (u) ids[u] = 1; });
+        FLOW.forEach(function (st) {
+          var r = SE().of(p, st.key); if (r && r.approved_by) ids[r.approved_by] = 1;
+        });
+      });
+      var list = Object.keys(ids).filter(function (k) { return !PEOPLE[k]; });
+      if (!list.length) return Promise.resolve();
+      return db.rpc("onecue_people", { p_ids: list }).then(function (r) {
+        (r.data || []).forEach(function (x) { PEOPLE[x.id] = x.email; });
+      });
+    }
+    function who(uid) {
+      if (!uid) return "기록 없음";
+      var e = PEOPLE[uid];
+      return e ? e.split("@")[0] : String(uid).slice(0, 8);
+    }
+    function signoff(p, key) {
+      var out = [];
+      var r = SE().of(p, key);
+      if (r && r.approved_at) out.push("승인 " + who(r.approved_by) + " · " + hhmm(r.approved_at));
+      var gate = (p.approvals || []).filter(function (a) { return a.gate === key; })[0];
+      if (gate) out.push("광고주 " + (gate.decision === "ok" ? "승인" : "수정 요청") + " " +
+        who(gate.decided_by) + " · " + hhmm(gate.decided_at));
+      if (key === "deliver") {
+        var sent = (p.sents || []).filter(function (e) {
+          return e.payload && e.payload.what === "final";
+        })[0];
+        if (sent) out.unshift("납품 " + who(sent.payload.by_uid) + " · " + hhmm(sent.ts));
+      }
+      return out.length ? '<small class="signoff">' + esc(out.join("  /  ")) + "</small>" : "";
+    }
+
     function totalLine(p) {
       var all = spentAll(p);
       if (!all) return "";
@@ -2449,7 +2510,7 @@
       //   버튼만 있고 영상이 없었다 (09-23 15:26)
       post: postFor(p) + (p.step === "post" || (SE().of(p, "post") || {}).approved_at
         ? assetList(p, "post") : ""),
-      deliver: totalLine(p) + (p.step === "deliver" ? productionAction : "")
+      deliver: totalLine(p) + (p.step === "deliver" ? deliverBody(p) : "")
     };
 
     var openProject = isNew || p.aiNeedsReview || !!p.job || (p.state !== "done" && p.step !== "deliver");
@@ -2946,6 +3007,20 @@
     // ── 단계 상태 버튼 ────────────────────────────────────────────────────
     // 한 곳에서 받는다. 어느 버튼이든 하는 일은 같다 — RPC 하나 부르고 다시 읽기.
     // 누르는 동안 잠가서 두 번 눌리지 않게 한다(두 번 누르면 작업이 둘 생긴다).
+    // 납품 — 광고주 발송. 되돌릴 수 없으니 한 번 더 묻는다
+    document.querySelectorAll("[data-final-send]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (!window.confirm("완성본을 광고주에게 납품합니다. 광고주 화면에 바로 뜹니다.")) return;
+        b.disabled = true; b.textContent = "보내는 중…";
+        db.rpc("onecue_final_send", { p_project_id: b.dataset.finalSend }).then(function (r) {
+          if (r.error) throw r.error;
+          return load();
+        }).catch(function (e) {
+          b.disabled = false; b.textContent = "승인하고 광고주에게 납품";
+          window.alert("보내지 못했습니다 — " + (e.message || e));
+        });
+      });
+    });
     document.querySelectorAll("[data-lc]").forEach(function (b) {
       b.addEventListener("click", function () {
         var what = b.dataset.lc;
@@ -3560,10 +3635,10 @@
             .in("project_id", ids),
           db.from("briefs").select("project_id,raw,goal,target,format").in("project_id", ids),
           // 승인하면서 남긴 말도 놓치면 안 된다. 반려만 보면 반쪽이다
-          db.from("approvals").select("project_id,gate,decision,note,decided_at")
+          db.from("approvals").select("project_id,gate,decision,note,decided_at,decided_by")
             .in("project_id", ids).order("decided_at", { ascending: false }),
           // 우리가 마지막으로 넘긴 시각 — 광고주 말을 처리했는지 가르는 기준
-          db.from("events").select("project_id,ts").eq("kind", "sent")
+          db.from("events").select("project_id,ts,payload").eq("kind", "sent")
             .in("project_id", ids).order("ts", { ascending: false }),
           db.from("events").select("project_id,kind,to_step,ts,payload")
             .in("kind", ["production_enroll_requested", "production_enrolled", "astra_draft"])
@@ -3778,8 +3853,12 @@
               p.brief_target = b.target; p.brief_format = b.format;
             }
           });
+          ROWS.forEach(function (p) {
+            p.sents = sents.filter(function (e) { return e.project_id === p.id; });
+          });
           setConn("ok", "새 의뢰 " + ROWS.filter(function (x) { return x.isNew; }).length);
-          render();
+          // 승인·납품한 사람 아이디 — 번호를 이메일로 (066). 실패해도 화면은 그린다
+          return loadPeople().then(render, render);
         });
       }).catch(function (e) {
         // ★ 이유를 삼키지 않는다. 이 catch 는 조회 실패만 잡는 게 아니라
