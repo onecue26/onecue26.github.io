@@ -1806,7 +1806,16 @@
     // 후반 작업 — 뽑은 뒤 보내기 전에 사람이 하는 일. 돈은 안 나간다.
     // 계획(render_plan.post)에 적힌 것을 그대로 세운다 — 화면이 목록을
     // 따로 들고 있으면 계획과 갈린다.
-    function postBody(p) {
+    function postFor(p) {
+      var pick = SE().of(p, "post") || {};
+      if (!pick.chosen_at) return "<span></span>";
+      if (!pick.directions) return postBody(p, "후반에서 입힐 것 — AI 계획");
+      var applied = p.render_mode_at && pick.directions_at &&
+        new Date(p.render_mode_at) > new Date(pick.directions_at);
+      return applied ? postBody(p, "요청사항대로 입힐 것") : "<span></span>";
+    }
+
+    function postBody(p, title) {
       var raw = (p.render_plan || {}).post;
       // 자막·엔드카드 계획(auto_post 가 읽는 모양)이면 그대로 보여 준다
       if (raw && !Array.isArray(raw) && (raw.captions || raw.endcard)) {
@@ -1816,7 +1825,7 @@
         var ec = raw.endcard || {};
         var end = (ec.lines || []).length ? "<li><b>" + esc(ec.from) + "초부터 엔드카드</b> — <span>" +
           (ec.lines || []).map(esc).join(" / ") + "</span></li>" : "";
-        return '<div class="stage-content post-work"><div class="pw-head"><b>후반에서 입힐 것</b>' +
+        return '<div class="stage-content post-work"><div class="pw-head"><b>' + esc(title || "후반에서 입힐 것") + '</b>' +
           (raw.source ? "<span>영상 " + esc(raw.source) + " 에</span>" : "") + "</div>" +
           '<ol class="pw-list">' + caps + end + "</ol>" +
           (raw.why ? '<p class="none">' + esc(raw.why) + "</p>" : "") + "</div>";
@@ -2400,7 +2409,10 @@
       // 후반 — 계획에 적힌 할 일을 그대로 세운다. 여기서 지어내지 않는다.
       // 후반 계획은 AI 에게 맡긴 뒤에 보인다 — 고르기 전에 떠 있으면 이미 정해진 것처럼 읽힌다
       //   (Dan 09-23: 「후반에서 입힐것은 ai한테 맞겻을때 하는건데 아래 계속떠잇네?」)
-      post: (SE().of(p, "post") || {}).chosen_at ? postBody(p) : "<span></span>",
+      // 후반 계획은 **AI 로 진행할 때의 계획**이다. 사람(요청사항)이면 요청이 반영된 뒤에만
+      //   「요청사항대로 입힐 것」으로 보인다 (Dan 09-23: 「후반에서 입힐 것은 ai가 할경우에만
+      //   해당되는거아냐?」). 고르기 전에는 아무것도 안 보인다.
+      post: postFor(p),
       deliver: totalLine(p) + (p.step === "deliver" ? productionAction : "")
     };
 
