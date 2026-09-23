@@ -1787,6 +1787,10 @@
       if (!got.length) return "";
       var f = got[0];
       var m = f.meta || {};
+      // ★ 그 준비물로 **이미 영상을 뽑았으면** 지난 소식이다. 09-22 에 나온
+      //   소품 앵커 알림이 v3·v4·v5 를 뽑은 뒤에도 영상 단계에 계속 떠 있었다
+      //   (Dan 2026-09-23: 「이게 영상 제작세션에 계속떠잇을이유가잇나?」).
+      if (usedAfter(p, step, f.created_at)) return "";
       return '<div class="ready"><b>영상에 물릴 준비물이 나왔습니다</b>' +
         '<span class="when">' + esc(when(f.created_at)) + " · " + esc(ago(f.created_at)) +
         (m.credits ? " · " + m.credits + " 크레딧" : "") + "</span>" +
