@@ -405,11 +405,11 @@
         now.making),
       // 납품 — 관리자가 보내기 전(준비 중) · 보낸 뒤(확인하실 차례) · 승인 뒤(완료)가 다르게 보인다 (065)
       box("done", "납품",
-        P.state === "ready" ? "확인하실 차례" : (P.state === "idle" ? "승인 완료" : "준비 중"),
+        P.state === "ready" ? "확인하실 차례" : (P.state === "done" ? "완료" : (P.state === "idle" ? "승인 완료" : "준비 중")),
         P.step !== "deliver" ? ""
           : P.state === "ready" && HAS_FINAL
             ? secFinal(assets) + deliverForm()
-          : P.state === "idle"
+          : (P.state === "idle" || P.state === "done")
             ? secFinal(assets) + '<p class="muted">승인해 주셔서 감사합니다. 완성본은 이 화면에서 언제든 받으실 수 있습니다.</p>'
           : '<div class="stage-read development-notice"><section class="stage-block status">' +
             "<h4>납품을 준비하고 있습니다</h4><p>납품되면 이 화면에서 확인하실 수 있습니다.</p></section></div>",

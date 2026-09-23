@@ -497,8 +497,10 @@
     return '<div class="flow-wrap"><div class="flow-head"><span class="lbl">전체 제작 흐름</span>' +
       '<span class="now-owner">현재 담당 <b>' + esc(currentOwner(p)) + '</b></span></div>' +
       '<div class="flow-track">' + FLOW.map(function (s, i) {
-        var status = i < current ? "done" : (i === current ? "current" : "upcoming");
-        var marker = i < current ? "완료" : (i === current ? "현재" : (i + 1));
+        // 프로젝트를 닫으면(068) 마지막 납품 단계까지 「완료」다
+        var closed = p.state === "done";
+        var status = (i < current || closed) ? "done" : (i === current ? "current" : "upcoming");
+        var marker = (i < current || closed) ? "완료" : (i === current ? "현재" : (i + 1));
         var h = stageAi(s.key), ai = h && h.executor ? h.executor : null;
         var version = (p.aiVersions && p.aiVersions[s.key]) || (h ? 1 : 0);
         // 수행자와 핵심 검토 AI — 관리자가 지정한 실행 주체가 먼저고, 없으면 AI 실행 기록이다
@@ -1826,10 +1828,20 @@
           '<span class="lc-msg">납품 ' + esc(p.sentAt ? hhmm(p.sentAt) : "") +
           ' · 광고주 화면에 「납품되었습니다 · 확인 및 승인」이 떠 있습니다</span></div>';
       }
+      if (p.state === "done") {
+        return '<div class="close-box done"><b>프로젝트 완료</b>' +
+          '<span>' + esc(who(p.closed_by)) + " · " + esc(when(p.closed_at)) + " · 총 원가 " + spentAll(p) +
+          "cr" + won(spentAll(p)) + "</span></div>";
+      }
       if (p.state === "idle" && last && last.decision === "ok") {
-        return '<div class="lc-box ok"><b>납품 완료 · 광고주 승인</b>' +
-          '<span class="lc-msg">' + esc(hhmm(last.decided_at)) +
-          (last.note ? " · 「" + esc(last.note) + "」" : "") + '</span></div>';
+        // ★ 광고주 승인으로 끝나지 않는다 — 관리자가 닫아야 한 건이 끝난다 (068 · Dan 09-23)
+        return '<div class="close-box"><b>광고주가 납품본을 승인했습니다</b>' +
+          '<span>' + esc(who(last.decided_by)) + " · " + esc(when(last.decided_at)) +
+          (last.note ? " · 「" + esc(last.note) + "」" : "") + "</span>" +
+          '<p>남은 일이 없으면 프로젝트를 닫습니다. 닫으면 목록 아래 「완료된 프로젝트」로 내려가고, ' +
+          "이 건의 원가·판 수가 제작 기록에 남습니다.</p>" +
+          (canWrite ? '<button class="btn" type="button" data-close-project="' + esc(p.id) + '">프로젝트 완료</button>' : "") +
+          "</div>" + backBox(p);
       }
       if (!canWrite) return "";
       // 보내기 전에 한 번 더 본다 — 승인 버튼 바로 위 (Dan 09-23)
@@ -2586,8 +2598,9 @@
       '<div class="meta">' + esc(p.slug) + " · " + p.running_sec + "초 · " +
       esc((p.aspects || []).join("/")) +
       (p.created_at ? " · " + ago(p.created_at) : "") + "</div>" +
-      '</div><div class="project-summary-side"><span class="project-stage">' +
-      esc(STEP_NAME[p.step] || p.step) + '</span><span class="fold-icon" aria-hidden="true">⌄</span></div></summary>' +
+      '</div><div class="project-summary-side"><span class="project-stage' + (p.state === "done" ? " closed" : "") + '">' +
+      (p.state === "done" ? "완료 · " + esc(String(p.closed_at || "").slice(5, 10).replace("-", "/")) +
+        " · " + spentAll(p) + "cr" + won(spentAll(p)) : esc(STEP_NAME[p.step] || p.step)) + '</span><span class="fold-icon" aria-hidden="true">⌄</span></div></summary>' +
       // ★ 카드 맨 위에는 단계와 무관한 것만 둔다. 「콘티 검수」가 여기 있으면
       //   어느 단계의 일인지 알 수 없고, 바로 아래에 콘셉트 5안이 오므로 그
       //   단계의 버튼처럼 읽혔다. 링크는 콘티 승인 단계 본문 안으로 옮겼다.
@@ -2857,10 +2870,15 @@
     }
     el("alert").innerHTML = notices;
 
+    // 닫은 프로젝트는 아래로 모은다 (068) — 진행 중인 건이 위에 남는다
+    var live = ROWS.filter(function (p) { return p.state !== "done"; });
+    var closedRows = ROWS.filter(function (p) { return p.state === "done"; });
+    function cards(list) {
+      return list.map(function (p) { return '<div id="c-' + esc(p.slug) + '">' + card(p) + "</div>"; }).join("");
+    }
     var html = ROWS.length
-      ? ROWS.map(function (p) {
-          return '<div id="c-' + esc(p.slug) + '">' + card(p) + "</div>";
-        }).join("")
+      ? cards(live) + (closedRows.length
+          ? '<h3 class="closed-head">완료된 프로젝트 ' + closedRows.length + "건</h3>" + cards(closedRows) : "")
       : '<div class="empty"><span class="big">아직 들어온 의뢰가 없습니다</span>' +
         "광고주가 의뢰하면 여기에 뜹니다.</div>";
 
@@ -3083,6 +3101,18 @@
           .catch(function (e) {
             b.disabled = false; b.textContent = "되돌리기";
             window.alert("되돌리지 못했습니다 — " + (e.message || e));
+          });
+      });
+    });
+    document.querySelectorAll("[data-close-project]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (!window.confirm("이 프로젝트를 완료로 닫습니다.")) return;
+        b.disabled = true; b.textContent = "닫는 중…";
+        db.rpc("onecue_project_close", { p_project_id: b.dataset.closeProject })
+          .then(function (r) { if (r.error) throw r.error; return load(); })
+          .catch(function (e) {
+            b.disabled = false; b.textContent = "프로젝트 완료";
+            window.alert("닫지 못했습니다 — " + (e.message || e));
           });
       });
     });
@@ -3674,6 +3704,7 @@
     var ids = {};
     ROWS.forEach(function (p) {
       (p.approvals || []).forEach(function (a) { if (a.decided_by) ids[a.decided_by] = 1; });
+      if (p.closed_by) ids[p.closed_by] = 1;
       (p.sents || []).forEach(function (e) { var u = e.payload && e.payload.by_uid; if (u) ids[u] = 1; });
       FLOW.forEach(function (st) {
         var r = SE().of(p, st.key); if (r && r.approved_by) ids[r.approved_by] = 1;
@@ -3702,6 +3733,7 @@
         return e.payload && e.payload.what === "final";
       })[0];
       if (sent) out.unshift("납품 " + who(sent.payload.by_uid) + " · " + hhmm(sent.ts));
+      if (p.closed_at) out.push("마감 " + who(p.closed_by) + " · " + hhmm(p.closed_at));
     }
     return out.length ? '<small class="signoff">' + esc(out.join("  /  ")) + "</small>" : "";
   }
@@ -3712,7 +3744,7 @@
     el("stamp").textContent = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 16);
 
     return db.from("projects")
-      .select("id,slug,brand,product,step,state,running_sec,cut_count,aspects,created_at,ad_type,ad_type_by,render_mode,render_plan,render_mode_by,render_mode_at")
+      .select("id,slug,brand,product,step,state,running_sec,cut_count,aspects,created_at,ad_type,ad_type_by,render_mode,render_plan,render_mode_by,render_mode_at,closed_at,closed_by")
       // ★ render_mode_at 을 안 읽어 오면 「수정사항 적용 완료」가 영원히
       //   안 뜬다 — 계획이 언제 손봐졌는지를 모르니 늘 「아직」이 되고,
       //   다시 뽑기 버튼이 계속 잠긴 채로 남는다. 화면이 쓰는 칸은
