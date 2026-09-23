@@ -8,7 +8,7 @@
   root.ONECUE_CREDIT_RATES =
 {
   "how_to_fill": "예: 월 39,000원에 6,000 크레딧이면 6.5 를 넣는다",
-  "krw_per_credit": null,
+  "krw_per_credit": 56.4,
   "measured": {
     "gpt_image_2_5": {
       "2k_high": 3,
@@ -48,7 +48,7 @@
     },
     "_note": "★ 장부에는 **실제 결제액**만 적는다. 생성 도구가 값을 안 돌려줄 때 예상값을 넣었다가 2cr 을 없는 지출로 적은 적이 있다 (2026-09-22). 값을 모르면 힉스필드 결제 기록을 보고 적는다."
   },
-  "plan_note": "2026-09-22 확인: 힉스필드 ultra, 월 6,000 크레딧 지급 + 보너스 150",
+  "plan_note": "2026-09-23 확인: 힉스필드 ULTRA 6,000cr/월 — 월 결제 정가 $250",
   "version": "credit-rates-v1",
   "why": [
     "크레딧 1개가 원화로 얼마인지. 이 값이 없으면 화면은 크레딧만 보여 준다.",
@@ -56,15 +56,15 @@
     "Dan 이 실제로 결제하는 월 금액 ÷ 그 달에 받는 크레딧 = 이 값이다.",
     "요금제가 바뀌면 이 숫자만 고친다. 화면은 이 파일만 읽는다."
   ],
-  "krw_per_credit_estimate": 44.7,
-  "estimate_basis": {
-    "status": "추정 — Dan 실제 결제액 미확인",
-    "usd_per_credit": 0.033,
-    "usd_per_credit_source": "힉스필드 가격 정보(실시간 조회 2026-09-23): ULTRA 연간 월 $99 · 3,000cr. 추가 충전은 4,000cr $190(=$0.0475)",
+  "rate_basis": {
+    "plan": "힉스필드 ULTRA 6,000cr/월 (Dan 계정 — balance: ultra · 09-17 Subscription Credits 6,000)",
+    "usd_per_month": 250,
+    "usd_per_credit": 0.0417,
+    "usd_source": "higgsfield.ai/pricing 2026-09-23 직접 확인 — ULTRA 6,000: 월 결제 $250(첫 달 $220 후 $250 갱신) · 연간 결제 월 $194",
+    "why_monthly": "결제 주기를 계정에서 확인 못 해 갱신 정가(월 $250)로 잡았다 — 원가를 낮게 잡지 않으려고. 연간이면 1cr ≈ ₩43.8",
     "krw_per_usd": 1353.7,
-    "krw_per_usd_source": "open.er-api.com 2026-09-23 갱신분",
-    "plan_seen": "Dan 계정 ultra · 09-17 Subscription Credits 6,000 지급 — 이 플랜의 실제 결제액은 공개 정보에 없다",
-    "replace_with": "Dan 실제 월 결제액(원) ÷ 6,000 을 krw_per_credit 에 넣으면 확정값으로 바뀐다"
+    "krw_source": "open.er-api.com 2026-09-23 갱신분",
+    "calc": "250 ÷ 6,000 × 1,353.7 = 56.4"
   }
 };
 })(typeof window !== "undefined" ? window : this);
