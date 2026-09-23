@@ -790,9 +790,22 @@
 
   /** 그 사실을 한 줄로. 다시 뽑기 버튼이 눌리는지와 같은 판단을 쓴다 —
    *  두 곳이 따로 판단하면 버튼은 눌리는데 글은 「아직」이라고 말한다. */
+  /** 그 시각 **뒤에** 만든 판이 있는가 — 있으면 그 시각의 소식은 이미 쓰였다. */
+  function usedAfter(p, s, at) {
+    if (!at) return false;
+    return newestTakes(p, s).some(function (f) {
+      return new Date(f.created_at) > new Date(at);
+    });
+  }
+
   function planChanged(p, s) {
     var pick = SE().of(p, s) || {};
     if (!pick.revision_at) return "";
+    // ★ 이미 **그 바뀐 문장으로 뽑은 판이 있으면** 지난 소식이다. v5 가 나온
+    //   뒤에도 「수정사항 적용 완료 — 이제 바뀐 문장으로 뽑습니다」가 남아
+    //   지금 상황처럼 읽혔다 (Dan 2026-09-23: 「현재 상황이면 실시간에 따라
+    //   바뀌어야지 … 쓸대없는건 빼던가」).
+    if (usedAfter(p, s, p.render_mode_at)) return "";
     if (planReady(p, s)) {
       var at = p.render_mode_at;
       return '<div class="plan-new"><b>수정사항 적용 완료</b>' +
@@ -851,11 +864,17 @@
       // 쓰면 이미 나간 돈을 잊게 됩니다.
       var again = !!(SE().of(p, s) || {}).revision_at;
       var note = (SE().of(p, s) || {}).revision_note || "";
+      // ★ 제목은 **지금 상태**를 말한다 — 「영상을 다시 뽑습니다」는 버튼 칸의
+      //   고정 제목이었는데 지금 일어나는 일처럼 읽혔다 (Dan 2026-09-23).
+      var locked = again && (!planReady(p, s) || !takeSettled(p, s));
+      // 고쳐 달라고 적으신 글도 **그 뒤에 이미 뽑았으면** 지난 이야기다
+      if (usedAfter(p, s, (SE().of(p, s) || {}).revision_at)) note = "";
       return '<div class="lc lc-start"' + tag + ">" +
         head(again
-              ? (s === "anchors" ? "제작 자료를 다시 만듭니다" : "영상을 다시 뽑습니다")
+              ? (s === "anchors" ? "다시 만들기" : "다시 뽑기") +
+                (locked ? " · 잠겨 있습니다" : " · 누르실 수 있습니다")
               : (s === "anchors" ? "제작 자료를 만듭니다" : "영상을 뽑습니다"),
-             (again ? "<b>또</b> " : "예상 ") + money(plan.credits) +
+             (again ? "누르면 <b>또</b> " : "예상 ") + money(plan.credits) +
              (plan.mode ? " · 방식 " + esc(plan.mode) : "")) +
         (again && note
           ? '<div class="redo-note"><b>고쳐 달라고 적으신 것</b>' +
@@ -868,11 +887,12 @@
         //   정당하다. 대신 **어느 쪽인지 말한다.** 말해 주지 않으면 사장님은
         //   적은 대로 바뀐 줄 아시고 누르게 된다.
         (again ? planChanged(p, s) + takeWaiting(p, s) : "") +
-        (again
+        (again && !locked
           ? '<span class="lc-msg">아래 만든 것은 <b>그대로 남아 있습니다.</b> ' +
             '누르시면 그 위에 새로 뽑습니다 — 누르지 않으면 돈이 나가지 않습니다.</span>'
           : "") +
-        needs +
+        // 준비물 설명은 **처음 뽑을 때만.** 다시 뽑을 때는 이미 만들어져 있다
+        (again ? "" : needs) +
         '<div class="lc-row">' +
         // ★ 고쳐 달라고 하신 것이 계획에 반영되기 전에는 **못 누르게** 한다.
         //   누르면 같은 문장으로 같은 값이 또 나간다. 버튼을 없애지는 않는다 —
@@ -885,8 +905,8 @@
         (again ? (s === "anchors" ? "다시 만들기" : "다시 뽑기")
                : (s === "anchors" ? "제작 자료 만들기" : "영상 뽑기")) + "</button>" +
         "</div>" +
-        '<span class="lc-msg">누르면 크레딧이 나갑니다. 만들어지면 여기에 올라오고, ' +
-        '보신 뒤 승인하거나 고칠 곳을 적으실 수 있습니다.</span>' +
+        (locked ? "" : '<span class="lc-msg">누르면 크레딧이 나갑니다. 만들어지면 여기에 올라오고, ' +
+        '보신 뒤 승인하거나 고칠 곳을 적으실 수 있습니다.</span>') +
         '<span class="lc-msg" data-lc-msg></span></div>';
     }
     if (at === "working") {
