@@ -1906,7 +1906,15 @@
           (g.gone ? ' <span class="sub">(채택 ' + g.used + " · 버린 판 " + g.gone + ")</span>" : "") +
           '</td><td></td><td class="num">' + g.all + '</td><td class="num">' + krw(g.all) + "</td></tr>";
       }).join("");
-      return '<div class="cost-statement"><h4>제작 원가 명세</h4>' +
+      var rb = (window.ONECUE_CREDIT_RATES || {}).rate_basis || {};
+      // 오른쪽 위 — 환율과 1크레딧 단가 (Dan 09-23 「명세서 맨위 오른쪽에 환율이랑 credit당 얼마인지」)
+      var head = krwPerCredit()
+        ? '<div class="stmt-rate"><div>환율 $1 = ₩' + Number(rb.krw_per_usd || 0).toLocaleString() +
+          ' <span>(' + esc(String(rb.krw_source || "").slice(0, 16)) + ")</span></div>" +
+          "<div><b>1크레딧 ≈ ₩" + krwPerCredit() + "</b> <span>(" + esc(rb.plan || "") + " 정가 $" +
+          esc(String(rb.usd_list || "")) + " + VAT 10% ÷ " + Number(rb.credits || 0).toLocaleString() + "cr)</span></div></div>"
+        : "";
+      return '<div class="cost-statement"><div class="stmt-head"><h4>제작 원가 명세</h4>' + head + "</div>" +
         '<table class="stmt"><thead><tr><th class="n">#</th><th>항목 · 엔진 · 시각</th><th>결과</th>' +
         '<th class="num">크레딧</th><th class="num">원화</th></tr></thead><tbody>' + body + "</tbody></table>" +
         '<table class="stmt total"><tbody>' +
@@ -1917,11 +1925,7 @@
         '<tr class="grand"><td>총 원가 · 결제 ' + rows.length + '건</td><td class="num">' + all +
         ' cr</td><td class="num">' + krw(all) + "</td></tr></tbody></table>" +
         '<p class="stmt-note">' +
-        (krwPerCredit()
-          ? "원화 환산: 1크레딧 ≈ ₩" + krwPerCredit() + " — " +
-            esc(((window.ONECUE_CREDIT_RATES || {}).rate_basis || {}).plan || "") + " · " +
-            esc(((window.ONECUE_CREDIT_RATES || {}).rate_basis || {}).calc || "") +
-            " (환율 " + esc(((window.ONECUE_CREDIT_RATES || {}).rate_basis || {}).krw_source || "") + ")."
+        (krwPerCredit() ? "원화 = 크레딧 × ₩" + krwPerCredit() + " · " + esc(rb.calc || "") + " · 근거: " + esc(rb.krw_source || "") + "."
           : (est ? "원화는 추정 — 1크레딧 ≈ ₩" + est + "." : "원화 단가가 없습니다 — db/credit_rates.json")) +
         " 영상 생성 외 비용(그록 구독 · AI 사용료)은 포함하지 않았습니다.</p></div>";
     }

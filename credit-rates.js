@@ -8,7 +8,7 @@
   root.ONECUE_CREDIT_RATES =
 {
   "how_to_fill": "예: 월 39,000원에 6,000 크레딧이면 6.5 를 넣는다",
-  "krw_per_credit": 56.4,
+  "krw_per_credit": 63.2,
   "measured": {
     "gpt_image_2_5": {
       "2k_high": 3,
@@ -48,7 +48,7 @@
     },
     "_note": "★ 장부에는 **실제 결제액**만 적는다. 생성 도구가 값을 안 돌려줄 때 예상값을 넣었다가 2cr 을 없는 지출로 적은 적이 있다 (2026-09-22). 값을 모르면 힉스필드 결제 기록을 보고 적는다."
   },
-  "plan_note": "2026-09-23 확인: 힉스필드 ULTRA 6,000cr/월 — 월 결제 정가 $250",
+  "plan_note": "2026-09-17 인보이스 확인: Higgsfield Ultra 월간 정가 $250(할인 −$74) + VAT 10%",
   "version": "credit-rates-v1",
   "why": [
     "크레딧 1개가 원화로 얼마인지. 이 값이 없으면 화면은 크레딧만 보여 준다.",
@@ -57,14 +57,16 @@
     "요금제가 바뀌면 이 숫자만 고친다. 화면은 이 파일만 읽는다."
   ],
   "rate_basis": {
-    "plan": "힉스필드 ULTRA 6,000cr/월 (Dan 계정 — balance: ultra · 09-17 Subscription Credits 6,000)",
-    "usd_per_month": 250,
-    "usd_per_credit": 0.0417,
-    "usd_source": "higgsfield.ai/pricing 2026-09-23 직접 확인 — ULTRA 6,000: 월 결제 $250(첫 달 $220 후 $250 갱신) · 연간 결제 월 $194",
-    "why_monthly": "결제 주기를 계정에서 확인 못 해 갱신 정가(월 $250)로 잡았다 — 원가를 낮게 잡지 않으려고. 연간이면 1cr ≈ ₩43.8",
-    "krw_per_usd": 1353.7,
-    "krw_source": "open.er-api.com 2026-09-23 갱신분",
-    "calc": "250 ÷ 6,000 × 1,353.7 = 56.4"
+    "plan": "힉스필드 Ultra 월간 6,000cr",
+    "usd_list": 250,
+    "vat": 0.1,
+    "usd_with_vat": 275,
+    "credits": 6000,
+    "krw_per_usd": 1379.94,
+    "krw_source": "2026-09-17 구독 인보이스(2ZIW3EG2-0004)에 찍힌 VAT ₩24,287 ÷ $17.60",
+    "why": "할인 전 정가 + 부가세로 잡는다 — 보수적으로 잡아야 손해가 없다 (Dan 09-23). 실제 결제는 $176+VAT(할인가)",
+    "calc": "$250 × 1.1 = $275 × ₩1,379.94 = ₩379,484 ÷ 6,000cr = ₩63.2/cr",
+    "invoice_file": "C:/Users/sado4/Downloads/Invoice-2ZIW3EG2-0004.pdf"
   }
 };
 })(typeof window !== "undefined" ? window : this);
