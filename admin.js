@@ -90,13 +90,12 @@
     return d.toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul",
       hour: "numeric", minute: "2-digit" });
   }
+  // ★ 한국 시각으로 못 박는다 — 브라우저 시간대에 기대면 다른 곳에서 열 때 어긋난다 (09-23)
   function when(ts) {
     if (!ts) return "";
     var d = new Date(ts);
     if (isNaN(d.getTime())) return "";
-    function two(n) { return (n < 10 ? "0" : "") + n; }
-    return d.getFullYear() + "-" + two(d.getMonth() + 1) + "-" + two(d.getDate()) +
-      " " + two(d.getHours()) + ":" + two(d.getMinutes());
+    return d.toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 16);
   }
   function ago(ts) {
     var m = Math.floor((Date.now() - new Date(ts).getTime()) / 60000);
@@ -1883,6 +1882,15 @@
      *  합계는 힉스필드 결제 내역과 같아야 한다(RUSH 271cr 대조 완료). 원화는 확정 단가가 없으면 추정. */
     /** 광고주가 올린 자료를 그림으로 — 글자(「제품 사진 1개」)만 보여서 무엇이 왔는지 몰랐다 (09-23 환타).
      *  누르면 크게(data-big). 어떤 종류가 광고주 몫인지는 계약(ad-type-materials.js)이 정한다. */
+    /** 광고주가 메시지로 보낸 답 — 의뢰 내용에 붙는다 (Dan 09-23 「의뢰 접수 부분에 내용이 업데이트되야지」) */
+    function clientReplies(p) {
+      var r = (p.messages || []).filter(function (m) { return m.author === "client"; });
+      if (!r.length) return "";
+      return '<div class="said"><span class="lbl">광고주 추가 답변 ' + r.length + "건</span>" + r.map(function (m) {
+        return '<span class="sub">' + esc(when(m.sent_at)) + " · " + esc(m.body) + "</span>";
+      }).join("") + "</div>";
+    }
+
     function clientFiles(p) {
       var spec = window.ONECUE_AD_TYPE_MATERIALS || {};
       var mine = (p.files || []).filter(function (f) {
@@ -2573,7 +2581,7 @@
       //   Dan 2026-09-22: 「환타 광고 새의뢰 들어와서 의뢰접수 AI진행 저장
       //   눌럿는데 버튼만 눌리고 아무일도없어」 — 누를 것이 그것뿐이었으니
       //   그걸 누르신 것이 맞다. 없던 것은 다음으로 보내는 버튼이다.
-      brief: '<div class="stage-content">' + said + requirements + clientFiles(p) +
+      brief: '<div class="stage-content">' + said + requirements + clientReplies(p) + clientFiles(p) +
         (p.step === "brief" ? productionAction : "") + '</div>',
       facts: factsBody,
       strategy: strategyBody,
@@ -2620,7 +2628,7 @@
       esc((p.aspects || []).join("/")) +
       (p.created_at ? " · " + ago(p.created_at) : "") + "</div>" +
       '</div><div class="project-summary-side"><span class="project-stage' + (p.state === "done" ? " closed" : "") + '">' +
-      (p.state === "done" ? "완료 · " + esc(String(p.closed_at || "").slice(5, 10).replace("-", "/")) +
+      (p.state === "done" ? "완료 · " + esc(p.closed_at ? new Date(p.closed_at).toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 10).slice(5).replace("-", "/") : "") +
         " · " + spentAll(p) + "cr" + won(spentAll(p)) : esc(STEP_NAME[p.step] || p.step)) + '</span><span class="fold-icon" aria-hidden="true">⌄</span></div></summary>' +
       // ★ 카드 맨 위에는 단계와 무관한 것만 둔다. 「콘티 검수」가 여기 있으면
       //   어느 단계의 일인지 알 수 없고, 바로 아래에 콘셉트 5안이 오므로 그
@@ -3756,30 +3764,45 @@
   }
   function messageBox(p) {
     var list = p.messages || [];
-    var waiting = list.filter(function (m) { return m.author === "client"; }).length;
+    var sentAdmin = list.filter(function (m) { return m.author === "admin" && m.sent_at; });
+    var replies = list.filter(function (m) { return m.author === "client"; });
+    var lastSent = sentAdmin[sentAdmin.length - 1];
+    var lastReply = replies[replies.length - 1];
+    // 상태 한 줄 — 보냈는데 답이 없으면 「답변 대기 중」, 오면 「답변 도착」 (Dan 09-23)
+    var status = !lastSent ? ""
+      : (lastReply && lastReply.sent_at > lastSent.sent_at)
+        ? '<span class="msg-state got">광고주 답변 도착 · ' + esc(when(lastReply.sent_at)) + "</span>"
+        : '<span class="msg-state wait">답변 대기 중 · ' + esc(when(lastSent.sent_at)) + " 보냄</span>";
     var thread = list.map(function (m) {
       var mine = m.author === "admin";
-      return '<div class="msg ' + (mine ? "out" : "in") + (m.sent_at ? "" : " draft") + '">' +
-        '<div class="msg-head"><b>' + esc(MSG_KIND[m.kind] || m.kind) + "</b> · " +
-        (m.sent_at ? esc(when(m.sent_at)) + (mine ? (m.read_at ? " · 읽음" : " · 안 읽음") : "")
-                   : "초안 — 아직 광고주에게 안 보임") + "</div>" +
-        '<div class="msg-body">' + esc(m.body) + "</div>" +
-        (mine && !m.sent_at && canWrite
-          ? '<button class="btn" type="button" data-msg-send="' + esc(m.id) + '">광고주에게 보내기</button>' : "") +
-        "</div>";
+      if (mine && !m.sent_at) {
+        return '<div class="msg out draft"><div class="msg-head"><b>' + esc(MSG_KIND[m.kind] || m.kind) +
+          "</b> · 초안 — 아직 광고주에게 안 보임</div>" +
+          '<div class="msg-body">' + esc(m.body) + "</div>" +
+          (canWrite ? '<button class="btn" type="button" data-msg-send="' + esc(m.id) + '">광고주에게 보내기</button>' : "") +
+          "</div>";
+      }
+      return '<div class="msg ' + (mine ? "out sent" : "in") + '"><div class="msg-head"><b>' +
+        esc(mine ? (MSG_KIND[m.kind] || m.kind) : "광고주 답") + "</b> · " +
+        (mine ? "보냄 " : "") + esc(when(m.sent_at)) +
+        (mine ? (m.read_at ? " · 읽음" : "") : "") + "</div>" +
+        '<div class="msg-body">' + esc(m.body) + "</div></div>";
     }).join("");
+    // 새 메시지 칸은 접어 둔다 — 늘 열려 있으니 방금 보낸 것이 안 보낸 것처럼 보였다
     var form = canWrite
-      ? '<div class="msg-form"><select data-msg-kind="' + esc(p.id) + '">' +
+      ? '<details class="msg-new"><summary>+ 새 메시지</summary><div class="msg-form">' +
+        '<select data-msg-kind="' + esc(p.id) + '">' +
         '<option value="change">요청 조정 제안</option><option value="materials">자료 요청</option>' +
-        '<option value="explain">설명</option></select>' +
+        '<option value="explain">질문·설명</option></select>' +
         '<textarea data-msg-body="' + esc(p.id) + '" rows="3" maxlength="4000" ' +
         'placeholder="광고주에게 보낼 말 — 초안으로 먼저 저장됩니다"></textarea>' +
-        '<button class="btn ghost" type="button" data-msg-draft="' + esc(p.id) + '">초안 저장</button></div>'
+        '<button class="btn ghost" type="button" data-msg-draft="' + esc(p.id) + '">초안 저장</button></div></details>'
       : "";
+    var drafts = list.filter(function (m) { return m.author === "admin" && !m.sent_at; }).length;
     return '<details class="msgbox"' + (list.length ? " open" : "") + '><summary>광고주 메시지' +
-      (list.length ? " · " + list.length + "건" : "") + (waiting ? " · 광고주 답 " + waiting : "") + "</summary>" +
-      thread + form + "</details>";
+      (drafts ? " · 초안 " + drafts : "") + " " + status + "</summary>" + thread + form + "</details>";
   }
+
 
   var PEOPLE = {};
   function loadPeople() {

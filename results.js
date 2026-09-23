@@ -42,7 +42,7 @@ function render(){
  const ids=[...new Set(rows.map(r=>r.work_id))].sort();
  const html=ids.map(id=>{const g=latestOf(id),r=g[0];
   if(!`${r.work_id} ${r.title}`.toLowerCase().includes(q))return '';
-  const day=String(r.delivered_at||r.registered_at||'').slice(0,10);
+  const ts=r.delivered_at||r.registered_at; const day=ts?new Date(ts).toLocaleString('sv-SE',{timeZone:'Asia/Seoul'}).slice(0,10):'';   // 한국 날짜
   const cost=r.cost_credits?`${Number(r.cost_credits)}cr ${won(r.cost_krw)}`:'';
   return `<details class="work-row" data-id="${esc(id)}"${open.has(id)?' open':''}><summary>
    <span class="w-id">${esc(id)}</span><strong class="w-title">${esc(r.title)}</strong>
@@ -65,7 +65,7 @@ async function body(id){
  const fresh=r.improvements!=null;
  const tabs={review:['제작 후기',fresh?r.analyst_review:r.production_record],
   improve:['개선점',fresh?r.improvements:(r.analyst_review?'(옛 기록 — 개선점 칸이 없던 때라 시스템 검토로 대신)\n'+r.analyst_review:'')],
-  info:['제작 정보',fresh?r.production_record:`제작 정보\n- 등록 ${String(r.registered_at).slice(0,10)}\n- 분류 ${KIND[r.kind]||r.kind}`]};
+  info:['제작 정보',fresh?r.production_record:`제작 정보\n- 등록 ${new Date(r.registered_at).toLocaleString('sv-SE',{timeZone:'Asia/Seoul'}).slice(0,10)}\n- 분류 ${KIND[r.kind]||r.kind}`]};
  box.innerHTML=`<div class="w-grid"><div class="w-video">${src?`<video src="${esc(src)}#t=0.3" controls playsinline preload="metadata"></video>`:'<div class="empty">영상을 불러오지 못했습니다</div>'}
    ${g.length>1?`<label class="w-rev">판 <select data-rev="${esc(id)}">${g.map(x=>`<option value="${x.revision}"${x.revision===r.revision?' selected':''}>r${String(x.revision).padStart(3,'0')}</option>`).join('')}</select></label>`:''}
    ${dl?`<a class="w-dl" href="${esc(dl)}">영상 다운로드</a>`:''}</div>
