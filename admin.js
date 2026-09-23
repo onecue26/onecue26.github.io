@@ -713,7 +713,8 @@
   // 이 단계가 내놓는 것이 무엇인가. 앵커에 적어 주신 말이 영상을 잠그면
   // 안 된다 — 잠그는 이유와 잠기는 대상이 어긋나면 풀 길을 못 찾는다.
   function stageKinds(s) {
-    return s === "anchors" ? ["anchor"] : ["clip", "final"];
+    // 단계마다 내놓는 것 — 제작 자료=앵커, 영상=클립, 후반=완성본(final)
+    return s === "anchors" ? ["anchor"] : s === "post" ? ["final"] : ["clip"];
   }
   /** 자리(covers_call)마다 **가장 새 판**. 다시 뽑기의 잠금은 이것을 본다. */
   function newestTakes(p, s) {
@@ -1918,7 +1919,7 @@
       if (p.step === step) return "";
       var at = (SE().of(p, step) || {}).approved_at;
       if (!at) return "";
-      var want = step === "anchors" ? ["anchor"] : ["clip", "final"];
+      var want = stageKinds(step);
       var more = (p.files || []).filter(function (f) {
         var made = f.created_at || (f.meta || {}).made_at;
         return want.indexOf(f.kind) >= 0 && made && String(made) > String(at);
@@ -2005,7 +2006,7 @@
     }
 
     function assetList(p, step) {
-      var want = step === "anchors" ? ["anchor"] : ["clip", "final"];
+      var want = stageKinds(step);
       // ★ 판을 **버전으로 쌓는다.** 「이전 판 1개」가 아니라 v1·v2·v3… 이다 —
       //   앞으로 더 나올 것이고, 무엇이 언제 왜 나왔는지 다 남아야 견줄 수 있다
       //   (Dan 2026-09-22: 「버전을 붙여서 예전것들은 계속 쌓여서 볼수잇게」).
@@ -2410,7 +2411,10 @@
       // 후반 계획은 **AI 로 진행할 때의 계획**이다. 사람(요청사항)이면 요청이 반영된 뒤에만
       //   「요청사항대로 입힐 것」으로 보인다 (Dan 09-23: 「후반에서 입힐 것은 ai가 할경우에만
       //   해당되는거아냐?」). 고르기 전에는 아무것도 안 보인다.
-      post: postFor(p),
+      // 후반은 계획 아래에 **올라온 완성본**(검수·의견 칸 포함)을 붙인다 — 전에는 승인
+      //   버튼만 있고 영상이 없었다 (09-23 15:26)
+      post: postFor(p) + (p.step === "post" || (SE().of(p, "post") || {}).approved_at
+        ? assetList(p, "post") : ""),
       deliver: totalLine(p) + (p.step === "deliver" ? productionAction : "")
     };
 
