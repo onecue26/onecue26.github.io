@@ -388,7 +388,8 @@
     };
     return [
       box("ask", "의뢰 내용", P.step === "brief" ? "접수됨" : "확정",
-        secBrief(brief, MINE && canEditBrief(P)) + secFiles(assets) + secNeeds(assets, cuts), now.ask),
+        // 「필요한 자료」는 광고주에게 보이지 않는다 — 가진 자료 안에서 만든다 (Dan 09-24). 관리자 화면에만 참고로
+        secBrief(brief, MINE && canEditBrief(P)) + secFiles(assets), now.ask),
       // 콘셉트 — 보내기 전(준비 중)·보낸 뒤(고르실 차례)·고른 뒤(선택 완료) (09-24)
       box("pick", "콘셉트 선택",
         (concepts || []).some(function (c) { return c.is_chosen; }) ? "선택 완료"
