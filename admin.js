@@ -1566,7 +1566,9 @@
         return PLACEMENT_NAME[x] || x;
       }).join(" / ") || "입력 안 함") + '</span>' +
       '<span class="sub">영상 · ' + esc(p.running_sec + "초 · " + (p.aspects || []).join(" / ")) +
-      '</span></div>';
+      '</span>' + digestConditions(p).map(function (c) {
+        return '<span class="sub added">광고주 답 · ' + esc(c) + '</span>';   // 071 — 답이 오면 바로 여기 붙는다
+      }).join("") + '</div>';
 
     var AI_STAGE = {
       facts: "제품·자료 확인", strategy: "전략 설계", concepts: "콘셉트 5안",
@@ -2627,7 +2629,7 @@
       '<div class="meta">' + esc(p.slug) + " · " + p.running_sec + "초 · " +
       esc((p.aspects || []).join("/")) +
       (p.created_at ? " · " + ago(p.created_at) : "") + "</div>" +
-      '</div><div class="project-summary-side"><span class="project-stage' + (p.state === "done" ? " closed" : "") + '">' +
+      '</div><div class="project-summary-side"><span class="project-stage ' + (p.state === "done" ? "closed st-done" : p.state === "ready" ? "st-fix" : "st-run") + '">' +
       (p.state === "done" ? "완료 · " + esc(p.closed_at ? new Date(p.closed_at).toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 10).slice(5).replace("-", "/") : "") +
         " · " + spentAll(p) + "cr" + won(spentAll(p)) : esc(STEP_NAME[p.step] || p.step)) + '</span><span class="fold-icon" aria-hidden="true">⌄</span></div></summary>' +
       // ★ 카드 맨 위에는 단계와 무관한 것만 둔다. 「콘티 검수」가 여기 있으면
@@ -3756,12 +3758,31 @@
   function loadMessages() {
     var ids = ROWS.map(function (p) { return p.id; });
     if (!ids.length) return Promise.resolve();
-    return db.from("project_messages").select("id,project_id,author,kind,body,created_at,sent_at,read_at")
+    return db.from("project_messages").select("id,project_id,author,kind,body,created_at,sent_at,read_at,digest,digest_at")
       .in("project_id", ids).order("created_at").then(function (r) {
         var all = r.data || [];
         ROWS.forEach(function (p) { p.messages = all.filter(function (m) { return m.project_id === p.id; }); });
       });
   }
+  // 광고주 답을 작업기가 정리한 것 (071) — 없으면 「정리 중」
+  function digestView(m) {
+    var d = m.digest;
+    if (!d) return '<div class="msg-digest wait">반영 중 — 작업기가 답을 조건으로 정리하고 있습니다</div>';
+    function li(title, arr) {
+      return arr && arr.length ? "<b>" + title + "</b>" + arr.map(function (x) { return "<span>· " + esc(x) + "</span>"; }).join("") : "";
+    }
+    return '<div class="msg-digest">' + li("반영된 조건", d.conditions) + li("결정", d.decisions) +
+      li("다시 물어볼 것", d.follow_up) + "</div>";
+  }
+  /** 모든 광고주 답의 반영 조건 — 의뢰 조건 칸에 붙인다. 기획이 이것까지 읽는다 */
+  function digestConditions(p) {
+    var out = [];
+    (p.messages || []).forEach(function (m) {
+      if (m.author === "client" && m.digest) out = out.concat(m.digest.conditions || [], m.digest.decisions || []);
+    });
+    return out;
+  }
+
   function messageBox(p) {
     var list = p.messages || [];
     var sentAdmin = list.filter(function (m) { return m.author === "admin" && m.sent_at; });
@@ -3786,7 +3807,7 @@
         esc(mine ? (MSG_KIND[m.kind] || m.kind) : "광고주 답") + "</b> · " +
         (mine ? "보냄 " : "") + esc(when(m.sent_at)) +
         (mine ? (m.read_at ? " · 읽음" : "") : "") + "</div>" +
-        '<div class="msg-body">' + esc(m.body) + "</div></div>";
+        '<div class="msg-body">' + esc(m.body) + "</div>" + (mine ? "" : digestView(m)) + "</div>";
     }).join("");
     // 새 메시지 칸은 접어 둔다 — 늘 열려 있으니 방금 보낸 것이 안 보낸 것처럼 보였다
     var form = canWrite

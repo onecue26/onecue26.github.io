@@ -438,7 +438,11 @@
     return '<section class="msgs"><h2>onecue 에서 온 메시지</h2>' + list.map(function (m) {
       return '<div class="msg ' + (m.author === "admin" ? "in" : "out") + '"><div class="msg-head"><b>' +
         esc(MSG_KIND[m.kind] || m.kind) + "</b> · " + esc(m.sent_at ? new Date(m.sent_at).toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 16) : "") +
-        '</div><div class="msg-body">' + esc(m.body) + "</div></div>";
+        '</div><div class="msg-body">' + esc(m.body) + "</div>" +
+        (m.author === "client"
+          ? '<div class="msg-done">' + (m.digest && m.digest.summary
+              ? "반영했습니다 · " + esc(m.digest.summary)
+              : "보내 주신 답을 반영하고 있습니다") + "</div>" : "") + "</div>";
     }).join("") +
       (MINE ? '<div class="msg-reply"><textarea id="msgReply" rows="3" maxlength="4000" placeholder="' +
         (open ? "답을 적어 주세요" : "더 하실 말씀이 있으면 적어 주세요") + '"></textarea>' +
@@ -875,7 +879,7 @@
           db.from("approvals").select("gate,decision,note,decided_at").eq("project_id", id).order("decided_at"),
           // onecue 에서 보낸 메시지와 광고주 답 (070) — 초안은 서버가 안 내준다
           // ★ 보낸 것만 — 관리자·읽기 전용 계정으로 볼 때 초안까지 떠서 광고주가 보는 것과 달랐다(09-23)
-          db.from("project_messages").select("id,author,kind,body,sent_at").eq("project_id", id).not("sent_at", "is", null).order("created_at"),
+          db.from("project_messages").select("id,author,kind,body,sent_at,digest").eq("project_id", id).not("sent_at", "is", null).order("created_at"),
         ]).then(function (x) {
           x.forEach(function (r) { if (r.error) throw r.error; });
           if (!window.ONECUE_ASSETS) throw new Error("자료 접근 설정을 불러오지 못했습니다.");
