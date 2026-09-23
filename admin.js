@@ -612,7 +612,7 @@
           // ★ 간단한 「누가 맡습니까」가 떠 있으면 옛 선택 양식은 띄우지 않는다 —
           //   두 개가 떴다 (Dan 09-23: 「아래쪽이 더맘에드는데 … 심플하게 나오니깐」)
           // 아직 오지 않은 단계에도 옛 선택 양식이 떴다 — 고르기는 그 단계에 들어와서
-          (bact || act || SE().isPaid(s.key) || status === "upcoming" ? "" : execPicker(p, s.key)) +
+          (bact || act || SE().isPaid(s.key) || status === "upcoming" || s.key === "deliver" ? "" : execPicker(p, s.key)) +
           deliverBox(p, s.key) +
           (s.key === "facts" ? needsPanel(p) : "") +
           (status === "upcoming" ? ''
@@ -1815,11 +1815,37 @@
           (last.note ? " · 「" + esc(last.note) + "」" : "") + '</span></div>';
       }
       if (!canWrite) return "";
-      return '<div class="lc-box"><b>완성본을 광고주에게 보냅니다</b>' +
+      // 보내기 전에 한 번 더 본다 — 승인 버튼 바로 위 (Dan 09-23)
+      var fin = (p.files || []).filter(function (x) { return x.kind === "final" && x.url; })
+        .sort(function (a, b) { return a.created_at < b.created_at ? 1 : -1; })[0];
+      return (fin ? '<div class="deliver-final"><video src="' + esc(fin.url) +
+          '" controls playsinline preload="metadata"></video><small>보낼 완성본 · ' +
+          esc(hhmm(fin.created_at)) + ' 판</small></div>' : "") +
+        '<div class="lc-box"><b>완성본을 광고주에게 보냅니다</b>' +
         '<span class="lc-msg">누르면 가장 새 완성본 한 편이 광고주 화면에 뜨고, 광고주가 확인·승인합니다. ' +
         '보내기 전까지 광고주에게는 「영상 제작 완료 · 납품을 준비하고 있습니다」로 보입니다.</span>' +
         '<div class="lc-row"><button class="btn" type="button" data-final-send="' + esc(p.id) +
-        '">승인하고 광고주에게 납품</button></div></div>';
+        '">승인하고 광고주에게 납품</button></div></div>' + backBox(p);
+    }
+
+    /** 앞 단계로 되돌리기 — 마지막 검수에서도 고칠 수 있게 (067 · Dan 09-23).
+     *  만든 것은 지우지 않는다. 사유는 되돌아간 단계의 「고칠 점」으로 남는다. */
+    function backBox(p) {
+      if (!canWrite) return "";
+      var order = ["anchors", "video", "post"];
+      var now = FLOW.map(function (x) { return x.key; }).indexOf(p.step);
+      var opts = order.filter(function (k) {
+        return FLOW.map(function (x) { return x.key; }).indexOf(k) < now;
+      });
+      if (!opts.length) return "";
+      return '<details class="back-box"><summary>이전 단계로 되돌리기</summary>' +
+        '<div class="lc-row"><select data-back-to>' + opts.slice().reverse().map(function (k) {
+          return '<option value="' + k + '">' + esc(STEP_NAME[k]) + "</option>";
+        }).join("") + '</select>' +
+        '<input data-back-note maxlength="2000" placeholder="왜 되돌리나요 — 그 단계의 고칠 점으로 남습니다">' +
+        '<button class="btn ghost" type="button" data-back="' + esc(p.id) + '">되돌리기</button></div>' +
+        (p.step === "deliver" && p.state === "ready"
+          ? '<small>광고주에게 보낸 완성본은 거둬들입니다.</small>' : "") + "</details>";
     }
 
     function totalLine(p) {
@@ -1829,7 +1855,18 @@
       (p.spends || []).forEach(function (x) {
         byStep[x.step] = (byStep[x.step] || 0) + (Number(x.credits) || 0);
       });
-      return '<div class="cost-total"><b>이 건 원가 ' + all + " 크레딧" + won(all) + "</b>" +
+      // ★ 버린 판도 원가다 (Dan 09-23 「우리가 실패한 가격도 포함해서 기재」). 납품할 때 067 이 가른다
+      var used = 0, gone = 0, goneStep = {};
+      (p.spends || []).forEach(function (x) {
+        var c = Number(x.credits) || 0;
+        if (x.outcome === "used") used += c;
+        if (x.outcome === "discarded") { gone += c; goneStep[x.step] = (goneStep[x.step] || 0) + c; }
+      });
+      var split = (used || gone)
+        ? '<span class="cost-what">채택 ' + used + " · <b>버린 판 " + gone + "</b> (" +
+          Object.keys(goneStep).map(function (k) { return esc(STEP_NAME[k] || k) + " " + goneStep[k]; }).join(" · ") +
+          ")</span>" : "";
+      return '<div class="cost-total"><b>이 건 원가 ' + all + " 크레딧" + won(all) + "</b>" + split +
         '<span class="cost-what">' + Object.keys(byStep).map(function (k) {
           return esc(STEP_NAME[k] || k) + " " + byStep[k];
         }).join(" · ") + "</span>" +
@@ -2459,7 +2496,7 @@
       // 조건을 뺐다 — paidStageBody 가 안에서 「누를 것」만 가린다.
       // 여기서 통째로 가리면 승인한 뒤 만든 것이 사라진다.
       anchors: costLine(p, "anchors") + paidStageBody(p, "anchors"),
-      video: costLine(p, "video") + paidStageBody(p, "video"),
+      video: costLine(p, "video") + paidStageBody(p, "video") + (p.step === "video" ? backBox(p) : ""),
       // ★ 납품에는 **이 건 원가 합계**를 둔다. 광고 한 편에 얼마가 드는지
       //   모르면 서비스 가격을 정할 수 없다.
       // 후반 — 계획에 적힌 할 일을 그대로 세운다. 여기서 지어내지 않는다.
@@ -2471,7 +2508,7 @@
       // 후반은 계획 아래에 **올라온 완성본**(검수·의견 칸 포함)을 붙인다 — 전에는 승인
       //   버튼만 있고 영상이 없었다 (09-23 15:26)
       post: postFor(p) + (p.step === "post" || (SE().of(p, "post") || {}).approved_at
-        ? assetList(p, "post") : ""),
+        ? assetList(p, "post") : "") + (p.step === "post" ? backBox(p) : ""),
       deliver: totalLine(p) + (p.step === "deliver" ? deliverBody(p) : "")
     };
 
@@ -2969,6 +3006,22 @@
     // ── 단계 상태 버튼 ────────────────────────────────────────────────────
     // 한 곳에서 받는다. 어느 버튼이든 하는 일은 같다 — RPC 하나 부르고 다시 읽기.
     // 누르는 동안 잠가서 두 번 눌리지 않게 한다(두 번 누르면 작업이 둘 생긴다).
+    document.querySelectorAll("[data-back]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var box = b.closest(".back-box");
+        var to = box.querySelector("[data-back-to]").value;
+        var note = (box.querySelector("[data-back-note]").value || "").trim();
+        if (!note) { window.alert("왜 되돌리는지 적어 주십시오 — 그 단계의 고칠 점으로 남습니다."); return; }
+        if (!window.confirm(STEP_NAME[to] + " 단계로 되돌립니다. 그 뒤 단계의 승인은 풀립니다.")) return;
+        b.disabled = true; b.textContent = "되돌리는 중…";
+        db.rpc("onecue_stage_back", { p_project_id: b.dataset.back, p_to: to, p_note: note })
+          .then(function (r) { if (r.error) throw r.error; return load(); })
+          .catch(function (e) {
+            b.disabled = false; b.textContent = "되돌리기";
+            window.alert("되돌리지 못했습니다 — " + (e.message || e));
+          });
+      });
+    });
     // 납품 — 광고주 발송. 되돌릴 수 없으니 한 번 더 묻는다
     document.querySelectorAll("[data-final-send]").forEach(function (b) {
       b.addEventListener("click", function () {
@@ -3644,7 +3697,7 @@
             .in("kind", ["production_enroll_requested", "production_enrolled", "astra_draft"])
             .in("project_id", ids).order("ts", { ascending: false }),
           // 실제로 나간 크레딧. 예상은 계획에 있고, 이건 쓴 것이다.
-          db.from("credit_spend").select("project_id,step,engine,credits,what,spent_at")
+          db.from("credit_spend").select("project_id,step,engine,credits,what,spent_at,outcome")
             .in("project_id", ids).order("spent_at"),
           db.from("product_facts").select("project_id,facts,label_text,claims,product_lock,device_note")
             .in("project_id", ids),
