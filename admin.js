@@ -2032,7 +2032,10 @@
               : '<div class="none">파일을 불러오지 못했습니다</div>') +
             '<figcaption><b>' + esc(f.role || f.kind) +
             (f.cut_n != null ? " · 컷" + f.cut_n : "") + "</b>" +
-            (m.why ? '<span class="why">' + esc(m.why) + "</span>" : "") +
+            // 검수 칸이 같은 문장(m.why)을 이미 보여 주면 여기서는 뺀다 — 두 번 나왔다
+            (m.why && !(m.review === "blocked" || m.review === "ask" ||
+                        (!isOld && m.review && m.review !== "pending"))
+              ? '<span class="why">' + esc(m.why) + "</span>" : "") +
             (m.camera_lock ? '<span class="lock">카메라 고정 — ' +
               esc(m.camera_lock) + "</span>" : "") +
             (facts.length ? '<span class="facts">' + facts.join(" · ") + "</span>" : "") +
