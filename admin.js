@@ -754,7 +754,10 @@
       return (!um.review || um.review === "pending")
         ? '<div class="plan-same"><b>새 판이 ' + esc(hhmm(u.created_at)) +
           "에 나왔습니다 — " + esc(hhmm(u.created_at, 20)) +
-          "쯤 검수와 함께 올라옵니다</b><span>" +
+          // 지난 시각을 「쯤 올라옵니다」라고 계속 말하면 거짓말이 된다
+          (Date.now() > new Date(u.created_at).getTime() + 20 * 60000
+            ? " 예정이었는데 늦어지고 있습니다. 검수가 끝나는 대로 올라옵니다</b><span>"
+            : "쯤 검수와 함께 올라옵니다</b><span>") +
           "잘게 끊어 보고 소리를 확인한 뒤 페이블이 판정합니다. <b>검수가 붙은 뒤에 " +
           "영상·의견·적으실 칸이 한꺼번에</b> 여기에 올라옵니다. 그때까지 다시 " +
           "뽑기는 잠겨 있습니다.</span></div>"
