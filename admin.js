@@ -3566,7 +3566,12 @@
     document.querySelector('main').innerHTML = '<section role="status" style="max-width:560px;margin:48px auto;overflow-wrap:anywhere">' +
       '<h1 style="font-size:24px">' + esc(title) + '</h1><p>' + esc(message) + '</p>' +
       '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px">' +
-      '<a class="btn" href="index.html">프로젝트로 돌아가기</a>' +
+      // ★ 「프로젝트로 돌아가기」가 index.html(메인)으로 가서 보던 건으로 못
+      //   돌아왔다 (Dan 2026-09-23). 보던 화면을 그대로 다시 부르고, 관리자
+      //   목록으로 가는 길을 따로 둔다.
+      (login ? '<a class="btn" href="index.html">처음 화면</a>'
+             : '<a class="btn" href="' + esc(location.href) + '">다시 불러오기</a>' +
+               '<a class="btn ghost" href="admin.html">관리자 목록</a>') +
       '<a class="btn ghost" href="login.html' + (login ? '?next=admin.html' : '') + '">' +
       (login ? '로그인' : '계정 확인') + '</a></div></section>';
     setConn('bad', title);
