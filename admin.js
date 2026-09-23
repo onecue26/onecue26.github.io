@@ -1488,10 +1488,15 @@
         '누가 진행할지 고르기 전까지 작업이 시작되지 않습니다</span>';
     } else if (SE().waiting(p, p.step)) {
       productionAction = '<span class="progress-state wait">담당자 진행 — 결과 등록 대기</span>';
-    } else if (p.step === "brief" && p.productionEnrolled && p.n_facts) {
-      // 제품·자료 확인 결과는 올라왔는데 기획 초안(전략·콘셉트)을 만들 쪽이 멈춰 있다 (09-23 환타)
-      productionAction = '<span class="progress-state wait">제품·자료 확인 결과 등록됨 · 전략·콘셉트 초안 대기 — ' +
-        '초안을 만드는 제작 세션이 멈춰 있으면 여기서 멈춥니다</span>';
+    } else if ((p.step === "brief" || p.step === "facts") && p.job && p.job.step === "concepts") {
+      // 기획 시작을 눌렀다 — 작업기가 전략 + 콘셉트 5안을 쓰는 중 (072 · plan_writer.py)
+      productionAction = '<span class="progress-state working st-run">기획 초안 쓰는 중 — 전략 + 콘셉트 5안 · 끝나면 콘셉트 검토로 넘어갑니다</span>';
+    } else if ((p.step === "brief" || p.step === "facts") && p.productionEnrolled && p.n_facts) {
+      // 의뢰 확정 → 기획 시작 (072). 광고주 답이 반영된 조건이 함께 넘어간다 (Dan 09-24)
+      productionAction = canWrite
+        ? '<div class="plan-start"><span>제품·자료 확인 끝 · 광고주 답 반영 후 기획을 시작합니다</span>' +
+          '<button class="btn" type="button" data-plan-start="' + esc(p.id) + '">의뢰 확정 → 기획 시작</button></div>'
+        : '<span class="progress-state wait">기획 시작 대기</span>';
     } else {
       productionAction = '<span class="progress-state">' + esc((STEP_NAME[p.step] || p.step)) + ' 진행 중</span>';
     }
@@ -3156,6 +3161,15 @@
           .catch(function (e) { b.disabled = false; b.textContent = "광고주에게 보내기"; window.alert("보내지 못했습니다 — " + (e.message || e)); });
       });
     });
+    document.querySelectorAll("[data-plan-start]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (!window.confirm("의뢰를 확정하고 기획(전략 + 콘셉트 5안)을 시작합니다. 광고주 답에서 정리한 조건이 함께 넘어갑니다.")) return;
+        b.disabled = true; b.textContent = "시작하는 중…";
+        db.rpc("onecue_plan_start", { p_project_id: b.dataset.planStart })
+          .then(function (r) { if (r.error) throw r.error; return load(); })
+          .catch(function (e) { b.disabled = false; b.textContent = "의뢰 확정 → 기획 시작"; window.alert("시작하지 못했습니다 — " + (e.message || e)); });
+      });
+    });
     document.querySelectorAll("[data-close-project]").forEach(function (b) {
       b.addEventListener("click", function () {
         if (!window.confirm("이 프로젝트를 완료로 닫습니다.")) return;
@@ -3907,7 +3921,7 @@
             //   값이 늘 undefined 라 링크가 조용히 안 뜬다
             .select("project_id,name,email,phone,title,homepage")
             .in("project_id", ids),
-          db.from("jobs").select("project_id,step,request").eq("state", "queued")
+          db.from("jobs").select("project_id,step,request").in("state", ["queued", "claimed"])   // 작업기가 가져간(claimed) 작업도 「쓰는 중」이다
             .in("project_id", ids),
           db.from("briefs").select("project_id,raw,goal,target,format").in("project_id", ids),
           // 승인하면서 남긴 말도 놓치면 안 된다. 반려만 보면 반쪽이다

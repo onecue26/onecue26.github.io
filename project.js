@@ -389,11 +389,16 @@
     return [
       box("ask", "의뢰 내용", "접수됨",
         secBrief(brief, MINE && canEditBrief(P)) + secFiles(assets) + secNeeds(assets, cuts), now.ask),
+      // 콘셉트 — 보내기 전(준비 중)·보낸 뒤(고르실 차례)·고른 뒤(선택 완료) (09-24)
       box("pick", "콘셉트 선택",
-        (concepts || []).some(function (c) { return c.is_chosen; }) ? "선택 완료" : "고르실 차례",
+        (concepts || []).some(function (c) { return c.is_chosen; }) ? "선택 완료"
+          : (P.step === "concepts" && P.state === "ready") ? "고르실 차례" : "준비 중",
         shown("concepts")
           ? secConcepts(concepts, MINE && P.step === "concepts" && P.state === "ready")
-          : "",
+          : (P.step === "concepts" || P.step === "strategy"
+            ? '<div class="stage-read development-notice"><section class="stage-block status"><h4>콘셉트를 준비하고 있습니다</h4>' +
+              "<p>보내 주신 내용과 답을 반영해 다섯 가지 안을 만들고 있습니다. 준비되면 여기서 고르실 수 있습니다.</p></section></div>"
+            : ""),
         now.pick),
       // ★ 상태 글자를 박아 두지 않는다. 「진행 중」으로 고정돼 있어서 영상
       //   제작 중인 건에도 제작 설계가 「진행 중」이라고 떴다 (Dan 2026-09-23).
