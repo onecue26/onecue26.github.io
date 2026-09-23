@@ -613,7 +613,7 @@
           // ★ 간단한 「누가 맡습니까」가 떠 있으면 옛 선택 양식은 띄우지 않는다 —
           //   두 개가 떴다 (Dan 09-23: 「아래쪽이 더맘에드는데 … 심플하게 나오니깐」)
           // 아직 오지 않은 단계에도 옛 선택 양식이 떴다 — 고르기는 그 단계에 들어와서
-          (bact || act || SE().isPaid(s.key) || status === "upcoming" || s.key === "deliver" || s.key === "brief" || s.key === "facts" ? "" : execPicker(p, s.key)) +
+          (bact || act || SE().isPaid(s.key) || status === "upcoming" || s.key === "deliver" || s.key === "brief" || s.key === "facts" || s.key === "strategy" || s.key === "concepts" ? "" : execPicker(p, s.key)) +
           deliverBox(p, s.key) +
           (s.key === "facts" ? needsPanel(p) : "") +
           (status === "upcoming" ? ''
@@ -1493,10 +1493,15 @@
       productionAction = '<span class="progress-state working st-run">기획 초안 쓰는 중 — 전략 + 콘셉트 5안 · 끝나면 콘셉트 검토로 넘어갑니다</span>';
     } else if ((p.step === "brief" || p.step === "facts") && p.productionEnrolled && p.n_facts) {
       // 의뢰 확정 → 기획 시작 (072). 광고주 답이 반영된 조건이 함께 넘어간다 (Dan 09-24)
+      // ★ 콘셉트가 나오기 전에 누가 맡을지 고른다 (Dan 09-24) — AI 면 작업기가 5안을 쓰고,
+      //   사람이면 양식과 작성 안내만 준다. 둘 다 콘셉트 검토로 모인다.
       productionAction = canWrite
-        ? '<div class="plan-start"><span>제품·자료 확인 끝 · 광고주 답 반영 후 기획을 시작합니다</span>' +
-          '<button class="btn" type="button" data-plan-start="' + esc(p.id) + '">의뢰 확정 → 기획 시작</button></div>'
-        : '<span class="progress-state wait">기획 시작 대기</span>';
+        ? '<div class="plan-start"><b>콘셉트 — 누가 맡습니까</b>' +
+          '<div class="lc-row"><button class="btn" type="button" data-plan-start="' + esc(p.id) + '">AI에게 맡기기</button>' +
+          '<button class="btn ghost" type="button" data-plan-human="' + esc(p.id) + '">사람이 직접 쓰기</button></div>' +
+          '<span>AI: 광고주 답 조건을 반영해 전략과 콘셉트 5안을 씁니다 · 사람: 아래 양식으로 씁니다</span></div>' +
+          manualConceptForm(p)
+        : '<span class="progress-state wait">콘셉트 담당 선택 대기</span>';
     } else {
       productionAction = '<span class="progress-state">' + esc((STEP_NAME[p.step] || p.step)) + ' 진행 중</span>';
     }
@@ -1890,6 +1895,31 @@
     /** 광고주가 올린 자료를 그림으로 — 글자(「제품 사진 1개」)만 보여서 무엇이 왔는지 몰랐다 (09-23 환타).
      *  누르면 크게(data-big). 어떤 종류가 광고주 몫인지는 계약(ad-type-materials.js)이 정한다. */
     /** 광고주가 메시지로 보낸 답 — 의뢰 내용에 붙는다 (Dan 09-23 「의뢰 접수 부분에 내용이 업데이트되야지」) */
+    /** 사람이 콘셉트를 쓰는 양식 (073). 쓰는 법 안내를 같이 둔다. */
+    function manualConceptForm(p) {
+      var one = function (i) {
+        var k = "ABCDE"[i];
+        return '<fieldset class="mc-one"><legend>' + k + '안</legend>' +
+          '<input data-mc="title" placeholder="제목 — 발상을 한 마디로">' +
+          '<input data-mc="client_one_line" placeholder="한 줄 설명 — 광고주가 읽는 말 (필수)">' +
+          '<textarea data-mc="client_explain" rows="2" placeholder="어떤 광고인가 — 쉬운 말로 두세 줄"></textarea>' +
+          '<input data-mc="client_appeal" placeholder="매력 — 왜 기억에 남나">' +
+          '<input data-mc="client_mood" placeholder="분위기 — 예: 유쾌하고 시원한">' +
+          '<input data-mc="client_difference" placeholder="다른 안과 다른 점">' +
+          '<label class="mc-reco"><input type="radio" name="mc-reco-' + esc(p.id) + '" value="' + i + '"' + (i === 0 ? " checked" : "") + '> 추천안</label>' +
+          "</fieldset>";
+      };
+      return '<div class="mc-form" id="mc-' + esc(p.id) + '" hidden>' +
+        '<div class="mc-guide"><b>쓰는 법</b>' +
+        "<span>· 다섯 안은 서로 다른 「보는 재미」 하나씩 — 반전·과장·리듬·웃음·감각 중 하나를 분명히</span>" +
+        "<span>· 광고주가 읽는 칸은 쉬운 말로, 포인트만 — 초·컷·카메라·전환·BGM·엔딩 같은 제작 용어는 쓰지 않는다(올릴 때 막힌다)</span>" +
+        "<span>· 가진 자료 안에서 되는 발상만 — 광고주에게 새 자료를 요구하지 않는다</span>" +
+        "<span>· 한 안만 써도 된다. 빈 안은 올라가지 않는다. 추천안은 하나</span></div>" +
+        '<input class="mc-msg" data-mc-msg placeholder="이 광고가 남길 한마디(선택) — 예: 톡 쏘면, 오늘이 다시 켜진다">' +
+        [0, 1, 2, 3, 4].map(one).join("") +
+        '<button class="btn" type="button" data-mc-save="' + esc(p.id) + '">콘셉트 올리기 → 검토</button></div>';
+    }
+
     function clientReplies(p) {
       var r = (p.messages || []).filter(function (m) { return m.author === "client"; });
       if (!r.length) return "";
@@ -3168,6 +3198,33 @@
         db.rpc("onecue_plan_start", { p_project_id: b.dataset.planStart })
           .then(function (r) { if (r.error) throw r.error; return load(); })
           .catch(function (e) { b.disabled = false; b.textContent = "의뢰 확정 → 기획 시작"; window.alert("시작하지 못했습니다 — " + (e.message || e)); });
+      });
+    });
+    document.querySelectorAll("[data-plan-human]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var f = document.getElementById("mc-" + b.dataset.planHuman);
+        if (f) f.hidden = !f.hidden;
+      });
+    });
+    document.querySelectorAll("[data-mc-save]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var id = b.dataset.mcSave, form = document.getElementById("mc-" + id);
+        var reco = (form.querySelector('input[type=radio]:checked') || {}).value;
+        var list = [];
+        form.querySelectorAll(".mc-one").forEach(function (fs, i) {
+          var c = {};
+          fs.querySelectorAll("[data-mc]").forEach(function (x) { c[x.dataset.mc] = (x.value || "").trim(); });
+          if (!c.title && !c.client_one_line) return;          // 빈 안은 건너뛴다
+          c.is_recommended = String(i) === reco;
+          list.push(c);
+        });
+        if (!list.length) { window.alert("한 안 이상 써 주십시오 (제목과 한 줄 설명)."); return; }
+        if (!list.some(function (c) { return c.is_recommended; })) list[0].is_recommended = true;
+        b.disabled = true; b.textContent = "올리는 중…";
+        db.rpc("onecue_concepts_manual", { p_project_id: id, p_concepts: list,
+          p_one_message: (form.querySelector("[data-mc-msg]").value || "").trim() })
+          .then(function (r) { if (r.error) throw r.error; return load(); })
+          .catch(function (e) { b.disabled = false; b.textContent = "콘셉트 올리기 → 검토"; window.alert("올리지 못했습니다 — " + (e.message || e)); });
       });
     });
     document.querySelectorAll("[data-close-project]").forEach(function (b) {
