@@ -28,6 +28,14 @@
   outline:2px solid var(--cue);outline-offset:1px;border-color:var(--cue)}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+/* ★ 한 줄에 놓인 칸들은 **입력칸 아래끝을 맞춘다.**
+   설명(hint)이 칸마다 길이가 달라서 — 하나는 한 줄, 하나는 비어 있으면 —
+   입력칸이 그만큼 위아래로 어긋났다 (Dan 2026-09-23: 「줄맞춤해」).
+   설명을 억지로 채우지 않고, 입력칸을 칸의 바닥으로 내려 보낸다.
+   그러면 앞으로 설명 길이가 바뀌어도 줄은 안 깨진다. */
+.row>.field,.row3>.field{display:flex;flex-direction:column}
+.row>.field>input,.row>.field>select,.row>.field>textarea,
+.row3>.field>input,.row3>.field>select,.row3>.field>textarea{margin-top:auto}
 @media(max-width:600px){.row,.row3{grid-template-columns:1fr}}
 
 /* 고르는 칩 */
