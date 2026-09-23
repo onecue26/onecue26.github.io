@@ -904,6 +904,18 @@
         (again && (!planReady(p, s) || !takeSettled(p, s)) ? " disabled" : "") + ">" +
         (again ? (s === "anchors" ? "다시 만들기" : "다시 뽑기")
                : (s === "anchors" ? "제작 자료 만들기" : "영상 뽑기")) + "</button>" +
+        // ★ 검수가 붙은 새 판이 있으면 **이대로 승인**도 여기서 누른다.
+        //   한 번 뽑고 멈추면 화면이 「다시 뽑기」 자리로만 돌아와서 승인 버튼이
+        //   없었다 — 의견 저장 말고는 누를 것이 없었다 (Dan 2026-09-23:
+        //   「의견 저장 말고는 버튼이없다 승인버튼이」). 승인은 돈을 쓰지 않으므로
+        //   의견 절차 잠금과 무관하게 연다.
+        (again && newestTakes(p, s).some(function (f) {
+          var rv = (f.meta || {}).review;
+          return rv && rv !== "pending";
+        })
+          ? '<button class="btn ghost" type="button" data-lc="approve"' + tag +
+            ">이대로 승인</button>"
+          : "") +
         "</div>" +
         (locked ? "" : '<span class="lc-msg">누르면 크레딧이 나갑니다. 만들어지면 여기에 올라오고, ' +
         '보신 뒤 승인하거나 고칠 곳을 적으실 수 있습니다.</span>') +
