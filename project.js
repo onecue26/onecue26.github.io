@@ -395,14 +395,11 @@
         boardOpen ? secBoard(assets) + secCuts(cuts, assets) : "", now.board),
       box("making", "영상 제작", "진행 중",
         (now.making && !HAS_FINAL)
+          // ★ 광고주에게는 한 줄이면 된다 — 자료·영상·후반을 나눠 알릴 필요 없다
+          //   (Dan 09-23: 「너무 디테일하게 알려줄 필요없는것 같은데」)
           ? '<div class="stage-read development-notice">' +
-            (P.step === "post"
-              ? '<section class="stage-block status"><h4>마무리 편집을 하고 있습니다</h4>' +
-                "<p>영상은 나왔고, 자막과 마지막 화면을 입히고 있습니다. " +
-                "완성되면 이 화면에서 바로 보실 수 있습니다.</p></section></div>"
-              : '<section class="stage-block status"><h4>영상을 만들고 있습니다</h4>' +
-                "<p>승인하신 콘티대로 촬영·생성과 편집을 진행하고 있습니다. " +
-                "완성되면 이 화면에서 바로 보실 수 있습니다.</p></section></div>")
+            '<section class="stage-block status"><h4>영상 제작 중입니다</h4>' +
+            "<p>완성되면 이 화면에서 바로 보실 수 있습니다.</p></section></div>"
           : "",
         now.making),
       box("done", "완성 영상", "도착",
@@ -648,14 +645,10 @@
       return '<div class="gate done"><div class="txt"><b>영상 제작 완료</b>' +
         '<small>납품을 준비하고 있습니다. 납품되면 이 화면에서 확인하실 수 있습니다.</small></div></div>';
     }
-    // ★ 후반 단계 안내가 없어서 「콘티 승인 완료 — 앵커 이미지와…」가 떴다 (09-23)
-    if (p.step === "post") {
-      return '<div class="gate done"><div class="txt"><b>마무리 편집 중입니다</b>' +
-        '<small>영상에 자막과 마지막 화면을 입히고 있습니다. 끝나면 완성본이 올라옵니다.</small></div></div>';
-    }
-    if (p.step === "video") {
-      return '<div class="gate done"><div class="txt"><b>영상을 준비하고 있습니다</b>' +
-        '<small>검수가 끝나면 완성본이 올라옵니다.</small></div></div>';
+    // 제작 자료·영상·후반은 광고주에게 한 가지로 보인다 (Dan 09-23 「너무 디테일하게 알려줄 필요없는」)
+    if (p.step === "anchors" || p.step === "video" || p.step === "post") {
+      return '<div class="gate done"><div class="txt"><b>영상 제작 중입니다</b>' +
+        '<small>완성되면 이 화면에서 바로 보실 수 있습니다.</small></div></div>';
     }
     if (done.storyboard) {
       return '<div class="gate done"><div class="txt"><b>콘티 승인 완료</b>' +
