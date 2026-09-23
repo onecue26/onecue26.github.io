@@ -1471,7 +1471,7 @@
   function card(p) {
     var isNew = p.isNew;
     var productionAction = "";
-    if (p.step === "brief" && p.state === "pending" && p.job && p.job.step === "facts") {
+    if (p.step === "brief" && p.state === "pending" && p.job && p.job.step === "facts" && !(p.job.request && p.job.request.plan)) {
       if (p.productionEnrolled) {
         productionAction = '<span class="progress-state ok">AI 제작 등록 완료 · 제품·자료 확인 준비 중</span>';
       } else if (p.enrollRequested) {
@@ -1488,7 +1488,7 @@
         '누가 진행할지 고르기 전까지 작업이 시작되지 않습니다</span>';
     } else if (SE().waiting(p, p.step)) {
       productionAction = '<span class="progress-state wait">담당자 진행 — 결과 등록 대기</span>';
-    } else if ((p.step === "brief" || p.step === "facts") && p.job && p.job.step === "concepts") {
+    } else if (p.job && p.job.request && p.job.request.plan) {
       // 기획 시작을 눌렀다 — 작업기가 전략 + 콘셉트 5안을 쓰는 중 (072 · plan_writer.py)
       productionAction = '<span class="progress-state working st-run">기획 초안 쓰는 중 — 전략 + 콘셉트 5안 · 끝나면 콘셉트 검토로 넘어갑니다</span>';
     } else if ((p.step === "brief" || p.step === "facts") && p.productionEnrolled && p.n_facts) {

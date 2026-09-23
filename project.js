@@ -379,15 +379,15 @@
     var boardOpen = BOARD_READY && shown("storyboard");
     // 광고주 칸 → 그 칸이 「지금」인 내부 단계
     var now = {
-      ask: at <= IDX.facts,
-      pick: P.step === "concepts",
+      ask: P.step === "brief",
+      pick: P.step === "concepts" || P.step === "strategy" || P.step === "facts",   // 기획 시작 뒤엔 콘셉트 칸이 지금 칸
       design: P.step === "develop" || (P.step === "storyboard" && !boardOpen),
       board: P.step === "storyboard" && boardOpen,
       making: P.step === "anchors" || P.step === "video" || P.step === "post",
       done: P.step === "deliver" || HAS_FINAL,
     };
     return [
-      box("ask", "의뢰 내용", "접수됨",
+      box("ask", "의뢰 내용", P.step === "brief" ? "접수됨" : "확정",
         secBrief(brief, MINE && canEditBrief(P)) + secFiles(assets) + secNeeds(assets, cuts), now.ask),
       // 콘셉트 — 보내기 전(준비 중)·보낸 뒤(고르실 차례)·고른 뒤(선택 완료) (09-24)
       box("pick", "콘셉트 선택",
@@ -395,7 +395,7 @@
           : (P.step === "concepts" && P.state === "ready") ? "고르실 차례" : "준비 중",
         shown("concepts")
           ? secConcepts(concepts, MINE && P.step === "concepts" && P.state === "ready")
-          : (P.step === "concepts" || P.step === "strategy"
+          : (P.step === "concepts" || P.step === "strategy" || P.step === "facts"
             ? '<div class="stage-read development-notice"><section class="stage-block status"><h4>콘셉트를 준비하고 있습니다</h4>' +
               "<p>보내 주신 내용과 답을 반영해 다섯 가지 안을 만들고 있습니다. 준비되면 여기서 고르실 수 있습니다.</p></section></div>"
             : ""),
@@ -440,7 +440,9 @@
     if (!list.length) return "";
     var last = list[list.length - 1];
     var open = last.author === "admin";            // 우리 말이 마지막이면 답을 기다리는 중
-    return '<section class="msgs"><h2>onecue 에서 온 메시지</h2>' + list.map(function (m) {
+    // 답할 차례일 때만 펼친다 — 계속 떠 있으면 다음 단계가 안 보인다 (Dan 09-24 「계속 메시지창이뜨게하지말고」)
+    return '<details class="msgs"' + (open ? " open" : "") + '><summary><h2>' +
+      (open ? "onecue 에서 온 메시지 — 답을 기다립니다" : "주고받은 메시지 " + list.length + "건") + "</h2></summary>" + list.map(function (m) {
       return '<div class="msg ' + (m.author === "admin" ? "in" : "out") + '"><div class="msg-head"><b>' +
         esc(MSG_KIND[m.kind] || m.kind) + "</b> · " + esc(m.sent_at ? new Date(m.sent_at).toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 16) : "") +
         '</div><div class="msg-body">' + esc(m.body) + "</div>" +
@@ -456,7 +458,7 @@
         '<option value="mood_ref">참고 이미지·영상</option><option value="doc">문서·기타</option></select>' +
         '<input type="file" id="msgFiles" multiple accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.zip"></div>' +
         '<button class="btn" id="msgSend" data-reply-to="' + esc(last.id) + '">보내기</button>' +
-        '<span class="hint" id="msgMsg" role="status" aria-live="polite"></span></div>' : "") + "</section>";
+        '<span class="hint" id="msgMsg" role="status" aria-live="polite"></span></div>' : "") + "</details>";
   }
 
   function deliverForm() {
