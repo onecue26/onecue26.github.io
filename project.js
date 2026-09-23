@@ -22,8 +22,12 @@
   var STEPS = [
     ["brief", "의뢰 접수"], ["facts", "제품·자료 확인"], ["strategy", "전략 설계"],
     ["concepts", "콘셉트 5안"], ["develop", "구성·각본"], ["storyboard", "콘티 승인"],
-    ["anchors", "제작 자료"], ["video", "영상 제작"], ["deliver", "납품"],
+    ["anchors", "제작 자료"], ["video", "영상 제작"], ["post", "후반 작업"],
+    ["deliver", "납품"],
   ];
+  // ★ 후반(post)이 빠져 있었다 — 후반으로 넘어간 건이 처음이라 몰랐다. 순서표에 없으면
+  //   IDX 가 비어 「0번 = 의뢰 접수」로 돌아가고 아래 칸이 전부 사라졌다 (Dan 09-23:
+  //   「광고주 화면 다 박살나잇는데? 진행상황안맞고」).
   var IDX = {}; STEPS.forEach(function (s, i) { IDX[s[0]] = i; });
   // 광고주가 판단하는 자리 — 여기서만 버튼이 뜬다
   var GATES = { strategy: "검토", concepts: "선택", storyboard: "승인", video: "승인" };
@@ -80,7 +84,7 @@
     { key: "pick",   name: "콘셉트 선택", from: ["strategy", "concepts"] },
     { key: "design", name: "제작 설계",   from: ["develop"] },
     { key: "board",  name: "콘티 확인",   from: ["storyboard"] },
-    { key: "making", name: "영상 제작",   from: ["anchors", "video"] },
+    { key: "making", name: "영상 제작",   from: ["anchors", "video", "post"] },
     { key: "done",   name: "납품",        from: ["deliver"] },
   ];
 
@@ -368,7 +372,7 @@
       pick: P.step === "concepts",
       design: P.step === "develop" || (P.step === "storyboard" && !boardOpen),
       board: P.step === "storyboard" && boardOpen,
-      making: P.step === "anchors" || P.step === "video",
+      making: P.step === "anchors" || P.step === "video" || P.step === "post",
       done: P.step === "deliver" || HAS_FINAL,
     };
     return [
@@ -392,9 +396,13 @@
       box("making", "영상 제작", "진행 중",
         (now.making && !HAS_FINAL)
           ? '<div class="stage-read development-notice">' +
-            '<section class="stage-block status"><h4>영상을 만들고 있습니다</h4>' +
-            "<p>승인하신 콘티대로 촬영·생성과 편집을 진행하고 있습니다. " +
-            "완성되면 이 화면에서 바로 보실 수 있습니다.</p></section></div>"
+            (P.step === "post"
+              ? '<section class="stage-block status"><h4>마무리 편집을 하고 있습니다</h4>' +
+                "<p>영상은 나왔고, 자막과 마지막 화면을 입히고 있습니다. " +
+                "완성되면 이 화면에서 바로 보실 수 있습니다.</p></section></div>"
+              : '<section class="stage-block status"><h4>영상을 만들고 있습니다</h4>' +
+                "<p>승인하신 콘티대로 촬영·생성과 편집을 진행하고 있습니다. " +
+                "완성되면 이 화면에서 바로 보실 수 있습니다.</p></section></div>")
           : "",
         now.making),
       box("done", "완성 영상", "도착",
