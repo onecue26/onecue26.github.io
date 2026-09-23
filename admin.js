@@ -1255,6 +1255,16 @@
           : "AI가 작업 중",
           pick.started_at ? "시작 " + ago(pick.started_at) : "") + "</div>";
     }
+    // ★ 결과물 카드에 「의견 → 답변 → 정하기」 칸이 있는 단계(후반)는 **고칠 점을 거기에만** 적는다.
+    //   위에 「수정 요청」, 아래에 「의견 적기」가 같이 있어 어디에 쓰라는 건지 몰랐다
+    //   (Dan 09-23: 「위에 수정요청있고 아래는 의견넣는거잇고 … 하나만하는게맞지않냐?」)
+    if (act.phase === "review" && key === "post") {
+      return '<div class="lc lc-review"' + tag + ">" +
+        head("결과를 검토해 주세요", "괜찮으면 승인 · 고칠 점은 아래 완성본의 의견 칸에") +
+        '<div class="lc-row">' +
+        '<button class="btn" type="button" data-lc="approve"' + tag + ">승인</button>" +
+        "</div>" + '<span class="lc-msg" data-lc-msg></span></div>';
+    }
     if (act.phase === "review") {
       return '<div class="lc lc-review"' + tag + ">" +
         head("결과를 검토해 주세요", "승인해야 다음 단계로 넘어갑니다") +
@@ -2265,8 +2275,8 @@
             : danTakeBox(f, m) +
               (f.kind === "final"
                 // 후반 완성본은 다시 만들어도 크레딧이 안 든다 (ffmpeg)
-                ? '<span class="call">보시고 정하십시오 — 위의 <b>승인</b> 또는 <b>수정 요청</b>' +
-                  "(크레딧 없음).</span></div>"
+                ? '<span class="call">괜찮으면 위의 <b>승인</b> · 고칠 점은 이 <b>의견 칸</b>에 — ' +
+                  "답을 달고, 정하시면 다시 만듭니다(크레딧 없음).</span></div>"
                 : '<span class="call">보시고 정하십시오 — <b>다시 뽑기</b>' +
                   "(값이 또 나갑니다) 또는 <b>이대로 승인</b>.</span></div>"));
       }
