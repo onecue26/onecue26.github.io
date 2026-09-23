@@ -37,7 +37,7 @@
     { key: "storyboard", owner: "AI/담당자 · 관리자" },
     { key: "anchors", owner: "AI · 제작 관리자" },
     { key: "video", owner: "AI · 제작 관리자" },
-    { key: "post", owner: "사람 손 · AI 검수" },
+    { key: "post", owner: "AI · 관리자 승인" },
     { key: "deliver", owner: "관리자 → 광고주" },
   ];
   // 이 단계로 옮기면 광고주가 판단할 차례가 된다
@@ -601,14 +601,18 @@
             : (act && !SE().isPaid(s.key)) ? lifecycleBar(p, s.key, act)
             : SE().isPaid(s.key) ? ""
             : choiceGate(p, s.key)) +
-          '<span>수행 · ' + esc(worker) +
-          '</span><span>결과를 검토하는 AI(핵심 검토 AI) · ' + esc(reviewer) + '</span>' +
+          // ★ 기록이 없으면 이 줄을 띄우지 않는다 — 모든 단계에 「기록 없음 · 별도 검토
+          //   없음」이 떠서 끝난 단계까지 안 한 것처럼 보였다 (09-23 화면 점검).
+          (who.label === "기록 없음" && reviewer === "별도 검토 없음" ? "" :
+            '<span>수행 · ' + esc(worker) +
+            '</span><span>결과를 검토하는 AI(핵심 검토 AI) · ' + esc(reviewer) + '</span>') +
           findingText + delivered +
           // 유료 단계는 고르기를 묻지 않으므로 선택 폼도 띄우지 않는다 —
           // 띄우면 「사람이 직접 진행」이 보이고, 그 길은 없다.
           // ★ 간단한 「누가 맡습니까」가 떠 있으면 옛 선택 양식은 띄우지 않는다 —
           //   두 개가 떴다 (Dan 09-23: 「아래쪽이 더맘에드는데 … 심플하게 나오니깐」)
-          (bact || act || SE().isPaid(s.key) ? "" : execPicker(p, s.key)) +
+          // 아직 오지 않은 단계에도 옛 선택 양식이 떴다 — 고르기는 그 단계에 들어와서
+          (bact || act || SE().isPaid(s.key) || status === "upcoming" ? "" : execPicker(p, s.key)) +
           deliverBox(p, s.key) +
           (s.key === "facts" ? needsPanel(p) : "") +
           (status === "upcoming" ? ''
@@ -1755,7 +1759,21 @@
     // 계획(render_plan.post)에 적힌 것을 그대로 세운다 — 화면이 목록을
     // 따로 들고 있으면 계획과 갈린다.
     function postBody(p) {
-      var list = ((p.render_plan || {}).post) || [];
+      var raw = (p.render_plan || {}).post;
+      // 자막·엔드카드 계획(auto_post 가 읽는 모양)이면 그대로 보여 준다
+      if (raw && !Array.isArray(raw) && (raw.captions || raw.endcard)) {
+        var caps = (raw.captions || []).map(function (c) {
+          return "<li><b>" + esc(c.from) + "~" + esc(c.to) + "초 자막</b><span>" + esc(c.text) + "</span></li>";
+        }).join("");
+        var ec = raw.endcard || {};
+        var end = (ec.lines || []).length ? "<li><b>" + esc(ec.from) + "초부터 엔드카드</b><span>" +
+          (ec.lines || []).map(esc).join(" / ") + "</span></li>" : "";
+        return '<div class="stage-content post-work"><div class="pw-head"><b>후반에서 입힐 것</b>' +
+          (raw.source ? "<span>영상 " + esc(raw.source) + " 에</span>" : "") + "</div>" +
+          '<ol class="pw-list">' + caps + end + "</ol>" +
+          (raw.why ? '<p class="none">' + esc(raw.why) + "</p>" : "") + "</div>";
+      }
+      var list = Array.isArray(raw) ? raw : [];
       if (!list.length) {
         return '<div class="stage-content"><p class="none">' +
           '후반에 할 일이 계획에 아직 없습니다 — 구성·각본 단계에서 정합니다.</p></div>';
@@ -2165,7 +2183,10 @@
            *  Dan 2026-09-22: 「v2가 아래로 내려가긴햇는데 의견 쓰는부분이
            *  여전히 잇고 버튼도 동작해」 — 접어 두기만 하고 그 안의 것을
            *  그대로 둔 것이 잘못이다. 접힌 것은 **기록**이지 할 일이 아니다. */
-          (isOld
+          // ★ 승인한 판을 「버린 판」이라고 적고 있었다 (09-23 화면 점검 — v6).
+          (isOld && (SE().of(p, step) || {}).approved_at && rank[f.id] === 0
+            ? '<span class="call gone">승인한 판입니다 — 이 판으로 다음 단계를 진행합니다.</span></div>'
+            : isOld
             ? '<span class="call gone">지난 판입니다 — 여기서 정하실 것은 ' +
               "없습니다. 왜 이 판을 버렸는지 남겨 둔 것입니다.</span></div>"
             : danTakeBox(f, m) +
