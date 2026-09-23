@@ -12,3 +12,7 @@
 @media(max-width:600px){.wordmark{font-size:22px}.wordmark b{width:25px;height:25px}.site-header nav a[href='#work']{display:none}.site-header{gap:10px}}
 @media(max-width:360px){.site-header{padding-left:12px;padding-right:12px;gap:8px}.header-cta{padding:8px}.header-cta svg{display:none}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+
+/* 로그인 — 맨 아래 푸터에만 있어 찾기 어려웠다. 오른쪽 위 「제작 의뢰」 옆으로 (Dan 2026-09-23) */
+.header-right{display:flex;align-items:center;gap:22px}.header-login{font-size:14px;color:var(--paper);padding:11px 4px}.header-login:hover{color:var(--lime)}
+@media(max-width:600px){.header-right{gap:10px}.header-login{font-size:12px;padding:8px 2px}}
