@@ -13,7 +13,7 @@ async function load(){try{
   if(!window.supabase)await script('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
   db ||= window.supabase.createClient(window.ONECUE.supabaseUrl,window.ONECUE.supabaseAnonKey);
   const {data:{user},error:authError}=await db.auth.getUser();
-  if(authError||!user){document.querySelector('#detail').innerHTML='<div class="empty">관리자 로그인이 필요합니다. <a href="login.html">로그인</a></div>';status.textContent='로그인 대기';return;}
+  if(authError||!user){document.querySelector('#rows').innerHTML='<div class="empty">관리자 로그인이 필요합니다. <a href="login.html">로그인</a></div>';status.textContent='로그인 대기';return;}
   const {data:profile,error:profileError}=await db.from('profiles').select('is_admin').eq('id',user.id).maybeSingle();
   if(profileError||!profile?.is_admin)throw Error('관리자 계정만 볼 수 있습니다.');
   document.querySelectorAll('[data-studio-admin]').forEach(a=>a.hidden=false);
@@ -22,30 +22,60 @@ async function load(){try{
  }
  if(!Array.isArray(rows))throw Error('목록 형식이 올바르지 않습니다.');
  status.textContent=`${new Set(rows.map(r=>r.work_id)).size}개 작품 · ${rows.length}개 버전${local?' · 로컬 관리자 미리보기':''}`;
- if(!selected&&rows.length)selected=rows[0].work_id;list();await detail();
-}catch(e){rows=[];document.querySelector('#list').innerHTML='';status.textContent=e.message;document.querySelector('#detail').innerHTML='<div class="empty">연결을 확인한 뒤 새로고침해 주세요.</div>';}}
-function list(){const query=document.querySelector('#search').value.toLowerCase();const latest=new Map();for(const row of rows){if(!latest.has(row.work_id)||latest.get(row.work_id).revision<row.revision)latest.set(row.work_id,row);}document.querySelector('#list').innerHTML=[...latest.values()].filter(r=>`${r.work_id} ${r.title}`.toLowerCase().includes(query)).map(r=>`<button class="work ${r.work_id===selected?'active':''}" data-id="${esc(r.work_id)}"><small>${esc(r.work_id)} / r${String(r.revision).padStart(3,'0')}</small><strong>${esc(r.title)}</strong><span>${r.kind==='test'?'테스트':r.kind==='experiment'?'실험':'납품'} · ${r.analyst_review?'후기 검토됨':'후기 검토 대기'}</span></button>`).join('')||'<p class="empty">일치하는 작품이 없습니다.</p>';}
-function prose(text){if(!text)return '<p class="empty">아직 기록이 없습니다.</p>';return text.split('\n').map(line=>{if(line.startsWith('## '))return `<h4>${esc(line.slice(3))}</h4>`;if(line.startsWith('# '))return `<h3>${esc(line.slice(2))}</h3>`;if(line.startsWith('- '))return `<p class="bullet">${esc(line.slice(2))}</p>`;return line.trim()?`<p>${esc(line)}</p>`:'';}).join('');}
-let requestVersion=0;
-async function detail(){const request=++requestVersion;const group=rows.filter(r=>r.work_id===selected).sort((a,b)=>b.revision-a.revision);const r=group.find(r=>r.revision===revision)||group[0];if(!r){document.querySelector('#detail').innerHTML='<div class="empty">등록된 완성작이 없습니다.</div>';return;}
- revision=r.revision;
- let src=r.video_url;
- let original;
- if(!local){const signed=await db.storage.from('production-results').createSignedUrl(r.preview_path||r.video_path,3600);if(request!==requestVersion)return;if(signed.error){src='';}else src=signed.data.signedUrl;
- const download=await db.storage.from('production-results').createSignedUrl(r.video_path,3600,{download:true});if(request!==requestVersion)return;original=download.data?.signedUrl;
- }
- if(src){const parsed=new URL(src,location.href);if(!['http:','https:'].includes(parsed.protocol))src='';}
- document.querySelector('#detail').innerHTML=`<div class="result-head"><div><h2>${esc(r.title)}</h2><div class="tags"><span class="tag">${esc(r.work_id)}</span><span class="tag">${esc(r.kind)}</span><span class="tag pending">${({unreviewed:'영상 감상 미검수',reviewed:'영상 검수 완료',approved:'사용자 승인'})[r.review]||esc(r.review)}</span></div></div><label><select id="revision" aria-label="수정본 선택">${group.map(g=>`<option value="${g.revision}" ${g.revision===r.revision?'selected':''}>r${String(g.revision).padStart(3,'0')}</option>`).join('')}</select></label></div>${src?`<div class="media"><video src="${esc(src)}" controls playsinline preload="metadata"></video></div><a class="download" href="${esc(src)}" download>영상 다운로드</a>`:'<p class="error">영상 접근에 실패했습니다. 새로고침해 주세요.</p>'}<div class="review-tabs">${[['record','아스트라 제작 후기'],['analyst','시스템 담당 검토'],['info','제작 정보']].map(([v,t])=>`<button data-section="${v}" class="${section===v?'active':''}">${t}</button>`).join('')}</div><div id="review-body"></div>`;
- showReview(r);
- if(original)document.querySelector('.download').href=original;
- if(local && r.video_preview_url){
-  const video=document.querySelector('#detail video');
-  const preview=new URL(r.video_preview_url,location.href);
-  if(video && preview.origin===location.origin){video.src=preview.href;video.load();}
- }
+ render();
+}catch(e){rows=[];document.querySelector('#rows').innerHTML='';status.textContent=e.message;document.querySelector('#rows').innerHTML='<div class="empty">연결을 확인한 뒤 새로고침해 주세요.</div>';}}
+// ★ 2026-09-23 — 가로로 긴 줄(제작 단계 목록과 같은 모양)로 바꿨다. 누르면 결과물 · 제작 후기 · 개선점.
+//   Dan: 「파도에 이어서 순서대로 … 가로로 긴 탭으로 해서 열면 결과물과 후기가 잇는걸로. 그리고 개선점을 넣고」
+//   순서는 작품 번호순(P0001 파도 → P0002 → P0003 …). 완료된 원큐 프로젝트는 작업기가 닫는 순간 이어서 붙인다.
+const KIND={test:'자체 제작 테스트',client:'광고주 납품'};
+const open=new Map();   // work_id → 보고 있는 판·칸
+function latestOf(id){return rows.filter(r=>r.work_id===id).sort((a,b)=>b.revision-a.revision);}
+function prose(text){if(!text)return '<p class="empty">기록 없음</p>';
+ return text.split('\n').map(line=>{if(line.startsWith('## '))return `<h4>${esc(line.slice(3))}</h4>`;
+  if(line.startsWith('# '))return `<h3>${esc(line.slice(2))}</h3>`;
+  if(line.startsWith('- '))return `<p class="bullet">${esc(line.slice(2))}</p>`;
+  if(/^(결론|잘된 점|문제와 원인|제작 정보)/.test(line))return `<h4>${esc(line)}</h4>`;
+  return line.trim()?`<p>${esc(line)}</p>`:'';}).join('');}
+function won(n){return n?'₩'+Number(n).toLocaleString():'';}
+function render(){
+ const q=(document.querySelector('#search').value||'').toLowerCase();
+ const ids=[...new Set(rows.map(r=>r.work_id))].sort();
+ const html=ids.map(id=>{const g=latestOf(id),r=g[0];
+  if(!`${r.work_id} ${r.title}`.toLowerCase().includes(q))return '';
+  const day=String(r.delivered_at||r.registered_at||'').slice(0,10);
+  const cost=r.cost_credits?`${Number(r.cost_credits)}cr ${won(r.cost_krw)}`:'';
+  return `<details class="work-row" data-id="${esc(id)}"${open.has(id)?' open':''}><summary>
+   <span class="w-id">${esc(id)}</span><strong class="w-title">${esc(r.title)}</strong>
+   <span class="w-kind ${esc(r.kind)}">${esc(KIND[r.kind]||r.kind)}</span>
+   <span class="w-meta">${esc(day)}${g.length>1?' · '+g.length+'판':''}${cost?' · '+esc(cost):''}</span></summary>
+   <div class="w-body" data-body="${esc(id)}"></div></details>`;}).join('');
+ document.querySelector('#rows').innerHTML=html||'<div class="empty">등록된 결과물이 없습니다.</div>';
+ document.querySelectorAll('details.work-row[open]').forEach(d=>body(d.dataset.id));
 }
-function showReview(r){document.querySelectorAll('[data-section]').forEach(b=>b.classList.toggle('active',b.dataset.section===section));document.querySelector('#review-body').innerHTML=section==='info'?`<div class="facts"><span>등록 일시<strong>${esc(new Date(r.registered_at).toLocaleString('ko-KR'))}</strong></span><span>버전<strong>${esc(r.work_id)} / r${String(r.revision).padStart(3,'0')}</strong></span><span>분류<strong>${esc(r.kind)}</strong></span><span>시스템 후기 검토<strong>${r.analyst_review?'기록 있음':'대기'}</strong></span></div>`:`<article class="prose">${prose(section==='record'?r.production_record:r.analyst_review)}</article>`;}
-document.querySelector('#list').onclick=e=>{const b=e.target.closest('[data-id]');if(b){selected=b.dataset.id;revision=0;list();detail();}};
-document.querySelector('#detail').onclick=e=>{const b=e.target.closest('[data-section]');if(b){section=b.dataset.section;const r=rows.find(r=>r.work_id===selected&&r.revision===revision);if(r)showReview(r);}};
-document.querySelector('#detail').onchange=e=>{if(e.target.id==='revision'){revision=Number(e.target.value);detail();}};
-document.querySelector('#search').oninput=list;document.querySelector('#reload').onclick=load;load();
+async function body(id){
+ const st=open.get(id)||{rev:0,tab:'review'};open.set(id,st);
+ const g=latestOf(id),r=g.find(x=>x.revision===st.rev)||g[0];st.rev=r.revision;
+ const box=document.querySelector(`[data-body="${CSS.escape(id)}"]`);if(!box)return;
+ let src='',dl='';
+ if(!local){const b=r.bucket||'production-results';
+  const s1=await db.storage.from(b).createSignedUrl(r.preview_path||r.video_path,3600);if(!s1.error)src=s1.data.signedUrl;
+  const s2=await db.storage.from(b).createSignedUrl(r.video_path,3600,{download:true});dl=s2.data?.signedUrl||'';}
+ else src=r.video_url||'';
+ // 옛 기록(파도)은 후기가 production_record 에, 시스템 검토가 analyst_review 에 있다
+ const fresh=r.improvements!=null;
+ const tabs={review:['제작 후기',fresh?r.analyst_review:r.production_record],
+  improve:['개선점',fresh?r.improvements:(r.analyst_review?'(옛 기록 — 개선점 칸이 없던 때라 시스템 검토로 대신)\n'+r.analyst_review:'')],
+  info:['제작 정보',fresh?r.production_record:`제작 정보\n- 등록 ${String(r.registered_at).slice(0,10)}\n- 분류 ${KIND[r.kind]||r.kind}`]};
+ box.innerHTML=`<div class="w-grid"><div class="w-video">${src?`<video src="${esc(src)}#t=0.3" controls playsinline preload="metadata"></video>`:'<div class="empty">영상을 불러오지 못했습니다</div>'}
+   ${g.length>1?`<label class="w-rev">판 <select data-rev="${esc(id)}">${g.map(x=>`<option value="${x.revision}"${x.revision===r.revision?' selected':''}>r${String(x.revision).padStart(3,'0')}</option>`).join('')}</select></label>`:''}
+   ${dl?`<a class="w-dl" href="${esc(dl)}">영상 다운로드</a>`:''}</div>
+  <div class="w-text"><nav class="w-tabs">${Object.entries(tabs).map(([k,[n]])=>`<button data-tab="${k}" data-for="${esc(id)}" class="${k===st.tab?'active':''}">${n}</button>`).join('')}</nav>
+   <div class="w-prose">${prose(tabs[st.tab][1])}</div></div></div>`;
+}
+document.querySelector('#rows').addEventListener('toggle',e=>{const d=e.target;if(!d.matches||!d.matches('details.work-row'))return;
+ if(d.open){if(!open.has(d.dataset.id))open.set(d.dataset.id,{rev:0,tab:'review'});body(d.dataset.id);}else open.delete(d.dataset.id);},true);
+document.querySelector('#rows').onclick=e=>{const b=e.target.closest('[data-tab]');if(b){open.get(b.dataset.for).tab=b.dataset.tab;body(b.dataset.for);}};
+document.querySelector('#rows').onchange=e=>{if(e.target.dataset.rev){open.get(e.target.dataset.rev).rev=Number(e.target.value);body(e.target.dataset.rev);}};
+document.querySelector('#search').oninput=render;
+document.querySelector('#reload').onclick=load;
+load();
