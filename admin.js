@@ -1918,7 +1918,9 @@
           "<div><b>1크레딧 ≈ ₩" + krwPerCredit() + "</b> <span>(" + esc(rb.plan || "") + " 정가 $" +
           esc(String(rb.usd_list || "")) + " + VAT 10% ÷ " + Number(rb.credits || 0).toLocaleString() + "cr)</span></div></div>"
         : "";
-      return '<div class="cost-statement"><div class="stmt-head"><h4>제작 원가 명세</h4>' + head + "</div>" +
+      // 기본은 접어 둔다 — 제목 줄에 총 원가만, 누르면 명세가 펼쳐진다 (Dan 09-23)
+      return '<details class="cost-statement"><summary class="stmt-head"><h4>제작 원가 명세 <span class="stmt-sum">총 ' +
+        all + "cr" + won(all) + (gone ? " · 버린 판 " + gone + "cr" : "") + "</span></h4>" + head + "</summary>" +
         '<table class="stmt"><thead><tr><th class="n">#</th><th>항목 · 엔진 · 시각</th><th>결과</th>' +
         '<th class="num">크레딧</th><th class="num">원화</th></tr></thead><tbody>' + body + "</tbody></table>" +
         '<table class="stmt total"><tbody>' +
@@ -1931,7 +1933,7 @@
         '<p class="stmt-note">' +
         (krwPerCredit() ? "원화 = 크레딧 × ₩" + krwPerCredit() + " · " + esc(rb.calc || "") + " · 근거: " + esc(rb.krw_source || "") + "."
           : (est ? "원화는 추정 — 1크레딧 ≈ ₩" + est + "." : "원화 단가가 없습니다 — db/credit_rates.json")) +
-        " 영상 생성 외 비용(그록 구독 · AI 사용료)은 포함하지 않았습니다.</p></div>";
+        " 영상 생성 외 비용(그록 구독 · AI 사용료)은 포함하지 않았습니다.</p></details>";
     }
 
 
