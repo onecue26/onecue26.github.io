@@ -831,7 +831,10 @@
         ]).then(function (access) {
         access.forEach(function (r) { if (r.error) throw r.error; });
         var admin = !!(access[1].data && access[1].data.is_admin);
-        MINE = !admin && !!(access[0].data && access[0].data.owner_id === user.id);
+        // ★ 자기가 넣은 의뢰면 광고주로 행동한다 — 관리자 표시가 있어도 (2026-09-23 Dan)
+        //   읽기 전용 계정(관리자 표시 O · 쓰기 X)은 관리자 쪽은 보기만, 광고주 쪽은 광고주가 되어 전부 해 본다.
+        //   전에는 관리자 표시만 있으면 광고주 버튼을 다 숨겨서, 자기 의뢰에서도 아무것도 못 눌렀다.
+        MINE = !!(access[0].data && access[0].data.owner_id === user.id);
         if (!MINE && !admin) { P = null; denied(); return; }
         setConn("ok", "연결됨");
         var id = P.id;
