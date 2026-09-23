@@ -1897,8 +1897,12 @@
         return '<tr class="grp"><th colspan="6">' + esc(STEP_NAME[g.key] || g.key) + "</th></tr>" +
           g.rows.map(function (x, i) {
             var c = Number(x.credits) || 0;
+            // 영상은 판 번호로 — 「C1 · 15초(C1)」가 여섯 줄 똑같아 몇 번째 판인지 안 보였다
+            var vid = /seedance|kling|veo|hailuo|wan/i.test(x.engine || "");
+            var nth = vid ? g.rows.slice(0, i + 1).filter(function (y) {
+              return /seedance|kling|veo|hailuo|wan/i.test(y.engine || ""); }).length : 0;
             return '<tr class="' + (x.outcome || "") + '"><td class="n">' + (i + 1) + "</td><td>" +
-              esc(item(x)) + '<div class="sub">' + esc(x.engine || "") + " · " + esc(when(x.spent_at)) +
+              (vid ? "<b>영상 " + nth + "판</b> · " : "") + esc(item(x)) + '<div class="sub">' + esc(x.engine || "") + " · " + esc(when(x.spent_at)) +
               "</div></td><td>" + mark(x) + '</td><td class="num">' + c + '</td><td class="num">' + krw(c) +
               "</td></tr>";
           }).join("") +
