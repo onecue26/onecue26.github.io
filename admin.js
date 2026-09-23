@@ -1822,44 +1822,6 @@
         '">승인하고 광고주에게 납품</button></div></div>';
     }
 
-    /** 단계마다 누가 승인·납품했나 (Dan 09-23: 「승인자 아이디가 단계별로 보이도록」) */
-    var PEOPLE = {};
-    function loadPeople() {
-      var ids = {};
-      ROWS.forEach(function (p) {
-        (p.approvals || []).forEach(function (a) { if (a.decided_by) ids[a.decided_by] = 1; });
-        (p.sents || []).forEach(function (e) { var u = e.payload && e.payload.by_uid; if (u) ids[u] = 1; });
-        FLOW.forEach(function (st) {
-          var r = SE().of(p, st.key); if (r && r.approved_by) ids[r.approved_by] = 1;
-        });
-      });
-      var list = Object.keys(ids).filter(function (k) { return !PEOPLE[k]; });
-      if (!list.length) return Promise.resolve();
-      return db.rpc("onecue_people", { p_ids: list }).then(function (r) {
-        (r.data || []).forEach(function (x) { PEOPLE[x.id] = x.email; });
-      });
-    }
-    function who(uid) {
-      if (!uid) return "기록 없음";
-      var e = PEOPLE[uid];
-      return e ? e.split("@")[0] : String(uid).slice(0, 8);
-    }
-    function signoff(p, key) {
-      var out = [];
-      var r = SE().of(p, key);
-      if (r && r.approved_at) out.push("승인 " + who(r.approved_by) + " · " + hhmm(r.approved_at));
-      var gate = (p.approvals || []).filter(function (a) { return a.gate === key; })[0];
-      if (gate) out.push("광고주 " + (gate.decision === "ok" ? "승인" : "수정 요청") + " " +
-        who(gate.decided_by) + " · " + hhmm(gate.decided_at));
-      if (key === "deliver") {
-        var sent = (p.sents || []).filter(function (e) {
-          return e.payload && e.payload.what === "final";
-        })[0];
-        if (sent) out.unshift("납품 " + who(sent.payload.by_uid) + " · " + hhmm(sent.ts));
-      }
-      return out.length ? '<small class="signoff">' + esc(out.join("  /  ")) + "</small>" : "";
-    }
-
     function totalLine(p) {
       var all = spentAll(p);
       if (!all) return "";
@@ -3587,6 +3549,44 @@
     }).then(function (r) {
       if (r.error) throw r.error;
     });
+  }
+
+  /** 단계마다 누가 승인·납품했나 (Dan 09-23: 「승인자 아이디가 단계별로 보이도록」) */
+  var PEOPLE = {};
+  function loadPeople() {
+    var ids = {};
+    ROWS.forEach(function (p) {
+      (p.approvals || []).forEach(function (a) { if (a.decided_by) ids[a.decided_by] = 1; });
+      (p.sents || []).forEach(function (e) { var u = e.payload && e.payload.by_uid; if (u) ids[u] = 1; });
+      FLOW.forEach(function (st) {
+        var r = SE().of(p, st.key); if (r && r.approved_by) ids[r.approved_by] = 1;
+      });
+    });
+    var list = Object.keys(ids).filter(function (k) { return !PEOPLE[k]; });
+    if (!list.length) return Promise.resolve();
+    return db.rpc("onecue_people", { p_ids: list }).then(function (r) {
+      (r.data || []).forEach(function (x) { PEOPLE[x.id] = x.email; });
+    });
+  }
+  function who(uid) {
+    if (!uid) return "기록 없음";
+    var e = PEOPLE[uid];
+    return e ? e.split("@")[0] : String(uid).slice(0, 8);
+  }
+  function signoff(p, key) {
+    var out = [];
+    var r = SE().of(p, key);
+    if (r && r.approved_at) out.push("승인 " + who(r.approved_by) + " · " + hhmm(r.approved_at));
+    var gate = (p.approvals || []).filter(function (a) { return a.gate === key; })[0];
+    if (gate) out.push("광고주 " + (gate.decision === "ok" ? "승인" : "수정 요청") + " " +
+      who(gate.decided_by) + " · " + hhmm(gate.decided_at));
+    if (key === "deliver") {
+      var sent = (p.sents || []).filter(function (e) {
+        return e.payload && e.payload.what === "final";
+      })[0];
+      if (sent) out.unshift("납품 " + who(sent.payload.by_uid) + " · " + hhmm(sent.ts));
+    }
+    return out.length ? '<small class="signoff">' + esc(out.join("  /  ")) + "</small>" : "";
   }
 
   // ── 불러오기 ──────────────────────────────────────────────────────────────
