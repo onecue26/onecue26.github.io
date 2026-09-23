@@ -2611,7 +2611,7 @@
       // ★ 광고주가 무엇을 언제 정했는지는 **카드를 열자마자** 보여야 한다.
       //   단계 안에 숨겨 두면 흐름을 펼쳐야 보이고, 그때는 이미 늦다.
       clientSaid + freshLine(p) + redo + who +
-      '<div class="mailbox" id="mail-' + esc(p.slug) + '" hidden></div>' +
+      '<div class="mailbox" id="mail-' + esc(p.slug) + '" hidden></div>' + messageBox(p) +
       flow(p, stageBodies) + "</div></details>";
   }
 
@@ -3103,6 +3103,27 @@
             b.disabled = false; b.textContent = "되돌리기";
             window.alert("되돌리지 못했습니다 — " + (e.message || e));
           });
+      });
+    });
+    document.querySelectorAll("[data-msg-draft]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var id = b.dataset.msgDraft;
+        var body = (document.querySelector('[data-msg-body="' + id + '"]').value || "").trim();
+        var kind = document.querySelector('[data-msg-kind="' + id + '"]').value;
+        if (!body) { window.alert("보낼 말을 적어 주십시오."); return; }
+        b.disabled = true;
+        db.rpc("onecue_message_draft", { p_project_id: id, p_kind: kind, p_body: body })
+          .then(function (r) { if (r.error) throw r.error; return load(); })
+          .catch(function (e) { b.disabled = false; window.alert("저장하지 못했습니다 — " + (e.message || e)); });
+      });
+    });
+    document.querySelectorAll("[data-msg-send]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (!window.confirm("이 메시지를 광고주에게 보냅니다. 광고주 화면에 바로 뜹니다.")) return;
+        b.disabled = true; b.textContent = "보내는 중…";
+        db.rpc("onecue_message_send", { p_message_id: b.dataset.msgSend })
+          .then(function (r) { if (r.error) throw r.error; return load(); })
+          .catch(function (e) { b.disabled = false; b.textContent = "광고주에게 보내기"; window.alert("보내지 못했습니다 — " + (e.message || e)); });
       });
     });
     document.querySelectorAll("[data-close-project]").forEach(function (b) {
@@ -3700,6 +3721,46 @@
   }
 
   /** 단계마다 누가 승인·납품했나 (Dan 09-23: 「승인자 아이디가 단계별로 보이도록」) */
+  // ── 광고주 메시지 (070) — 요청 조정 제안 · 자료 요청 · 설명, 광고주 답 ──
+  //   Dan 09-23: 「의뢰인에게 메시지로 변경이나 다른 자료를 요청하거나 설명하는 기능은없어?」
+  //   관리자 글은 초안으로 먼저 남고, 「보내기」를 눌러야 광고주 화면에 뜬다(광고주 발송 = Dan 승인 경계).
+  var MSG_KIND = { change: "요청 조정 제안", materials: "자료 요청", explain: "설명", reply: "광고주 답" };
+  function loadMessages() {
+    var ids = ROWS.map(function (p) { return p.id; });
+    if (!ids.length) return Promise.resolve();
+    return db.from("project_messages").select("id,project_id,author,kind,body,created_at,sent_at,read_at")
+      .in("project_id", ids).order("created_at").then(function (r) {
+        var all = r.data || [];
+        ROWS.forEach(function (p) { p.messages = all.filter(function (m) { return m.project_id === p.id; }); });
+      });
+  }
+  function messageBox(p) {
+    var list = p.messages || [];
+    var waiting = list.filter(function (m) { return m.author === "client"; }).length;
+    var thread = list.map(function (m) {
+      var mine = m.author === "admin";
+      return '<div class="msg ' + (mine ? "out" : "in") + (m.sent_at ? "" : " draft") + '">' +
+        '<div class="msg-head"><b>' + esc(MSG_KIND[m.kind] || m.kind) + "</b> · " +
+        (m.sent_at ? esc(when(m.sent_at)) + (mine ? (m.read_at ? " · 읽음" : " · 안 읽음") : "")
+                   : "초안 — 아직 광고주에게 안 보임") + "</div>" +
+        '<div class="msg-body">' + esc(m.body) + "</div>" +
+        (mine && !m.sent_at && canWrite
+          ? '<button class="btn" type="button" data-msg-send="' + esc(m.id) + '">광고주에게 보내기</button>' : "") +
+        "</div>";
+    }).join("");
+    var form = canWrite
+      ? '<div class="msg-form"><select data-msg-kind="' + esc(p.id) + '">' +
+        '<option value="change">요청 조정 제안</option><option value="materials">자료 요청</option>' +
+        '<option value="explain">설명</option></select>' +
+        '<textarea data-msg-body="' + esc(p.id) + '" rows="3" maxlength="4000" ' +
+        'placeholder="광고주에게 보낼 말 — 초안으로 먼저 저장됩니다"></textarea>' +
+        '<button class="btn ghost" type="button" data-msg-draft="' + esc(p.id) + '">초안 저장</button></div>'
+      : "";
+    return '<details class="msgbox"' + (list.length ? " open" : "") + '><summary>광고주 메시지' +
+      (list.length ? " · " + list.length + "건" : "") + (waiting ? " · 광고주 답 " + waiting : "") + "</summary>" +
+      thread + form + "</details>";
+  }
+
   var PEOPLE = {};
   function loadPeople() {
     var ids = {};
@@ -4009,7 +4070,7 @@
           });
           setConn("ok", "새 의뢰 " + ROWS.filter(function (x) { return x.isNew; }).length);
           // 승인·납품한 사람 아이디 — 번호를 이메일로 (066). 실패해도 화면은 그린다
-          return loadPeople().then(render, render);
+          return Promise.all([loadPeople(), loadMessages()]).then(render, render);
         });
       }).catch(function (e) {
         // ★ 이유를 삼키지 않는다. 이 catch 는 조회 실패만 잡는 게 아니라

@@ -422,6 +422,24 @@
     ].join("");
   }
 
+  // ── onecue 에서 온 메시지 (070) — 요청 조정 제안 · 자료 요청 · 설명. 그 자리에서 답한다 ──
+  var MSG_KIND = { change: "요청 조정 제안", materials: "자료 요청", explain: "안내", reply: "보내신 답" };
+  function secMessages(list) {
+    list = list || [];
+    if (!list.length) return "";
+    var last = list[list.length - 1];
+    var open = last.author === "admin";            // 우리 말이 마지막이면 답을 기다리는 중
+    return '<section class="msgs"><h2>onecue 에서 온 메시지</h2>' + list.map(function (m) {
+      return '<div class="msg ' + (m.author === "admin" ? "in" : "out") + '"><div class="msg-head"><b>' +
+        esc(MSG_KIND[m.kind] || m.kind) + "</b> · " + esc(String(m.sent_at || "").slice(0, 16).replace("T", " ")) +
+        '</div><div class="msg-body">' + esc(m.body) + "</div></div>";
+    }).join("") +
+      (MINE ? '<div class="msg-reply"><textarea id="msgReply" rows="3" maxlength="4000" placeholder="' +
+        (open ? "답을 적어 주세요" : "더 하실 말씀이 있으면 적어 주세요") + '"></textarea>' +
+        '<button class="btn" id="msgSend" data-reply-to="' + esc(last.id) + '">보내기</button>' +
+        '<span class="hint" id="msgMsg" role="status" aria-live="polite"></span></div>' : "") + "</section>";
+  }
+
   function deliverForm() {
     if (!MINE) return "";
     return '<div class="gate col"><div class="txt"><b>납품되었습니다</b>' +
@@ -707,6 +725,15 @@
         el("videoMsg").textContent = "저장하지 못했습니다. 진행 상태를 확인한 뒤 다시 시도해주세요.";
       });
     }
+    var ms = el("msgSend");
+    if (ms) ms.addEventListener("click", function () {
+      var body = (el("msgReply").value || "").trim();
+      if (!body) { el("msgMsg").textContent = "보낼 말을 적어 주세요."; return; }
+      ms.disabled = true; el("msgMsg").textContent = "보내는 중…";
+      db.rpc("onecue_message_reply", { p_project_id: P.id, p_body: body, p_reply_to: ms.dataset.replyTo || null })
+        .then(function (r) { if (r.error) throw r.error; return load(); })
+        .catch(function () { ms.disabled = false; el("msgMsg").textContent = "보내지 못했습니다. 잠시 뒤 다시 시도해 주세요."; });
+    });
     var fa = el("approveFinal"), fr = el("reviseFinal");
     function finalDecision(decision) {
       if (!MINE || !HAS_FINAL || P.step !== "deliver" || P.state !== "ready" || fa.disabled) return;
@@ -817,6 +844,8 @@
           db.from("cuts").select("n,t_start,t_end,block,size,angle,move,lens,action,intent").eq("project_id", id).order("n"),
           db.from("assets").select("kind,approved,url,storage_path,role,mime,cut_n,meta").eq("project_id", id).or("kind.neq.final,approved.eq.true"),
           db.from("approvals").select("gate,decision,note,decided_at").eq("project_id", id).order("decided_at"),
+          // onecue 에서 보낸 메시지와 광고주 답 (070) — 초안은 서버가 안 내준다
+          db.from("project_messages").select("id,author,kind,body,sent_at").eq("project_id", id).order("created_at"),
         ]).then(function (x) {
           x.forEach(function (r) { if (r.error) throw r.error; });
           if (!window.ONECUE_ASSETS) throw new Error("자료 접근 설정을 불러오지 못했습니다.");
@@ -847,7 +876,7 @@
             (P.state === "done"
               ? '<div class="gate done"><div class="txt"><b>프로젝트가 완료되었습니다</b><small>' +
                 esc(String(P.closed_at || "").slice(0, 10)) + " · 함께해 주셔서 감사합니다. 완성본은 아래 납품 칸에서 언제든 받으실 수 있습니다.</small></div></div>"
-              : secGate(P, x[5].data)) + flow(x) +
+              : secGate(P, x[5].data)) + secMessages(x[6].data) + flow(x) +
             '<footer><span><a href="index.html">← 목록</a></span>' +
             '<span class="mono">' + new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 16) +
             "</span></footer>";

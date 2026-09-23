@@ -324,3 +324,12 @@ body.admin-wide .other-concepts .concepts {
 }
 .cut-said.ok { background: var(--live-soft); color: var(--live); }
 .cut-said.revise { background: var(--hold-soft); color: var(--hold); }
+
+/* onecue 에서 온 메시지 (070 · 2026-09-23) */
+.msgs{margin:14px 0 18px;padding:14px 16px;background:#fff;border:1px solid #e6dcd6;border-radius:10px}
+.msgs h2{font-size:15px;margin:0 0 8px}
+.msgs .msg{margin:8px 0;padding:10px 12px;border-radius:8px;font-size:14px;max-width:760px}
+.msgs .msg.in{background:#fdf0ec}.msgs .msg.out{background:#eef6f0;margin-left:40px}
+.msgs .msg-head{font-size:12px;color:#777;margin-bottom:4px}.msgs .msg-body{white-space:pre-wrap;line-height:1.6}
+.msgs .msg-reply{display:flex;flex-direction:column;gap:6px;margin-top:10px;max-width:760px}
+.msgs .msg-reply textarea{padding:8px;font:inherit}.msgs .msg-reply .btn{align-self:flex-start}
