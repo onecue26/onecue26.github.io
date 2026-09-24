@@ -1466,12 +1466,20 @@
       return '<div class="lc lc-working"' + tag + ">" +
         head("콘티 그림을 뽑는 중", "끝나면 컷마다 붙습니다") + "</div>";
     }
+    // 콘티 시트(한 판) — 검수 칸 맨 위에 크게. 컷별 그림이 없을 때 보이는 자리가 없었다 (09-24 환타)
+    var sheets = (p.files || []).filter(function (f) { return f.kind === "board" && f.cut_n == null && f.url; })
+      .sort(function (x, y) { return String(y.created_at).localeCompare(String(x.created_at)); });
+    var sheetHtml = sheets.length
+      ? '<div class="board-sheet"><img src="' + esc(sheets[0].url) + '" data-big="' + esc(sheets[0].url) +
+        '" data-kind="img" alt="콘티 시트"><span>' + esc(sheets[0].role || "콘티 시트") + " · " + esc(when(sheets[0].created_at)) +
+        (sheets.length > 1 ? " · 이전 판 " + (sheets.length - 1) + "장" : "") + "</span></div>"
+      : "";
     if (act.phase === "board.review") {
-      return reviewBox("board", "콘티 그림을 검수해 주세요",
+      return sheetHtml + reviewBox("board", "콘티 그림을 검수해 주세요",
         "그림 " + (n.board || 0) + "장 · 컷마다 따로 요청하면 그 컷만 다시 뽑습니다");
     }
     if (act.phase === "final.review") {
-      return reviewBox("final", "완성 콘티를 확인해 주세요",
+      return sheetHtml + reviewBox("final", "완성 콘티를 확인해 주세요",
         "승인하면 광고주에게 보낼 수 있습니다",
         '<button class="btn ghost" type="button" data-lc="back"' + tag +
         ">취소 · 전 단계로</button>");
