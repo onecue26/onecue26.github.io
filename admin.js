@@ -3470,6 +3470,21 @@
         });
       });
     });
+    // ★ 수정 요청은 무엇을 고칠지 적어야 눌린다 — 빈칸이면 버튼을 잠근다 (Dan 09-24 「아무것도 안 쓰면 활성화 안 돼야」)
+    //   전에는 눌리고 안내만 떠서, 눌렀는데 아무 일도 없는 것처럼 보였다.
+    document.querySelectorAll("[data-lc-note]").forEach(function (t) {
+      var wrap = t.closest(".lc");
+      var btns = wrap ? wrap.querySelectorAll('[data-lc="revise"],[data-lc="review-revise"]') : [];
+      function sync() {
+        var empty = !(t.value || "").trim();
+        Array.prototype.forEach.call(btns, function (x) {
+          x.disabled = empty;
+          x.title = empty ? "무엇을 고칠지 적으면 눌립니다" : "";
+        });
+      }
+      t.addEventListener("input", sync);
+      sync();
+    });
     document.querySelectorAll("[data-lc]").forEach(function (b) {
       b.addEventListener("click", function () {
         var what = b.dataset.lc;
