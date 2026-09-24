@@ -465,25 +465,42 @@
       '<span class="msg" data-adtype-msg="' + esc(p.slug) + '"></span></div>';
 
     if (!p.ad_type) {
-      return '<div class="needs need-admin"><h4>필요한 자료</h4>' + picker +
+      return '<div class="needs need-admin"><h4>자료 확인</h4>' + picker +
         '<p class="need-type">종류를 정해야 무엇이 모자란지 셀 수 있습니다.</p></div>';
     }
-    // 관리자는 우리 말투로 본다 — 「왜」와 「고를 것」이 판단에 필요하다.
-    var out = G.text(G.gaps(counts, p.ad_type, p.cut_count || 0), "internal");
+    // ★ 자료 칸은 「광고주에게 무엇을 더 달라고 할까」가 아니라 「있는 것으로 어떻게 만들까」다 (Dan 09-24 · 광고주는 가볍게).
+    //   광고주에게 가는 것은 **없으면 정직하게 만들 수 없는 것(required)** 하나뿐이다 — 그때만 메시지 한 번.
+    //   나머지는 우리가 메운다. 컷 수와 견주지 않는다 — 컷 수는 광고주가 준 값이 아니다(길이로 자동 계산).
+    //   판정(gaps)은 파이썬과 같은 한 벌을 그대로 쓰고, 여기서는 읽는 자리만 바꾼다.
+    var out = G.gaps(counts, p.ad_type, 0);
     if (!out) return "";
-    function list(items, cls) {
-      return '<ul class="' + cls + '">' + items.map(function (t) {
-        var lines = t.split(/\r?\n/).map(function (x) { return x.trim(); });
-        return "<li>" + esc(lines[0]) + lines.slice(1).map(function (x) {
-          return '<span class="need-why">' + esc(x) + "</span>";
-        }).join("") + "</li>";
-      }).join("") + "</ul>";
-    }
-    return '<div class="needs need-admin"><h4>필요한 자료</h4>' + picker +
-      (out.blocking.length
-        ? '<h4>이게 없으면 정직하게 만들 수 없습니다</h4>' + list(out.blocking, "need-block")
-        : (out.notes.length ? "" : '<p class="need-ok">필요한 자료가 다 도착했습니다.</p>')) +
-      (out.notes.length ? '<h4>광고주에게 알릴 것</h4>' + list(out.notes, "need-note") : "") +
+    var t = spec.types[out.type] || { materials: [] };
+    var nameOf = function (it) { return (it.say && it.say.label) || (spec.kinds[it.kind] && spec.kinds[it.kind].label) || it.kind; };
+    var FILL = {
+      logo: "제품 사진에 보이는 로고를 잘라 씁니다. 그것도 없으면 로고를 얹지 않습니다 — 비슷한 로고를 그리지 않습니다.",
+    };
+    var got = t.materials.filter(function (m) { return (counts[m.kind] || 0) > 0; }).map(function (m) {
+      var n = counts[m.kind];
+      return "<li>" + esc(nameOf(m) + " " + n + "개") +
+        (m.real === "yes" ? '<span class="need-why">가진 각도·모양 그대로 씁니다 — 없는 각도는 지어내지 않습니다</span>' : "") + "</li>";
+    });
+    var fill = out.notes.filter(function (it) { return it.mode === "missing"; }).map(function (it) {
+      return "<li>" + esc(nameOf(it) + " 없음") + '<span class="need-why">' +
+        esc(FILL[it.kind] || ("있는 자료 안에서 메웁니다 — " + it.why)) + "</span></li>";
+    });
+    var watch = out.notes.filter(function (it) { return it.mode === "caution"; }).map(function (it) {
+      return "<li>" + esc(String(it.text || "").replace(/^살필 것 — /, "")) + "</li>";
+    });
+    var block = out.blocking.map(function (it) {
+      return "<li>" + esc(nameOf(it) + " 없음") + '<span class="need-why">' + esc(it.why) + "</span>" +
+        '<span class="need-why">광고주에게 한 번 요청 — ' + esc((it.say && it.say.ask) || it.ask) + "</span></li>";
+    });
+    return '<div class="needs need-admin"><h4>자료 확인</h4>' + picker +
+      (block.length ? '<h4>이게 없으면 정직하게 만들 수 없습니다 — 광고주에게 요청</h4><ul class="need-block">' + block.join("") + "</ul>"
+                    : '<p class="need-ok">광고주에게 더 요청할 것 없음 — 있는 자료로 만듭니다.</p>') +
+      (got.length ? '<h4>받은 자료</h4><ul class="need-note">' + got.join("") + "</ul>" : "") +
+      (fill.length ? '<h4>우리가 메울 것</h4><ul class="need-note">' + fill.join("") + "</ul>" : "") +
+      (watch.length ? '<h4>살필 것</h4><ul class="need-note">' + watch.join("") + "</ul>" : "") +
       "</div>";
   }
 
