@@ -1911,7 +1911,8 @@
           role: "admin", compact: true,
           // 검수하는 자리에서만 컷마다 의견 칸이 붙는다. 볼 것이 없는 자리에
           // 입력 칸을 두면 누를 수 없는 버튼이 생긴다.
-          cutActions: (boardFlow && boardFlow.perCut)
+          // 콘티 그림 단계에서 컷별 조각이 없으면(시트 한 판) 컷마다 승인·수정은 할 일이 없다 — 숨긴다 (09-24)
+          cutActions: (boardFlow && boardFlow.perCut && !(boardFlow.phase === "board.review" && !panelCount))
             ? function (n) { return cutReviewBox(p, boardFlow.layer, n); }
             : null,
         }, boardPanel) + '</details>'
