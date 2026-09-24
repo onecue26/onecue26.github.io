@@ -4509,6 +4509,13 @@
               return j.project_id === p.id && j.step === "facts";
             });
             p.job = jobs.filter(function (j) { return j.project_id === p.id; })[0] || null;
+            // ★ 콘티 그림이 도는 중인가는 p.job 을 읽은 **뒤에** 센다 — 앞에서 세면 늘 「안 돈다」였다(09-24:
+            //   「콘티 뽑기」를 눌러도 버튼이 그대로 살아 있었다). 도는 작업을 우선 찾는다.
+            if (p.boardCounts) {
+              p.boardCounts.boardRunning = jobs.some(function (j) {
+                return j.project_id === p.id && j.step === "storyboard" && j.kind === "image";
+              });
+            }
             // 광고주가 내린 판단 전부. 「말을 남겼는가」와 「무엇을 정했는가」는
             // 다른 물음이라 따로 둔다 — 아래 p.redo 는 말이 있는 것만 고른다.
             p.approvals = revises.filter(function (a) { return a.project_id === p.id; });
