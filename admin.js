@@ -1497,12 +1497,18 @@
     }
     if (act.phase === "final.done") {
       return sheetHtml + '<div class="lc lc-approved"' + tag + ">" +
-        head("광고주에게 보냈습니다 — 광고주 확인 기다리는 중", "광고주가 「콘티 승인」을 누르면 영상 단계로 넘어갑니다") +
+        head("광고주에게 보냈습니다 — 광고주 확인 기다리는 중", "광고주가 「콘티 승인」을 누르면 제작 자료 단계로 넘어갑니다") +
         '<div class="lc-row">' +
         // 다음에 누를 것을 미리 보여 준다 — 지금은 누를 수 없다 (Dan 09-24 「비활성화된 다음 안내 버튼이라도」)
-        '<button class="btn" type="button" disabled title="광고주가 콘티를 승인하면 열립니다">다음 · 영상 만들기' +
-        ((p.render_plan && p.render_plan.credits_total != null) ? " (" + esc(String(p.render_plan.credits_total)) + "cr)" : "") +
-        " — 광고주 승인 대기</button>" +
+        // 콘티 다음은 제작 자료(인물·공간 기준 그림)다 — 계획에 준비물이 있으면 그걸 먼저 말한다 (Dan 09-24)
+        (function () {
+          var calls = (p.render_plan && p.render_plan.calls) || [];
+          var needs = [].concat.apply([], calls.map(function (c) { return c.needs || []; }));
+          var label = needs.length
+            ? "다음 · 제작 자료 만들기 (" + needs.length + "장 · " + needs.reduce(function (a, n) { return a + (Number(n.credits_estimate) || 0); }, 0) + "cr)"
+            : "다음 · 영상 만들기" + ((p.render_plan && p.render_plan.credits_total != null) ? " (" + p.render_plan.credits_total + "cr)" : "");
+          return '<button class="btn" type="button" disabled title="광고주가 콘티를 승인하면 열립니다">' + esc(label) + " — 광고주 승인 대기</button>";
+        })() +
         '<button class="btn ghost" type="button" data-lc="back"' + tag +
         ">내리고 다시 고치기</button></div>" +
         '<span class="lc-msg" data-lc-msg></span></div>';
