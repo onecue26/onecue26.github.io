@@ -1801,15 +1801,20 @@
         '</dl>' + files + '</div>'
       : '<p class="stage-empty">제품 자료는 등록됐지만 정리된 확인 내용이 없습니다.</p>' + files;
     // 전략도 공용 렌더다 — 네 칸이 각각 한 구획이고, 긴 문단은 문장 단위로 나뉜다
+    // ★ 전략 칸은 「한눈에 보기」가 먼저다 (Dan 09-24 「아 이런 느낌으로 하려는 거구나」가 바로 읽히게)
+    //   광고주 화면의 「공통 기획 방향」과 같은 글 — 광고주가 이걸 고쳐 달라면 전략을 바꿔 달라는 뜻이다.
+    //   인사이트·강점·톤 전문은 아래에 접어 둔다.
+    var sg = p.strategy || {};
+    var glance = (sg.client_who || sg.client_what || sg.client_why || sg.client_feel)
+      ? '<div class="ms-summary glance"><div class="ms-by">한눈에 보기 · 광고주 화면의 「공통 기획 방향」</div>' +
+        [["누구에게", sg.client_who], ["무슨 말을", sg.client_what], ["왜 이 방향인가", sg.client_why], ["어떤 느낌으로", sg.client_feel]]
+          .filter(function (r) { return r[1]; })
+          .map(function (r) { return "<span><b>" + r[0] + "</b> " + esc(r[1]) + "</span>"; }).join("") + "</div>"
+      : (sg.one_message ? '<div class="ms-summary glance"><div class="ms-by">한눈에 보기</div><span><b>핵심 메시지</b> ' +
+          esc(sg.one_message) + "</span><span class=\"ms-more\">광고주용 「공통 기획 방향」이 아직 없습니다</span></div>" : "");
     var strategyBody = p.strategy
-      ? '<div class="stage-content">' + R().strategy(p.strategy, ADMIN) +
-        ((p.strategy.client_who || p.strategy.client_what || p.strategy.client_feel)
-          ? '<div class="ms-summary"><div class="ms-by">광고주에게 보이는 「이번 제안의 방향」</div>' +
-            (p.strategy.client_who ? "<span><b>누구에게</b> " + esc(p.strategy.client_who) + "</span>" : "") +
-            (p.strategy.client_what ? "<span><b>무슨 말을</b> " + esc(p.strategy.client_what) + "</span>" : "") +
-            (p.strategy.client_why ? "<span><b>왜 이 방향인가</b> " + esc(p.strategy.client_why) + "</span>" : "") +
-            (p.strategy.client_feel ? "<span><b>어떤 느낌으로</b> " + esc(p.strategy.client_feel) + "</span>" : "") + "</div>"
-          : "") + '</div>'
+      ? '<div class="stage-content">' + glance +
+        '<details class="strategy-full"><summary>전략 전문 — 인사이트 · 강점 · 톤</summary>' + R().strategy(p.strategy, ADMIN) + "</details></div>"
       : '<p class="stage-empty">저장된 전략 설계 내용이 없습니다.</p>';
 
     // 구성·각본 — 결과가 들어오기 전에는 「제작 중 / 대기」를 분명히 보여 주고,
@@ -2011,7 +2016,7 @@
         f("usp", "강점(USP)", "이 제품만 줄 수 있는 것", 2) +
         f("tone", "톤", "예: 유쾌하고 시원한, 과장된 코믹", 2) +
         f("direction", "그 외 필요한 사항", "꼭 넣을 것, 피할 것, 참고할 결", 3) +
-        '<div class="mc-guide"><b>광고주에게 보이는 「이번 제안의 방향」</b><span>· 콘셉트 5안 위에 뜹니다. 항목마다 한두 문장, 쉬운 말로 — 인사이트·USP 같은 우리 말 없이</span></div>' +
+        '<div class="mc-guide"><b>광고주에게 보이는 「공통 기획 방향」</b><span>· 콘셉트 5안 위에 뜹니다. 항목마다 한두 문장, 쉬운 말로 — 인사이트·USP 같은 우리 말 없이</span></div>' +
         f("client_who", "누구에게", "예: 20~50대 남성 — 어떤 순간에 있는 사람인지까지", 2) +
         f("client_what", "무슨 말을", "예: 밋밋한 순간, 한 모금으로 톡 깨어난다 — 무엇을 약속하는지까지", 2) +
         f("client_why", "왜 이 방향인가", "예: 이 제품의 가장 큰 무기가 무엇이라 이 방향인지", 2) +

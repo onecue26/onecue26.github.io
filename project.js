@@ -483,15 +483,15 @@
       '<span class="hint" id="finalMsg" role="status" aria-live="polite"></span></div>';
   }
 
-  /** 「이번 제안의 방향」 세 줄 — 5안이 모두 이 안에서 나왔다. 고른 뒤에도 남긴다 (Dan 09-24)
+  /** 「공통 기획 방향」 — 5안이 모두 이 방향 위에서 나왔다. 고른 뒤에도 남긴다 (Dan 09-24)
    *  내부 전략(인사이트·강점·톤 문단)은 보여 주지 않는다 — 쉬운 말 세 줄만 */
   function secDirection(s) {
     if (!s || !(s.client_who || s.client_what || s.client_why || s.client_feel)) return "";
     var row = function (k, v) { return v ? "<li><b>" + k + "</b><span>" + esc(v) + "</span></li>" : ""; };
-    return '<div class="direction"><h3>이번 제안의 방향</h3><ul>' +
+    return '<div class="direction"><h3>공통 기획 방향</h3><p class="dir-sub">다섯 가지 안 모두 이 방향 위에서 만들었습니다.</p><ul>' +
       row("누구에게", s.client_who) + row("무슨 말을", s.client_what) + row("왜 이 방향인가", s.client_why) +
       row("어떤 느낌으로", s.client_feel) + "</ul>" +
-      '<p class="dir-note">아래 다섯 가지 안은 모두 이 방향 안에서 만들었습니다.</p></div>';
+      "</div>";
   }
 
   function secConcepts(list, canPick) {
