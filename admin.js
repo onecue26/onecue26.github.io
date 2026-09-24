@@ -1835,7 +1835,7 @@
           slogan: d.slogan, bgm: d.bgm,
         }, ADMIN) + scriptCuts + '</div>'
       : (p.step === "develop"
-          ? stageWait(p, "develop", "구성·각본") + scriptCuts : scriptCuts);
+          ? scriptCuts : scriptCuts);   // 기다리는 동안은 위 두 갈래 선택 칸이 말한다 — 「대기 중」을 또 적지 않는다
 
     // 콘티 — 이 단계의 주인공은 **그림**이다. 글로 된 컷 사양은 그림을 대조하는
     // 보조 검사기이지 콘티 자체가 아니다. 그래서 맨 위에 「지금 어디까지 와 있나」
