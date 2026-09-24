@@ -966,7 +966,8 @@
                 (locked ? " · 잠겨 있습니다" : " · 누르실 수 있습니다")
               : (s === "anchors" ? "제작 자료를 만듭니다" : "영상을 뽑습니다"),
              (again ? "누르면 <b>또</b> " : "예상 ") + money(plan.credits) +
-             (plan.mode ? " · 방식 " + esc(plan.mode) : "")) +
+             (plan.mode ? " · " + esc(plan.mode === "one_shot" ? "영상은 한 판" : plan.mode) : "") +
+             (s === "anchors" && (plan.needs || []).length > 1 ? " · 한 번 누르면 " + plan.needs.length + "장을 모두 만들고 멈춥니다" : "")) +
         ((SE().of(p, s) || {}).directions
           ? '<div class="redo-note"><b>사장님 요청사항 — 이대로 만듭니다</b><span>' +
             esc((SE().of(p, s) || {}).directions) + "</span></div>" : "") +
@@ -2319,7 +2320,8 @@
         var act = SE().actions(p, step, !!(p.stageResults && p.stageResults[step]));
         buttons = paidBody(p, step, act);
       }
-      return (step === "anchors" ? needsPlan(p) : "") + buttons + readyNote(p, step) + doneNote(p, step) + askNote(p, step) +
+      // 계획 목록은 「누가 맡습니까」 고르기 전에만 — 고른 뒤에는 아래 만들기 칸이 같은 목록을 보여 준다
+      return (step === "anchors" && !(SE().of(p, "anchors") || {}).chosen_at ? needsPlan(p) : "") + buttons + readyNote(p, step) + doneNote(p, step) + askNote(p, step) +
         blockedNote(p, step) + assetList(p, step);
     }
 
