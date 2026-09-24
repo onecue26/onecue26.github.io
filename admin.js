@@ -3897,6 +3897,13 @@
   function send(slug) {
     var p = ROWS.filter(function (x) { return x.slug === slug; })[0];
     if (!p) return Promise.reject(new Error("건을 찾지 못했습니다"));
+    // ★ 순서 — 콘셉트는 5안이 올라오고 AI 작업이 끝난 뒤에만 보낸다 (Dan 09-24). DB(075)도 같은 것을 막는다
+    if (p.step === "concepts" && !(p.concepts && p.concepts.length)) {
+      return Promise.reject(new Error("콘셉트가 아직 없습니다 — 5안이 올라온 뒤에 보낼 수 있습니다"));
+    }
+    if (p.job && p.job.request && p.job.request.plan) {
+      return Promise.reject(new Error("AI가 쓰는 중입니다 — 끝난 뒤에 보낼 수 있습니다"));
+    }
     var gate = SE().sendGate(p);
     return recordPlainReview(p, gate).then(function () {
       if (!gate.ok) {
@@ -3908,7 +3915,9 @@
       }
       return db.from("projects").update({ state: "ready", updated_at: new Date() })
         .eq("slug", slug)
-        .then(function () {
+        .then(function (u) {
+          // DB 가 거절하면 「보냈음」 기록을 남기지 않는다 — 전에는 거절을 안 보고 넘어갔다
+          if (u && u.error) throw u.error;
           return db.from("projects").select("id,step").eq("slug", slug).single();
         })
         .then(function (r) {
