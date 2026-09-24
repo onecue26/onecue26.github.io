@@ -1473,11 +1473,7 @@
     // 콘티 시트(한 판) — 검수 칸 맨 위에 크게. 컷별 그림이 없을 때 보이는 자리가 없었다 (09-24 환타)
     var sheets = (p.files || []).filter(function (f) { return f.cut_n == null && f.url && boardCurrent(p, f); })
       .sort(function (x, y) { return String(y.created_at).localeCompare(String(x.created_at)); });
-    var sheetHtml = sheets.length
-      ? '<div class="board-sheet"><img src="' + esc(sheets[0].url) + '" data-big="' + esc(sheets[0].url) +
-        '" data-kind="img" alt="콘티 시트"><span>' + esc(sheets[0].role || "콘티 시트") + " · " + esc(when(sheets[0].created_at)) +
-        (sheets.length > 1 ? " · 이전 판 " + (sheets.length - 1) + "장" : "") + "</span></div>"
-      : "";
+    var sheetHtml = "";   // 시트 한 장은 칸 아래 「콘티 한 장으로 보기」로 옮겼다 — sheetFold()
     if (act.phase === "board.review") {
       return sheetHtml + reviewBox("board", "콘티 그림을 검수해 주세요",
         "콘티 시트 " + (n.board || 0) + "장 · 수정 요청하면 시트 전체를 다시 그립니다(유료 · 다시 「콘티 뽑기」)");
@@ -1922,7 +1918,7 @@
     }
     var storyboardBody = storyboardHead + ((cutRows.length && showCuts)
       ? '<details class="stage-cuts"' +
-        ((boardFlow && boardFlow.perCut) ? " open" : "") + ">" +
+        ((boardFlow && (boardFlow.perCut || /^(board|final)\./.test(boardFlow.phase))) ? " open" : "") + ">" +
         '<summary>' + (panelCount
           ? '콘티 확인하기 · ' + panelCount + '컷'
           : '컷 사양 ' + cutRows.length + '개 — 글로 확인하기') + '</summary>' +
@@ -2840,7 +2836,7 @@
       storyboard: costLine(p, "storyboard") +
         (boardFlow ? "" : boardLink(BOARD_REVIEW_STAGE)) + storyboardBody +
         (p.step === BOARD_REVIEW_STAGE ? productionAction : "") +
-        oldBoardsHtml(p),   // 지난 콘티 판은 칸 맨 아래 — 위는 지금 할 일(뽑기·검수) 자리 (Dan 09-24)
+        sheetFold(p) + oldBoardsHtml(p),   // 지난 콘티 판은 칸 맨 아래 — 위는 지금 할 일(뽑기·검수) 자리 (Dan 09-24)
       // 제작 자료는 **돈이 나가는 첫 자리**다. 무엇을 근거로 시작하는지를
       // 그 자리에 적는다 — 광고주 승인이 그 근거다.
       // 유료 단계는 자기 본문을 갖는다. 「현재 절차에 따라 진행 중입니다」는
@@ -3017,6 +3013,16 @@
   }
 
   /** 지난 콘티 판(수정 요청 전·교체된 시트)을 접어서 — 새 판과 나란히 대조하려고 (Dan 09-24 「예전 콘티는 못 보게 막은 거?」) */
+  /** 지금 판 콘티 시트 한 장 — 관리자 콘티 칸 아래 접어서 (위는 컷별 그림+설명) */
+  function sheetFold(p) {
+    var cur = (p.files || []).filter(function (f) { return f.kind === "board" && f.cut_n == null && f.url && boardCurrent(p, f); })
+      .sort(function (x, y) { return String(y.created_at).localeCompare(String(x.created_at)); })[0];
+    if (!cur) return "";
+    return '<details class="board-old"><summary>콘티 한 장으로 보기 — 광고주 화면에는 이 한 장이 뜹니다</summary>' +
+      '<div class="board-sheet"><img src="' + esc(cur.url) + '" data-big="' + esc(cur.url) + '" data-kind="img" alt="콘티 시트"><span>' +
+      esc(cur.role || "콘티 시트") + " · " + esc(when(cur.created_at)) + "</span></div></details>";
+  }
+
   function oldBoardsHtml(p) {
     var old = (p.files || []).filter(function (f) { return f.kind === "board" && f.cut_n == null && f.url && !boardCurrent(p, f); })
       .sort(function (x, y) { return String(y.created_at).localeCompare(String(x.created_at)); });
