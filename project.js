@@ -384,7 +384,7 @@
   // 빈 상자는 「아직 안 했다」가 아니라 「무엇인지 모르겠다」로 읽힌다.
   // 지금 칸 하나만 열려 있다. 그 판단은 여기 한 곳에서만 한다.
   function flow(x) {
-    var brief = x[0].data, concepts = x[2].data, cuts = x[3].data, assets = x[4].data;
+    var brief = x[0].data, concepts = x[2].data, cuts = x[3].data, assets = x[4].data, strat = x[1].data;
     var at = IDX[P.step] == null ? 0 : IDX[P.step];
     var boardOpen = BOARD_READY && shown("storyboard");
     // 광고주 칸 → 그 칸이 「지금」인 내부 단계
@@ -405,7 +405,7 @@
         (concepts || []).some(function (c) { return c.is_chosen; }) ? "선택 완료"
           : (P.step === "concepts" && P.state === "ready") ? "고르실 차례" : "준비 중",
         shown("concepts")
-          ? secConcepts(concepts, MINE && P.step === "concepts" && P.state === "ready")
+          ? secDirection(strat) + secConcepts(concepts, MINE && P.step === "concepts" && P.state === "ready")
           : (P.step === "concepts" || P.step === "strategy" || P.step === "facts"
             ? '<div class="stage-read development-notice"><section class="stage-block status"><h4>콘셉트를 준비하고 있습니다</h4>' +
               "<p>보내 주신 내용과 답을 반영해 다섯 가지 안을 만들고 있습니다. 준비되면 여기서 고르실 수 있습니다.</p></section></div>"
@@ -481,6 +481,15 @@
       '<div class="acts"><button class="btn" id="approveFinal">확인했습니다 · 승인</button>' +
       '<button class="btn ghost" id="reviseFinal">고쳐주세요</button></div>' +
       '<span class="hint" id="finalMsg" role="status" aria-live="polite"></span></div>';
+  }
+
+  /** 「이번 제안의 방향」 세 줄 — 5안이 모두 이 안에서 나왔다. 고른 뒤에도 남긴다 (Dan 09-24)
+   *  내부 전략(인사이트·강점·톤 문단)은 보여 주지 않는다 — 쉬운 말 세 줄만 */
+  function secDirection(s) {
+    if (!s || !(s.client_who || s.client_what || s.client_feel)) return "";
+    var row = function (k, v) { return v ? "<li><b>" + k + "</b><span>" + esc(v) + "</span></li>" : ""; };
+    return '<div class="direction"><h3>이번 제안의 방향</h3><ul>' +
+      row("누구에게", s.client_who) + row("무슨 말을", s.client_what) + row("어떤 느낌으로", s.client_feel) + "</ul></div>";
   }
 
   function secConcepts(list, canPick) {
@@ -888,7 +897,7 @@
         var id = P.id;
         return Promise.all([
           db.from("briefs").select("raw,goal,target,format").eq("project_id", id).maybeSingle(),
-          db.from("strategies").select("insight,usp,one_message,tone").eq("project_id", id).maybeSingle(),
+          db.from("strategies").select("insight,usp,one_message,tone,client_who,client_what,client_feel").eq("project_id", id).maybeSingle(),
           // visual 은 관리자 칸이다(제작 사양). 화면에 안 그리는 것으로는 부족하고
           // 애초에 읽어 오지 않는다 — 받아 두면 언젠가 그려진다
           db.from("concepts").select("key,title,client_one_line,client_explain,client_appeal,client_mood,client_difference,is_chosen,is_recommended,reco_reason").eq("project_id", id).order("key"),
