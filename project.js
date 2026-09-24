@@ -421,6 +421,7 @@
         shown("concepts")
           ? secDirection(strat && Object.assign({ _added: (concepts || []).some(function (c) { return c.batch > 1; }) }, strat)) +
             secConcepts(concepts, MINE && P.step === "concepts" && P.state === "ready")
+          : addWaiting(concepts, strat) ? addWaiting(concepts, strat)
           : (P.step === "concepts" || P.step === "strategy" || P.step === "facts"
             ? '<div class="stage-read development-notice"><section class="stage-block status"><h4>콘셉트를 준비하고 있습니다</h4>' +
               "<p>보내 주신 내용과 답을 반영해 다섯 가지 안을 만들고 있습니다. 준비되면 여기서 고르실 수 있습니다.</p></section></div>"
@@ -517,6 +518,17 @@
     return '<div class="direction"><h3>공통 기획 방향</h3><p class="dir-sub">' +
       (s._added ? "모든 안이 이 방향 위에서 나왔습니다." : "다섯 가지 안 모두 이 방향 위에서 만들었습니다.") + "</p>" + rows(s) +
       "</div>";
+  }
+
+  /** 추가 요청을 보낸 뒤 새 안이 오기 전 — 처음 안은 계속 보인다. 관리자 검토 전의 새 안·새 방향은 숨긴다 (085) */
+  function addWaiting(concepts, strat) {
+    var asked = APPROVALS.some(function (a) { return a.gate === "concepts" && a.decision === "revise"; });
+    var first = (concepts || []).filter(function (c) { return !(c.batch > 1); });
+    if (!asked || P.step !== "concepts" || P.state === "ready" || !first.length) return "";
+    var shownStrat = strat && strat.prev_client ? Object.assign({}, strat.prev_client) : strat;
+    return '<div class="stage-read development-notice"><section class="stage-block status"><h4>추가 두 가지 안을 만들고 있습니다</h4>' +
+      "<p>지금 안은 그대로 두었습니다. 새 안이 준비되면 이 자리에 함께 올라오고, 모든 안 중에서 고르실 수 있습니다.</p></section></div>" +
+      secDirection(shownStrat) + secConcepts(first, false);
   }
 
   function secConcepts(list, canPick) {
