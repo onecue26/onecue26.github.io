@@ -351,4 +351,4 @@ details.flow-step > summary.flow-summary { position: relative; padding-right: 34
 details.flow-step > summary.flow-summary::after { position: absolute; right: 12px; top: 50%; margin: -9px 0 0 0; }
 
 /* 이번 제안의 방향 — 광고주 콘셉트 칸 위 세 줄 (Dan 09-24) */
-.direction{margin:0 0 16px;padding:14px 16px;border:1px solid #f0d9a8;background:#fbf6ea;border-radius:10px}.direction h3{margin:0 0 8px;font-size:14px}.direction ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}.direction li{display:flex;gap:10px;font-size:14px}.direction li{line-height:1.6}.dir-note{margin:10px 0 0;font-size:12.5px;color:#8a6a2a}.direction li b{flex:0 0 110px;color:#8a6a2a;font-weight:600}
+.direction{margin:0 0 16px;padding:14px 16px;border:1px solid #f0d9a8;background:#fbf6ea;border-radius:10px}.direction h3{margin:0 0 8px;font-size:14px}.direction ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}.direction li{display:flex;gap:10px;font-size:14px}.direction li{line-height:1.6}.dir-sub{margin:-4px 0 10px;font-size:12.5px;color:#8a6a2a}.direction li b{flex:0 0 110px;color:#8a6a2a;font-weight:600}
