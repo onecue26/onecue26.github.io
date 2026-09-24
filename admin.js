@@ -1464,11 +1464,11 @@
         '<button class="btn" type="button" data-lc="make-board"' + tag + ">콘티 뽑기</button>" +
         "</div>" +
         '<span class="lc-msg">유료 생성(약 2cr) — 누르면 바로 한 판 그리고 컷마다 잘라 붙인 뒤 멈춥니다</span>' +
-        '<span class="lc-msg" data-lc-msg></span></div>' + oldBoardsHtml(p);
+        '<span class="lc-msg" data-lc-msg></span></div>';
     }
     if (act.phase === "board.working") {
       return '<div class="lc lc-working"' + tag + ">" +
-        head("콘티 그림을 뽑는 중", "끝나면 컷마다 붙습니다") + "</div>" + oldBoardsHtml(p);
+        head("콘티 그림을 뽑는 중", "끝나면 컷마다 붙습니다") + "</div>";
     }
     // 콘티 시트(한 판) — 검수 칸 맨 위에 크게. 컷별 그림이 없을 때 보이는 자리가 없었다 (09-24 환타)
     var sheets = (p.files || []).filter(function (f) { return f.cut_n == null && f.url && boardCurrent(p, f); })
@@ -1478,7 +1478,6 @@
         '" data-kind="img" alt="콘티 시트"><span>' + esc(sheets[0].role || "콘티 시트") + " · " + esc(when(sheets[0].created_at)) +
         (sheets.length > 1 ? " · 이전 판 " + (sheets.length - 1) + "장" : "") + "</span></div>"
       : "";
-    sheetHtml = sheetHtml + oldBoardsHtml(p);
     if (act.phase === "board.review") {
       return sheetHtml + reviewBox("board", "콘티 그림을 검수해 주세요",
         "콘티 시트 " + (n.board || 0) + "장 · 수정 요청하면 시트 전체를 다시 그립니다(유료 · 다시 「콘티 뽑기」)");
@@ -2825,7 +2824,8 @@
       // 어느 쪽이 본 자리인지 모르게 된다.
       storyboard: costLine(p, "storyboard") +
         (boardFlow ? "" : boardLink(BOARD_REVIEW_STAGE)) + storyboardBody +
-        (p.step === BOARD_REVIEW_STAGE ? productionAction : ""),
+        (p.step === BOARD_REVIEW_STAGE ? productionAction : "") +
+        oldBoardsHtml(p),   // 지난 콘티 판은 칸 맨 아래 — 위는 지금 할 일(뽑기·검수) 자리 (Dan 09-24)
       // 제작 자료는 **돈이 나가는 첫 자리**다. 무엇을 근거로 시작하는지를
       // 그 자리에 적는다 — 광고주 승인이 그 근거다.
       // 유료 단계는 자기 본문을 갖는다. 「현재 절차에 따라 진행 중입니다」는
