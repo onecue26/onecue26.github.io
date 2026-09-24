@@ -4299,7 +4299,7 @@
             //   값이 늘 undefined 라 링크가 조용히 안 뜬다
             .select("project_id,name,email,phone,title,homepage")
             .in("project_id", ids),
-          db.from("jobs").select("project_id,step,request").in("state", ["queued", "claimed"])   // 작업기가 가져간(claimed) 작업도 「쓰는 중」이다
+          db.from("jobs").select("project_id,step,kind,request").in("state", ["queued", "claimed"])   // kind — 콘티 그림(image)이 도는 중인지 화면이 알아야 버튼을 잠근다 (09-24)   // 작업기가 가져간(claimed) 작업도 「쓰는 중」이다
             .in("project_id", ids),
           db.from("briefs").select("project_id,raw,goal,target,format").in("project_id", ids),
           // 승인하면서 남긴 말도 놓치면 안 된다. 반려만 보면 반쪽이다
