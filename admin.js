@@ -1467,7 +1467,7 @@
         head("콘티 그림을 뽑는 중", "끝나면 컷마다 붙습니다") + "</div>";
     }
     // 콘티 시트(한 판) — 검수 칸 맨 위에 크게. 컷별 그림이 없을 때 보이는 자리가 없었다 (09-24 환타)
-    var sheets = (p.files || []).filter(function (f) { return f.kind === "board" && f.cut_n == null && f.url; })
+    var sheets = (p.files || []).filter(function (f) { return f.kind === "board" && f.cut_n == null && f.url && !(f.meta || {}).superseded; })
       .sort(function (x, y) { return String(y.created_at).localeCompare(String(x.created_at)); });
     var sheetHtml = sheets.length
       ? '<div class="board-sheet"><img src="' + esc(sheets[0].url) + '" data-big="' + esc(sheets[0].url) +
@@ -1889,7 +1889,7 @@
     // 없으면 빈 칸을 렌더러가 알아서 그린다("그림 준비 전") — 여기서 지어내지 않는다.
     var panelBy = {};
     boardFiles.forEach(function (f) {
-      if (f.cut_n == null || !f.url) return;
+      if (f.cut_n == null || !f.url || (f.meta || {}).superseded) return;   // 교체된 조각은 안 붙인다
       if (!panelBy[f.cut_n]) panelBy[f.cut_n] = f;
     });
     var panelCount = Object.keys(panelBy).length;
@@ -4440,7 +4440,8 @@
               //   「콘티 뽑기」가 다시 안 뜬다 (09-24). 광고주에게 이미 보낸(approved) 것은 그대로 센다.
               board: (function () {
                 var rev = (p.reviews || []).filter(function (r) {
-                  return r.step === "storyboard" && r.layer === "board" && r.decision === "revise" && r.cut_n == null;
+                  // 완성 콘티(final)에서 수정 요청해도 다시 그린다 — 그 전 시트는 세지 않는다 (09-24 환타: 손 두 개)
+                  return r.step === "storyboard" && (r.layer === "board" || r.layer === "final") && r.decision === "revise" && r.cut_n == null;
                 }).map(function (r) { return String(r.decided_at || ""); }).sort().pop() || "";
                 return p.files.filter(function (f) {
                   return f.kind === "board" && (f.approved || !rev || String(f.created_at || "") > rev);
