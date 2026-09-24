@@ -1802,7 +1802,13 @@
       : '<p class="stage-empty">제품 자료는 등록됐지만 정리된 확인 내용이 없습니다.</p>' + files;
     // 전략도 공용 렌더다 — 네 칸이 각각 한 구획이고, 긴 문단은 문장 단위로 나뉜다
     var strategyBody = p.strategy
-      ? '<div class="stage-content">' + R().strategy(p.strategy, ADMIN) + '</div>'
+      ? '<div class="stage-content">' + R().strategy(p.strategy, ADMIN) +
+        ((p.strategy.client_who || p.strategy.client_what || p.strategy.client_feel)
+          ? '<div class="ms-summary"><div class="ms-by">광고주에게 보이는 「이번 제안의 방향」</div>' +
+            (p.strategy.client_who ? "<span><b>누구에게</b> " + esc(p.strategy.client_who) + "</span>" : "") +
+            (p.strategy.client_what ? "<span><b>무슨 말을</b> " + esc(p.strategy.client_what) + "</span>" : "") +
+            (p.strategy.client_feel ? "<span><b>어떤 느낌으로</b> " + esc(p.strategy.client_feel) + "</span>" : "") + "</div>"
+          : "") + '</div>'
       : '<p class="stage-empty">저장된 전략 설계 내용이 없습니다.</p>';
 
     // 구성·각본 — 결과가 들어오기 전에는 「제작 중 / 대기」를 분명히 보여 주고,
@@ -2004,6 +2010,10 @@
         f("usp", "강점(USP)", "이 제품만 줄 수 있는 것", 2) +
         f("tone", "톤", "예: 유쾌하고 시원한, 과장된 코믹", 2) +
         f("direction", "그 외 필요한 사항", "꼭 넣을 것, 피할 것, 참고할 결", 3) +
+        '<div class="mc-guide"><b>광고주에게 보이는 「이번 제안의 방향」</b><span>· 콘셉트 5안 위에 뜹니다. 쉬운 말 한 줄씩 — 인사이트·USP 같은 우리 말 없이</span></div>' +
+        f("client_who", "누구에게", "예: 하루에도 몇 번씩 나른해지는 20~50대 남성", 1) +
+        f("client_what", "무슨 말을", "예: 밋밋한 순간, 한 모금으로 톡 깨어난다", 1) +
+        f("client_feel", "어떤 느낌으로", "예: 밝고 시원하게, 유쾌한 과장으로", 1) +
         '<button class="btn" type="button" data-ms-save="' + esc(p.id) + '">전략 올리기 → 콘셉트 5안</button></div>';
     }
 
@@ -3418,7 +3428,8 @@
         if (!v.one_message && !v.insight && !v.direction) { window.alert("핵심 메시지·인사이트·그 외 필요한 사항 중 하나는 써 주십시오."); return; }
         b.disabled = true; b.textContent = "올리는 중…";
         db.rpc("onecue_strategy_manual", { p_project_id: id, p_insight: v.insight, p_one_message: v.one_message,
-          p_usp: v.usp, p_tone: v.tone, p_direction: v.direction })
+          p_usp: v.usp, p_tone: v.tone, p_direction: v.direction,
+          p_client_who: v.client_who || "", p_client_what: v.client_what || "", p_client_feel: v.client_feel || "" })
           .then(function (r) { if (r.error) throw r.error; return load(); })
           .catch(function (e) { b.disabled = false; b.textContent = "전략 올리기 → 콘셉트 5안"; window.alert("올리지 못했습니다 — " + (e.message || e)); });
       });
@@ -4261,7 +4272,7 @@
             .in("project_id", ids).order("spent_at"),
           db.from("product_facts").select("project_id,facts,label_text,claims,product_lock,device_note")
             .in("project_id", ids),
-          db.from("strategies").select("project_id,insight,insight_flip,usp,one_message,tone,direction,written_by")
+          db.from("strategies").select("project_id,insight,insight_flip,usp,one_message,tone,direction,written_by,client_who,client_what,client_feel")
             .in("project_id", ids),
           // axis·payoff·is_chosen 이 빠져 있었다. 그래서 고른 안을 전체폭으로 펼치는
           // 배치가 한 번도 걸리지 않았고(is_chosen 이 늘 undefined), 카드의 「이렇게
