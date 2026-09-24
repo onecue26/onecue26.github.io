@@ -419,7 +419,8 @@
         (concepts || []).some(function (c) { return c.is_chosen; }) ? "선택 완료"
           : (P.step === "concepts" && P.state === "ready") ? "고르실 차례" : "준비 중",
         shown("concepts")
-          ? secDirection(strat) + secConcepts(concepts, MINE && P.step === "concepts" && P.state === "ready")
+          ? secDirection(strat && Object.assign({ _added: (concepts || []).some(function (c) { return c.batch > 1; }) }, strat)) +
+            secConcepts(concepts, MINE && P.step === "concepts" && P.state === "ready")
           : (P.step === "concepts" || P.step === "strategy" || P.step === "facts"
             ? '<div class="stage-read development-notice"><section class="stage-block status"><h4>콘셉트를 준비하고 있습니다</h4>' +
               "<p>보내 주신 내용과 답을 반영해 다섯 가지 안을 만들고 있습니다. 준비되면 여기서 고르실 수 있습니다.</p></section></div>"
@@ -502,9 +503,19 @@
   function secDirection(s) {
     if (!s || !(s.client_who || s.client_what || s.client_why || s.client_feel)) return "";
     var row = function (k, v) { return v ? "<li><b>" + k + "</b><span>" + esc(v) + "</span></li>" : ""; };
-    return '<div class="direction"><h3>공통 기획 방향</h3><p class="dir-sub">다섯 가지 안 모두 이 방향 위에서 만들었습니다.</p><ul>' +
-      row("누구에게", s.client_who) + row("무슨 말을", s.client_what) + row("왜 이 방향인가", s.client_why) +
-      row("어떤 느낌으로", s.client_feel) + "</ul>" +
+    var rows = function (x) {
+      return "<ul>" + row("누구에게", x.client_who) + row("무슨 말을", x.client_what) + row("왜 이 방향인가", x.client_why) +
+        row("어떤 느낌으로", x.client_feel) + "</ul>";
+    };
+    var prev = s.prev_client;     // 085 · 추가 요청에서 방향을 다시 잡았다
+    if (prev && (prev.client_who || prev.client_what)) {
+      return '<div class="direction"><h3>공통 기획 방향 — 다시 잡은 방향</h3>' +
+        '<p class="dir-sub">추가 요청에 따라 방향을 다시 잡았습니다. 추가로 드린 두 가지 안이 이 방향 위에서 나왔습니다.</p>' + rows(s) +
+        '<details class="dir-prev"><summary>처음 방향 보기 — 처음 다섯 가지 안은 이 방향 위에서 나왔습니다</summary>' + rows(prev) + "</details>" +
+        "</div>";
+    }
+    return '<div class="direction"><h3>공통 기획 방향</h3><p class="dir-sub">' +
+      (s._added ? "모든 안이 이 방향 위에서 나왔습니다." : "다섯 가지 안 모두 이 방향 위에서 만들었습니다.") + "</p>" + rows(s) +
       "</div>";
   }
 
@@ -519,13 +530,24 @@
         : "";
       return R().concept(c, { role: "client", actions: pick });
     }
-    var head = "<h2>컨셉 5안" + (chosen ? " — 선택 완료" : "") + "</h2>";
+    var added = list.filter(function (c) { return c.batch > 1; });
+    var first = list.filter(function (c) { return !(c.batch > 1); });
+    var head = "<h2>컨셉 " + (added.length ? first.length + "안 + 추가 " + added.length + "안" : list.length + "안") +
+      (chosen ? " — 선택 완료" : "") + "</h2>";
     if (chosen) {
       var others = list.filter(function (c) { return !c.is_chosen; });
       return head + '<div class="chosen-summary"><span class="chosen-label">선택한 방향</span>' +
         card(chosen) + "</div>" +
         (others.length ? '<details class="other-concepts"><summary>다른 제안 ' + others.length +
           '개 다시 보기</summary><div class="concepts">' + others.map(card).join("") + "</div></details>" : "");
+    }
+    if (added.length) {
+      return head + '<p class="section-guide">요청하신 추가 ' + added.length + "안을 먼저 보여 드립니다. 처음 " + first.length +
+        "안도 그대로 고르실 수 있습니다.</p>" +
+        '<h3 class="concepts-sub">추가로 받으신 ' + added.length + "안</h3>" +
+        '<div class="concepts">' + added.map(card).join("") + "</div>" +
+        '<h3 class="concepts-sub">처음 ' + first.length + "안</h3>" +
+        '<div class="concepts">' + first.map(card).join("") + redoCard(canPick) + "</div>";
     }
     return head + '<p class="section-guide">제목을 먼저 보고, 관심 가는 안의 핵심 아이디어와 첫 장면을 비교해 주세요.</p>' +
       '<div class="concepts">' + list.map(card).join("") + redoCard(canPick) + "</div>";
@@ -536,21 +558,35 @@
   // 메모는 비워도 된다. 비면 우리가 축을 바꿔 다시 잡는다
   function redoCard(canPick) {
     if (!canPick) return "";
+    if (!reviseLeft("concepts")) {
+      return '<div class="cc redo"><span class="k">추가 요청</span>' +
+        '<span class="hint">추가 요청 1회를 쓰셨습니다 — 더 필요하시면 위 「메시지」로 문의해 주세요.</span></div>';
+    }
     return '<div class="cc redo">' +
-      '<span class="k">재요청</span>' +
-      '<span class="t">원하는 방향이 없나요?</span>' +
-      '<span class="b">억지로 고르지 않으셔도 됩니다. 의견을 주시면 다섯 가지를 새로 만들어 드립니다. (다시 요청은 1회)</span>' +
+      '<span class="k">추가 요청 · 1회</span>' +
+      '<span class="t">마음에 드는 안이 없나요?</span>' +
+      '<span class="b">억지로 고르지 않으셔도 됩니다. 지금 안은 그대로 두고, 새 안 두 가지를 더 만들어 드립니다.</span>' +
+      '<div class="redo-kind">' +
+      '<label><input type="radio" name="redoKind" value="direction"><span><b>공통 기획 방향이 맞지 않아요</b>' +
+      "<small>누구에게·무슨 말을 할지부터 다시 잡고, 그 위에서 두 안을 만듭니다</small></span></label>" +
+      '<label><input type="radio" name="redoKind" value="expression"><span><b>방향은 좋은데 표현이 아쉬워요</b>' +
+      "<small>방향은 그대로 두고, 다른 장면·다른 느낌으로 두 안을 만듭니다</small></span></label>" +
+      "</div>" +
       '<textarea id="redoNote" maxlength="500" ' +
-      'placeholder="원하시는 방향이 있으면 적어주세요 — 안 적으셔도 됩니다&#10;&#10;예 · 아이가 나오는 건 피하고 싶습니다&#10;예 · 하와이를 더 보여주면 좋겠습니다&#10;예 · B안 방향은 좋은데 더 밝았으면"></textarea>' +
-      '<span class="hint">비워두시면 저희가 축을 바꿔 다시 잡습니다.</span>' +
-      (reviseLeft("concepts") ? '<button class="btn ghost" id="redoBtn">의견과 함께 5안 다시 요청</button>'
-        : '<span class="hint">다시 요청 1회를 쓰셨습니다 — 추가 요청은 위 「메시지」로 문의해 주세요.</span>') +
+      'placeholder="원하시는 것이 있으면 적어주세요 — 안 적으셔도 됩니다&#10;&#10;예 · 아이가 나오는 건 피하고 싶습니다&#10;예 · B안 방향은 좋은데 더 밝았으면"></textarea>' +
+      '<button class="btn ghost" id="redoBtn" disabled title="위에서 이유를 고르시면 눌립니다">새 안 두 가지 더 받기</button>' +
       '<span class="hint" id="redoMsg"></span>' +
       "</div>";
   }
 
-  function askRedo(note) {
-    return decide("concepts", "revise", note);
+  function askRedo(note, kind) {
+    return db.rpc("onecue_decide", {
+      p_project_id: P.id, p_gate: "concepts", p_decision: "revise",
+      p_note: note || "", p_concept_key: null, p_redo_kind: kind,
+    }).then(function (r) {
+      if (r.error) throw r.error;
+      return r.data;
+    });
   }
 
   // ⚠️ 영상을 맨 위에 따로 나열하던 절은 **없앴다** (Dan 2026-09-08).
@@ -718,7 +754,7 @@
       var blank = said.indexOf("방향 지정 없음") === 0 || said.indexOf("내용 없음") >= 0;
       return '<div class="gate"><div class="txt"><b>다시 만들고 있습니다</b>' +
         "<small>" + (p.step === "concepts"
-          ? "새 다섯 가지가" : p.step === "video" ? "고친 영상이" : "고친 콘티가") + " 준비되면 이 화면에 올라옵니다." +
+          ? "추가 두 가지 안이" : p.step === "video" ? "고친 영상이" : "고친 콘티가") + " 준비되면 이 화면에 올라옵니다." +
         (blank ? "" : "<br>주신 말씀 · " + esc(said)) +
         "</small></div></div>";
     }
@@ -731,7 +767,9 @@
     if (p.step === "concepts" && p.state === "ready" && !done.concepts) {
       if (!MINE) return look;
       return '<div class="gate"><div class="txt"><b>컨셉을 골라주세요</b>' +
-        "<small>다섯 가지 방향을 준비했습니다. 하나를 고르시면 그 방향으로 콘티를 만듭니다.</small>" +
+        "<small>" + ((approvals || []).some(function (a) { return a.gate === "concepts" && a.decision === "revise"; })
+          ? "요청하신 두 가지 안을 더 준비했습니다. 처음 안까지 모두 중에서 하나를 고르시면 그 방향으로 콘티를 만듭니다."
+          : "다섯 가지 방향을 준비했습니다. 하나를 고르시면 그 방향으로 콘티를 만듭니다.") + "</small>" +
         "</div></div>";
     }
     // 콘티에 「고쳐주세요」만 있고 무엇을 고칠지 적을 데가 없었다.
@@ -868,11 +906,19 @@
       });
     });
     var rd = el("redoBtn");
+    var redoKind = function () {
+      var r = document.querySelector('input[name="redoKind"]:checked');
+      return r ? r.value : "";
+    };
+    document.querySelectorAll('input[name="redoKind"]').forEach(function (r) {
+      r.addEventListener("change", function () { if (rd) { rd.disabled = !redoKind(); rd.title = ""; } });
+    });
     if (rd) rd.addEventListener("click", function () {
-      var note = (el("redoNote").value || "").trim();
+      var note = (el("redoNote").value || "").trim(), kind = redoKind();
+      if (!kind) return;
       rd.disabled = true; rd.textContent = "보내는 중…";
-      askRedo(note).then(load).catch(function (e) {
-        rd.disabled = false; rd.textContent = "다시 부탁드립니다";
+      askRedo(note, kind).then(load).catch(function (e) {
+        rd.disabled = false; rd.textContent = "새 안 두 가지 더 받기";
         var m = el("redoMsg"); if (m) m.textContent = "실패 — " + e.message;
       });
     });
@@ -951,10 +997,10 @@
         var id = P.id;
         return Promise.all([
           db.from("briefs").select("raw,goal,target,format").eq("project_id", id).maybeSingle(),
-          db.from("strategies").select("insight,usp,one_message,tone,client_who,client_what,client_why,client_feel").eq("project_id", id).maybeSingle(),
+          db.from("strategies").select("insight,usp,one_message,tone,client_who,client_what,client_why,client_feel,prev_client").eq("project_id", id).maybeSingle(),
           // visual 은 관리자 칸이다(제작 사양). 화면에 안 그리는 것으로는 부족하고
           // 애초에 읽어 오지 않는다 — 받아 두면 언젠가 그려진다
-          db.from("concepts").select("key,title,client_one_line,client_explain,client_appeal,client_mood,client_difference,is_chosen,is_recommended,reco_reason").eq("project_id", id).order("key"),
+          db.from("concepts").select("key,title,client_one_line,client_explain,client_appeal,client_mood,client_difference,is_chosen,is_recommended,reco_reason,batch").eq("project_id", id).order("key"),
           db.from("cuts").select("n,t_start,t_end,block,size,angle,move,lens,action,intent").eq("project_id", id).order("n"),
           db.from("assets").select("kind,approved,url,storage_path,role,mime,cut_n,meta").eq("project_id", id).or("kind.neq.final,approved.eq.true"),
           db.from("approvals").select("gate,decision,note,decided_at").eq("project_id", id).order("decided_at"),

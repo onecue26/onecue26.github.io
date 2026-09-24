@@ -185,6 +185,14 @@ h2::after{content:"";flex:1;height:1px;background:var(--rule)}
   padding:10px 12px;font-family:inherit;font-size:13.5px;line-height:1.6;color:var(--ink)}
 .cc.redo textarea:focus{outline:2px solid var(--cue);outline-offset:1px;border-color:var(--cue)}
 .cc.redo .hint{font-size:12px;color:var(--faint)}
+/* 085 · 추가 요청 이유 고르기 */
+.redo-kind{display:flex;flex-direction:column;gap:6px;margin:6px 0 2px}
+.redo-kind label{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border:1px solid var(--line,#ddd);border-radius:8px;background:#fff;cursor:pointer}
+.redo-kind label:has(input:checked){border-color:var(--cue);outline:1px solid var(--cue)}
+.redo-kind input{margin-top:3px}
+.redo-kind span{display:flex;flex-direction:column;gap:2px;font-size:13.5px}
+.redo-kind small{font-size:12px;color:var(--faint)}
+.concepts-sub{margin:14px 0 6px;font-size:14px}
 .cc button{margin-top:auto}
 
 /* 만든 영상 — 세로라 나란히 놓는다 */
