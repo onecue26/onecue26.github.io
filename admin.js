@@ -1476,7 +1476,7 @@
       : "";
     if (act.phase === "board.review") {
       return sheetHtml + reviewBox("board", "콘티 그림을 검수해 주세요",
-        "그림 " + (n.board || 0) + "장 · 컷마다 따로 요청하면 그 컷만 다시 뽑습니다");
+        "콘티 시트 " + (n.board || 0) + "장 · 수정 요청하면 시트 전체를 다시 그립니다(유료 · 다시 「콘티 뽑기」)");
     }
     if (act.phase === "final.review") {
       return sheetHtml + reviewBox("final", "완성 콘티를 확인해 주세요",
@@ -1893,9 +1893,11 @@
       if (!panelBy[f.cut_n]) panelBy[f.cut_n] = f;
     });
     var panelCount = Object.keys(panelBy).length;
+    var hasSheet = boardFiles.some(function (f) { return f.cut_n == null && f.url; });
     function boardPanel(c) {
       var f = panelBy[c && c.n];
-      if (!f) return "";
+      // 컷별 조각이 없고 시트 한 판만 있으면 「그림 준비 전」 대신 시트의 몇 번 칸인지 알린다 (09-24)
+      if (!f) return hasSheet ? '<div class="cut-empty"><span>위 콘티 시트 ' + esc(String(c && c.n)) + '번 칸</span></div>' : "";
       return '<img class="cut-panel" src="' + esc(f.url) + '" alt="컷 ' + esc(String(c.n)) +
         ' 콘티" loading="lazy" data-big="' + esc(f.url) + '" data-kind="img">';
     }
