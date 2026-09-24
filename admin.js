@@ -1463,7 +1463,7 @@
         '<div class="lc-row">' +
         '<button class="btn" type="button" data-lc="make-board"' + tag + ">콘티 뽑기</button>" +
         "</div>" +
-        '<span class="lc-msg">유료 생성입니다 — 누르면 작업으로 걸리고, 실제 생성 시점은 Dan 이 정합니다</span>' +
+        '<span class="lc-msg">유료 생성(약 2cr) — 누르면 바로 한 판 그리고 컷마다 잘라 붙인 뒤 멈춥니다</span>' +
         '<span class="lc-msg" data-lc-msg></span></div>';
     }
     if (act.phase === "board.working") {
