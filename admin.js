@@ -536,7 +536,9 @@
         var waitingHere = SE().waiting(p, s.key);
         var working = i === current && p.job && p.job.step === s.key;
         var updated = i === current && p.aiNeedsReview && h;
-        var needsPick = SE().awaitingChoice(p, s.key);
+        // 구성·각본(내 단계)은 두 갈래 선택 칸이 대신한다 — 옛 상태 기계의 배지·바·선택 양식을 띄우지 않는다 (077)
+        var devTwo = s.key === "develop" && p.step === "develop" && !(p.development && ((p.development.arc || []).length || (p.development.copies || []).length));
+        var needsPick = !devTwo && SE().awaitingChoice(p, s.key);
         // ★ 콘티는 그림이 나와야 끝난 것이다. 컷 표가 등록됐다고 「업데이트 완료」를
         //   달면, 바로 아래 본문의 「시각 콘티 미제작」과 정면으로 어긋난다. 머리와
         //   본문이 서로 다른 말을 하면 둘 다 못 믿게 된다 — 머리를 본문에 맞춘다.
@@ -604,7 +606,7 @@
         // 먼저 건다. 되는 것을 보고 나서 콘티로 옮긴다.
         // 제작 자료·영상 제작도 같은 길을 쓴다. 029 로 DB 함수가 세 단계를
         // 받게 됐으니 화면도 같이 넓힌다 — 한쪽만 넓히면 버튼이 눌리고 튕긴다.
-        var act = ((s.key === LIFECYCLE_STEP || s.key === "post" || SE().isPaid(s.key)) && i === current)
+        var act = (!devTwo && (s.key === LIFECYCLE_STEP || s.key === "post" || SE().isPaid(s.key)) && i === current)
           ? SE().actions(p, s.key, !!(p.stageResults && p.stageResults[s.key]))
           : null;
         // 콘티는 두 겹이라 판단이 다르다 — 전용 상태기계를 쓴다
@@ -618,7 +620,7 @@
           (bact ? boardBar(p, bact)
             : (act && !SE().isPaid(s.key)) ? lifecycleBar(p, s.key, act)
             : SE().isPaid(s.key) ? ""
-            : choiceGate(p, s.key)) +
+            : devTwo ? "" : choiceGate(p, s.key)) +
           // ★ 기록이 없으면 이 줄을 띄우지 않는다 — 모든 단계에 「기록 없음 · 별도 검토
           //   없음」이 떠서 끝난 단계까지 안 한 것처럼 보였다 (09-23 화면 점검).
           // 누가 했는지만 — 모델 이름·「별도 검토 없음」은 관리자 판단에 쓰이지 않는다 (09-24 검수)
@@ -633,7 +635,7 @@
           // ★ 간단한 「누가 맡습니까」가 떠 있으면 옛 선택 양식은 띄우지 않는다 —
           //   두 개가 떴다 (Dan 09-23: 「아래쪽이 더맘에드는데 … 심플하게 나오니깐」)
           // 아직 오지 않은 단계에도 옛 선택 양식이 떴다 — 고르기는 그 단계에 들어와서
-          (bact || act || SE().isPaid(s.key) || status === "upcoming" || s.key === "deliver" || s.key === "brief" || s.key === "facts" || s.key === "strategy" || s.key === "concepts" ? "" : execPicker(p, s.key)) +
+          (bact || act || devTwo || SE().isPaid(s.key) || status === "upcoming" || s.key === "deliver" || s.key === "brief" || s.key === "facts" || s.key === "strategy" || s.key === "concepts" ? "" : execPicker(p, s.key)) +
           deliverBox(p, s.key) +
           (s.key === "facts" ? needsPanel(p) : "") +
           (status === "upcoming" ? ''
@@ -1509,16 +1511,18 @@
             esc(p.slug) + '">AI 제작 시작</button>'
           : '<span class="progress-state">제작 시작은 관리자 계정에서 누릅니다</span>';
       }
-    } else if (SE().awaitingChoice(p, p.step) && ["facts", "strategy", "concepts"].indexOf(p.step) < 0) {   // 기획 단계는 아래 두 갈래 선택이 대신한다
+    } else if (SE().awaitingChoice(p, p.step) && ["facts", "strategy", "concepts", "develop"].indexOf(p.step) < 0) {   // 기획 단계는 아래 두 갈래 선택이 대신한다
       // 고르기 전에는 작업이 하나도 만들어지지 않았다. 카드 맨 위에서 바로 보이게 한다
       productionAction = '<span class="progress-state pick">실행 주체 선택 대기 — ' +
         '누가 진행할지 고르기 전까지 작업이 시작되지 않습니다</span>';
-    } else if (SE().waiting(p, p.step) && ["facts", "strategy", "concepts"].indexOf(p.step) < 0) {
+    } else if (SE().waiting(p, p.step) && ["facts", "strategy", "concepts", "develop"].indexOf(p.step) < 0) {
       productionAction = '<span class="progress-state wait">담당자 진행 — 결과 등록 대기</span>';
     } else if (p.job && p.job.request && p.job.request.plan) {
       // AI 가 기획을 쓰는 중 (074 · plan_writer.py) — 무엇을 쓰는지 갈래대로 말한다
       var rq = p.job.request;
-      productionAction = '<span class="progress-state working st-run">' + (rq.strategy_only
+      productionAction = '<span class="progress-state working st-run">' + (p.job.step === "develop"
+        ? "AI가 구성·각본을 쓰는 중 — 고른 콘셉트 그대로 · 골·필수·비트 · 끝나면 콘티 확인 단계로 넘어갑니다"
+        : rq.strategy_only
         ? "AI가 전략 설계를 쓰는 중 — 끝나면 콘셉트 5안을 누가 쓸지 고릅니다"
         : rq.keep_strategy
           ? "AI가 콘셉트 5안을 쓰는 중 — 정해진 전략 그대로 · 끝나면 콘셉트 검토로 넘어갑니다"
@@ -1548,6 +1552,17 @@
           '<span>AI: 위 전략을 그대로 받아 5안을 씁니다 · 사람: 아래 양식으로 씁니다</span></div>' +
           manualConceptForm(p)
         : '<span class="progress-state wait">콘셉트 담당 선택 대기</span>';
+    } else if (p.step === "develop" && !(p.development && ((p.development.arc || []).length || (p.development.copies || []).length))) {
+      var picked = (p.concepts || []).filter(function (c) { return c.is_chosen; })[0];
+      productionAction = canWrite
+        ? (picked ? '<div class="ms-summary"><div class="ms-by">광고주가 고른 콘셉트</div><span><b>' + esc(picked.key + "안 · " + picked.title) +
+            "</b> " + esc(picked.client_one_line || "") + "</span></div>" : "") +
+          '<div class="plan-start"><b>구성·각본 — 누가 맡습니까</b>' +
+          '<div class="lc-row"><button class="btn" type="button" data-plan-start="' + esc(p.id) + '" data-plan-what="develop">AI에게 맡기기</button>' +
+          '<button class="btn ghost" type="button" data-toggle-form="dv-' + esc(p.id) + '">사람이 직접 쓰기</button></div>' +
+          '<span>AI: 고른 콘셉트·전략 그대로 골·필수·비트 4~6개를 씁니다 · 사람: 아래 양식 — 어느 쪽이든 콘티 확인 단계로 넘어갑니다</span></div>' +
+          manualDevelopForm(p)
+        : '<span class="progress-state wait">구성·각본 담당 선택 대기</span>';
     } else {
       productionAction = '<span class="progress-state">' + esc((STEP_NAME[p.step] || p.step)) + ' 진행 중</span>';
     }
@@ -1990,6 +2005,35 @@
         f("tone", "톤", "예: 유쾌하고 시원한, 과장된 코믹", 2) +
         f("direction", "그 외 필요한 사항", "꼭 넣을 것, 피할 것, 참고할 결", 3) +
         '<button class="btn" type="button" data-ms-save="' + esc(p.id) + '">전략 올리기 → 콘셉트 5안</button></div>';
+    }
+
+    /** 사람이 구성·각본을 쓰는 양식 (077) — AI 와 같은 칸: 골 · 필수 · 흐름 · 카피 · 비트 */
+    function manualDevelopForm(p) {
+      var sec = Number(p.running_sec) || 15;
+      var fld = function (k, label, ph, rows) {
+        return '<label class="ms-field"><span>' + esc(label) + '</span><textarea data-dv="' + k + '" rows="' + (rows || 2) +
+          '" placeholder="' + esc(ph) + '"></textarea></label>';
+      };
+      var beat = function (i) {
+        return '<fieldset class="mc-one dv-beat"><legend>비트 ' + (i + 1) + '</legend>' +
+          '<div class="dv-time"><label class="ms-field"><span>시작(초)</span><input data-bt="t_start" inputmode="decimal"' + (i === 0 ? ' value="0"' : "") + '></label>' +
+          '<label class="ms-field"><span>끝(초)</span><input data-bt="t_end" inputmode="decimal"></label></div>' +
+          '<label class="ms-field"><span>무슨 일이 벌어지나</span><input data-bt="action" placeholder="한 장으로 보이는 순간"></label>' +
+          '<label class="ms-field"><span>왜 (의도)</span><input data-bt="intent" placeholder="이 순간이 하는 일"></label>' +
+          '<label class="ms-field"><span>자막·대사 (선택)</span><input data-bt="dialogue"></label></fieldset>';
+      };
+      return '<div class="mc-form" id="dv-' + esc(p.id) + '" hidden>' +
+        '<div class="mc-guide"><b>쓰는 법</b>' +
+        "<span>· 영상은 " + sec + "초 한 통으로 뽑고 컷·앵글은 영상 엔진이 설계합니다 — 여기서는 골과 꼭 지나갈 순간만</span>" +
+        "<span>· 비트는 한 장으로 보이는 순간으로. 시간은 0초부터 빈틈없이 이어지고 마지막이 " + sec + "초</span>" +
+        "<span>· 쓴 비트만 올라갑니다(빈 비트는 건너뜀)</span></div>" +
+        fld("goal", "골", "이 " + sec + "초 동안 무슨 일이 벌어지고 무엇으로 끝나나") +
+        fld("must", "필수", "반드시 들어갈 연출 — 예: 병이 화면에서 명확히 보인다") +
+        fld("flow", "흐름 (선택)", "한 줄에 하나씩", 3) +
+        fld("copies", "화면 자막·카피 (선택)", "한 줄에 하나씩", 2) +
+        '<label class="ms-field"><span>슬로건 (선택)</span><input data-dv="slogan"></label>' +
+        [0, 1, 2, 3, 4, 5].map(beat).join("") +
+        '<button class="btn" type="button" data-dv-save="' + esc(p.id) + '">구성·각본 올리기 → 콘티 확인</button></div>';
     }
 
     /** 사람이 콘셉트를 쓰는 양식 (073). 쓰는 법 안내를 같이 둔다. */
@@ -2738,7 +2782,7 @@
       strategy: strategyBody + (p.step === "strategy" ? '<div class="plan-wrap">' + productionAction + "</div>" : ""),
       concepts: (p.step === "concepts" && !(p.concepts && p.concepts.length) ? '<div class="plan-wrap">' + productionAction + "</div>" : "") + conceptReview +
         (p.step === "concepts" && p.state === "pending" && (!(p.concepts && p.concepts.length) || canWrite) ? "" : check),
-      develop: developBody,
+      develop: (p.step === "develop" ? '<div class="plan-wrap">' + productionAction + "</div>" : "") + developBody,
       // 새 흐름이 도는 동안에는 「컷 설계 보기」 링크를 띄우지 않는다 —
       // 검수할 컷 목록이 바로 아래 펼쳐져 있는데 같은 곳으로 가는 링크가 또 있으면
       // 어느 쪽이 본 자리인지 모르게 된다.
@@ -3320,7 +3364,8 @@
     });
     document.querySelectorAll("[data-plan-start]").forEach(function (b) {
       b.addEventListener("click", function () {
-        var what = b.dataset.planWhat === "concepts" ? "위 전략을 그대로 받아 콘셉트 5안을" : "전략 설계를";
+        var what = b.dataset.planWhat === "develop" ? "고른 콘셉트 그대로 구성·각본(골·필수·비트)을"
+          : b.dataset.planWhat === "concepts" ? "위 전략을 그대로 받아 콘셉트 5안을" : "전략 설계를";
         if (!window.confirm("AI가 " + what + " 씁니다. 광고주 답에서 정리한 조건이 함께 넘어갑니다.")) return;
         b.disabled = true; b.textContent = "시작하는 중…";
         db.rpc("onecue_plan_start", { p_project_id: b.dataset.planStart })
@@ -3341,6 +3386,29 @@
         db.rpc("onecue_back_to_strategy", { p_project_id: b.dataset.backStrategy })
           .then(function (r) { if (r.error) throw r.error; return load(); })
           .catch(function (e) { b.disabled = false; window.alert("돌아가지 못했습니다 — " + (e.message || e)); });
+      });
+    });
+    document.querySelectorAll("[data-dv-save]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var id = b.dataset.dvSave, form = document.getElementById("dv-" + id), v = {};
+        form.querySelectorAll("[data-dv]").forEach(function (x) { v[x.dataset.dv] = (x.value || "").trim(); });
+        var lines = function (t) { return (t || "").split(/\n+/).map(function (x) { return x.trim(); }).filter(Boolean); };
+        var beats = [];
+        form.querySelectorAll(".dv-beat").forEach(function (fs) {
+          var o = {};
+          fs.querySelectorAll("[data-bt]").forEach(function (x) { o[x.dataset.bt] = (x.value || "").trim(); });
+          if (!o.action && !o.t_end) return;          // 빈 비트는 건너뛴다
+          o.t_start = Number(o.t_start); o.t_end = Number(o.t_end);
+          beats.push(o);
+        });
+        if (!v.goal) { window.alert("골을 한 줄 써 주십시오."); return; }
+        if (!beats.length) { window.alert("비트를 하나 이상 써 주십시오."); return; }
+        var arc = ["골: " + v.goal].concat(v.must ? ["필수: " + v.must] : []).concat(lines(v.flow));
+        b.disabled = true; b.textContent = "올리는 중…";
+        db.rpc("onecue_develop_manual", { p_project_id: id,
+          p_development: { arc: arc, copies: lines(v.copies), slogan: v.slogan || "", narration_tone: "" }, p_beats: beats })
+          .then(function (r) { if (r.error) throw r.error; return load(); })
+          .catch(function (e) { b.disabled = false; b.textContent = "구성·각본 올리기 → 콘티 확인"; window.alert("올리지 못했습니다 — " + (e.message || e)); });
       });
     });
     document.querySelectorAll("[data-ms-save]").forEach(function (b) {
