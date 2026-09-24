@@ -486,10 +486,12 @@
   /** 「이번 제안의 방향」 세 줄 — 5안이 모두 이 안에서 나왔다. 고른 뒤에도 남긴다 (Dan 09-24)
    *  내부 전략(인사이트·강점·톤 문단)은 보여 주지 않는다 — 쉬운 말 세 줄만 */
   function secDirection(s) {
-    if (!s || !(s.client_who || s.client_what || s.client_feel)) return "";
+    if (!s || !(s.client_who || s.client_what || s.client_why || s.client_feel)) return "";
     var row = function (k, v) { return v ? "<li><b>" + k + "</b><span>" + esc(v) + "</span></li>" : ""; };
     return '<div class="direction"><h3>이번 제안의 방향</h3><ul>' +
-      row("누구에게", s.client_who) + row("무슨 말을", s.client_what) + row("어떤 느낌으로", s.client_feel) + "</ul></div>";
+      row("누구에게", s.client_who) + row("무슨 말을", s.client_what) + row("왜 이 방향인가", s.client_why) +
+      row("어떤 느낌으로", s.client_feel) + "</ul>" +
+      '<p class="dir-note">아래 다섯 가지 안은 모두 이 방향 안에서 만들었습니다.</p></div>';
   }
 
   function secConcepts(list, canPick) {
@@ -897,7 +899,7 @@
         var id = P.id;
         return Promise.all([
           db.from("briefs").select("raw,goal,target,format").eq("project_id", id).maybeSingle(),
-          db.from("strategies").select("insight,usp,one_message,tone,client_who,client_what,client_feel").eq("project_id", id).maybeSingle(),
+          db.from("strategies").select("insight,usp,one_message,tone,client_who,client_what,client_why,client_feel").eq("project_id", id).maybeSingle(),
           // visual 은 관리자 칸이다(제작 사양). 화면에 안 그리는 것으로는 부족하고
           // 애초에 읽어 오지 않는다 — 받아 두면 언젠가 그려진다
           db.from("concepts").select("key,title,client_one_line,client_explain,client_appeal,client_mood,client_difference,is_chosen,is_recommended,reco_reason").eq("project_id", id).order("key"),

@@ -338,12 +338,12 @@ body.admin-wide .other-concepts .concepts {
 
 /* ── 접히는 곳에는 전부 화살표 (Dan 09-24 「누르고 접히는 기능 있는 곳에는 다 해주거나 표시해주는 게 좋을 듯」)
    프로젝트 칸의 ⌄ 를 기준으로 통일한다. 이미 ▸/▾ 나 자체 화살표가 있는 곳은 뺀다(두 개 겹치지 않게). */
-details:not(.project-fold):not(.cstep):not(.made-old):not(.kept):not(.take-more):not(.cut-more):not(.cc-more) > summary { cursor: pointer; }
-details:not(.project-fold):not(.cstep):not(.made-old):not(.kept):not(.take-more):not(.cut-more):not(.cc-more) > summary::after {
+details:not(.project-fold):not(.cstep):not(.made-old):not(.kept):not(.take-more):not(.cut-more):not(.cc-more):not(.other-concepts) > summary { cursor: pointer; }
+details:not(.project-fold):not(.cstep):not(.made-old):not(.kept):not(.take-more):not(.cut-more):not(.cc-more):not(.other-concepts) > summary::after {
   content: "⌄"; display: inline-block; margin-left: 8px; color: var(--muted, #888);
   font-size: 15px; line-height: 1; vertical-align: middle; transition: transform .15s;
 }
-details[open]:not(.project-fold):not(.cstep):not(.made-old):not(.kept):not(.take-more):not(.cut-more):not(.cc-more) > summary::after {
+details[open]:not(.project-fold):not(.cstep):not(.made-old):not(.kept):not(.take-more):not(.cut-more):not(.cc-more):not(.other-concepts) > summary::after {
   transform: rotate(180deg);
 }
 /* 단계 줄은 칸이 나뉜 격자라 화살표를 오른쪽 끝에 따로 둔다 — 격자 칸을 밀지 않게 */
@@ -351,4 +351,4 @@ details.flow-step > summary.flow-summary { position: relative; padding-right: 34
 details.flow-step > summary.flow-summary::after { position: absolute; right: 12px; top: 50%; margin: -9px 0 0 0; }
 
 /* 이번 제안의 방향 — 광고주 콘셉트 칸 위 세 줄 (Dan 09-24) */
-.direction{margin:0 0 16px;padding:14px 16px;border:1px solid #f0d9a8;background:#fbf6ea;border-radius:10px}.direction h3{margin:0 0 8px;font-size:14px}.direction ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}.direction li{display:flex;gap:10px;font-size:14px}.direction li b{flex:0 0 96px;color:#8a6a2a;font-weight:600}
+.direction{margin:0 0 16px;padding:14px 16px;border:1px solid #f0d9a8;background:#fbf6ea;border-radius:10px}.direction h3{margin:0 0 8px;font-size:14px}.direction ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}.direction li{display:flex;gap:10px;font-size:14px}.direction li{line-height:1.6}.dir-note{margin:10px 0 0;font-size:12.5px;color:#8a6a2a}.direction li b{flex:0 0 110px;color:#8a6a2a;font-weight:600}
