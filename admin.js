@@ -504,6 +504,17 @@
       "</div>";
   }
 
+  /** 카드 머리 가로 진행 막대 — 광고주 화면 맨 위 막대와 같은 모양, 우리 10단계로 (Dan 09-25 「관리자에도 있었는데 사라졌다」)
+   *  09-21 「전체 제작 흐름」이 가로 줄에서 세로 목록으로 바뀌며 한눈에 보던 막대가 없어졌다. 접힌 카드에서도 보이게 머리에 둔다 */
+  function stepBar(p) {
+    var cur = FLOW.map(function (x) { return x.key; }).indexOf(p.step), closed = p.state === "done";
+    var cls = function (i) { return (closed || i < cur) ? "done" : i === cur ? "now" : ""; };
+    return '<div class="abar-wrap"><div class="abar">' + FLOW.map(function (s, i) { return '<i class="' + cls(i) + '"></i>'; }).join("") +
+      '</div><div class="abar-names">' + FLOW.map(function (s, i) {
+        return '<span class="' + cls(i) + '">' + esc(STEP_NAME[s.key] || s.key) + "</span>";
+      }).join("") + "</div></div>";
+  }
+
   function flow(p, bodies) {
     var current = FLOW.map(function (x) { return x.key; }).indexOf(p.step);
     var history = p.aiHistory || [];
@@ -2917,7 +2928,7 @@
       '<strong class="product-name">' + esc(p.product || p.brand || p.slug) + '</strong></div>' +
       '<div class="meta">' + esc(p.slug) + " · " + p.running_sec + "초 · " +
       esc((p.aspects || []).join("/")) +
-      (p.created_at ? " · " + ago(p.created_at) : "") + "</div>" +
+      (p.created_at ? " · " + ago(p.created_at) : "") + "</div>" + stepBar(p) +
       '</div><div class="project-summary-side"><span class="project-stage ' + (p.state === "done" ? "closed st-done" : p.state === "ready" ? "st-fix" : "st-run") + '">' +
       (p.state === "done" ? "완료 · " + esc(p.closed_at ? new Date(p.closed_at).toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 10).slice(5).replace("-", "/") : "") +
         " · " + spentAll(p) + "cr" + won(spentAll(p)) : esc(STEP_NAME[p.step] || p.step)) + '</span><span class="fold-icon" aria-hidden="true">⌄</span></div></summary>' +

@@ -410,9 +410,9 @@
   function fixNotice(what, a) {
     var said = String((a && a.note) || "").trim();
     return '<div class="stage-read development-notice"><section class="stage-block status">' +
-      "<h4>말씀하신 내용으로 " + what + "을 고치고 있습니다</h4>" +
+      "<h4>말씀하신 내용으로 " + what + (what === "콘티" ? "를" : "을") + " 고치고 있습니다</h4>" +
       (said ? '<p class="fix-said">주신 말씀 · ' + esc(said).replace(/\n+/g, " ") + "</p>" : "") +
-      "<p>고친 " + what + "이 준비되면 이 자리에서 다시 확인하실 수 있습니다.</p></section></div>";
+      "<p>고친 " + what + (what === "콘티" ? "가" : "이") + " 준비되면 이 자리에서 다시 확인하실 수 있습니다.</p></section></div>";
   }
 
   function flow(x) {
