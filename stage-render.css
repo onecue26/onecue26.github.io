@@ -364,3 +364,4 @@ details.flow-step > summary.flow-summary::after { position: absolute; right: 12p
 .redo-kind span{display:flex;flex-direction:column;gap:2px;font-size:13.5px}
 .redo-kind small{font-size:12px;color:var(--faint)}
 .concepts-sub{margin:14px 0 6px;font-size:14px}
+.fix-said{background:#fff6e6;border-left:3px solid #e0a13a;padding:6px 10px;border-radius:4px}.fix-prev{margin-top:12px}.fix-prev summary{cursor:pointer;color:var(--faint,#777);font-size:13px}
