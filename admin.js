@@ -1490,8 +1490,12 @@
     }
     if (act.phase === "final.done") {
       return sheetHtml + '<div class="lc lc-approved"' + tag + ">" +
-        head("광고주에게 보냈습니다", "광고주 화면에 콘티가 떠 있습니다") +
+        head("광고주에게 보냈습니다 — 광고주 확인 기다리는 중", "광고주가 「콘티 승인」을 누르면 영상 단계로 넘어갑니다") +
         '<div class="lc-row">' +
+        // 다음에 누를 것을 미리 보여 준다 — 지금은 누를 수 없다 (Dan 09-24 「비활성화된 다음 안내 버튼이라도」)
+        '<button class="btn" type="button" disabled title="광고주가 콘티를 승인하면 열립니다">다음 · 영상 만들기' +
+        ((p.render_plan && p.render_plan.credits_total != null) ? " (" + esc(String(p.render_plan.credits_total)) + "cr)" : "") +
+        " — 광고주 승인 대기</button>" +
         '<button class="btn ghost" type="button" data-lc="back"' + tag +
         ">내리고 다시 고치기</button></div>" +
         '<span class="lc-msg" data-lc-msg></span></div>';
