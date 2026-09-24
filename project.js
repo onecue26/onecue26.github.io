@@ -384,7 +384,7 @@
   // 빈 상자는 「아직 안 했다」가 아니라 「무엇인지 모르겠다」로 읽힌다.
   // 지금 칸 하나만 열려 있다. 그 판단은 여기 한 곳에서만 한다.
   function flow(x) {
-    var brief = x[0].data, concepts = x[2].data, cuts = x[3].data, assets = x[4].data, strat = x[1].data;
+    var brief = x[0].data, concepts = x[2].data, cuts = x[3].data, assets = x[4].data, strat = x[1].data, approvals = x[5].data;
     var at = IDX[P.step] == null ? 0 : IDX[P.step];
     var boardOpen = BOARD_READY && shown("storyboard");
     // 광고주 칸 → 그 칸이 「지금」인 내부 단계
@@ -419,7 +419,7 @@
           : (shown("develop") ? '<p class="muted">제작 설계를 마쳤습니다. ' +
             "설계한 컷은 아래 콘티에서 보실 수 있습니다.</p>" : ""), now.design),
       box("board", "콘티 확인", now.board ? "확인하실 차례" : "확인 완료",
-        boardOpen ? secBoard(assets) + secCuts(cuts, assets) : "", now.board),
+        boardOpen ? secCuts(cuts, assets) + boardAsk(P, approvals) : "", now.board),
       // ★ 지나간 뒤에도 칸은 남긴다 — 납품 단계로 넘어가자 「영상 제작」 칸이 통째로 사라졌다(09-23).
       //   펼친 내용은 한 줄이면 된다 (Dan 09-23: 「너무 디테일하게 알려줄 필요없는」)
       box("making", "영상 제작", now.making ? "진행 중" : "완료",
@@ -659,6 +659,33 @@
   }
 
   // 지금 광고주가 무엇을 해야 하나
+  /** 콘티 승인 칸 — 콘티 확인 칸 안, 시트 바로 아래 (09-24) */
+  function boardAsk(p, approvals) {
+    var done = {};
+    (approvals || []).forEach(function (a) { if (a.decision === "ok") done[a.gate] = a; });
+    if (p.step === "storyboard" && p.state === "ready" && !done.storyboard && BOARD_READY) {
+      if (!MINE) return "";
+      var rev = (approvals || []).filter(function (a) {
+        return a.gate === "storyboard" && a.decision === "revise";
+      });
+      return '<div class="gate col"><div class="txt"><b>콘티를 확인해주세요</b>' +
+        "<small>위 콘티 흐름대로 만듭니다. 승인하시면 제작에 들어갑니다." +
+        (rev.length ? " 앞서 주신 말씀은 반영해서 다시 올렸습니다." : "") +
+        "</small></div>" +
+        '<textarea id="boardNote" maxlength="1000" ' +
+        'placeholder="고치실 곳이나 하고 싶은 말씀을 적어주세요 — 안 적으셔도 됩니다&#10;&#10;' +
+        '예 · 4번 컷 봉지 글자가 이상합니다&#10;' +
+        '예 · 아이 얼굴이 나왔으면 좋겠습니다&#10;' +
+        '예 · 마지막 자막을 「이름 그대로」로 줄여주세요"></textarea>' +
+        '<div class="acts">' +
+        '<button class="btn" id="approveBoard">콘티 승인</button>' +
+        '<button class="btn ghost" id="reviseBoard">고쳐주세요</button>' +
+        '<span class="hint">적으신 내용은 승인하실 때도 같이 전달됩니다.</span>' +
+        "</div></div>";
+    }
+    return "";
+  }
+
   function secGate(p, approvals) {
     // 「고쳐주세요」도 approvals 에 남는다. 그걸 통과로 세면
     // 다시 만들어 올린 뒤에도 「승인 완료」라고 뜬다 — 통과는 ok 만이다
@@ -696,26 +723,7 @@
     // 승인이냐 반려냐만 받으면 우리는 어디가 틀렸는지 모른 채 다시 짜게 된다
     // 그림이 없으면 승인을 묻지 않는다. 컷 표만 놓고 「승인하시면 제작에
     // 들어갑니다」라고 하면, 광고주는 보지도 못한 화면을 승인하는 셈이 된다.
-    if (p.step === "storyboard" && p.state === "ready" && !done.storyboard && BOARD_READY) {
-      if (!MINE) return look;
-      var rev = (approvals || []).filter(function (a) {
-        return a.gate === "storyboard" && a.decision === "revise";
-      });
-      return '<div class="gate col"><div class="txt"><b>콘티를 확인해주세요</b>' +
-        "<small>아래 컷 구성대로 만듭니다. 승인하시면 제작에 들어갑니다." +
-        (rev.length ? " 앞서 주신 말씀은 반영해서 다시 올렸습니다." : "") +
-        "</small></div>" +
-        '<textarea id="boardNote" maxlength="1000" ' +
-        'placeholder="고치실 곳이나 하고 싶은 말씀을 적어주세요 — 안 적으셔도 됩니다&#10;&#10;' +
-        '예 · 4번 컷 봉지 글자가 이상합니다&#10;' +
-        '예 · 아이 얼굴이 나왔으면 좋겠습니다&#10;' +
-        '예 · 마지막 자막을 「이름 그대로」로 줄여주세요"></textarea>' +
-        '<div class="acts">' +
-        '<button class="btn" id="approveBoard">콘티 승인</button>' +
-        '<button class="btn ghost" id="reviseBoard">고쳐주세요</button>' +
-        '<span class="hint">적으신 내용은 승인하실 때도 같이 전달됩니다.</span>' +
-        "</div></div>";
-    }
+    // 콘티 승인 칸은 맨 위가 아니라 콘티 확인 칸 안에 있다 — boardAsk() (Dan 09-24 「따로 놀고 있어」)
     if (p.step === "video" && p.state === "ready" && HAS_FINAL) {
       if (!MINE) return look;
       return '<div class="gate col"><div class="txt"><b>완성본을 확인해주세요</b>' +
@@ -973,10 +981,33 @@
       });
   }
 
+  // ★ 새로고침 없이 따라간다 (Dan 09-24 「콘티 전송되면 새로고침 안 해도 떠야 되는 거 아냐?」)
+  //   관리자가 보내거나 단계가 넘어가면 projects 의 상태·갱신 시각이 바뀐다. 20초마다 그것만 가볍게 보고,
+  //   바뀌었으면 다시 그린다. 광고주가 뭔가 적고 있는 중이면 적은 것이 날아가지 않게 기다린다.
+  var SIG = "";
+  function watch() {
+    if (document.hidden || !P) return;
+    db.from("projects").select("step,state,updated_at").eq("id", P.id).maybeSingle().then(function (r) {
+      var d = r && r.data;
+      if (!d) return;
+      var sig = d.step + "|" + d.state + "|" + d.updated_at;
+      if (!SIG) { SIG = sig; return; }
+      if (sig === SIG) return;
+      var typing = Array.prototype.some.call(document.querySelectorAll("textarea, input[type=text]"), function (t) {
+        return (t.value || "").trim();
+      });
+      if (typing) return;
+      SIG = sig;
+      load();
+    });
+  }
+
   function boot() {
     if (!window.supabase || !cfg.supabaseUrl) { setConn("bad", "연결 설정 없음"); return; }
     db = shared();
     load();
+    setInterval(watch, 20000);
+    document.addEventListener("visibilitychange", function () { if (!document.hidden) watch(); });
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
