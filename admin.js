@@ -1500,10 +1500,10 @@
       return '<div class="lc lc-approved"' + tag + ">" +
         head("완성 콘티 승인됨", "이제 광고주에게 보낼 수 있습니다") +
         '<div class="lc-row">' +
-        '<button class="btn" type="button" data-lc="send-client"' + tag + ">콘티 전송</button>" +
+        '<button class="btn" type="button" data-lc="send-client"' + tag + ">광고주에게 보내기</button>" +
         '<button class="btn ghost" type="button" data-lc="back"' + tag +
         ">취소 · 전 단계로</button></div>" +
-        '<span class="lc-msg">광고주 발송은 Dan 승인 사항입니다</span></div>';
+        '<span class="lc-msg">보내면 광고주 화면에 콘티 시트 한 장과 「흐름을 보여 주는 밑그림」 안내가 바로 뜹니다</span></div>';
     }
     return "";
   }
@@ -3651,9 +3651,11 @@
         }
         // 전송은 되돌릴 수 있는 일이 아니다 — 누르는 순간 광고주 화면에 뜬다.
         // 그래서 한 번 묻는다. 「취소」는 반대로 내리는 일이라 묻지 않는다.
-        if (what === "send") {
+        // ★ 버튼 이름이 send-client 인데 여기서는 send 만 받고 있었다 — 눌러도 「처리 중…」에서 멈췄다 (09-24 환타)
+        if (what === "send" || what === "send-client") {
           if (!window.confirm("콘티를 광고주에게 보냅니다. 보내면 광고주 화면에 바로 뜹니다.")) {
             b.disabled = false;
+            if (b.dataset.label) b.textContent = b.dataset.label;
             return;
           }
           return rpc(slug, "onecue_board_send", {}).then(load).catch(fail(b, msg));
