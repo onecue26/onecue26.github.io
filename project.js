@@ -724,6 +724,12 @@
     // 그림이 없으면 승인을 묻지 않는다. 컷 표만 놓고 「승인하시면 제작에
     // 들어갑니다」라고 하면, 광고주는 보지도 못한 화면을 승인하는 셈이 된다.
     // 콘티 승인 칸은 맨 위가 아니라 콘티 확인 칸 안에 있다 — boardAsk() (Dan 09-24 「따로 놀고 있어」)
+    //   맨 위에는 차례만 짧게 알린다 — 비워 두면 「작업 중입니다 · 하실 일 없음」이 떨어져 거꾸로 말했다
+    if (p.step === "storyboard" && p.state === "ready" && !done.storyboard && BOARD_READY) {
+      if (!MINE) return look;
+      return '<div class="gate"><div class="txt"><b>콘티를 확인해 주실 차례입니다</b>' +
+        "<small>아래 「콘티 확인」 칸에서 보시고 승인하시거나 고칠 곳을 적어 주세요.</small></div></div>";
+    }
     if (p.step === "video" && p.state === "ready" && HAS_FINAL) {
       if (!MINE) return look;
       return '<div class="gate col"><div class="txt"><b>완성본을 확인해주세요</b>' +
