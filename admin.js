@@ -1464,11 +1464,11 @@
         '<button class="btn" type="button" data-lc="make-board"' + tag + ">콘티 뽑기</button>" +
         "</div>" +
         '<span class="lc-msg">유료 생성(약 2cr) — 누르면 바로 한 판 그리고 컷마다 잘라 붙인 뒤 멈춥니다</span>' +
-        '<span class="lc-msg" data-lc-msg></span></div>';
+        '<span class="lc-msg" data-lc-msg></span></div>' + oldBoardsHtml(p);
     }
     if (act.phase === "board.working") {
       return '<div class="lc lc-working"' + tag + ">" +
-        head("콘티 그림을 뽑는 중", "끝나면 컷마다 붙습니다") + "</div>";
+        head("콘티 그림을 뽑는 중", "끝나면 컷마다 붙습니다") + "</div>" + oldBoardsHtml(p);
     }
     // 콘티 시트(한 판) — 검수 칸 맨 위에 크게. 컷별 그림이 없을 때 보이는 자리가 없었다 (09-24 환타)
     var sheets = (p.files || []).filter(function (f) { return f.cut_n == null && f.url && boardCurrent(p, f); })
@@ -1478,6 +1478,7 @@
         '" data-kind="img" alt="콘티 시트"><span>' + esc(sheets[0].role || "콘티 시트") + " · " + esc(when(sheets[0].created_at)) +
         (sheets.length > 1 ? " · 이전 판 " + (sheets.length - 1) + "장" : "") + "</span></div>"
       : "";
+    sheetHtml = sheetHtml + oldBoardsHtml(p);
     if (act.phase === "board.review") {
       return sheetHtml + reviewBox("board", "콘티 그림을 검수해 주세요",
         "콘티 시트 " + (n.board || 0) + "장 · 수정 요청하면 시트 전체를 다시 그립니다(유료 · 다시 「콘티 뽑기」)");
@@ -2998,6 +2999,18 @@
   function boardCurrent(p, f) {
     var at = boardRedoAt(p);
     return f.kind === "board" && !(f.meta || {}).superseded && (f.approved || !at || String(f.created_at || "") > at);
+  }
+
+  /** 지난 콘티 판(수정 요청 전·교체된 시트)을 접어서 — 새 판과 나란히 대조하려고 (Dan 09-24 「예전 콘티는 못 보게 막은 거?」) */
+  function oldBoardsHtml(p) {
+    var old = (p.files || []).filter(function (f) { return f.kind === "board" && f.cut_n == null && f.url && !boardCurrent(p, f); })
+      .sort(function (x, y) { return String(y.created_at).localeCompare(String(x.created_at)); });
+    if (!old.length) return "";
+    return '<details class="board-old"><summary>이전 콘티 ' + old.length + '판 보기 — 지금 판으로 세지 않고 광고주에게도 나가지 않습니다</summary>' +
+      old.map(function (f) {
+        return '<div class="board-sheet"><img src="' + esc(f.url) + '" data-big="' + esc(f.url) + '" data-kind="img" alt="이전 콘티"><span>' +
+          esc(when(f.created_at)) + "</span></div>";
+      }).join("") + "</details>";
   }
 
   function freshLine(p) {
