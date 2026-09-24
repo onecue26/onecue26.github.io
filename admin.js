@@ -1503,8 +1503,13 @@
         head("광고주가 콘티 수정을 요청했습니다", when(clientRedo.decided_at) + " · 아래 말로 다시 그립니다") +
         '<textarea class="lc-note" data-lc-note rows="3">' + esc(clientRedo.note || "") + "</textarea>" +
         '<div class="lc-row"><button class="btn" type="button" data-lc="back"' + tag +
-        ">광고주 요청대로 다시 그리기</button></div>" +
-        '<span class="lc-msg">누르면 광고주 화면의 콘티를 내리고 「콘티 뽑기」가 뜹니다 — 적힌 말이 그림 지시에 들어갑니다(필요하면 고쳐 적으세요)</span>' +
+        ">광고주 요청대로 다시 그리기</button>" +
+        // 그림은 좋은데 글(자막·내레이션·메시지)을 달라는 요청이면 다시 그리지 않는다 (09-25 환타)
+        ((p.development && p.development.client_script && (p.development.client_script.rows || []).length)
+          ? '<button class="btn ghost" type="button" data-lc="send-client"' + tag + ">그림은 그대로 · 장면별 대본을 붙여 다시 보내기</button>"
+          : "") + "</div>" +
+        '<span class="lc-msg">다시 그리기: 광고주 화면의 콘티를 내리고 「콘티 뽑기」가 뜹니다 — 적힌 말이 그림 지시에 들어갑니다(유료). ' +
+        "그대로 다시 보내기: 그림은 두고 아래 장면별 대본이 붙은 콘티를 다시 보냅니다(무료).</span>" +
         '<span class="lc-msg" data-lc-msg></span></div>';
     }
     if (act.phase === "final.done") {
@@ -2894,7 +2899,7 @@
       storyboard: costLine(p, "storyboard") +
         (boardFlow ? "" : boardLink(BOARD_REVIEW_STAGE)) + storyboardBody +
         (p.step === BOARD_REVIEW_STAGE ? productionAction : "") +
-        sheetFold(p) + oldBoardsHtml(p),   // 지난 콘티 판은 칸 맨 아래 — 위는 지금 할 일(뽑기·검수) 자리 (Dan 09-24)
+        scriptFold(p) + sheetFold(p) + oldBoardsHtml(p),   // 지난 콘티 판은 칸 맨 아래 — 위는 지금 할 일(뽑기·검수) 자리 (Dan 09-24)
       // 제작 자료는 **돈이 나가는 첫 자리**다. 무엇을 근거로 시작하는지를
       // 그 자리에 적는다 — 광고주 승인이 그 근거다.
       // 유료 단계는 자기 본문을 갖는다. 「현재 절차에 따라 진행 중입니다」는
@@ -3079,6 +3084,22 @@
     return '<details class="board-old"><summary>콘티 한 장으로 보기 — 광고주 화면에는 이 한 장이 뜹니다</summary>' +
       '<div class="board-sheet"><img src="' + esc(cur.url) + '" data-big="' + esc(cur.url) + '" data-kind="img" alt="콘티 시트"><span>' +
       esc(cur.role || "콘티 시트") + " · " + esc(when(cur.created_at)) + "</span></div></details>";
+  }
+
+  /** 광고주에게 붙는 장면별 대본 (086) — 관리자도 같은 것을 본다 */
+  function scriptFold(p) {
+    var sc = p.development && p.development.client_script;
+    if (!sc || !(sc.rows || []).length) {
+      return '<details class="board-old"><summary>장면별 대본 — 아직 없음</summary><p class="muted">작업기가 콘티·구성·각본에서 정리합니다(무료).</p></details>';
+    }
+    var sec = function (v) { return String(Math.round(Number(v) || 0)); };
+    return '<details class="board-old" open><summary>장면별 대본 — 광고주 콘티에 그림과 같이 뜹니다</summary>' +
+      '<p><b>이 영상이 전하는 말</b> · ' + esc(sc.message || "") + (sc.narration_note ? " · 내레이션 없음 — " + esc(sc.narration_note) : "") + "</p>" +
+      '<table class="script-tbl"><tr><th>장면</th><th>화면</th><th>자막</th><th>내레이션</th><th>소리(예정)</th></tr>' +
+      sc.rows.map(function (r) {
+        return "<tr><td>" + esc(r.n) + "<br><small>" + sec(r.t_start) + "~" + sec(r.t_end) + "초</small></td><td>" + esc(r.screen) +
+          "</td><td>" + esc(r.caption) + "</td><td>" + esc(r.narration) + "</td><td>" + esc(r.sound) + "</td></tr>";
+      }).join("") + "</table></details>";
   }
 
   function oldBoardsHtml(p) {
@@ -4470,7 +4491,7 @@
               "revision_at,revision_note,ai_job_id")
             .in("project_id", ids),
           // 구성·각본 결과 — 등록되면 그 단계 안에서 상세로 펼친다
-          db.from("developments").select("project_id,arc,copies,narration_tone,slogan,bgm")
+          db.from("developments").select("project_id,arc,copies,narration_tone,slogan,bgm,client_script")
             .in("project_id", ids),
           // 콘티 컷 — 광고주 화면과 같은 공용 렌더로 같은 구조로 편다.
           // admin_cuts 는 board.js 가 이미 쓰는 관리자용 보기다

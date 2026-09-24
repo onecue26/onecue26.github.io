@@ -306,6 +306,7 @@
   // ★ 광고주 수정 요청 횟수 (Dan 09-24) — 콘티·영상 「고쳐주세요」 2회, 콘셉트 다시 요청 1회. DB(084)도 같은 수로 막는다
   var REVISE_LIMIT = { concepts: 1, storyboard: 2, video: 2 };
   var APPROVALS = [];
+  var SCRIPT = null;     // 장면별 대본 (086)
   function reviseLeft(gate) {
     var used = APPROVALS.filter(function (a) { return a.gate === gate && a.decision === "revise"; }).length;
     return Math.max(0, (REVISE_LIMIT[gate] || 0) - used);
@@ -725,6 +726,32 @@
     // 광고주 쪽 자료 조회에는 만든 시각 칸이 없다(권한 칸을 늘리면 조회 전체가 깨질 수 있다) — 마지막으로 온 것을 쓴다
     var sheets = (assets || []).filter(function (a) { return a.kind === "board" && a.cut_n == null && a.url; });
     var sheet = sheets[sheets.length - 1];
+    // ★ 장면별 대본이 있으면 광고 콘티 형식으로 — 장면 그림 옆에 화면·자막·내레이션·소리 (09-25 환타 광고주 피드백)
+    if (sheet && SCRIPT && (SCRIPT.rows || []).length) {
+      var crop = {};
+      (assets || []).forEach(function (a) { if (a.kind === "board" && a.cut_n != null && a.url) crop[a.cut_n] = a; });
+      var sec = function (v) { return String(Math.round(Number(v) || 0)); };
+      var cell = function (k, v, cls) {
+        return '<div class="sc-f' + (cls ? " " + cls : "") + '"><span class="sc-k">' + k + "</span><span>" + esc(v || "—") + "</span></div>";
+      };
+      return "<h2>콘티</h2>" +
+        '<div class="script-msg"><span>이 영상이 전하는 말</span><b>' + esc(SCRIPT.message || "") + "</b>" +
+        (SCRIPT.narration_note ? "<small>내레이션 없음 — " + esc(SCRIPT.narration_note) + "</small>" : "") + "</div>" +
+        '<div class="script-rows">' + SCRIPT.rows.map(function (r) {
+          var c = crop[r.n];
+          return '<div class="sc-row"><div class="sc-pic">' +
+            (c ? '<img src="' + esc(c.url) + '" data-big="' + esc(c.url) + '" alt="' + esc(r.n) + '번 장면">' : "") +
+            '<span class="sc-n">' + esc(r.n) + " · " + sec(r.t_start) + "~" + sec(r.t_end) + "초</span></div>" +
+            '<div class="sc-txt">' + cell("화면", r.screen) + cell("자막", r.caption, r.caption && r.caption !== "—" ? "on" : "") +
+            cell("내레이션", r.narration) + cell("소리(예정)", r.sound) + "</div></div>";
+        }).join("") + "</div>" +
+        // ★ 약속하는 것과 흐름으로 보여 드리는 것을 가른다 (Dan 09-25 「결과물과 조금 달라질 수 있지 않나」)
+        //   전하는 말·자막·내레이션은 우리가 정하고 후반에서 얹는다 → 그대로. 화면·소리는 영상 엔진이 만든다 → 세부가 달라질 수 있다
+        '<p class="board-note"><b>전하는 말·자막·내레이션은 이대로 들어갑니다.</b> 화면과 소리는 흐름을 보여 드리는 것이라, ' +
+        "만들면서 세부(화면 구성·각도·인물·배경·음악 느낌)가 달라질 수 있습니다. 제품의 모양과 색은 보내 주신 사진 그대로 지킵니다.</p>" +
+        '<details class="fix-prev"><summary>콘티 한 장으로 보기</summary><div class="board-sheet-client"><img src="' +
+        esc(sheet.url) + '" data-big="' + esc(sheet.url) + '" alt="콘티 — ' + cuts.length + '개 장면"></div></details>';
+    }
     if (sheet) {
       return "<h2>콘티</h2>" +
         '<p class="board-note">콘티는 광고의 <b>흐름</b>을 보여 드리는 밑그림입니다. 실제 영상의 화면 구성·각도·인물·배경은 ' +
@@ -1041,12 +1068,15 @@
           // onecue 에서 보낸 메시지와 광고주 답 (070) — 초안은 서버가 안 내준다
           // ★ 보낸 것만 — 관리자·읽기 전용 계정으로 볼 때 초안까지 떠서 광고주가 보는 것과 달랐다(09-23)
           db.from("project_messages").select("id,author,kind,body,sent_at,digest").eq("project_id", id).not("sent_at", "is", null).order("created_at"),
+          // 장면별 대본 (086) — 콘티 칸에 화면·자막·내레이션·소리
+          db.from("developments").select("client_script").eq("project_id", id).maybeSingle(),
         ]).then(function (x) {
           x.forEach(function (r) { if (r.error) throw r.error; });
           if (!window.ONECUE_ASSETS) throw new Error("자료 접근 설정을 불러오지 못했습니다.");
           return window.ONECUE_ASSETS.resolve(db, x[4].data || []).then(function (assets) {
           x[4].data = assets;
           APPROVALS = x[5].data || [];
+          SCRIPT = (x[7] && x[7].data && x[7].data.client_script) || null;
           HAS_FINAL = (x[4].data || []).some(function (a) { return a.kind === "final" && a.approved === true && a.url; });
           // 콘티 그림이 한 장이라도 있는가. 이 한 값이 콘티 구간 전체(승인 요청 ·
           // 시트 · 컷)를 연다. 컷 표만 있는 상태는 「콘티」가 아니라 컷 설계다.
