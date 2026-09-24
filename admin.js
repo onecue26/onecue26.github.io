@@ -2294,6 +2294,24 @@
         }).join("") + "</div></div>";
     }
 
+    /** 제작 자료 계획 — 영상에 물릴 기준 그림을 무엇을 왜 만드는지 (Dan 09-24 「앵커나 레퍼런스 계획하고 만든 다음 영상」) */
+    function needsPlan(p) {
+      var calls = (p.render_plan && p.render_plan.calls) || [];
+      var needs = [].concat.apply([], calls.map(function (c) { return c.needs || []; }));
+      if (!needs.length) return '<div class="ms-summary"><div class="ms-by">제작 자료 계획</div><span>만들 기준 그림이 없습니다 — 영상은 제품 기준 그림만 물립니다</span></div>';
+      var row = function (n) {
+        var made = (p.files || []).filter(function (f) { return f.kind === "anchor" && (f.meta || {}).covers_call === n.id; })
+          .sort(function (x, y) { return String(y.created_at).localeCompare(String(x.created_at)); })[0];
+        var st = !made ? "만들 차례" : made.approved ? "승인됨" : "검토 차례";
+        return "<span><b>" + esc(n.id + " · " + (n.what || "")) + "</b> — " + esc(n.why || "") +
+          ' <em class="ms-more">' + esc(String(n.credits_estimate || 0)) + "cr · " + st + "</em></span>";
+      };
+      var sum = needs.reduce(function (a, n) { return a + (Number(n.credits_estimate) || 0); }, 0);
+      return '<div class="ms-summary"><div class="ms-by">제작 자료 계획 — 영상보다 먼저 만드는 기준 그림 ' + needs.length +
+        "장 · " + sum + "cr</div>" + needs.map(row).join("") +
+        '<span class="ms-more">영상은 제품 기준 그림 + 위 기준 그림을 참조로 물려 한 판 뽑습니다. 기준 그림은 승인해야 영상에 쓰입니다.</span></div>';
+    }
+
     function paidStageBody(p, step) {
       var here = p.step === step;
       var buttons = "";
@@ -2301,7 +2319,7 @@
         var act = SE().actions(p, step, !!(p.stageResults && p.stageResults[step]));
         buttons = paidBody(p, step, act);
       }
-      return buttons + readyNote(p, step) + doneNote(p, step) + askNote(p, step) +
+      return (step === "anchors" ? needsPlan(p) : "") + buttons + readyNote(p, step) + doneNote(p, step) + askNote(p, step) +
         blockedNote(p, step) + assetList(p, step);
     }
 
@@ -2448,7 +2466,7 @@
       //   (Dan 2026-09-22: 「버전을 붙여서 예전것들은 계속 쌓여서 볼수잇게」).
       //   만든 차례가 곧 버전이다. 지우지 않으므로 번호가 비지 않는다.
       var verOf = {};
-      (p.files || []).filter(function (f) { return want.indexOf(f.kind) >= 0; })
+      (p.files || []).filter(function (f) { return want.indexOf(f.kind) >= 0 && !(f.meta || {}).material && !(f.meta || {}).material; })
         .sort(function (x, y) {
           return String(x.created_at || "") < String(y.created_at || "") ? -1 : 1;
         })
@@ -2464,7 +2482,7 @@
       var rank = {};
       var byCall = {};
       (p.files || []).filter(function (f) {
-        return want.indexOf(f.kind) >= 0 && (f.meta || {}).covers_call;
+        return want.indexOf(f.kind) >= 0 && !(f.meta || {}).material && (f.meta || {}).covers_call;
       }).forEach(function (f) {
         var c = f.meta.covers_call;
         (byCall[c] = byCall[c] || []).push(f);
