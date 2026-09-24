@@ -636,6 +636,18 @@
       if (a.kind === "anchor" && !anchor[a.cut_n]) anchor[a.cut_n] = a;
     });
     var made = Object.keys(anchor).length;
+    // ★ 콘티 시트(한 장)가 있으면 광고주에게는 그 한 장만 보인다 — 흐름이 한눈에 읽히게 (Dan 09-24)
+    //   컷별로 잘라 둔 그림은 관리자 검수용이다. 시트가 없던 옛 건(RUSH)은 아래 컷별 보기 그대로.
+    // 광고주 쪽 자료 조회에는 만든 시각 칸이 없다(권한 칸을 늘리면 조회 전체가 깨질 수 있다) — 마지막으로 온 것을 쓴다
+    var sheets = (assets || []).filter(function (a) { return a.kind === "board" && a.cut_n == null && a.url; });
+    var sheet = sheets[sheets.length - 1];
+    if (sheet) {
+      return "<h2>콘티</h2>" +
+        '<p class="board-note">콘티는 광고의 <b>흐름</b>을 보여 드리는 밑그림입니다. 실제 영상의 화면 구성·각도·인물·배경은 ' +
+        '제작하면서 더 좋게 달라질 수 있고, 제품의 모양과 색은 보내 주신 사진 그대로 지킵니다.</p>' +
+        '<div class="board-sheet-client"><img src="' + esc(sheet.url) + '" data-big="' + esc(sheet.url) +
+        '" alt="콘티 — ' + cuts.length + '개 장면"></div>';
+    }
     // 글 구조는 공용 렌더가 만든다. 그림 칸만 이 화면이 만든다 —
     // 주소와 권한이 화면마다 다르기 때문이다(공용 모듈은 URL 을 그리지 않는다)
     return "<h2>콘티 " + cuts.length + "컷" +
