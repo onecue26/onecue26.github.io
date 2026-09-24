@@ -2254,7 +2254,11 @@
       return '<div class="said"><span class="lbl">제작 재료 ' + m.length + '개 — 광고주 자료를 우리가 가공한 것</span><div class="client-files">' +
         m.map(function (f) {
           return '<figure>' + (f.url ? '<img src="' + esc(f.url) + '" loading="lazy" data-big="' + esc(f.url) + '" data-kind="img" alt="">' : "") +
-            '<figcaption>' + esc(f.role || "") + '</figcaption></figure>';
+            '<figcaption>' + esc(f.role || "") + (f.approved ? " · 승인됨" : "") + '</figcaption>' +
+            (!f.approved && canWrite
+              ? '<div class="lc"><button class="btn" type="button" data-lc="approve-anchor" data-asset="' + esc(f.id) +
+                '" data-slug="' + esc(p.slug) + '" data-step="' + esc(p.step) + '">제품 기준으로 승인</button><span class="lc-msg" data-lc-msg></span></div>'
+              : "") + '</figure>';
         }).join("") + "</div></div>";
     }
 
@@ -2851,7 +2855,7 @@
       '" target="_blank" rel="noopener">광고주 화면 ↗</a></div>' +
       // ★ 광고주가 무엇을 언제 정했는지는 **카드를 열자마자** 보여야 한다.
       //   단계 안에 숨겨 두면 흐름을 펼쳐야 보이고, 그때는 이미 늦다.
-      clientSaid + freshLine(p) + redo + who +
+      clientSaid + stoppedLine(p) + freshLine(p) + redo + who +
       '<div class="mailbox" id="mail-' + esc(p.slug) + '" hidden></div>' + messageBox(p) +
       flow(p, stageBodies) + "</div></details>";
   }
@@ -2952,6 +2956,24 @@
   }
 
   /** 카드 맨 위 한 줄 — 마지막으로 본 뒤에 무엇이 올라왔는지. */
+  /** 작업기가 멈췄다 — 어디서 · 왜 · 무엇을 누르면 다시 도는지 (Dan 09-24 「너한테 말 안 걸고 자동으로」) */
+  var WORKER_NAME = { facts_writer: "제품·자료 확인", board_maker: "콘티 그림", order_writer: "영상 오더 작성",
+    plan_writer: "기획 초안" };
+  function stoppedLine(p) {
+    var e = p.stopped;
+    if (!e) return "";
+    var pl = e.payload || {};
+    return '<div class="client-said revise worker-stop"><b>작업기가 멈췄습니다 — ' +
+      esc(WORKER_NAME[pl.worker] || pl.worker || "작업기") + "</b>" +
+      '<span class="at">' + esc(when(e.ts)) + "</span>" +
+      '<span class="said">' + esc(pl.why || "") + "</span>" +
+      (pl.job && canWrite
+        ? '<button class="btn ghost" type="button" data-retry-job="' + esc(pl.job) + '" data-retry-pid="' + esc(p.id) +
+          '" data-retry-worker="' + esc(pl.worker || "") + '">다시 돌리기</button>'
+        : '<span class="said">' + (pl.worker === "order_writer" ? "비트가 바뀌면 다시 씁니다 — 세 번 실패하면 멈춥니다" : "") + "</span>") +
+      "</div>";
+  }
+
   function freshLine(p) {
     var got = freshFiles(p).filter(function (f) { return !((f.meta || {}).material); });
     if (!got.length) return "";
@@ -3369,6 +3391,20 @@
         db.rpc("onecue_message_send", { p_message_id: b.dataset.msgSend })
           .then(function (r) { if (r.error) throw r.error; return load(); })
           .catch(function (e) { b.disabled = false; b.textContent = "광고주에게 보내기"; window.alert("보내지 못했습니다 — " + (e.message || e)); });
+      });
+    });
+    document.querySelectorAll("[data-retry-job]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        b.disabled = true; b.textContent = "다시 돌리는 중…";
+        db.from("jobs").update({ state: "queued", error: null, claimed_by: null, claimed_at: null, finished_at: null })
+          .eq("id", b.dataset.retryJob)
+          .then(function (r) {
+            if (r.error) throw r.error;
+            return db.from("events").insert({ project_id: b.dataset.retryPid, kind: "worker_retry",
+              payload: { by: "admin", worker: b.dataset.retryWorker, job: b.dataset.retryJob } });
+          })
+          .then(function (r) { if (r && r.error) throw r.error; return load(); })
+          .catch(function (e) { b.disabled = false; b.textContent = "다시 돌리기"; window.alert("다시 돌리지 못했습니다 — " + (e.message || e)); });
       });
     });
     document.querySelectorAll("[data-brief-confirm]").forEach(function (b) {
@@ -4273,7 +4309,9 @@
           db.from("events").select("project_id,ts,payload").eq("kind", "sent")
             .in("project_id", ids).order("ts", { ascending: false }),
           db.from("events").select("project_id,kind,to_step,ts,payload")
-            .in("kind", ["production_enroll_requested", "production_enrolled", "astra_draft"])
+            .in("kind", ["production_enroll_requested", "production_enrolled", "astra_draft",
+              // 작업기가 멈췄다 / 다시 돌았다 — 화면에 「어디서 왜 멈췄나」를 띄운다 (09-24)
+              "worker_stopped", "worker_retry", "facts_written", "board_made", "order_written", "anchors_skipped"])
             .in("project_id", ids).order("ts", { ascending: false }),
           // 실제로 나간 크레딧. 예상은 계획에 있고, 이건 쓴 것이다.
           db.from("credit_spend").select("project_id,step,engine,credits,what,spent_at,outcome")
@@ -4452,6 +4490,14 @@
             p.enrollRequested = enrollEvents.filter(function (e) {
               return e.project_id === p.id && e.kind === "production_enroll_requested";
             })[0] || null;
+            // 가장 최근 작업기 소식이 「멈춤」이면 그 이유를 카드 맨 위에 띄운다. 그 뒤에 다른 소식(성공·다시 돌림)이 있으면 지난 일이다
+            p.stopped = (function () {
+              var mine = enrollEvents.filter(function (e) {
+                return e.project_id === p.id && ["worker_stopped", "worker_retry", "facts_written", "board_made",
+                  "order_written", "anchors_skipped", "astra_draft"].indexOf(e.kind) >= 0;
+              });
+              return mine.length && mine[0].kind === "worker_stopped" ? mine[0] : null;
+            })();
             p.productionEnrolled = enrollEvents.filter(function (e) {
               return e.project_id === p.id && e.kind === "production_enrolled";
             })[0] || null;
