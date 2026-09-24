@@ -14,3 +14,6 @@
 .w-tabs{display:flex;gap:18px;border-bottom:1px solid #eee;margin-bottom:12px}.w-tabs button{background:none;border:0;padding:8px 0;font-size:14px;color:#777;cursor:pointer;border-bottom:2px solid transparent}
 .w-tabs button.active{color:#c2352a;border-color:#c2352a}.w-prose{font-size:14px;line-height:1.65}.w-prose h4{margin:12px 0 4px;font-size:14px}.w-prose .bullet{margin:2px 0 2px 12px;text-indent:-10px}.w-prose .bullet::before{content:"· "}
 @media(max-width:760px){.work-row>summary{grid-template-columns:60px 1fr;row-gap:4px}.w-kind,.w-meta{grid-column:2}.w-grid{grid-template-columns:1fr}}
+
+/* 접히는 줄 화살표 (Dan 09-24) */
+.work-row>summary{position:relative;padding-right:40px}.work-row>summary::after{content:"⌄";position:absolute;right:16px;top:50%;margin-top:-9px;color:#888;font-size:15px;transition:transform .15s}.work-row[open]>summary::after{transform:rotate(180deg)}
