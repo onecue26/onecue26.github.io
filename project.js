@@ -397,15 +397,34 @@
   // 여섯 칸을 순서대로 세운다. 각 칸은 **볼 것이 있을 때만** 나온다 —
   // 빈 상자는 「아직 안 했다」가 아니라 「무엇인지 모르겠다」로 읽힌다.
   // 지금 칸 하나만 열려 있다. 그 판단은 여기 한 곳에서만 한다.
+  /** 광고주가 「고쳐주세요」를 누르고 우리가 고치는 중인가 — 그 단계의 마지막 판단이 revise 이고 아직 다시 안 보냈다.
+   *  ★ 09-25 친구분 피드백: 콘티 고쳐주세요를 누르자 상태가 「제작 진행」·콘티 칸이 사라지고 「제작 설계 진행 중」으로
+   *    처음처럼 돌아갔다. 상태가 pending 이 되면 화면이 「처음 만드는 중」과 「고치는 중」을 구분하지 못했다. */
+  function fixing(step, approvals) {
+    if (!P || P.step !== step || P.state === "ready") return null;
+    var mine = (approvals || []).filter(function (a) { return a.gate === step; });
+    var last = mine[mine.length - 1];
+    return last && last.decision === "revise" ? last : null;
+  }
+
+  function fixNotice(what, a) {
+    var said = String((a && a.note) || "").trim();
+    return '<div class="stage-read development-notice"><section class="stage-block status">' +
+      "<h4>말씀하신 내용으로 " + what + "을 고치고 있습니다</h4>" +
+      (said ? '<p class="fix-said">주신 말씀 · ' + esc(said).replace(/\n+/g, " ") + "</p>" : "") +
+      "<p>고친 " + what + "이 준비되면 이 자리에서 다시 확인하실 수 있습니다.</p></section></div>";
+  }
+
   function flow(x) {
     var brief = x[0].data, concepts = x[2].data, cuts = x[3].data, assets = x[4].data, strat = x[1].data, approvals = x[5].data;
     var at = IDX[P.step] == null ? 0 : IDX[P.step];
-    var boardOpen = BOARD_READY && shown("storyboard");
+    var boardFix = fixing("storyboard", approvals), videoFix = fixing("video", approvals);
+    var boardOpen = BOARD_READY && (shown("storyboard") || !!boardFix);
     // 광고주 칸 → 그 칸이 「지금」인 내부 단계
     var now = {
       ask: P.step === "brief",
       pick: P.step === "concepts" || P.step === "strategy" || P.step === "facts",   // 기획 시작 뒤엔 콘셉트 칸이 지금 칸
-      design: P.step === "develop" || (P.step === "storyboard" && !boardOpen),
+      design: P.step === "develop" || (P.step === "storyboard" && !boardOpen && !boardFix),
       board: P.step === "storyboard" && boardOpen,
       making: P.step === "anchors" || P.step === "video" || P.step === "post",
       done: P.step === "deliver" || HAS_FINAL,
@@ -434,11 +453,13 @@
         now.design ? secDesigning()
           : (shown("develop") ? '<p class="muted">제작 설계를 마쳤습니다. ' +
             "설계한 컷은 아래 콘티에서 보실 수 있습니다.</p>" : ""), now.design),
-      box("board", "콘티 확인", now.board ? "확인하실 차례" : "확인 완료",
-        boardOpen ? secCuts(cuts, assets) + boardAsk(P, approvals) : "", now.board),
+      box("board", "콘티 확인", boardFix ? "수정 중" : now.board ? "확인하실 차례" : "확인 완료",
+        boardFix ? fixNotice("콘티", boardFix) + (boardOpen ? '<details class="fix-prev"><summary>수정을 요청하신 콘티 보기</summary>' +
+            secCuts(cuts, assets) + "</details>" : "")
+          : boardOpen ? secCuts(cuts, assets) + boardAsk(P, approvals) : "", now.board || !!boardFix),
       // ★ 지나간 뒤에도 칸은 남긴다 — 납품 단계로 넘어가자 「영상 제작」 칸이 통째로 사라졌다(09-23).
       //   펼친 내용은 한 줄이면 된다 (Dan 09-23: 「너무 디테일하게 알려줄 필요없는」)
-      box("making", "영상 제작", now.making ? "진행 중" : "완료",
+      box("making", "영상 제작", videoFix ? "수정 중" : now.making ? "진행 중" : "완료",
         (now.making || at >= IDX.deliver)
           ? '<div class="stage-read development-notice"><section class="stage-block status">' +
             (now.making
@@ -767,7 +788,8 @@
       return '<div class="gate"><div class="txt"><b>다시 만들고 있습니다</b>' +
         "<small>" + (p.step === "concepts"
           ? "추가 두 가지 안이" : p.step === "video" ? "고친 영상이" : "고친 콘티가") + " 준비되면 이 화면에 올라옵니다." +
-        (blank ? "" : "<br>주신 말씀 · " + esc(said)) +
+        // 콘티·영상은 주신 말씀을 아래 칸(수정 중)에 한 번만 — 위아래 두 번 뜨지 않게 (09-25)
+        (blank || p.step !== "concepts" ? "" : "<br>주신 말씀 · " + esc(said)) +
         "</small></div></div>";
     }
 
