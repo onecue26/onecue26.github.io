@@ -1705,6 +1705,13 @@
       var rows = list.slice().sort(function (a, b) { return a.key.localeCompare(b.key); });
       var card = function (c) { return R().concept(c, ADMIN); };
       var chosen = rows.filter(function (c) { return c.is_chosen; })[0];
+      var added = rows.filter(function (c) { return c.batch > 1; });
+      if (!chosen && added.length) {
+        return '<h4 class="concepts-sub">광고주 추가 요청으로 만든 ' + added.length + "안</h4>" +
+          '<div class="concepts">' + added.map(card).join("") + "</div>" +
+          '<h4 class="concepts-sub">처음 ' + (rows.length - added.length) + "안</h4>" +
+          '<div class="concepts">' + rows.filter(function (c) { return !(c.batch > 1); }).map(card).join("") + "</div>";
+      }
       if (!chosen) return '<div class="concepts">' + rows.map(card).join("") + '</div>';
       var others = rows.filter(function (c) { return !c.is_chosen; });
       return '<div class="chosen-summary"><span class="chosen-label">선택한 방향</span>' +
@@ -1759,7 +1766,9 @@
       // **덧붙을** 뿐이다(role: admin).
       conceptReview = '<section class="concept-review"><div class="review-head"><span>' +
         (atConceptStage ? "관리자 검토" : "선택 완료 · 보관본") + '</span>' +
-        '<h3>콘셉트 5안</h3><p>' + (atConceptStage
+        "<h3>콘셉트 " + ((p.concepts || []).some(function (c) { return c.batch > 1; })
+          ? "5안 + 추가 " + (p.concepts || []).filter(function (c) { return c.batch > 1; }).length + "안" : "5안") +
+        "</h3><p>" + (atConceptStage
           ? "추천은 참고값입니다. 다섯 방향의 차이와 위험을 확인한 뒤 광고주에게 보내세요."
           : "이 프로젝트에서 실제로 제안하고 선택한 콘셉트 기록입니다.") + '</p></div>' +
         strategyLine + conceptList(p.concepts) + reviewActions(p, atConceptStage, replanBusy) + replanBox + '</section>';
@@ -1771,9 +1780,13 @@
       if (!here || p.state !== "pending" || !canWrite || busy) return "";
       var chosen = (p.concepts || []).some(function (c) { return c.is_chosen; });
       var back = p.redo && p.redo.gate === "concepts" && p.redo.decision === "revise" && !p.redoDone;
+      var addedN = (p.concepts || []).filter(function (c) { return c.batch > 1; }).length;
       return '<div class="review-actions"><div class="txt"><b>' +
-        (back ? "광고주가 되돌려보냈습니다 — 고쳐서 다시 보내세요" : "검토 후 할 일") + "</b>" +
-        "<span>광고주에게 보내기 전까지 광고주 쪽에는 버튼이 없습니다.</span></div>" +
+        (back && addedN ? "광고주 추가 요청 — 새 " + addedN + "안이 붙었습니다. 보고 광고주에게 보내세요"
+          : back ? "광고주가 추가 요청을 했습니다 — 새 안이 올라오면 보고 보내세요" : "검토 후 할 일") + "</b>" +
+        (back && p.redo.note ? "<span>광고주가 남긴 말 · " + esc(p.redo.note) + "</span>" : "") +
+        "<span>광고주에게 보내기 전까지 광고주 쪽에는 버튼이 없습니다." +
+        (addedN ? " 「5안 다시 만들기」는 처음 안과 추가 안을 모두 새로 씁니다." : "") + "</span></div>" +
         '<div class="ra-row">' +
         (chosen ? "" : '<button class="btn ghost" type="button" data-back-strategy="' + esc(p.id) + '">① 전략부터 다시</button>') +
         '<button class="btn ghost" type="button" data-toggle-form="rp-' + esc(p.slug) + '">② 5안 다시 만들기</button>' +
@@ -4414,7 +4427,7 @@
             .in("project_id", ids).order("spent_at"),
           db.from("product_facts").select("project_id,facts,label_text,claims,product_lock,device_note")
             .in("project_id", ids),
-          db.from("strategies").select("project_id,insight,insight_flip,usp,one_message,tone,direction,written_by,client_who,client_what,client_why,client_feel")
+          db.from("strategies").select("project_id,insight,insight_flip,usp,one_message,tone,direction,written_by,client_who,client_what,client_why,client_feel,prev_client")
             .in("project_id", ids),
           // axis·payoff·is_chosen 이 빠져 있었다. 그래서 고른 안을 전체폭으로 펼치는
           // 배치가 한 번도 걸리지 않았고(is_chosen 이 늘 undefined), 카드의 「이렇게
@@ -4423,7 +4436,7 @@
             .select("project_id,key,title,client_one_line,client_explain," +
               "client_appeal,client_mood,client_difference," +
               "axis,body,hook,visual,payoff,risk," +
-              "is_recommended,reco_reason,is_chosen")
+              "is_recommended,reco_reason,is_chosen,batch")
             .in("project_id", ids),
           db.from("jobs").select("project_id,response,finished_at").eq("state", "ok")
             .in("project_id", ids).order("finished_at", { ascending: false }),
