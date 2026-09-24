@@ -543,7 +543,9 @@
         //   달면, 바로 아래 본문의 「시각 콘티 미제작」과 정면으로 어긋난다. 머리와
         //   본문이 서로 다른 말을 하면 둘 다 못 믿게 된다 — 머리를 본문에 맞춘다.
         var boardMissing = s.key === BOARD_REVIEW_STAGE &&
-          !(p.files || []).some(function (f) { return f.kind === "board"; });
+          !(p.files || []).some(function (f) { return boardCurrent(p, f); });
+        // 콘티 칸 머리는 콘티 자리를 그대로 말한다 — 수정 요청 뒤 옛 「업데이트 완료」가 남아 있었다 (09-24)
+        var bph = (s.key === BOARD_REVIEW_STAGE && i === current) ? SE().boardActions(p, p.boardCounts).phase : "";
         // ★ 돈이 드는 단계(제작 자료·영상)는 작업이 큐에 걸려 있어도 **아무도
         //   집지 않는다.** 유료 생성은 사람이 누르는 자리라서다.
         //   ⚠ 배지는 summary 안에 있어서 **누르면 단계가 접힌다.** 그래서
@@ -568,7 +570,9 @@
           : (paidAt === "start" || paidAt === "choose")
             ? '<em class="ai-update choice">유료 생성 대기</em>'
           : "";
-        var badge = paidBadge ? paidBadge
+        var badge = bph === "board.make" ? '<em class="ai-update choice">' + (boardRedoAt(p) ? "콘티 다시 그릴 차례" : "콘티 뽑기 차례") + "</em>"
+          : bph === "board.working" ? '<em class="ai-update working">AI 작업 중 · 콘티 그림</em>'
+          : paidBadge ? paidBadge
           : needsPick ? '<em class="ai-update choice">실행 주체 선택 대기</em>'
           : (waitingHere ? '<em class="ai-update working">담당자 결과 대기</em>'
           : (working && paidStage
@@ -1467,7 +1471,7 @@
         head("콘티 그림을 뽑는 중", "끝나면 컷마다 붙습니다") + "</div>";
     }
     // 콘티 시트(한 판) — 검수 칸 맨 위에 크게. 컷별 그림이 없을 때 보이는 자리가 없었다 (09-24 환타)
-    var sheets = (p.files || []).filter(function (f) { return f.kind === "board" && f.cut_n == null && f.url && !(f.meta || {}).superseded; })
+    var sheets = (p.files || []).filter(function (f) { return f.cut_n == null && f.url && boardCurrent(p, f); })
       .sort(function (x, y) { return String(y.created_at).localeCompare(String(x.created_at)); });
     var sheetHtml = sheets.length
       ? '<div class="board-sheet"><img src="' + esc(sheets[0].url) + '" data-big="' + esc(sheets[0].url) +
@@ -1889,11 +1893,11 @@
     // 없으면 빈 칸을 렌더러가 알아서 그린다("그림 준비 전") — 여기서 지어내지 않는다.
     var panelBy = {};
     boardFiles.forEach(function (f) {
-      if (f.cut_n == null || !f.url || (f.meta || {}).superseded) return;   // 교체된 조각은 안 붙인다
+      if (f.cut_n == null || !f.url || !boardCurrent(p, f)) return;   // 수정 요청 전·교체된 조각은 안 붙인다
       if (!panelBy[f.cut_n]) panelBy[f.cut_n] = f;
     });
     var panelCount = Object.keys(panelBy).length;
-    var hasSheet = boardFiles.some(function (f) { return f.cut_n == null && f.url; });
+    var hasSheet = boardFiles.some(function (f) { return f.cut_n == null && f.url && boardCurrent(p, f); });
     function boardPanel(c) {
       var f = panelBy[c && c.n];
       // 컷별 조각이 없고 시트 한 판만 있으면 「그림 준비 전」 대신 시트의 몇 번 칸인지 알린다 (09-24)
@@ -2983,6 +2987,17 @@
           '" data-retry-worker="' + esc(pl.worker || "") + '">다시 돌리기</button>'
         : '<span class="said">' + (pl.worker === "order_writer" ? "비트가 바뀌면 다시 씁니다 — 세 번 실패하면 멈춥니다" : "") + "</span>") +
       "</div>";
+  }
+
+  /** 콘티 그림에 「수정 요청」(그림·완성 콘티)을 한 시각 — 그 전에 그린 시트·조각은 지난 판이다 (09-24) */
+  function boardRedoAt(p) {
+    return (p.reviews || []).filter(function (r) {
+      return r.step === "storyboard" && (r.layer === "board" || r.layer === "final") && r.decision === "revise" && r.cut_n == null;
+    }).map(function (r) { return String(r.decided_at || ""); }).sort().pop() || "";
+  }
+  function boardCurrent(p, f) {
+    var at = boardRedoAt(p);
+    return f.kind === "board" && !(f.meta || {}).superseded && (f.approved || !at || String(f.created_at || "") > at);
   }
 
   function freshLine(p) {
@@ -4438,15 +4453,7 @@
               cuts: p.cuts.length,
               // ★ 콘티 그림에 「수정 요청」을 했으면 그 전에 그린 시트는 세지 않는다 — 세면 검수 칸에서 멈추고
               //   「콘티 뽑기」가 다시 안 뜬다 (09-24). 광고주에게 이미 보낸(approved) 것은 그대로 센다.
-              board: (function () {
-                var rev = (p.reviews || []).filter(function (r) {
-                  // 완성 콘티(final)에서 수정 요청해도 다시 그린다 — 그 전 시트는 세지 않는다 (09-24 환타: 손 두 개)
-                  return r.step === "storyboard" && (r.layer === "board" || r.layer === "final") && r.decision === "revise" && r.cut_n == null;
-                }).map(function (r) { return String(r.decided_at || ""); }).sort().pop() || "";
-                return p.files.filter(function (f) {
-                  return f.kind === "board" && (f.approved || !rev || String(f.created_at || "") > rev);
-                }).length;
-              })(),
+              board: p.files.filter(function (f) { return boardCurrent(p, f); }).length,
               // 보냈는가. approved 가 광고주 노출 스위치라, 콘티가 하나라도
               // 켜져 있으면 광고주는 이미 보고 있다.
               boardSent: p.files.some(function (f) {
