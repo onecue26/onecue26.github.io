@@ -573,7 +573,7 @@
           : (waitingHere ? '<em class="ai-update working">담당자 결과 대기</em>'
           : (working && paidStage
             ? '<em class="ai-update choice">유료 생성 대기</em>'
-          : (working ? '<em class="ai-update working">AI 재작업 중</em>'
+          : (working ? '<em class="ai-update working">AI 작업 중</em>'
           : (updated && !(s.key === "concepts" && !(p.concepts && p.concepts.length))
             ? (boardMissing
               ? '<em class="ai-update working">콘티 준비 중</em>'
