@@ -754,7 +754,7 @@
   /** 자리(covers_call)마다 **가장 새 판**. 다시 뽑기의 잠금은 이것을 본다. */
   function newestTakes(p, s) {
     var kinds = stageKinds(s);
-    var all = (p.files || []).filter(function (f) { return kinds.indexOf(f.kind) >= 0; });
+    var all = (p.files || []).filter(function (f) { return kinds.indexOf(f.kind) >= 0 && !((f.meta || {}).material); });   // 제작 재료는 판이 아니다
     return all.filter(function (f) {
       var call = (f.meta || {}).covers_call || "";
       return !all.some(function (g) {
@@ -2156,6 +2156,16 @@
         "</div>";
     }
 
+    function materialList(p) {
+      var m = (p.files || []).filter(isMaterial);
+      if (!m.length) return "";
+      return '<div class="said"><span class="lbl">제작 재료 ' + m.length + '개 — 광고주 자료를 우리가 가공한 것</span><div class="client-files">' +
+        m.map(function (f) {
+          return '<figure>' + (f.url ? '<img src="' + esc(f.url) + '" loading="lazy" data-big="' + esc(f.url) + '" data-kind="img" alt="">' : "") +
+            '<figcaption>' + esc(f.role || "") + '</figcaption></figure>';
+        }).join("") + "</div></div>";
+    }
+
     function paidStageBody(p, step) {
       var here = p.step === step;
       var buttons = "";
@@ -2186,7 +2196,7 @@
       });
       if (!wants) return "";
       var got = (p.files || []).filter(function (f) {
-        if (f.kind !== "anchor" || !f.url) return false;
+        if (f.kind !== "anchor" || !f.url || isMaterial(f)) return false;
         var made = f.created_at || (f.meta || {}).made_at;
         return !!made && (!mark || String(made) > String(mark));
       }).sort(function (x, y) {
@@ -2708,7 +2718,7 @@
       // 아무것도 말해 주지 않는 문장이었고, 그 아래엔 누를 것이 없었다.
       // 조건을 뺐다 — paidStageBody 가 안에서 「누를 것」만 가린다.
       // 여기서 통째로 가리면 승인한 뒤 만든 것이 사라진다.
-      anchors: costLine(p, "anchors") + paidStageBody(p, "anchors"),
+      anchors: costLine(p, "anchors") + materialList(p) + paidStageBody(p, "anchors"),
       video: costLine(p, "video") + paidStageBody(p, "video") + (p.step === "video" ? backBox(p) : ""),
       // ★ 납품에는 **이 건 원가 합계**를 둔다. 광고 한 편에 얼마가 드는지
       //   모르면 서비스 가격을 정할 수 없다.
@@ -2810,6 +2820,11 @@
   //   사장님께 남는 선택이 「다시 뽑기」뿐이 된다. 그건 검수가 결정까지
   //   하는 것이다. 검수는 찾아서 설명하고, **고르는 것은 사장님**이다.
   //   무엇이 걸렸는지는 그림 바로 밑에 크게 적으므로 모르고 누르실 일은 없다.
+  /** 우리가 광고주 자료를 가공해 만든 제작 재료(meta.material) — 광고주 자료로도, 이 단계의 판으로도 세지 않는다 (Dan 09-24) */
+  function isMaterial(f) {
+    return !!(f && f.meta && f.meta.material);
+  }
+
   function held(f) {
     return false;
   }
@@ -4229,7 +4244,7 @@
               //   결과로 세면 승인 버튼이 뜨고, 관리자가 아직 안 정해진 것을
               //   승인하게 된다. ASK 는 답하기 전까지 다음이 없다.
               anchors: p.files.some(function (f) {
-                return f.kind === "anchor" && !held(f) && !superseded(p, "anchors", f);
+                return f.kind === "anchor" && !isMaterial(f) && !held(f) && !superseded(p, "anchors", f);
               }),
               video: p.files.some(function (f) {
                 return (f.kind === "clip" || f.kind === "final") && !held(f) &&
