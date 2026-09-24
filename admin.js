@@ -1489,7 +1489,7 @@
         ">취소 · 전 단계로</button>");
     }
     if (act.phase === "final.done") {
-      return '<div class="lc lc-approved"' + tag + ">" +
+      return sheetHtml + '<div class="lc lc-approved"' + tag + ">" +
         head("광고주에게 보냈습니다", "광고주 화면에 콘티가 떠 있습니다") +
         '<div class="lc-row">' +
         '<button class="btn ghost" type="button" data-lc="back"' + tag +
@@ -1497,7 +1497,7 @@
         '<span class="lc-msg" data-lc-msg></span></div>';
     }
     if (act.phase === "final.sent") {
-      return '<div class="lc lc-approved"' + tag + ">" +
+      return sheetHtml + '<div class="lc lc-approved"' + tag + ">" +
         head("완성 콘티 승인됨", "이제 광고주에게 보낼 수 있습니다") +
         '<div class="lc-row">' +
         '<button class="btn" type="button" data-lc="send-client"' + tag + ">광고주에게 보내기</button>" +
