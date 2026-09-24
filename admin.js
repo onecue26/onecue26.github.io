@@ -3473,8 +3473,9 @@
     // ★ 수정 요청은 무엇을 고칠지 적어야 눌린다 — 빈칸이면 버튼을 잠근다 (Dan 09-24 「아무것도 안 쓰면 활성화 안 돼야」)
     //   전에는 눌리고 안내만 떠서, 눌렀는데 아무 일도 없는 것처럼 보였다.
     document.querySelectorAll("[data-lc-note]").forEach(function (t) {
-      var wrap = t.closest(".lc");
-      var btns = wrap ? wrap.querySelectorAll('[data-lc="revise"],[data-lc="review-revise"]') : [];
+      var wrap = t.closest(".cut-review, .lc");
+      var btns = wrap ? Array.prototype.filter.call(wrap.querySelectorAll('[data-lc="revise"],[data-lc="review-revise"]'),
+        function (x) { return x.closest(".cut-review, .lc") === wrap; }) : [];
       function sync() {
         var empty = !(t.value || "").trim();
         Array.prototype.forEach.call(btns, function (x) {
@@ -3489,8 +3490,9 @@
       b.addEventListener("click", function () {
         var what = b.dataset.lc;
         var slug = b.dataset.slug, step = b.dataset.step;
-        var wrap = b.closest(".lc");
-        var msg = wrap && wrap.querySelector("[data-lc-msg]");
+        // 컷 칸(.cut-review)이 가장 가까운 칸이다 — 전에는 바깥 .lc 로 올라가 컷에 적은 글 대신 윗칸 글을 읽었다
+        var wrap = b.closest(".cut-review, .lc");
+        var msg = wrap && (wrap.querySelector("[data-lc-msg]") || (b.closest(".lc") || {}).querySelector && b.closest(".lc").querySelector("[data-lc-msg]"));
         var note = wrap && wrap.querySelector("[data-lc-note]");
         var text = note ? (note.value || "").trim() : "";
         if (what === "revise" && !text) {
