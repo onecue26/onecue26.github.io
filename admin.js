@@ -621,9 +621,12 @@
             : choiceGate(p, s.key)) +
           // ★ 기록이 없으면 이 줄을 띄우지 않는다 — 모든 단계에 「기록 없음 · 별도 검토
           //   없음」이 떠서 끝난 단계까지 안 한 것처럼 보였다 (09-23 화면 점검).
-          (who.label === "기록 없음" && reviewer === "별도 검토 없음" ? "" :
-            '<span>수행 · ' + esc(worker) +
-            '</span><span>결과를 검토하는 AI(핵심 검토 AI) · ' + esc(reviewer) + '</span>') +
+          // 누가 했는지만 — 모델 이름·「별도 검토 없음」은 관리자 판단에 쓰이지 않는다 (09-24 검수)
+          (s.key === "strategy" && p.strategy
+            ? '<span>수행 · ' + (p.strategy.written_by === "human" ? "사람이 씀" : "AI가 씀") + "</span>"
+            : who.label === "기록 없음" ? "" :
+            '<span>수행 · ' + (who.kind === "human" ? "사람 · " + esc(who.label) : "AI") + "</span>" +
+            (reviewer === "별도 검토 없음" ? "" : '<span>검토 · ' + esc(reviewer) + "</span>")) +
           findingText + delivered +
           // 유료 단계는 고르기를 묻지 않으므로 선택 폼도 띄우지 않는다 —
           // 띄우면 「사람이 직접 진행」이 보이고, 그 길은 없다.
@@ -1048,15 +1051,22 @@
     return "";
   }
 
+  // 제품 사실의 내부 상태 코드 → 우리말 (09-24 검수: client_stated_not_verified 가 그대로 보였다)
+  var CLAIM_STATUS = {
+    client_stated_not_verified: "광고주 말 · 확인 전", label_read_low_confidence_image: "라벨에서 읽음 · 흐림",
+    creative_positioning_not_measured: "표현 · 측정 아님", undefined_do_not_assert: "근거 없음 · 말하지 않음",
+    not_authorized_do_not_imply: "권한 없음 · 암시하지 않음", verified: "확인됨",
+  };
   function readable(value) {
     if (value == null || value === "") return "입력 없음";
     if (Array.isArray(value)) return value.map(readable).join(" · ");
     if (typeof value === "object") {
+      if (value.claim) return value.claim + (value.status ? " (" + (CLAIM_STATUS[value.status] || value.status) + ")" : "");
       return Object.keys(value).map(function (key) {
         return key + " · " + readable(value[key]);
       }).join(" / ");
     }
-    return String(value);
+    return String(value).replace(/\*\*/g, "");
   }
 
   // ── 회신 문구 ─────────────────────────────────────────────────────────────
@@ -1664,8 +1674,8 @@
     var conceptReview = "";
     if (p.concepts && p.concepts.length) {
       var strategyLine = p.strategy
-        ? '<div class="review-strategy"><span>전략 한 줄</span><b>' + esc(p.strategy.one_message || "") + '</b>' +
-          '<small>' + esc(p.strategy.insight || "") + '</small></div>'
+        ? '<div class="review-strategy"><span>전략 한 줄 · ' + (p.strategy.written_by === "human" ? "사람이 씀" : "AI가 씀") +
+          '</span><b>' + esc(p.strategy.one_message || "") + '</b></div>'
         : "";
       var atConceptStage = p.step === "concepts";
       var replanBusy = atConceptStage && p.job && p.job.step === "concepts";
@@ -1680,7 +1690,7 @@
       var replanBox = atConceptStage && p.state === "pending"
         ? (replanBusy
           ? '<div class="replan-box busy"><b>새 콘셉트를 만드는 중입니다</b><span>완료되면 이 화면에 자동으로 교체됩니다.</span></div>'
-          : '<div class="replan-box" data-replan-form="' + esc(p.slug) + '">' +
+          : '<div class="replan-box" id="rp-' + esc(p.slug) + '" data-replan-form="' + esc(p.slug) + '" hidden>' +
             '<b>다시 만들 범위</b>' +
             '<div class="replan-scope">' +
             '<label><input type="radio" name="replan-scope-' + esc(p.slug) + '" data-replan-scope="' +
@@ -1691,11 +1701,11 @@
             '<div class="replan-keys" data-replan-keys="' + esc(p.slug) + '" hidden>' +
             '<span class="replan-keys-label">다시 만들 안</span>' + pickBoxes +
             '<small>선택하지 않은 안은 그대로 둡니다.</small></div>' +
-            '<label for="replan-' + esc(p.slug) + '">어떤 점이 아쉬운지</label>' +
+            '<label for="replan-' + esc(p.slug) + '">어떤 점이 아쉬운지 (선택)</label>' +
             '<textarea id="replan-' + esc(p.slug) + '" data-replan-note="' + esc(p.slug) +
-            '" rows="3" placeholder="예: 제품 맛이 더 잘 느껴지고, 인물 없는 방향을 늘려 주세요."></textarea>' +
+            '" rows="3" placeholder="비워 두면 지금 5안과 겹치지 않는 새 발상으로 다시 씁니다. 예: 인물 없는 방향을 늘려 주세요."></textarea>' +
             '<button class="btn ghost" type="button" data-replan="' + esc(p.slug) +
-            '">5안 전체 다시 만들기</button><small>이전 5안은 비교 기록으로 보존됩니다.</small></div>')
+            '">5안 전체 다시 만들기</button><small>지금 5안은 관리자용 백업으로 남기고 새 안으로 바꿉니다. 전략은 그대로 둡니다.</small></div>')
         : "";
       // ★ 콘셉트 카드는 광고주 화면과 **같은 공용 렌더**가 그린다.
       // 예전에는 본문 한 문단이 통째로 <p> 하나였고 후킹·화면·위험이 한 줄씩
@@ -1707,11 +1717,23 @@
         '<h3>콘셉트 5안</h3><p>' + (atConceptStage
           ? "추천은 참고값입니다. 다섯 방향의 차이와 위험을 확인한 뒤 광고주에게 보내세요."
           : "이 프로젝트에서 실제로 제안하고 선택한 콘셉트 기록입니다.") + '</p></div>' +
-        strategyLine + conceptList(p.concepts) + replanBox +
-        (atConceptStage && canWrite && !p.concepts.some(function (c) { return c.is_chosen; })
-          ? '<div class="replan-box"><b>전략부터 다시</b><span>전략 설계로 돌아가 AI / 사람을 다시 고릅니다. 새 전략을 올리면 지금 5안은 지워집니다.</span>' +
-            '<button class="btn ghost" type="button" data-back-strategy="' + esc(p.id) + '">전략 설계로 돌아가기</button></div>'
-          : "") + '</section>';
+        strategyLine + conceptList(p.concepts) + reviewActions(p, atConceptStage, replanBusy) + replanBox + '</section>';
+    }
+
+    /** 콘셉트 검토의 할 일을 한 줄에 순서대로 (Dan 09-24 「버튼은 한곳에 순서대로」)
+     *  전략부터 다시 → 5안 다시 만들기(양식은 눌러야 열림) → 광고주에게 보내기 */
+    function reviewActions(p, here, busy) {
+      if (!here || p.state !== "pending" || !canWrite || busy) return "";
+      var chosen = (p.concepts || []).some(function (c) { return c.is_chosen; });
+      var back = p.redo && p.redo.gate === "concepts" && p.redo.decision === "revise" && !p.redoDone;
+      return '<div class="review-actions"><div class="txt"><b>' +
+        (back ? "광고주가 되돌려보냈습니다 — 고쳐서 다시 보내세요" : "검토 후 할 일") + "</b>" +
+        "<span>광고주에게 보내기 전까지 광고주 쪽에는 버튼이 없습니다.</span></div>" +
+        '<div class="ra-row">' +
+        (chosen ? "" : '<button class="btn ghost" type="button" data-back-strategy="' + esc(p.id) + '">① 전략부터 다시</button>') +
+        '<button class="btn ghost" type="button" data-toggle-form="rp-' + esc(p.slug) + '">② 5안 다시 만들기</button>' +
+        '<button class="btn" type="button" data-send="' + esc(p.slug) + '">③ 광고주에게 보내기</button>' +
+        "</div></div>";
     }
 
     // 1차 검수 — 정지점에 와 있으면 우리가 먼저 보고 광고주에게 넘긴다.
@@ -1750,13 +1772,17 @@
         "</span>" + esc(p.redo.note || "") + "</div>"
       : "";
 
+    function factList(v) {
+      var arr = Array.isArray(v) ? v : [v];
+      return '<ul class="fact-list">' + arr.map(function (x) { return "<li>" + esc(readable(x)) + "</li>"; }).join("") + "</ul>";
+    }
     var factsBody = p.facts
       ? '<div class="stage-content"><dl class="stage-data">' +
-        '<dt>확인된 사실</dt><dd>' + esc(readable(p.facts.facts)) + '</dd>' +
+        '<dt>확인된 사실</dt><dd>' + factList(p.facts.facts) + '</dd>' +
         '<dt>제품 잠금</dt><dd>' + esc(readable(p.facts.product_lock)) + '</dd>' +
         '<dt>표기 문구</dt><dd>' + esc(readable(p.facts.label_text)) + '</dd>' +
-        '<dt>사용 가능한 주장</dt><dd>' + esc(readable(p.facts.claims)) + '</dd>' +
-        (p.facts.device_note ? '<dt>제작 메모</dt><dd>' + esc(p.facts.device_note) + '</dd>' : '') +
+        '<dt>주장별 근거</dt><dd>' + factList(p.facts.claims) + '</dd>' +
+        (p.facts.device_note ? '<dt>제작 메모</dt><dd class="pre">' + esc(readable(p.facts.device_note)) + '</dd>' : '') +
         '</dl>' + files + '</div>'
       : '<p class="stage-empty">제품 자료는 등록됐지만 정리된 확인 내용이 없습니다.</p>' + files;
     // 전략도 공용 렌더다 — 네 칸이 각각 한 구획이고, 긴 문단은 문장 단위로 나뉜다
@@ -1942,27 +1968,27 @@
       var row = function (k, v) { return v ? '<span><b>' + k + '</b> ' + esc(v) + '</span>' : ""; };
       return '<div class="ms-summary"><div class="ms-by">전략 설계 · ' + (st.written_by === "human" ? "사람이 씀" : "AI가 씀") + '</div>' +
         row("핵심 메시지", st.one_message) + row("인사이트", st.insight) + row("강점(USP)", st.usp) +
-        row("톤", st.tone) + row("방향·그 외", st.direction) + "</div>";
+        row("톤", st.tone) + row("그 외 필요한 사항", st.direction) + "</div>";
     }
 
     /** 사람이 전략을 쓰는 양식 (074). 있던 전략이 있으면 채워 둔다 — 고쳐 쓰기 쉽게. */
     function manualStrategyForm(p) {
       var st = p.strategy || {};
-      var f = function (k, ph, rows) {
-        return rows
+      var f = function (k, label, ph, rows) {
+        return '<label class="ms-field"><span>' + esc(label) + "</span>" + (rows
           ? '<textarea data-ms="' + k + '" rows="' + rows + '" placeholder="' + esc(ph) + '">' + esc(st[k] || "") + "</textarea>"
-          : '<input data-ms="' + k + '" placeholder="' + esc(ph) + '" value="' + esc(st[k] || "") + '">';
+          : '<input data-ms="' + k + '" placeholder="' + esc(ph) + '" value="' + esc(st[k] || "") + '">') + "</label>";
       };
       return '<div class="mc-form" id="ms-' + esc(p.id) + '" hidden>' +
         '<div class="mc-guide"><b>쓰는 법</b>' +
         "<span>· 콘셉트 5안이 이걸 그대로 받아 씁니다 — AI가 쓰든 사람이 쓰든</span>" +
-        "<span>· 핵심 메시지·인사이트·방향 중 하나는 꼭. 나머지는 비워도 됩니다</span>" +
+        "<span>· 핵심 메시지·인사이트·그 외 필요한 사항 중 하나는 꼭. 나머지는 비워도 됩니다</span>" +
         "<span>· 가진 자료 안에서 — 광고주에게 새 자료를 요구하는 방향은 쓰지 않습니다</span></div>" +
-        f("one_message", "핵심 메시지 — 이 광고가 남길 한마디") +
-        f("insight", "인사이트 — 누구의 어떤 순간을 건드리나", 2) +
-        f("usp", "강점(USP) — 이 제품만 줄 수 있는 것") +
-        f("tone", "톤 — 예: 유쾌하고 시원한, 과장된 코믹") +
-        f("direction", "방향·그 외 — 꼭 넣을 것, 피할 것, 참고할 결", 3) +
+        f("one_message", "핵심 메시지", "이 광고가 남길 한마디", 2) +
+        f("insight", "인사이트", "누구의 어떤 순간을 건드리나", 3) +
+        f("usp", "강점(USP)", "이 제품만 줄 수 있는 것", 2) +
+        f("tone", "톤", "예: 유쾌하고 시원한, 과장된 코믹", 2) +
+        f("direction", "그 외 필요한 사항", "꼭 넣을 것, 피할 것, 참고할 결", 3) +
         '<button class="btn" type="button" data-ms-save="' + esc(p.id) + '">전략 올리기 → 콘셉트 5안</button></div>';
     }
 
@@ -2702,9 +2728,11 @@
       brief: '<div class="stage-content">' + said + requirements + clientReplies(p) + clientFiles(p) +
         (p.step === "brief" ? productionAction : "") + '</div>',
       // 기획 두 갈래(074) — 전략·콘셉트 칸에도 「누가 맡습니까」를 그 칸 안에 그린다
-      facts: factsBody + (p.step === "facts" ? '<div class="plan-wrap">' + productionAction + "</div>" : ""),
+      // 광고주 자료를 우리가 정리한 기준(제작 재료)도 여기서 본다 — 기획·콘티·영상이 이걸 기준으로 쓴다 (Dan 09-24)
+      facts: factsBody + materialList(p) + (p.step === "facts" ? '<div class="plan-wrap">' + productionAction + "</div>" : ""),
       strategy: strategyBody + (p.step === "strategy" ? '<div class="plan-wrap">' + productionAction + "</div>" : ""),
-      concepts: (p.step === "concepts" && !(p.concepts && p.concepts.length) ? '<div class="plan-wrap">' + productionAction + "</div>" : "") + conceptReview + check,
+      concepts: (p.step === "concepts" && !(p.concepts && p.concepts.length) ? '<div class="plan-wrap">' + productionAction + "</div>" : "") + conceptReview +
+        (p.step === "concepts" && p.state === "pending" && canWrite && p.concepts && p.concepts.length ? "" : check),
       develop: developBody,
       // 새 흐름이 도는 동안에는 「컷 설계 보기」 링크를 띄우지 않는다 —
       // 검수할 컷 목록이 바로 아래 펼쳐져 있는데 같은 곳으로 가는 링크가 또 있으면
@@ -2859,7 +2887,7 @@
 
   /** 카드 맨 위 한 줄 — 마지막으로 본 뒤에 무엇이 올라왔는지. */
   function freshLine(p) {
-    var got = freshFiles(p);
+    var got = freshFiles(p).filter(function (f) { return !((f.meta || {}).material); });
     if (!got.length) return "";
     var what = {};
     got.forEach(function (f) {
@@ -3184,11 +3212,6 @@
           window.alert("다시 만들 안을 하나 이상 골라 주세요.");
           return;
         }
-        if (!note) {
-          window.alert("어떤 점을 바꿀지 한 줄만 적어 주세요.");
-          if (field) field.focus();
-          return;
-        }
         var label = b.textContent;
         b.disabled = true; b.textContent = "재기획 요청 중…";
         requestReplan(slug, note, scope, keys).then(load).catch(function (e) {
@@ -3315,7 +3338,7 @@
       b.addEventListener("click", function () {
         var id = b.dataset.msSave, form = document.getElementById("ms-" + id), v = {};
         form.querySelectorAll("[data-ms]").forEach(function (x) { v[x.dataset.ms] = (x.value || "").trim(); });
-        if (!v.one_message && !v.insight && !v.direction) { window.alert("핵심 메시지·인사이트·방향 중 하나는 써 주십시오."); return; }
+        if (!v.one_message && !v.insight && !v.direction) { window.alert("핵심 메시지·인사이트·그 외 필요한 사항 중 하나는 써 주십시오."); return; }
         b.disabled = true; b.textContent = "올리는 중…";
         db.rpc("onecue_strategy_manual", { p_project_id: id, p_insight: v.insight, p_one_message: v.one_message,
           p_usp: v.usp, p_tone: v.tone, p_direction: v.direction })
@@ -3838,7 +3861,7 @@
       db.from("jobs").insert({
         project_id: p.id, step: "concepts", kind: "text", state: "queued",
         request: {
-          note: "관리자 재기획 요청", direction: note,
+          note: "관리자 재기획 요청", direction: note, plan: true, keep_strategy: true,
           replan_scope: selected ? "selected" : "all",
           replan_keys: replanKeys,
           preserve_keys: preserveKeys,

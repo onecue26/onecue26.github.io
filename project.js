@@ -139,7 +139,7 @@
       (b.raw ? "<dt>제품 설명</dt><dd>" + nl(b.raw) + "</dd>" : "") +
       (b.goal ? "<dt>목표</dt><dd>" + esc(b.goal) + "</dd>" : "") +
       (b.target ? "<dt>대상</dt><dd>" + esc(b.target) + "</dd>" : "") +
-      (b.format ? "<dt>형식</dt><dd>" + esc(b.format) + "</dd>" : "") +
+      (b.format ? "<dt>형식</dt><dd>" + esc(String(b.format).split(/(\s*·\s*)/).map(korName).join("")) + "</dd>" : "") +
       "</dl></div>";
   }
 
@@ -302,6 +302,16 @@
     };
   }
   var CLIENT = { role: "client" };
+
+  // 매체·형식 코드를 광고주가 읽는 말로 (09-24 검수: 「youtube tv ooh」 「youtube_shorts」가 그대로 보였다)
+  var KOR = {
+    youtube: "유튜브", meta: "인스타·페북", tiktok: "틱톡", tv: "TV", web: "웹사이트", ooh: "매장·옥외",
+    youtube_instream: "유튜브 인스트림", youtube_video: "유튜브 일반 영상", youtube_shorts: "유튜브 쇼츠",
+    meta_feed: "인스타·페북 피드", meta_reels: "릴스·스토리", tiktok_feed: "틱톡 피드",
+    tv_spot: "방송 광고", ctv_spot: "스마트TV", web_hero: "웹사이트 메인", web_product: "제품 페이지",
+    ooh_screen: "전광판", store_signage: "매장 화면",
+  };
+  function korName(x) { return KOR[String(x).trim()] || x; }
 
   // ★ 전략은 내부 문서다. 인사이트·강점·톤은 우리가 어떻게 판단했는지를 적은
   //   것이지 광고주가 결정할 자리가 아니다(단계 계약 v1 §3 — 공개: 관리자 전용).
@@ -912,7 +922,7 @@
               '<div class="sub mono">' + esc(P.slug) + " · " + P.running_sec +
               "초 · " +   // 컷 수는 광고주가 준 값이 아니다(길이로 자동 계산) — 머리줄에서 뺀다 (Dan 09-24)
               esc((P.aspects && P.aspects.length) ? P.aspects.join(" / ") : P.aspect) +
-              ((P.channels && P.channels.length) ? " · " + esc(P.channels.join(" ")) : "") +
+              ((P.channels && P.channels.length) ? " · " + esc(P.channels.map(korName).join(" · ")) : "") +
               "</div>" +
               bar(P.step) + "</div></div>" +
             (P.state === "done"
