@@ -3299,6 +3299,10 @@
     });
     document.querySelectorAll("[data-msg-send]").forEach(function (b) {
       b.addEventListener("click", function () {
+        var owner = ROWS.filter(function (x) { return (x.messages || []).some(function (m) { return m.id === b.dataset.msgSend; }); })[0];
+        var msg = owner && owner.messages.filter(function (m) { return m.id === b.dataset.msgSend; })[0];
+        var others = owner && msg ? otherNameHits(owner, [msg.body]) : [];
+        if (others.length) { window.alert("메시지에 다른 건 이름이 있습니다 — " + others.join(", ") + "\n고친 뒤에 보내 주세요."); return; }
         if (!window.confirm("이 메시지를 광고주에게 보냅니다. 광고주 화면에 바로 뜹니다.")) return;
         b.disabled = true; b.textContent = "보내는 중…";
         db.rpc("onecue_message_send", { p_message_id: b.dataset.msgSend })
@@ -3889,6 +3893,25 @@
     });
   }
 
+  /** 광고주에게 나가는 글에 **다른 건(다른 광고주·다른 작품)의 이름**이 있는가 (Dan 09-24 「다른 작품을 예시로 하면 안 됨」)
+   *  이름은 지금 목록(ROWS)에서 읽는다 — 손으로 적은 목록은 새 건이 생기면 샌다. 제품 이름은 3자 이상만. */
+  function otherNames(p) {
+    var mine = [p.brand, p.product].map(function (x) { return String(x || "").trim(); });
+    var out = {};
+    ROWS.forEach(function (r) {
+      if (r.id === p.id) return;
+      [["brand", 2], ["product", 3]].forEach(function (k) {
+        var n = String(r[k[0]] || "").trim();
+        if (n.length >= k[1] && mine.indexOf(n) < 0) out[n] = true;
+      });
+    });
+    return Object.keys(out);
+  }
+  function otherNameHits(p, texts) {
+    var all = (texts || []).join("\n").toLowerCase();
+    return otherNames(p).filter(function (n) { return all.indexOf(n.toLowerCase()) >= 0; });
+  }
+
   // 1차 검수를 마쳤다 → 광고주 차례로 넘긴다. 이때 비로소 광고주 화면에 버튼이 뜬다.
   //
   // ★ 쉬운말 게이트가 여기에도 선다. AI 가 만든 글도 똑같이 본다 — 담당자 등록분만
@@ -3905,6 +3928,10 @@
       return Promise.reject(new Error("AI가 쓰는 중입니다 — 끝난 뒤에 보낼 수 있습니다"));
     }
     var gate = SE().sendGate(p);
+    var others = otherNameHits(p, gate.texts);
+    if (others.length) {
+      return Promise.reject(new Error("광고주에게 나갈 글에 다른 건 이름이 있습니다 — " + others.join(", ") + "\n\n고친 뒤에 다시 눌러 주세요."));
+    }
     return recordPlainReview(p, gate).then(function () {
       if (!gate.ok) {
         throw new Error(gate.reason === "contract_missing"
