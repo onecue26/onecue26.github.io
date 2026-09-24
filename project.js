@@ -303,6 +303,20 @@
   }
   var CLIENT = { role: "client" };
 
+  // ★ 광고주 수정 요청 횟수 (Dan 09-24) — 콘티·영상 「고쳐주세요」 2회, 콘셉트 다시 요청 1회. DB(084)도 같은 수로 막는다
+  var REVISE_LIMIT = { concepts: 1, storyboard: 2, video: 2 };
+  var APPROVALS = [];
+  function reviseLeft(gate) {
+    var used = APPROVALS.filter(function (a) { return a.gate === gate && a.decision === "revise"; }).length;
+    return Math.max(0, (REVISE_LIMIT[gate] || 0) - used);
+  }
+  function reviseButton(gate, id, label) {
+    var left = reviseLeft(gate);
+    if (!left) return '<span class="hint">수정 요청 ' + REVISE_LIMIT[gate] + "회를 모두 쓰셨습니다 — 추가 수정은 위 「메시지」로 문의해 주세요.</span>";
+    return '<button class="btn ghost" id="' + id + '">' + label + "</button>" +
+      '<span class="hint">남은 수정 ' + left + "회</span>";
+  }
+
   // 매체·형식 코드를 광고주가 읽는 말로 (09-24 검수: 「youtube tv ooh」 「youtube_shorts」가 그대로 보였다)
   var KOR = {
     youtube: "유튜브", meta: "인스타·페북", tiktok: "틱톡", tv: "TV", web: "웹사이트", ooh: "매장·옥외",
@@ -525,11 +539,12 @@
     return '<div class="cc redo">' +
       '<span class="k">재요청</span>' +
       '<span class="t">원하는 방향이 없나요?</span>' +
-      '<span class="b">억지로 고르지 않으셔도 됩니다. 의견을 주시면 다섯 가지를 새로 만들어 드립니다.</span>' +
+      '<span class="b">억지로 고르지 않으셔도 됩니다. 의견을 주시면 다섯 가지를 새로 만들어 드립니다. (다시 요청은 1회)</span>' +
       '<textarea id="redoNote" maxlength="500" ' +
       'placeholder="원하시는 방향이 있으면 적어주세요 — 안 적으셔도 됩니다&#10;&#10;예 · 아이가 나오는 건 피하고 싶습니다&#10;예 · 하와이를 더 보여주면 좋겠습니다&#10;예 · B안 방향은 좋은데 더 밝았으면"></textarea>' +
       '<span class="hint">비워두시면 저희가 축을 바꿔 다시 잡습니다.</span>' +
-      '<button class="btn ghost" id="redoBtn">의견과 함께 5안 다시 요청</button>' +
+      (reviseLeft("concepts") ? '<button class="btn ghost" id="redoBtn">의견과 함께 5안 다시 요청</button>'
+        : '<span class="hint">다시 요청 1회를 쓰셨습니다 — 추가 요청은 위 「메시지」로 문의해 주세요.</span>') +
       '<span class="hint" id="redoMsg"></span>' +
       "</div>";
   }
@@ -679,7 +694,7 @@
         '예 · 마지막 자막을 「이름 그대로」로 줄여주세요"></textarea>' +
         '<div class="acts">' +
         '<button class="btn" id="approveBoard">콘티 승인</button>' +
-        '<button class="btn ghost" id="reviseBoard">고쳐주세요</button>' +
+        reviseButton("storyboard", "reviseBoard", "고쳐주세요") +
         '<span class="hint">적으신 내용은 승인하실 때도 같이 전달됩니다.</span>' +
         "</div></div>";
     }
@@ -737,7 +752,7 @@
         '<label for="videoNote">남기실 말씀</label>' +
         '<textarea id="videoNote" maxlength="1000" placeholder="수정 요청 시 고칠 내용을 적어주세요"></textarea>' +
         '<div class="acts"><button class="btn" id="approveVideo">영상 승인</button>' +
-        '<button class="btn ghost" id="reviseVideo">고쳐주세요</button></div>' +
+        reviseButton("video", "reviseVideo", "고쳐주세요") + "</div>" +
         '<span class="hint" id="videoMsg" role="status" aria-live="polite"></span></div>';
     }
     // ★ 제작·납품은 맨 위에 띄우지 않는다 — 목록 칸(영상 제작 → 납품)에서 순서대로 보인다.
@@ -951,6 +966,7 @@
           if (!window.ONECUE_ASSETS) throw new Error("자료 접근 설정을 불러오지 못했습니다.");
           return window.ONECUE_ASSETS.resolve(db, x[4].data || []).then(function (assets) {
           x[4].data = assets;
+          APPROVALS = x[5].data || [];
           HAS_FINAL = (x[4].data || []).some(function (a) { return a.kind === "final" && a.approved === true && a.url; });
           // 콘티 그림이 한 장이라도 있는가. 이 한 값이 콘티 구간 전체(승인 요청 ·
           // 시트 · 컷)를 연다. 컷 표만 있는 상태는 「콘티」가 아니라 컷 설계다.
