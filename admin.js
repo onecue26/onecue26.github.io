@@ -4425,7 +4425,16 @@
             p.files = files.filter(function (f) { return f.project_id === p.id; });
             p.boardCounts = {
               cuts: p.cuts.length,
-              board: p.files.filter(function (f) { return f.kind === "board"; }).length,
+              // ★ 콘티 그림에 「수정 요청」을 했으면 그 전에 그린 시트는 세지 않는다 — 세면 검수 칸에서 멈추고
+              //   「콘티 뽑기」가 다시 안 뜬다 (09-24). 광고주에게 이미 보낸(approved) 것은 그대로 센다.
+              board: (function () {
+                var rev = (p.reviews || []).filter(function (r) {
+                  return r.step === "storyboard" && r.layer === "board" && r.decision === "revise" && r.cut_n == null;
+                }).map(function (r) { return String(r.decided_at || ""); }).sort().pop() || "";
+                return p.files.filter(function (f) {
+                  return f.kind === "board" && (f.approved || !rev || String(f.created_at || "") > rev);
+                }).length;
+              })(),
               // 보냈는가. approved 가 광고주 노출 스위치라, 콘티가 하나라도
               // 켜져 있으면 광고주는 이미 보고 있다.
               boardSent: p.files.some(function (f) {
