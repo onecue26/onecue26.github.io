@@ -2509,13 +2509,21 @@
       // 지금 영상 계획이 참고 이미지로 쓰는 것 — Image 번호까지
       var inPlan = {};
       ((p.render_plan || {}).calls || []).forEach(function (c) {
-        (c.image_reference_paths || []).forEach(function (path, k) { inPlan[path] = "Image " + (k + 1); });
+        (c.image_reference_paths || []).forEach(function (path, k) {
+          if (String(path).indexOf("need:") === 0) {
+            var nid = String(path).slice(5);
+            (p.files || []).forEach(function (f) {
+              if (f.kind === "anchor" && (f.meta || {}).covers_call === nid) inPlan[f.storage_path] = "Image " + (k + 1);
+            });
+          } else inPlan[path] = "Image " + (k + 1);
+        });
       });
       var anyInPlan = Object.keys(inPlan).length > 0;
 
       var older = [];
       var mine = (p.files || []).filter(function (f) {
         if (want.indexOf(f.kind) < 0) return false;
+        if ((f.meta || {}).material) return false;   // 제작 재료(광고주 사진을 자른 것)는 위 「제작 재료」 칸에 이미 있다 (09-24)
         // ★ 제작 자료는 **지금 계획에 들어가 있는가**가 기준이다. 빠진 것은 지난 버전.
         //   v1 시작 프레임이 「12초 한 판의 출발점」이라는 옛 설명으로만 떠서 지난 판처럼
         //   보였는데, 실제로는 지금 계획의 Image 1(세트 기준)이다 (09-23).
