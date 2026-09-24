@@ -572,7 +572,7 @@
           : (working && paidStage
             ? '<em class="ai-update choice">유료 생성 대기</em>'
           : (working ? '<em class="ai-update working">AI 재작업 중</em>'
-          : (updated
+          : (updated && !(s.key === "concepts" && !(p.concepts && p.concepts.length))
             ? (boardMissing
               ? '<em class="ai-update working">콘티 준비 중</em>'
               : '<em class="ai-update done">NEW · 업데이트 완료</em>')
@@ -626,7 +626,7 @@
             ? '<span>수행 · ' + (p.strategy.written_by === "human" ? "사람이 씀" : "AI가 씀") + "</span>"
             : who.label === "기록 없음" ? "" :
             '<span>수행 · ' + (who.kind === "human" ? "사람 · " + esc(who.label) : "AI") + "</span>" +
-            (reviewer === "별도 검토 없음" ? "" : '<span>검토 · ' + esc(reviewer) + "</span>")) +
+            (reviewer === "별도 검토 없음" ? "" : '<span>검토 · ' + (/claude|anthropic|gpt|openai|gemini|ai:/i.test(reviewer) ? "AI" : esc(reviewer)) + "</span>")) +
           findingText + delivered +
           // 유료 단계는 고르기를 묻지 않으므로 선택 폼도 띄우지 않는다 —
           // 띄우면 「사람이 직접 진행」이 보이고, 그 길은 없다.
@@ -1967,8 +1967,8 @@
       if (!st) return "";
       var row = function (k, v) { return v ? '<span><b>' + k + '</b> ' + esc(v) + '</span>' : ""; };
       return '<div class="ms-summary"><div class="ms-by">전략 설계 · ' + (st.written_by === "human" ? "사람이 씀" : "AI가 씀") + '</div>' +
-        row("핵심 메시지", st.one_message) + row("인사이트", st.insight) + row("강점(USP)", st.usp) +
-        row("톤", st.tone) + row("그 외 필요한 사항", st.direction) + "</div>";
+        row("핵심 메시지", st.one_message) + row("그 외 필요한 사항", st.direction) +
+        '<span class="ms-more">인사이트·강점·톤 전문은 위 「전략 설계」 칸</span></div>';
     }
 
     /** 사람이 전략을 쓰는 양식 (074). 있던 전략이 있으면 채워 둔다 — 고쳐 쓰기 쉽게. */
@@ -1994,15 +1994,20 @@
 
     /** 사람이 콘셉트를 쓰는 양식 (073). 쓰는 법 안내를 같이 둔다. */
     function manualConceptForm(p) {
+      var mf = function (k, label, ph, rows) {
+        return '<label class="ms-field"><span>' + esc(label) + "</span>" + (rows
+          ? '<textarea data-mc="' + k + '" rows="' + rows + '" placeholder="' + esc(ph) + '"></textarea>'
+          : '<input data-mc="' + k + '" placeholder="' + esc(ph) + '">') + "</label>";
+      };
       var one = function (i) {
         var k = "ABCDE"[i];
         return '<fieldset class="mc-one"><legend>' + k + '안</legend>' +
-          '<input data-mc="title" placeholder="제목 — 발상을 한 마디로">' +
-          '<input data-mc="client_one_line" placeholder="한 줄 설명 — 광고주가 읽는 말 (필수)">' +
-          '<textarea data-mc="client_explain" rows="2" placeholder="어떤 광고인가 — 쉬운 말로 두세 줄"></textarea>' +
-          '<input data-mc="client_appeal" placeholder="매력 — 왜 기억에 남나">' +
-          '<input data-mc="client_mood" placeholder="분위기 — 예: 유쾌하고 시원한">' +
-          '<input data-mc="client_difference" placeholder="다른 안과 다른 점">' +
+          mf("title", "제목", "발상을 한 마디로") +
+          mf("client_one_line", "한 줄 설명 (필수)", "광고주가 읽는 말") +
+          mf("client_explain", "어떤 광고인가", "쉬운 말로 두세 줄", 2) +
+          mf("client_appeal", "매력", "왜 기억에 남나") +
+          mf("client_mood", "분위기", "예: 유쾌하고 시원한") +
+          mf("client_difference", "다른 안과 다른 점", "") +
           '<label class="mc-reco"><input type="radio" name="mc-reco-' + esc(p.id) + '" value="' + i + '"' + (i === 0 ? " checked" : "") + '> 추천안</label>' +
           "</fieldset>";
       };
@@ -2012,7 +2017,7 @@
         "<span>· 광고주가 읽는 칸은 쉬운 말로, 포인트만 — 초·컷·카메라·전환·BGM·엔딩 같은 제작 용어는 쓰지 않는다(올릴 때 막힌다)</span>" +
         "<span>· 가진 자료 안에서 되는 발상만 — 광고주에게 새 자료를 요구하지 않는다</span>" +
         "<span>· 한 안만 써도 된다. 빈 안은 올라가지 않는다. 추천안은 하나</span></div>" +
-        '<input class="mc-msg" data-mc-msg placeholder="이 광고가 남길 한마디(선택) — 예: 톡 쏘면, 오늘이 다시 켜진다">' +
+        '<label class="ms-field"><span>이 광고가 남길 한마디 (선택)</span><input class="mc-msg" data-mc-msg placeholder="예: 톡 쏘면, 오늘이 다시 켜진다"></label>' +
         [0, 1, 2, 3, 4].map(one).join("") +
         '<button class="btn" type="button" data-mc-save="' + esc(p.id) + '">콘셉트 올리기 → 검토</button></div>';
     }
@@ -2732,7 +2737,7 @@
       facts: factsBody + materialList(p) + (p.step === "facts" ? '<div class="plan-wrap">' + productionAction + "</div>" : ""),
       strategy: strategyBody + (p.step === "strategy" ? '<div class="plan-wrap">' + productionAction + "</div>" : ""),
       concepts: (p.step === "concepts" && !(p.concepts && p.concepts.length) ? '<div class="plan-wrap">' + productionAction + "</div>" : "") + conceptReview +
-        (p.step === "concepts" && p.state === "pending" && canWrite && p.concepts && p.concepts.length ? "" : check),
+        (p.step === "concepts" && p.state === "pending" && (!(p.concepts && p.concepts.length) || canWrite) ? "" : check),
       develop: developBody,
       // 새 흐름이 도는 동안에는 「컷 설계 보기」 링크를 띄우지 않는다 —
       // 검수할 컷 목록이 바로 아래 펼쳐져 있는데 같은 곳으로 가는 링크가 또 있으면
