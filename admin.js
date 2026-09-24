@@ -1488,6 +1488,17 @@
         '<button class="btn ghost" type="button" data-lc="back"' + tag +
         ">취소 · 전 단계로</button>");
     }
+    // 광고주가 「고쳐주세요」를 눌렀다 — 기다리는 중이 아니라 우리 차례다 (09-24)
+    var clientRedo = p.redo && p.redo.gate === "storyboard" && p.redo.decision === "revise" && !p.redoDone ? p.redo : null;
+    if (act.phase === "final.done" && clientRedo) {
+      return sheetHtml + '<div class="lc lc-review"' + tag + ">" +
+        head("광고주가 콘티 수정을 요청했습니다", when(clientRedo.decided_at) + " · 아래 말로 다시 그립니다") +
+        '<textarea class="lc-note" data-lc-note rows="3">' + esc(clientRedo.note || "") + "</textarea>" +
+        '<div class="lc-row"><button class="btn" type="button" data-lc="back"' + tag +
+        ">광고주 요청대로 다시 그리기</button></div>" +
+        '<span class="lc-msg">누르면 광고주 화면의 콘티를 내리고 「콘티 뽑기」가 뜹니다 — 적힌 말이 그림 지시에 들어갑니다(필요하면 고쳐 적으세요)</span>' +
+        '<span class="lc-msg" data-lc-msg></span></div>';
+    }
     if (act.phase === "final.done") {
       return sheetHtml + '<div class="lc lc-approved"' + tag + ">" +
         head("광고주에게 보냈습니다 — 광고주 확인 기다리는 중", "광고주가 「콘티 승인」을 누르면 영상 단계로 넘어갑니다") +

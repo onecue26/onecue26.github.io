@@ -869,7 +869,15 @@
         ap.disabled = false; ap.textContent = "실패 — " + e.message;
       });
     });
+    // 「고쳐주세요」는 무엇을 고칠지 적어야 눌린다 — 빈칸이면 우리가 어디를 고칠지 모른다 (09-24)
+    var bn = el("boardNote");
+    if (rv && bn) {
+      var syncRv = function () { rv.disabled = !(bn.value || "").trim(); rv.title = rv.disabled ? "고칠 곳을 적으시면 눌립니다" : ""; };
+      bn.addEventListener("input", syncRv);
+      syncRv();
+    }
     if (rv) rv.addEventListener("click", function () {
+      if (bn && !(bn.value || "").trim()) return;
       rv.disabled = true;
       decideBoard("revise").then(load).catch(function (e) {
         rv.disabled = false; rv.textContent = "실패 — " + e.message;
