@@ -659,9 +659,11 @@
       if (s) out.push(s);
     }
     var p = project || {};
-    if (p.strategy) push([p.strategy.one_message, p.strategy.insight, p.strategy.usp, p.strategy.tone]);
+    // ★ 광고주가 **실제로 보는 칸만** 본다 (09-24) — 전략·body·visual 은 관리자 전용이라 광고주에게 안 나간다.
+    //   그 칸까지 보면 내부 메모의 제작 용어 때문에 보내기가 막혔다(환타 E안 visual 「앵커」).
+    //   콘셉트 카드가 광고주에게 그리는 것 = 제목 · client_* 다섯 · 추천 이유 (shared-stage-renderers.js FIELDS.concept.common)
     (p.concepts || []).forEach(function (c) {
-      push([c.title, c.body, c.hook, c.visual, c.risk, c.reco_reason]);
+      push([c.title, c.client_one_line, c.client_explain, c.client_appeal, c.client_mood, c.client_difference, c.reco_reason]);
     });
     var d = p.development;
     if (d) push([d.arc, d.copies, d.narration_tone, d.slogan]);
