@@ -769,6 +769,21 @@
     return !!(at && new Date(at) > new Date(t.meta.settled_at) && chk && chk.at && new Date(chk.at) > new Date(at));
   }
 
+  /** 반영 대기 중 무엇을 기다리나 — 오더 고치는 중인지, 고쳐 놓고 검사 중인지. 시작 시각·끝날 무렵을 같이 (09-26 Dan 「이렇게 오래 걸린다고?」) */
+  function applyWait(p, s) {
+    var t = newestTakes(p, s).filter(function (f) { return (f.meta || {}).settled_at; })[0];
+    var at = p.render_mode_at;
+    if (t && at && new Date(at) > new Date(t.meta.settled_at)) {
+      return { btn: "다시 뽑기 — 검사 중",
+        msg: "<b>오더를 고쳤습니다 · 콘티 대조·연출 판정 중입니다</b> — " + esc(hhmm(at)) + " 시작 · 보통 5분 · " +
+          esc(hhmm(at, 6)) + "쯤 다시 뽑기가 열립니다(무료). 그 사이 오더를 또 고치면 검사를 처음부터 다시 시작합니다" };
+    }
+    var st = t ? t.meta.settled_at : null;
+    return { btn: "다시 뽑기 — 오더 고치는 중",
+      msg: "<b>답변대로 오더를 고치는 중입니다</b>" + (st ? " — " + esc(hhmm(st)) + " 정함 · 보통 1~2분" : "") +
+        ", 이어서 콘티 대조·연출 판정(보통 5분)이 끝나면 다시 뽑기가 열립니다(무료)" };
+  }
+
   function planReady(p, s) {
     var pick = SE().of(p, s) || {};
     if (!pick.revision_at) return true;      // 처음 뽑는 자리는 해당 없음
@@ -961,8 +976,9 @@
     if (!plan.based_on || !(plan.calls || []).length) return "";
     var c = plan.check;
     if (!c) {
-      return '<div class="pchk wait"><b>콘티 대조 검사 중</b><span>승인된 콘티와 영상 오더·기준 그림 계획을 맞대 보고 있습니다 — ' +
-        "끝나기 전에는 만들기 버튼이 잠깁니다(무료, 보통 몇 분)</span></div>";
+      return '<div class="pchk wait"><b>콘티 대조·연출 판정 중</b><span>승인된 콘티와 영상 오더·기준 그림 계획을 맞대 보고, 프롬프트 전체의 훅·정점·카메라·완급을 봅니다 — ' +
+        (p.render_mode_at ? esc(hhmm(p.render_mode_at)) + " 시작 · 보통 5분 · " + esc(hhmm(p.render_mode_at, 6)) + "쯤 끝. " : "") +
+        "끝나기 전에는 만들기 버튼이 잠깁니다(무료)</span></div>";
     }
     if (c.fixing) {
       return '<div class="pchk wait"><b>지적대로 오더를 고치는 중</b><span>영상 오더 작성기가 다시 쓰고, 끝나면 검사가 다시 돕니다(무료)</span></div>';
@@ -1156,8 +1172,8 @@
         //   위에 수정 요청 칸이 또 있어 같은 말을 두 곳에 나눠 적게 됐다 (Dan 09-25 「합치던지 명확하게 구분」)
         (s === "video" && takeOpen(p, s) && newestTakes(p, s).some(function (f) { return (f.meta || {}).settled_at; }) && !applied(p, s)
           // 답변대로 정했는데 오더가 아직 안 고쳐졌다 — 다시 뽑기를 잠근다 (09-25 환타 v3: 정하고 8초 뒤 옛 오더로 뽑혔다)
-          ? '<span class="lc-msg"><b>답변대로 오더를 고치는 중입니다</b> — 고쳐지고 콘티 대조 검사가 끝나면 다시 뽑기가 열립니다(무료 · 몇 분)</span>' +
-            '<div class="lc-row"><button class="btn" type="button" disabled>다시 뽑기 — 오더 고치는 중</button>'
+          ? '<span class="lc-msg">' + applyWait(p, s).msg + '</span>' +
+            '<div class="lc-row"><button class="btn" type="button" disabled>' + applyWait(p, s).btn + '</button>'
           : s === "video" && takeOpen(p, s) && newestTakes(p, s).some(function (f) { return (f.meta || {}).settled_at; })
           // 답변대로 정하셨다 — 오더는 고쳐졌다. 여기서 다시 뽑거나, 그래도 이 영상으로 승인한다 (한 자리 · 09-25)
           ? '<span class="lc-msg"><b>답변대로 오더를 고쳤습니다</b>' + (checkBlocks(p) ? " — 콘티 대조 검사가 끝나면 다시 뽑기가 열립니다" : " · 콘티 대조 검사 통과") + "</span>" +
