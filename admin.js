@@ -761,6 +761,14 @@
   // 읽을 뿐이고 화면이 값을 지어내지 않는다 — 계획이 없으면 값도 없고,
   // 그때는 「계획이 먼저」라고 말한다.
   /** 고쳐 달라고 하신 뒤에 **계획이 실제로 손봐졌는가.** */
+  /** 정한 답변이 오더에 반영됐는가 — 오더 저장 시각(render_mode_at)이 정한 시각(settled_at)보다 뒤이고, 그 오더로 검사도 끝났는가 */
+  function applied(p, s) {
+    var t = newestTakes(p, s).filter(function (f) { return (f.meta || {}).settled_at; })[0];
+    if (!t) return true;
+    var at = p.render_mode_at, chk = (p.render_plan || {}).check;
+    return !!(at && new Date(at) > new Date(t.meta.settled_at) && chk && chk.at && new Date(chk.at) > new Date(at));
+  }
+
   function planReady(p, s) {
     var pick = SE().of(p, s) || {};
     if (!pick.revision_at) return true;      // 처음 뽑는 자리는 해당 없음
@@ -1146,7 +1154,11 @@
         })() +
         // ★ 영상 단계는 입력칸을 하나로 — 판 옆 「의견」 칸(답변 → 정하기 → 오더 고치기 → 다시 뽑기)으로 모은다.
         //   위에 수정 요청 칸이 또 있어 같은 말을 두 곳에 나눠 적게 됐다 (Dan 09-25 「합치던지 명확하게 구분」)
-        (s === "video" && takeOpen(p, s) && newestTakes(p, s).some(function (f) { return (f.meta || {}).settled_at; })
+        (s === "video" && takeOpen(p, s) && newestTakes(p, s).some(function (f) { return (f.meta || {}).settled_at; }) && !applied(p, s)
+          // 답변대로 정했는데 오더가 아직 안 고쳐졌다 — 다시 뽑기를 잠근다 (09-25 환타 v3: 정하고 8초 뒤 옛 오더로 뽑혔다)
+          ? '<span class="lc-msg"><b>답변대로 오더를 고치는 중입니다</b> — 고쳐지고 콘티 대조 검사가 끝나면 다시 뽑기가 열립니다(무료 · 몇 분)</span>' +
+            '<div class="lc-row"><button class="btn" type="button" disabled>다시 뽑기 — 오더 고치는 중</button>'
+          : s === "video" && takeOpen(p, s) && newestTakes(p, s).some(function (f) { return (f.meta || {}).settled_at; })
           // 답변대로 정하셨다 — 오더는 고쳐졌다. 여기서 다시 뽑거나, 그래도 이 영상으로 승인한다 (한 자리 · 09-25)
           ? '<span class="lc-msg"><b>답변대로 오더를 고쳤습니다</b>' + (checkBlocks(p) ? " — 콘티 대조 검사가 끝나면 다시 뽑기가 열립니다" : " · 콘티 대조 검사 통과") + "</span>" +
             '<div class="lc-row"><button class="btn" type="button" data-lc="rerun"' + tag + (checkBlocks(p) ? " disabled" : "") + ">다시 뽑기 (" + money(plan.credits) + ")</button>" +
