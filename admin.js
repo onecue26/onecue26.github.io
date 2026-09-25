@@ -1135,7 +1135,12 @@
         })() +
         // ★ 영상 단계는 입력칸을 하나로 — 판 옆 「의견」 칸(답변 → 정하기 → 오더 고치기 → 다시 뽑기)으로 모은다.
         //   위에 수정 요청 칸이 또 있어 같은 말을 두 곳에 나눠 적게 됐다 (Dan 09-25 「합치던지 명확하게 구분」)
-        (s === "video" && takeOpen(p, s)
+        (s === "video" && takeOpen(p, s) && newestTakes(p, s).some(function (f) { return (f.meta || {}).settled_at; })
+          // 답변대로 정하셨다 — 오더는 고쳐졌다. 여기서 다시 뽑거나, 그래도 이 영상으로 승인한다 (한 자리 · 09-25)
+          ? '<span class="lc-msg"><b>답변대로 오더를 고쳤습니다</b>' + (checkBlocks(p) ? " — 콘티 대조 검사가 끝나면 다시 뽑기가 열립니다" : " · 콘티 대조 검사 통과") + "</span>" +
+            '<div class="lc-row"><button class="btn" type="button" data-lc="rerun"' + tag + (checkBlocks(p) ? " disabled" : "") + ">다시 뽑기 (" + money(plan.credits) + ")</button>" +
+            '<button class="btn ghost" type="button" data-lc="approve"' + tag + ">그래도 이 영상으로 승인</button>"
+          : s === "video" && takeOpen(p, s)
           ? '<span class="lc-msg"><b>아래 판 옆 의견·답변에서 정해 주세요</b> — 「답변대로 다시 뽑기 준비」와 「이 영상으로 승인」이 거기 있습니다.</span>' +
             '<div class="lc-row">'
           : s === "video"
@@ -3906,6 +3911,9 @@
         var call = what === "choose-ai" ? chooseStageExecutor(slug, step, "ai", "", "")
           : what === "rechoose" ? clearStageChoice(slug, step)
           : what === "start" ? stageStart(slug, step)
+          // 답변대로 정한 뒤 다시 뽑기 — 한 번 누름 = 한 판 (되돌림 기록을 남기고 바로 시작)
+          // ★ 수정 요청 기록을 남기지 않는다 — 남기면 수정 요청 자동 답변(089)이 검사를 통과한 오더를 또 고치려 든다
+          : what === "rerun" ? (window.confirm("다시 뽑습니다. 크레딧이 나갑니다.") ? stageStart(slug, step) : Promise.resolve())
           : what === "approve" ? stageApprove(slug, step)
           : what === "revise" ? stageRevise(slug, step, text)
           : what === "next" ? stageNext(slug, step)
