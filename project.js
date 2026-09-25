@@ -381,9 +381,34 @@
       : /수정|다시/.test(t) ? "st-fix" : "st-run";
   }
 
+  /** 광고주가 남긴 요청 기록 — 「고쳐주세요」·추가 요청 때 쓴 말이 다시 보낸 뒤 화면에서 사라졌다 (Dan 09-25 「본인이 요청한 것은 남겨서 볼 수 있게」)
+   *  지금 고치는 중인 요청은 위 「수정 중」 안내가 이미 보여 주므로 여기서 빼고, 처리가 끝난 것만 쌓는다 */
+  var GATE_OF_BOX = { pick: "concepts", board: "storyboard", making: "video" };
+  function requestLog(key) {
+    var gate = GATE_OF_BOX[key];
+    if (!gate) return "";
+    var mine = APPROVALS.filter(function (a) { return a.gate === gate; });
+    var asks = mine.filter(function (a) { return a.decision === "revise"; });
+    if (!asks.length) return "";
+    var pending = fixing(gate, APPROVALS);
+    var rows = asks.filter(function (a) { return a !== pending; }).map(function (a) {
+      var note = String(a.note || "").trim();
+      var why = "";
+      var m = note.match(/^\[(방향이 맞지 않음|표현이 아쉬움)\]\s*/);
+      if (m) { why = m[1] === "방향이 맞지 않음" ? "공통 기획 방향이 맞지 않아요" : "방향은 좋은데 표현이 아쉬워요"; note = note.slice(m[0].length); }
+      return '<li><span class="rq-when">' + esc(String(a.decided_at || "").slice(0, 16).replace("T", " ")) + "</span>" +
+        (why ? '<span class="rq-why">' + esc(why) + "</span>" : "") +
+        '<span class="rq-note">' + (note ? esc(note).replace(/\n+/g, "<br>") : "(남기신 말 없음)") + "</span>" +
+        '<span class="rq-done">반영해서 다시 보내 드렸습니다</span></li>';
+    });
+    if (!rows.length) return "";
+    return '<details class="rq-log"><summary>요청하신 내용 ' + rows.length + "건</summary><ul>" + rows.join("") + "</ul></details>";
+  }
+
   function box(key, title, state, body, open) {
     body = stripHead(body);
     if (!body.trim()) return "";
+    body += requestLog(key);
     // 닫은 프로젝트(068)의 납품 칸은 펼쳐 두되 「지금 할 일」 강조(빨강)는 빼다
     var closedOpen = key === "done" && P && P.state === "done";
     if (closedOpen) open = false;
@@ -431,13 +456,15 @@
       done: P.step === "deliver" || HAS_FINAL,
     };
     return [
-      box("ask", "의뢰 내용", P.step === "brief" ? "접수됨" : "확정",
+      // ★ 칸 상태는 네 말·네 색만 — 완료(초록) · ○○하실 차례(빨강) · 진행 중(파랑) · 수정 중(주황) (Dan 09-25 「색이나 용어를 통일」)
+      box("ask", "의뢰 내용", P.step === "brief" ? "진행 중" : "완료",
         // 「필요한 자료」는 광고주에게 보이지 않는다 — 가진 자료 안에서 만든다 (Dan 09-24). 관리자 화면에만 참고로
         secBrief(brief, MINE && canEditBrief(P)) + secFiles(assets), now.ask),
       // 콘셉트 — 보내기 전(준비 중)·보낸 뒤(고르실 차례)·고른 뒤(선택 완료) (09-24)
       box("pick", "콘셉트 선택",
-        (concepts || []).some(function (c) { return c.is_chosen; }) ? "선택 완료"
-          : (P.step === "concepts" && P.state === "ready") ? "고르실 차례" : "준비 중",
+        (concepts || []).some(function (c) { return c.is_chosen; }) ? "완료"
+          : (P.step === "concepts" && P.state === "ready") ? "고르실 차례"
+          : fixing("concepts", approvals) ? "수정 중" : "진행 중",
         shown("concepts")
           ? secDirection(strat && Object.assign({ _added: (concepts || []).some(function (c) { return c.batch > 1; }) }, strat)) +
             secConcepts(concepts, MINE && P.step === "concepts" && P.state === "ready")
@@ -454,7 +481,7 @@
         now.design ? secDesigning()
           : (shown("develop") ? '<p class="muted">제작 설계를 마쳤습니다. ' +
             "설계한 컷은 아래 콘티에서 보실 수 있습니다.</p>" : ""), now.design),
-      box("board", "콘티 확인", boardFix ? "수정 중" : now.board ? "확인하실 차례" : "확인 완료",
+      box("board", "콘티 확인", boardFix ? "수정 중" : now.board ? "확인하실 차례" : "완료",
         boardFix ? fixNotice("콘티", boardFix) + (boardOpen ? '<details class="fix-prev"><summary>수정을 요청하신 콘티 보기</summary>' +
             secCuts(cuts, assets) + "</details>" : "")
           : boardOpen ? secCuts(cuts, assets) + boardAsk(P, approvals) : "", now.board || !!boardFix),
@@ -470,7 +497,7 @@
         now.making),
       // 납품 — 관리자가 보내기 전(준비 중) · 보낸 뒤(확인하실 차례) · 승인 뒤(완료)가 다르게 보인다 (065)
       box("done", "납품",
-        P.state === "ready" ? "확인하실 차례" : (P.state === "done" ? "완료" : (P.state === "idle" ? "승인 완료" : "준비 중")),
+        P.state === "ready" ? "확인하실 차례" : (P.state === "done" || P.state === "idle" ? "완료" : "진행 중"),
         P.step !== "deliver" ? ""
           : P.state === "ready" && HAS_FINAL
             ? secFinal(assets) + deliverForm()
