@@ -1111,8 +1111,14 @@
              s === "video"
                ? "수정 요청은 <b>다시 뽑기</b>입니다 — " + money(plan.credits) + "이 또 나갑니다"
                : "고칠 곳을 적으시면 그것만 다시 만듭니다. 승인하면 다음 단계로 갑니다") +
+        // 089 · 질문으로 읽혀 답이 달린 요청 — 검수 자리로 돌아와도 답이 보여야 한다
+        (function () {
+          var se = SE().of(p, s) || {};
+          return se.revision_kind === "question" && !se.revision_at && se.revision_reply && se.revision_note
+            ? revisionBox(se, se.revision_note) : "";
+        })() +
         '<textarea class="lc-note" data-lc-note placeholder="' +
-        esc("수정 요청은 무엇을 고칠지 적어야 보냅니다") + '"></textarea>' +
+        esc("궁금한 점이나 고칠 곳을 적어 주세요 — 질문이면 답만 달고, 고칠 곳이면 계획을 고칩니다") + '"></textarea>' +
         '<div class="lc-row">' +
         '<button class="btn" type="button" data-lc="approve"' + tag + ">승인</button>" +
         '<button class="btn ghost" type="button" data-lc="revise"' + tag + ">수정 요청</button>" +
