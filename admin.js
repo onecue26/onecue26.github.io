@@ -1900,8 +1900,21 @@
         '<span class="sc-lbl">컷 ' + (p.cuts || []).length + '개 · 각본 본문</span>' +
         R().cuts(p.cuts, { role: "admin", textOnly: true }) + "</div>"
       : "";
+    // 087 · 광고 필수 칸 (Dan 09-25 「광고라면 필수」) — 자막·CTA·마무리 컷 필수, 내레이션은 「없음 — 이유」 허용
+    var essentials = hasDevelopment ? (function () {
+      var row = function (label, v, must) {
+        var empty = !String(v || "").trim();
+        return '<div class="ess-row' + (empty ? " miss" : "") + '"><b>' + label + "</b><span>" +
+          (empty ? (must ? "비어 있음 — 광고 필수" : "비어 있음") : esc(v)) + "</span></div>";
+      };
+      return '<div class="ess"><div class="ess-h">광고 필수 요소</div>' +
+        row("자막", d.subtitle_plan, true) + row("CTA", d.cta, true) +
+        row("마무리 컷(히어로샷·엔드카드)", d.end_card, true) + row("내레이션", d.narration_plan, true) +
+        ((d.subtitle_plan || d.cta || d.end_card) ? "" :
+          '<small class="muted">이 건은 필수 칸이 생기기 전(09-25)에 쓴 구성·각본입니다.</small>') + "</div>";
+    })() : "";
     var developBody = hasDevelopment
-      ? '<div class="stage-content">' + R().development({
+      ? '<div class="stage-content">' + essentials + R().development({
           arc: d.arc, copies: d.copies, narration_tone: d.narration_tone,
           slogan: d.slogan, bgm: d.bgm,
         }, ADMIN) + scriptCuts + '</div>'
@@ -2111,6 +2124,12 @@
         fld("flow", "흐름 (선택)", "한 줄에 하나씩", 3) +
         fld("copies", "화면 자막·카피 (선택)", "한 줄에 하나씩", 2) +
         '<label class="ms-field"><span>슬로건 (선택)</span><input data-dv="slogan"></label>' +
+        '<div class="mc-guide"><b>광고 필수 — 비어 있으면 올라가지 않습니다</b>' +
+        "<span>· 자막·CTA·마무리 컷은 「없음」으로 둘 수 없습니다 · 내레이션은 빼도 되지만 「없음 — 이유」를 적습니다</span></div>" +
+        fld("subtitle_plan", "자막 (필수)", "언제 어떤 글자가 뜨나 — 예: 0~3초 '…' · 12~15초 슬로건 '…'") +
+        fld("cta", "CTA (필수)", "보는 사람이 무엇을 하게 할지 — 예: 지금 매장에서 만나 보세요") +
+        fld("end_card", "마무리 컷 · 히어로샷·엔드카드 (필수)", "제품이 가장 또렷한 마지막 장면 + 로고·슬로건·CTA 자리") +
+        fld("narration_plan", "내레이션 (필수 — 없으면 「없음 — 이유」)", "넣을 문장과 시간, 또는 없음 — 이유") +
         [0, 1, 2, 3, 4, 5].map(beat).join("") +
         '<button class="btn" type="button" data-dv-save="' + esc(p.id) + '">구성·각본 올리기 → 콘티 확인</button></div>';
     }
@@ -3595,10 +3614,14 @@
         });
         if (!v.goal) { window.alert("골을 한 줄 써 주십시오."); return; }
         if (!beats.length) { window.alert("비트를 하나 이상 써 주십시오."); return; }
+        if (!v.subtitle_plan || !v.cta || !v.end_card || !v.narration_plan) {
+          window.alert("광고 필수 칸(자막·CTA·마무리 컷·내레이션)을 모두 채워 주십시오. 내레이션을 빼면 「없음 — 이유」로 적습니다."); return;
+        }
         var arc = ["골: " + v.goal].concat(v.must ? ["필수: " + v.must] : []).concat(lines(v.flow));
         b.disabled = true; b.textContent = "올리는 중…";
         db.rpc("onecue_develop_manual", { p_project_id: id,
-          p_development: { arc: arc, copies: lines(v.copies), slogan: v.slogan || "", narration_tone: "" }, p_beats: beats })
+          p_development: { arc: arc, copies: lines(v.copies), slogan: v.slogan || "", narration_tone: "",
+            subtitle_plan: v.subtitle_plan, cta: v.cta, end_card: v.end_card, narration_plan: v.narration_plan }, p_beats: beats })
           .then(function (r) { if (r.error) throw r.error; return load(); })
           .catch(function (e) { b.disabled = false; b.textContent = "구성·각본 올리기 → 콘티 확인"; window.alert("올리지 못했습니다 — " + (e.message || e)); });
       });
@@ -4493,7 +4516,7 @@
               "revision_at,revision_note,ai_job_id")
             .in("project_id", ids),
           // 구성·각본 결과 — 등록되면 그 단계 안에서 상세로 펼친다
-          db.from("developments").select("project_id,arc,copies,narration_tone,slogan,bgm,client_script")
+          db.from("developments").select("project_id,arc,copies,narration_tone,slogan,bgm,client_script,subtitle_plan,cta,end_card,narration_plan")
             .in("project_id", ids),
           // 콘티 컷 — 광고주 화면과 같은 공용 렌더로 같은 구조로 편다.
           // admin_cuts 는 board.js 가 이미 쓰는 관리자용 보기다
