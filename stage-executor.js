@@ -70,6 +70,11 @@
       // 누가 승인했나 — 단계 줄에 아이디로 보인다 (066 · Dan 09-23)
       approved_by: row.approved_by || "",
       revision_at: row.revision_at || null,
+      // 089 — 수정 요청에 작업기가 단 답. 질문이면 revision_at 을 비우고 답만 남는다
+      revision_reply: row.revision_reply || "",
+      revision_kind: row.revision_kind || "",
+      revision_reply_at: row.revision_reply_at || null,
+      revision_reply_for: row.revision_reply_for || null,
       revision_note: row.revision_note || "",
     };
   }
