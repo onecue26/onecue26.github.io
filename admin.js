@@ -784,6 +784,38 @@
         ", 이어서 콘티 대조·연출 판정(보통 5분)이 끝나면 다시 뽑기가 열립니다(무료)" };
   }
 
+  /** 094 · 납품 게이트 — 자동 검수 통과 또는 「이대로 납품」(이유)일 때만 버튼을 켠다. 상태를 말로 보인다 (Dan 09-26) */
+  function deliverGate(p, fin) {
+    if (!fin) return '<div class="lc-box"><b>보낼 완성본이 아직 없습니다</b></div>';
+    var m = fin.meta || {};
+    var name = String(fin.storage_path || "").split("/").pop();
+    var st, cls, open = false, body = "";
+    if (!m.review || m.review === "pending") {
+      st = "검수 중"; cls = "wait";
+      body = "자동 검수(규격·제품 대조·연출)가 끝나면 납품 버튼이 열립니다. 보통 2~5분.";
+    } else if (m.review === "ok" && !(Number(m.critical) > 0)) {
+      st = "납품 가능"; cls = "ok"; open = true;
+      body = "자동 검수 통과" + (m.my_take ? " — " + esc(String(m.my_take).split("\n")[0]) : "");
+    } else if (m.deliver_override_at) {
+      st = "이대로 납품 선택됨"; cls = "warn"; open = true;
+      body = "검수에서 걸린 것이 있지만 관리자가 이대로 보내기로 했습니다 — 「" + esc(m.deliver_override_why || "") + "」 · " + esc(when(m.deliver_override_at));
+    } else {
+      st = "결정 필요"; cls = "bad";
+      body = "검수에서 걸렸습니다" + (Number(m.critical) > 0 ? " · 치명 " + Number(m.critical) + "건" : "") +
+        (m.my_take ? '<div class="dg-take">' + esc(m.my_take) + "</div>" : "") +
+        "고쳐서 새 완성본을 만들거나, 아래에 이유를 적고 「이대로 납품」을 고릅니다.";
+    }
+    return '<div class="lc-box deliver-gate"><b>완성본을 광고주에게 보냅니다</b>' +
+      '<span class="dg-state ' + cls + '">' + esc(st) + "</span>" +
+      '<span class="lc-msg">보낼 판 · ' + esc(name) + " (" + esc(hhmm(fin.created_at)) + ")<br>" + body + "</span>" +
+      (st === "결정 필요"
+        ? '<div class="lc-row"><input type="text" data-override-why="' + esc(fin.id) + '" placeholder="이대로 보내는 이유 (필수)">' +
+          '<button class="btn ghost" type="button" data-override="' + esc(fin.id) + '" disabled>이대로 납품으로 표시</button></div>'
+        : "") +
+      '<div class="lc-row"><button class="btn" type="button" data-final-send="' + esc(p.id) + '"' + (open ? "" : " disabled") +
+      ">" + (open ? "승인하고 광고주에게 납품" : "납품 — " + esc(st)) + "</button></div></div>";
+  }
+
   function planReady(p, s) {
     var pick = SE().of(p, s) || {};
     if (!pick.revision_at) return true;      // 처음 뽑는 자리는 해당 없음
@@ -2165,11 +2197,7 @@
       return (fin ? '<div class="deliver-final"><video src="' + esc(fin.url) +
           '" controls playsinline preload="metadata"></video><small>보낼 완성본 · ' +
           esc(hhmm(fin.created_at)) + ' 판</small></div>' : "") +
-        '<div class="lc-box"><b>완성본을 광고주에게 보냅니다</b>' +
-        '<span class="lc-msg">누르면 가장 새 완성본 한 편이 광고주 화면에 뜨고, 광고주가 확인·승인합니다. ' +
-        '보내기 전까지 광고주에게는 「영상 제작 완료 · 납품을 준비하고 있습니다」로 보입니다.</span>' +
-        '<div class="lc-row"><button class="btn" type="button" data-final-send="' + esc(p.id) +
-        '">승인하고 광고주에게 납품</button></div></div>' + backBox(p);
+        deliverGate(p, fin) + backBox(p);
     }
 
     /** 앞 단계로 되돌리기 — 마지막 검수에서도 고칠 수 있게 (067 · Dan 09-23).
@@ -2834,7 +2862,28 @@
             (m.made_why ? '<span class="madewhy">' + esc(m.made_why) + "</span>" : "") +
             addedLater(p, step, f) +
             verdictOf(f, isOld) +
+            (isOld ? pastTalk(f) : "") +
             "</figcaption></figure>";
+      }
+
+      /** ★ 09-26 — 지난 판에도 **그 판에서 오간 말을 전부** 남긴다: 검수 의견 · 사장님 의견 · 우리 답변 · 정한 시각.
+       *  지난 버전으로 접히면서 아무것도 안 보였다 (Dan: 「지난 버전에 우리가 작성하고 답변한 내용 전부 남기게」).
+       *  읽기 전용 — 지난 판에서는 정할 것을 주지 않는다. */
+      function pastTalk(f) {
+        var m = f.meta || {};
+        var rows = [];
+        if (m.my_take) rows.push(["검수 의견" + (m.reviewer ? " · " + m.reviewer : ""), m.my_take]);
+        (m.findings || []).forEach(function (x) {
+          if (x && x.what) rows.push([(x.level === "critical" ? "치명" : "지적") + (x.where ? " · " + x.where : ""), x.what + (x.fix ? " → " + x.fix : "")]);
+        });
+        if (m.dan_take) rows.push(["사장님 의견" + (m.dan_take_at ? " · " + when(m.dan_take_at) : ""), m.dan_take]);
+        if (m.our_reply) rows.push(["우리 답변" + (m.our_reply_at ? " · " + when(m.our_reply_at) : ""), m.our_reply]);
+        if (m.settled_at) rows.push(["정함", "「이 답변대로」 · " + when(m.settled_at)]);
+        if (!rows.length) return "";
+        return '<details class="past-talk" open><summary>이 판에서 오간 기록 ' + rows.length + '건</summary>' +
+          rows.map(function (r) {
+            return '<div class="pt-row"><b>' + esc(r[0]) + '</b><span>' + esc(r[1]) + "</span></div>";
+          }).join("") + "</details>";
       }
 
       /** ★ 승인 **뒤에** 들어온 자료는 「보충」이라고 말한다.
@@ -3829,6 +3878,26 @@
             b.disabled = false; b.textContent = "프로젝트 완료";
             window.alert("닫지 못했습니다 — " + (e.message || e));
           });
+      });
+    });
+    // 094 · 「이대로 납품」 — 이유를 적어야 눌린다
+    document.querySelectorAll("[data-override-why]").forEach(function (inp) {
+      var b = document.querySelector('[data-override="' + inp.dataset.overrideWhy + '"]');
+      inp.addEventListener("input", function () { if (b) b.disabled = !inp.value.trim(); });
+    });
+    document.querySelectorAll("[data-override]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var inp = document.querySelector('[data-override-why="' + b.dataset.override + '"]');
+        var why = inp ? inp.value.trim() : "";
+        if (!why) return;
+        b.disabled = true; b.textContent = "표시하는 중…";
+        db.rpc("onecue_final_override", { p_asset_id: b.dataset.override, p_why: why }).then(function (r) {
+          if (r.error) throw r.error;
+          return load();
+        }).catch(function (e) {
+          b.disabled = false; b.textContent = "이대로 납품으로 표시";
+          window.alert("표시하지 못했습니다 — " + (e.message || e));
+        });
       });
     });
     // 납품 — 광고주 발송. 되돌릴 수 없으니 한 번 더 묻는다
