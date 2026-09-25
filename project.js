@@ -713,6 +713,12 @@
 
   function secCuts(cuts, assets) {
     if (!cuts || !cuts.length) return "";
+    // ★ 광고주에게 나간 콘티만 — 승인됐고 교체되지 않은 것 (09-25 Dan: 관리자 계정으로 광고주 화면을 열자
+    //   버린 첫 판 시트가 「한 장으로 보기」에 떴다). 광고주 계정은 서버가 이미 걸러 주지만, 관리자·읽기 전용
+    //   계정은 전부 받는다 — 누가 열어도 같은 화면이어야 한다
+    assets = (assets || []).filter(function (a) {
+      return a.kind !== "board" || (a.approved === true && !(a.meta || {}).superseded);
+    });
     var board = {}, anchor = {}, clips = [];
     (assets || []).forEach(function (a) {
       if (a.kind === "clip") { clips.push(a); return; }
