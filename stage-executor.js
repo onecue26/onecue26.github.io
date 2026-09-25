@@ -333,10 +333,13 @@
     if (!pick.chosen_at) return "choose";
     // 시작의 증거는 둘 중 하나다 — AI 는 만들어진 작업, 사람은 시작 시각.
     // 작업 큐에 지금 이 단계가 돌고 있으면 그것도 시작이다(기록보다 현실이 먼저다).
-    var running = !!(project.job && project.job.step === step);
+    // ★ 유료 단계(제작 자료·영상)는 큐의 작업이 「시작」이 아니다 — 앞 단계 승인(onecue_decide)이 자리표시로
+    //   작업을 하나 넣어 두지만 아무도 집지 않는다. 그걸 시작으로 읽어 「만드는 중」을 띄우고 만들기 버튼을
+    //   숨겼다 (09-25 환타: AI에게 맡기기를 누르자 버튼 없이 「만드는 중」). 유료 단계는 눌렀다는 기록만 본다
+    var running = !!(project.job && project.job.step === step) && !isPaid(step);
     var started = pick.mode === "human"
       ? !!pick.started_at
-      : (!!pick.ai_job_id || running);
+      : (!!pick.ai_job_id || !!pick.started_at || running);
     return started ? "working" : "start";
   }
 
