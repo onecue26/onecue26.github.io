@@ -967,6 +967,20 @@
       (n.look_why ? " — " + esc(n.look_why) : "") + "</span>";
   }
 
+  /** 089 · 수정 요청 칸의 글과 작업기의 답 — 질문이면 답만 달고 요청을 거둔다(승인 버튼이 다시 뜬다) (Dan 09-25 「사이트 통해서 처리되게」) */
+  function revisionBox(se, note) {
+    var asked = se.revision_kind === "question" && !se.revision_at;
+    var answered = se.revision_reply && (asked || se.revision_reply_for === se.revision_at);
+    var tag = { question: "질문으로 읽었습니다 — 다시 만들지 않습니다", fix: "고쳐 달라는 요청으로 읽었습니다 — 계획을 고쳤습니다",
+      unclear: "무엇을 원하시는지 확인이 필요합니다" }[se.revision_kind] || "";
+    return '<div class="redo-note"><b>' + (asked ? "물어보신 것" : "고쳐 달라고 적으신 것") + "</b>" +
+      "<span>" + esc(note) + "</span></div>" +
+      (answered
+        ? '<div class="redo-reply"><b>제작 쪽 답변</b>' + (tag ? "<em>" + esc(tag) + "</em>" : "") +
+          "<span>" + esc(se.revision_reply).replace(/\n+/g, "<br>") + "</span></div>"
+        : se.revision_at ? '<div class="redo-reply wait"><b>제작 쪽이 읽고 답을 쓰는 중</b><span>질문이면 답만 달고, 고쳐 달라는 말이면 계획을 고칩니다(무료 · 몇 분)</span></div>' : "");
+  }
+
   function paidBody(p, s, act) {
     if (!canWrite) {
       var pl = act && act.plan;
@@ -1029,9 +1043,7 @@
         ((SE().of(p, s) || {}).directions
           ? '<div class="redo-note"><b>사장님 요청사항 — 이대로 만듭니다</b><span>' +
             esc((SE().of(p, s) || {}).directions) + "</span></div>" : "") +
-        (again && note
-          ? '<div class="redo-note"><b>고쳐 달라고 적으신 것</b>' +
-            "<span>" + esc(note) + "</span></div>" : "") +
+        (again && note ? revisionBox(SE().of(p, s) || {}, note) : "") +
         // ★ 수정 요청 글은 **프롬프트를 바꾸지 않는다.** 생성은 계획에 적힌
         //   문장을 그대로 돌린다(035). 계획을 안 고치고 다시 누르면 **같은
         //   문장으로 같은 값이 또 나간다.**
@@ -1063,10 +1075,12 @@
         //   없었다 — 의견 저장 말고는 누를 것이 없었다 (Dan 2026-09-23:
         //   「의견 저장 말고는 버튼이없다 승인버튼이」). 승인은 돈을 쓰지 않으므로
         //   의견 절차 잠금과 무관하게 연다.
-        (again && !takeOpen(p, s) && newestTakes(p, s).some(function (f) {
+        // ★ 제작 자료(기준 그림)는 자동 검수가 붙지 않는다 — 검수 결과를 기다리면 승인 버튼이 영영 안 떴다
+        //   (09-25 환타: 질문을 「수정 요청」으로 넣자 다시 만들기만 남고 승인할 길이 없었다). 그림은 관리자가 보고 정한다
+        (again && !takeOpen(p, s) && (s === "anchors" ? newestTakes(p, s).length > 0 : newestTakes(p, s).some(function (f) {
           var rv = (f.meta || {}).review;
           return rv && rv !== "pending";
-        })
+        }))
           ? '<button class="btn ghost" type="button" data-lc="approve"' + tag +
             ">이대로 승인</button>"
           : "") +
@@ -4571,7 +4585,7 @@
               //     옛 수정 요청 시각까지 밀렸고, **이미 죽은 2판이 「지금 판」으로
               //     되살아났다** (Dan: 「V2랑 V3 둘다 아래쪽에 잇어서 몰랏네」).
               "chosen_at,started_at,pressed_at,approved_at,approved_by,directions,directions_at," +
-              "revision_at,revision_note,ai_job_id")
+              "revision_at,revision_note,ai_job_id,revision_reply,revision_kind,revision_reply_at,revision_reply_for")
             .in("project_id", ids),
           // 구성·각본 결과 — 등록되면 그 단계 안에서 상세로 펼친다
           db.from("developments").select("project_id,arc,copies,narration_tone,slogan,bgm,client_script,subtitle_plan,cta,end_card,narration_plan")
