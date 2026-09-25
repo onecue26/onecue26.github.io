@@ -572,7 +572,18 @@
         var paidAt = (paidStage && i === current)
           ? SE().phase(p, s.key, !!(p.stageResults && p.stageResults[s.key]))
           : "";
-        var paidBadge = paidAt === "review"
+        // ★ 검수 자리에서는 판의 의견·답변 상태를 머리에 그대로 말한다 (09-25 Dan 「의견 남겼는데 상태창이 안 변했다」)
+        var takeState = paidAt === "review" ? (function () {
+          var t = newestTakes(p, s.key).filter(function (f) { return !(f.meta || {}).material; });
+          var m = (t[0] || {}).meta || {};
+          if (m.spec_fail) return '<em class="ai-update choice">규격 틀림 · 다시 뽑기 필요</em>';
+          if (!m.dan_take) return "";
+          if (!m.our_reply) return '<em class="ai-update working">의견 받음 · 답변 쓰는 중</em>';
+          if (!m.settled_at) return '<em class="ai-update choice">답변 확인하실 차례</em>';
+          return '<em class="ai-update choice">답변대로 고침 · 다시 뽑기 차례</em>';
+        })() : "";
+        var paidBadge = takeState ? takeState
+          : paidAt === "review"
             ? '<em class="ai-update done">생성 완료 · 검수 대기</em>'
           : paidAt === "working"
             ? '<em class="ai-update working">만드는 중</em>'
