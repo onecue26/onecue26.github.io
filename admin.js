@@ -1125,7 +1125,7 @@
       return '<div class="lc lc-review"' + tag + ">" +
         head(s === "anchors" ? "제작 자료를 검수해 주세요" : "영상을 검수해 주세요",
              s === "video"
-               ? "수정 요청은 <b>다시 뽑기</b>입니다 — " + money(plan.credits) + "이 또 나갑니다"
+               ? "괜찮으면 승인 · 고칠 곳은 아래 의견 칸에 — 다시 뽑으면 " + money(plan.credits) + "이 또 나갑니다"
                : "고칠 곳을 적으시면 그것만 다시 만듭니다. 승인하면 다음 단계로 갑니다") +
         // 089 · 질문으로 읽혀 답이 달린 요청 — 검수 자리로 돌아와도 답이 보여야 한다
         (function () {
@@ -1133,11 +1133,16 @@
           return se.revision_kind === "question" && !se.revision_at && se.revision_reply && se.revision_note
             ? revisionBox(se, se.revision_note) : "";
         })() +
-        '<textarea class="lc-note" data-lc-note placeholder="' +
-        esc("궁금한 점이나 고칠 곳을 적어 주세요 — 질문이면 답만 달고, 고칠 곳이면 계획을 고칩니다") + '"></textarea>' +
-        '<div class="lc-row">' +
-        '<button class="btn" type="button" data-lc="approve"' + tag + ">승인</button>" +
-        '<button class="btn ghost" type="button" data-lc="revise"' + tag + ">수정 요청</button>" +
+        // ★ 영상 단계는 입력칸을 하나로 — 판 옆 「의견」 칸(답변 → 정하기 → 오더 고치기 → 다시 뽑기)으로 모은다.
+        //   위에 수정 요청 칸이 또 있어 같은 말을 두 곳에 나눠 적게 됐다 (Dan 09-25 「합치던지 명확하게 구분」)
+        (s === "video"
+          ? '<span class="lc-msg">고칠 곳·궁금한 점은 <b>아래 판 옆 「의견」 칸</b>에 적어 주세요 — 제작 쪽 답변이 달리고, 정하시면 오더를 고쳐 다시 뽑습니다.</span>' +
+            '<div class="lc-row"><button class="btn" type="button" data-lc="approve"' + tag + ">승인</button>"
+          : '<textarea class="lc-note" data-lc-note placeholder="' +
+            esc("궁금한 점이나 고칠 곳을 적어 주세요 — 질문이면 답만 달고, 고칠 곳이면 계획을 고칩니다") + '"></textarea>' +
+            '<div class="lc-row">' +
+            '<button class="btn" type="button" data-lc="approve"' + tag + ">승인</button>" +
+            '<button class="btn ghost" type="button" data-lc="revise"' + tag + ">수정 요청</button>") +
         "</div>" +
         '<span class="lc-msg" data-lc-msg></span></div>';
     }
