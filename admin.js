@@ -927,6 +927,15 @@
     return !(plan.check && plan.check.ok_to_generate === true);
   }
 
+  /** 영상 단계에서 물리는 준비물 — 제작 자료 단계에서 승인된 것. 작은 그림 한 줄로만 */
+  function usedAnchors(p) {
+    var ok = (p.files || []).filter(function (f) { return f.kind === "anchor" && f.approved && f.url && !isMaterial(f); });
+    if (!ok.length) return "";
+    return '<div class="used-anchors"><b>이 영상에 물리는 준비물</b>' + ok.map(function (f) {
+      return '<img src="' + esc(f.url) + '" data-big="' + esc(f.url) + '" data-kind="img" alt="" title="' + esc(f.role || "") + '">';
+    }).join("") + "<span>제작 자료 단계에서 승인됨</span></div>";
+  }
+
   /** 088 · 콘티 대조 검사 결과 — 승인된 콘티 ↔ 영상 오더·기준 그림 계획 (Dan 09-25 「사이트가 잡아내야」) */
   function checkBox(p) {
     var plan = p.render_plan || {};
@@ -950,6 +959,11 @@
       : high.length && !c.accepted_at ? "콘티와 어긋난 곳 " + high.length + "건 — 고치기 전에는 만들기 버튼이 잠깁니다"
       : high.length ? "콘티와 어긋난 곳 " + high.length + "건 — 관리자가 보고 「그대로 진행」했습니다"
       : "콘티 대조 검사 통과 — 작은 차이 " + issues.length + "건";
+    if (!(high.length && !c.accepted_at)) {     // 통과 — 한 줄로, 상세는 접어서
+      return '<details class="pchk ok"><summary><b>' + head + "</b></summary>" +
+        '<span class="pchk-when">검사 ' + esc(when(c.at)) + " · 승인된 콘티 그림을 먼저 받아 적은 뒤 계획과 맞댐</span>" +
+        (issues.length ? "<ul>" + issues.map(row).join("") + "</ul>" : "") + "</details>";
+    }
     return '<div class="pchk ' + (high.length && !c.accepted_at ? "bad" : "ok") + '"><b>' + head + "</b>" +
       '<span class="pchk-when">검사 ' + esc(when(c.at)) + " · 승인된 콘티 그림을 먼저 받아 적은 뒤 계획과 맞댐</span>" +
       (issues.length ? "<ul>" + high.concat(issues.filter(function (i) { return i.severity !== "high"; })).map(row).join("") + "</ul>" : "") +
@@ -2430,7 +2444,9 @@
 
     function paidStageBody(p, step) {
       var here = p.step === step;
-      var chk = here ? checkBox(p) : "";
+      // ★ 단계에 들어오면 「누가 맡습니까」가 맨 먼저다. 검사 결과·준비물은 고른 뒤 만들기 버튼 위에 (09-25 Dan)
+      var picked = !!(SE().of(p, step) || {}).chosen_at;
+      var chk = here && picked ? checkBox(p) + (step === "video" ? usedAnchors(p) : "") : "";
       var buttons = "";
       if (here) {
         var act = SE().actions(p, step, !!(p.stageResults && p.stageResults[step]));
@@ -2460,7 +2476,9 @@
       });
       if (!wants) return "";
       var got = (p.files || []).filter(function (f) {
-        if (f.kind !== "anchor" || !f.url || isMaterial(f)) return false;
+        // ★ 제작 자료 단계에서 만들고 승인한 준비물은 이미 끝난 일이다 — 영상 단계에 「나왔습니다」로 크게 다시 띄우지 않는다
+        //   (09-25 Dan 「이게 나올 필요가 있냐」 — 누가 맡을지 고르기도 전에 사무실 사진이 크게 떴다)
+        if (f.kind !== "anchor" || !f.url || isMaterial(f) || f.approved) return false;
         var made = f.created_at || (f.meta || {}).made_at;
         return !!made && (!mark || String(made) > String(mark));
       }).sort(function (x, y) {
