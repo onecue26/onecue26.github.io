@@ -4636,7 +4636,7 @@
             .select("project_id,key,title,client_one_line,client_explain," +
               "client_appeal,client_mood,client_difference," +
               "axis,body,hook,visual,payoff,risk," +
-              "is_recommended,reco_reason,is_chosen,batch")
+              "is_recommended,reco_reason,is_chosen,batch,tags")
             .in("project_id", ids),
           db.from("jobs").select("project_id,response,finished_at").eq("state", "ok")
             .in("project_id", ids).order("finished_at", { ascending: false }),

@@ -33,7 +33,7 @@
       common: ["key", "title", "client_one_line", "client_explain",
         "client_appeal", "client_mood", "client_difference",
         "is_chosen", "is_recommended", "reco_reason"],
-      admin: ["axis", "body", "hook", "visual", "payoff", "risk"],
+      admin: ["axis", "body", "hook", "visual", "payoff", "risk", "tags"],
     },
     development: {
       common: ["arc", "copies", "narration_tone", "slogan", "bgm"],
@@ -260,7 +260,13 @@
 
     // 관리자만 보는 내부 원문. 콘셉트를 다시 쓸 때 근거가 되는 자리라 지우지 않는다.
     var flow = timeline(row.body);
+    // 092 · 장르·구조·유형·룩 태그 — 분류표(genre_library/genre.py) id. 관리자 전용
+    var tg = row.tags && typeof row.tags === "object" ? row.tags : null;
+    var tagLine = tg ? ["genre", "structure", "type", "look"].filter(function (k) { return has(tg[k]); })
+      .map(function (k) { return esc(text(tg[k])); }).join(" · ") : "";
     var internal =
+      (tagLine ? part("tags", "장르·결", "<span>" + tagLine +
+        (has(tg.why) ? " — " + esc(text(tg.why)) : "") + "</span>") : "") +
       (has(row.axis) ? part("axis", "내부 축", "<span>" + esc(text(row.axis)) + "</span>") : "") +
       (flow.lead ? part("full", "내부 원문", paragraphs(flow.lead, "stage-para", 3)) : "") +
       (flow.steps.length ? part("time", "내부 시간표", timelineList(flow.steps)) : "") +
