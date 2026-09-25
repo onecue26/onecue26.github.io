@@ -4447,7 +4447,9 @@
           db.from("approvals").select("project_id,gate,decision,note,decided_at,decided_by")
             .in("project_id", ids).order("decided_at", { ascending: false }),
           // 우리가 마지막으로 넘긴 시각 — 광고주 말을 처리했는지 가르는 기준
-          db.from("events").select("project_id,ts,payload").eq("kind", "sent")
+          // ★ 콘티 보내기는 「board_sent」를 남긴다 — 「sent」만 보면 콘티를 다시 보내도 광고주 수정 요청이
+          //   「처리 전」으로 남았다 (09-25 환타: 그림 그대로 다시 보내기를 눌렀는데 관리자 화면이 그대로)
+          db.from("events").select("project_id,ts,payload").in("kind", ["sent", "board_sent"])
             .in("project_id", ids).order("ts", { ascending: false }),
           db.from("events").select("project_id,kind,to_step,ts,payload")
             .in("kind", ["production_enroll_requested", "production_enrolled", "astra_draft",
