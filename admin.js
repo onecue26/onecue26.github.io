@@ -1135,7 +1135,10 @@
         })() +
         // ★ 영상 단계는 입력칸을 하나로 — 판 옆 「의견」 칸(답변 → 정하기 → 오더 고치기 → 다시 뽑기)으로 모은다.
         //   위에 수정 요청 칸이 또 있어 같은 말을 두 곳에 나눠 적게 됐다 (Dan 09-25 「합치던지 명확하게 구분」)
-        (s === "video"
+        (s === "video" && takeOpen(p, s)
+          ? '<span class="lc-msg"><b>아래 판 옆 의견·답변에서 정해 주세요</b> — 「답변대로 다시 뽑기 준비」와 「이 영상으로 승인」이 거기 있습니다.</span>' +
+            '<div class="lc-row">'
+          : s === "video"
           ? '<span class="lc-msg">고칠 곳·궁금한 점은 <b>아래 판 옆 「의견」 칸</b>에 적어 주세요 — 제작 쪽 답변이 달리고, 정하시면 오더를 고쳐 다시 뽑습니다.</span>' +
             '<div class="lc-row"><button class="btn" type="button" data-lc="approve"' + tag + ">승인</button>"
           : '<textarea class="lc-note" data-lc-note placeholder="' +
@@ -2921,8 +2924,14 @@
             '<p class="thread-now"><b>이 답변대로 가시겠습니까.</b>' +
             "<span>괜찮으시면 아래를 누르십시오. 그때 다시 뽑기가 열립니다. " +
             "아니면 의견을 더 적어 주십시오 — 다시 답을 답니다.</span></p>" +
-            '<button class="btn" data-take-settle="' + esc(f.id) + '">' +
-            "이 답변대로 갑니다</button>" + writeBox(f, m, true) + "</div>";
+            // ★ 결정은 여기 한 자리 — 「답변대로 고쳐 다시 뽑기」와 「그대로 승인」을 나란히 (Dan 09-25 「승인이랑 다시 뽑기랑 뭔 차이야 통일하라니까」)
+            '<div class="lc-row"><button class="btn" data-take-settle="' + esc(f.id) + '">' +
+            "이 답변대로 — 오더 고치고 다시 뽑기 준비</button>" +
+            (step === "video"
+              ? '<button class="btn ghost" type="button" data-lc="approve" data-slug="' + esc(p.slug) + '" data-step="video">' +
+                "그래도 이 영상으로 승인</button>" : "") + "</div>" +
+            '<span class="lc-msg">다시 뽑기는 오더를 고친 뒤 위에서 한 번 더 누르셔야 시작됩니다(돈은 그때 나갑니다). 승인하면 이 영상으로 후반 작업을 시작합니다.</span>' +
+            writeBox(f, m, true) + "</div>";
         }
 
         // ④ 정해졌다 — 이제 다시 뽑기가 열린다
