@@ -959,6 +959,14 @@
         : "") + "</div>";
   }
 
+  /** 인물 앵커의 룩(스튜디오·스냅)과 고른 이유 — 우리가 고르고 여기에 적는다 (Dan 09-25) */
+  function lookLine(n) {
+    if (n.kind_of !== "person" && !n.look) return "";
+    var name = { studio: "스튜디오", snap: "스냅" }[n.look] || n.look || "";
+    return '<span class="look-line">시댄스 2.5 인물 앵커(3칸 · 머리 없는 전신 정면 · 전신 후면 · 얼굴) · 룩 <b>' + esc(name) + "</b>" +
+      (n.look_why ? " — " + esc(n.look_why) : "") + "</span>";
+  }
+
   function paidBody(p, s, act) {
     if (!canWrite) {
       var pl = act && act.plan;
@@ -993,7 +1001,7 @@
       ? '<ul class="need-list">' + plan.needs.map(function (n) {
         return "<li><b>" + esc(n.what || n.kind) + "</b>" +
           (n.credits_estimate ? '<em class="c">' + n.credits_estimate + " 크레딧</em>" : "") +
-          (n.why ? '<span class="why">' + esc(n.why) + "</span>" : "") + "</li>";
+          (n.why ? '<span class="why">' + esc(n.why) + "</span>" : "") + lookLine(n) + "</li>";
       }).join("") + "</ul>"
       : "";
 
@@ -2392,7 +2400,7 @@
           .sort(function (x, y) { return String(y.created_at).localeCompare(String(x.created_at)); })[0];
         var st = !made ? "만들 차례" : made.approved ? "승인됨" : "검토 차례";
         return "<span><b>" + esc(n.id + " · " + (n.what || "")) + "</b> — " + esc(n.why || "") +
-          ' <em class="ms-more">' + esc(String(n.credits_estimate || 0)) + "cr · " + st + "</em></span>";
+          ' <em class="ms-more">' + esc(String(n.credits_estimate || 0)) + "cr · " + st + "</em>" + lookLine(n) + "</span>";
       };
       var sum = needs.reduce(function (a, n) { return a + (Number(n.credits_estimate) || 0); }, 0);
       return '<div class="ms-summary"><div class="ms-by">제작 자료 계획 — 영상보다 먼저 만드는 기준 그림 ' + needs.length +
