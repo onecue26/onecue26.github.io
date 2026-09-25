@@ -2731,7 +2731,9 @@
           //   Dan: 「검수결과가 나오고 한꺼번에 올라와야지」
           //   그동안은 버튼 옆에 「몇 시에 나왔고 언제쯤 올라온다」만 적는다.
           if (unreviewed(f)) return false;
-          if (rank[f.id] === 0) return true;
+          // ★ 09-26 — 다시 뽑기를 누르신 뒤면 가장 새 판도 지난 버전이다. 새 판이 만들어지는 동안
+          //   「지금 v5」로 남아 있었다 (Dan: 「이거 누르면 이전 버전은 자동으로 지난 버전 쪽으로」)
+          if (rank[f.id] === 0 && !superseded(p, step, f)) return true;
           older.push(f);
           return false;
         }
