@@ -396,7 +396,7 @@
       var why = "";
       var m = note.match(/^\[(방향이 맞지 않음|표현이 아쉬움)\]\s*/);
       if (m) { why = m[1] === "방향이 맞지 않음" ? "공통 기획 방향이 맞지 않아요" : "방향은 좋은데 표현이 아쉬워요"; note = note.slice(m[0].length); }
-      return '<li><span class="rq-when">' + esc(String(a.decided_at || "").slice(0, 16).replace("T", " ")) + "</span>" +
+      return '<li><span class="rq-when">' + esc(a.decided_at ? new Date(a.decided_at).toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 16) : "") + "</span>" +
         (why ? '<span class="rq-why">' + esc(why) + "</span>" : "") +
         '<span class="rq-note">' + (note ? esc(note).replace(/\n+/g, "<br>") : "(남기신 말 없음)") + "</span>" +
         '<span class="rq-done">반영해서 다시 보내 드렸습니다</span></li>';
