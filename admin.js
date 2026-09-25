@@ -920,6 +920,45 @@
       "「수정사항 적용 완료」가 뜨고 그때 눌리십니다.</span></div>";
   }
 
+  /** 088 · 콘티 대조 검사가 유료 버튼을 막고 있는가 — 새 방식 오더(based_on)만. DB onecue_may_generate 와 같은 조건 */
+  function checkBlocks(p) {
+    var plan = p.render_plan || {};
+    if (!plan.based_on) return false;
+    return !(plan.check && plan.check.ok_to_generate === true);
+  }
+
+  /** 088 · 콘티 대조 검사 결과 — 승인된 콘티 ↔ 영상 오더·기준 그림 계획 (Dan 09-25 「사이트가 잡아내야」) */
+  function checkBox(p) {
+    var plan = p.render_plan || {};
+    if (!plan.based_on || !(plan.calls || []).length) return "";
+    var c = plan.check;
+    if (!c) {
+      return '<div class="pchk wait"><b>콘티 대조 검사 중</b><span>승인된 콘티와 영상 오더·기준 그림 계획을 맞대 보고 있습니다 — ' +
+        "끝나기 전에는 만들기 버튼이 잠깁니다(무료, 보통 몇 분)</span></div>";
+    }
+    if (c.fixing) {
+      return '<div class="pchk wait"><b>지적대로 오더를 고치는 중</b><span>영상 오더 작성기가 다시 쓰고, 끝나면 검사가 다시 돕니다(무료)</span></div>';
+    }
+    var issues = c.issues || [];
+    var high = issues.filter(function (i) { return i.severity === "high"; });
+    var row = function (i) {
+      return '<li class="' + (i.severity === "high" ? "hi" : "lo") + '"><b>' + (i.severity === "high" ? "큰 어긋남" : "작은 차이") +
+        " · " + esc(i.where || "") + "</b> " + esc(i.what || "") +
+        '<small>콘티: ' + esc(i.storyboard || "") + "<br>계획: " + esc(i.plan || "") + "</small></li>";
+    };
+    var head = !issues.length ? "콘티 대조 검사 통과 — 어긋난 곳 없음"
+      : high.length && !c.accepted_at ? "콘티와 어긋난 곳 " + high.length + "건 — 고치기 전에는 만들기 버튼이 잠깁니다"
+      : high.length ? "콘티와 어긋난 곳 " + high.length + "건 — 관리자가 보고 「그대로 진행」했습니다"
+      : "콘티 대조 검사 통과 — 작은 차이 " + issues.length + "건";
+    return '<div class="pchk ' + (high.length && !c.accepted_at ? "bad" : "ok") + '"><b>' + head + "</b>" +
+      '<span class="pchk-when">검사 ' + esc(when(c.at)) + " · 승인된 콘티 그림을 먼저 받아 적은 뒤 계획과 맞댐</span>" +
+      (issues.length ? "<ul>" + high.concat(issues.filter(function (i) { return i.severity !== "high"; })).map(row).join("") + "</ul>" : "") +
+      (high.length && !c.accepted_at && canWrite
+        ? '<div class="lc-row"><button class="btn" type="button" data-pchk="fix" data-pid="' + esc(p.id) + '">지적대로 오더 고치기 (무료)</button>' +
+          '<button class="btn ghost" type="button" data-pchk="accept" data-pid="' + esc(p.id) + '">지적을 보고 그대로 진행</button></div>'
+        : "") + "</div>";
+  }
+
   function paidBody(p, s, act) {
     if (!canWrite) {
       var pl = act && act.plan;
@@ -1007,7 +1046,7 @@
         //   계획이 바뀌었는지(planReady)와 **따로** 본다 — 계획은 내가 고칠 수
         //   있지만 정하는 것은 사장님 몫이라, 둘은 다른 물음이다.
         '<button class="btn" type="button" data-lc="start"' + tag +
-        ((again && (!planReady(p, s) || !takeSettled(p, s))) || directionsPending(p, s)
+        ((again && (!planReady(p, s) || !takeSettled(p, s))) || directionsPending(p, s) || checkBlocks(p)
           ? " disabled" : "") + ">" +
         (again ? (s === "anchors" ? "다시 만들기" : "다시 뽑기")
                : (s === "anchors" ? "제작 자료 만들기" : "영상 뽑기")) + "</button>" +
@@ -2363,13 +2402,14 @@
 
     function paidStageBody(p, step) {
       var here = p.step === step;
+      var chk = here ? checkBox(p) : "";
       var buttons = "";
       if (here) {
         var act = SE().actions(p, step, !!(p.stageResults && p.stageResults[step]));
         buttons = paidBody(p, step, act);
       }
       // 계획 목록은 「누가 맡습니까」 고르기 전에만 — 고른 뒤에는 아래 만들기 칸이 같은 목록을 보여 준다
-      return (step === "anchors" && !(SE().of(p, "anchors") || {}).chosen_at ? needsPlan(p) : "") + buttons + readyNote(p, step) + doneNote(p, step) + askNote(p, step) +
+      return chk + (step === "anchors" && !(SE().of(p, "anchors") || {}).chosen_at ? needsPlan(p) : "") + buttons + readyNote(p, step) + doneNote(p, step) + askNote(p, step) +
         blockedNote(p, step) + assetList(p, step);
     }
 
@@ -3597,6 +3637,16 @@
         db.rpc("onecue_back_to_strategy", { p_project_id: b.dataset.backStrategy })
           .then(function (r) { if (r.error) throw r.error; return load(); })
           .catch(function (e) { b.disabled = false; window.alert("돌아가지 못했습니다 — " + (e.message || e)); });
+      });
+    });
+    document.querySelectorAll("[data-pchk]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var fix = b.dataset.pchk === "fix";
+        if (!fix && !window.confirm("콘티와 어긋난 곳을 그대로 두고 진행합니다. 영상이 콘티와 다르게 나올 수 있습니다.")) return;
+        b.disabled = true; b.textContent = "처리 중…";
+        db.rpc(fix ? "onecue_plan_fix_request" : "onecue_plan_check_accept", { p_project_id: b.dataset.pid })
+          .then(function (r) { if (r.error) throw r.error; return load(); })
+          .catch(function (e) { b.disabled = false; b.textContent = fix ? "지적대로 오더 고치기 (무료)" : "지적을 보고 그대로 진행"; window.alert("처리하지 못했습니다 — " + (e.message || e)); });
       });
     });
     document.querySelectorAll("[data-dv-save]").forEach(function (b) {
