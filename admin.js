@@ -1818,7 +1818,8 @@
         '<span class="lc-msg" data-lc-msg></span></div>';
     }
     if (act.phase === "final.sent") {
-      return sheetHtml + '<div class="lc lc-approved"' + tag + ">" +
+      // 보내기 직전에도 글 제안·의견 칸 — 완성 콘티를 승인하면 이 단계로 넘어와 칸이 안 보였다 (Dan 09-27 「사이트 내에서 할 수 있는 건 없는 거야?」)
+      return sheetHtml + textSyncBox(p) + '<div class="lc lc-approved"' + tag + ">" +
         head("완성 콘티 승인됨", "이제 광고주에게 보낼 수 있습니다") +
         '<div class="lc-row">' +
         '<button class="btn" type="button" data-lc="send-client"' + tag + ">광고주에게 보내기</button>" +
