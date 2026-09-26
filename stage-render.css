@@ -410,3 +410,12 @@ details.flow-step > summary.flow-summary::after { position: absolute; right: 12p
 .sc-note{display:flex;gap:6px;align-items:flex-start;margin-top:4px;padding:0;border:0;background:none}
 .sc-note textarea{flex:1;min-height:30px}
 .client-view .lc-check b{font-size:12px}
+
+/* 콘티 승인 화면 정리 (09-27) — 제작용 컷 카드는 작은 격자로(같은 그림이 광고주 보기에도 크게 있다) */
+.stage-cuts .cuts.compact { grid-template-columns: repeat(auto-fill, minmax(min(170px, 100%), 1fr)); gap: 10px; }
+.stage-cuts .cut.panel .what { font-size: 12px; }
+.stage-cuts > summary small { color: var(--muted); font-weight: 400; }
+.client-view > summary { font-weight: 700; font-size: 15px; }
+.client-view .cv-lead { margin: 8px 0 10px; font-size: 13px; color: var(--muted); }
+.client-view .cv-prop { border-left: 4px solid #c0392b; }
+.records > summary { color: var(--muted); }

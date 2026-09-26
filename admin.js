@@ -2256,9 +2256,9 @@
     }
     var storyboardBody = storyboardHead + ((cutRows.length && showCuts)
       ? '<details class="stage-cuts"' +
-        ((boardFlow && (boardFlow.perCut || /^(board|final)\./.test(boardFlow.phase))) ? " open" : "") + ">" +
+        ((boardFlow && (boardFlow.perCut || boardFlow.phase === "board.review")) ? " open" : "") + ">" +
         '<summary>' + (panelCount
-          ? '콘티 확인하기 · ' + panelCount + '컷'
+          ? '제작용 컷 설계 · ' + panelCount + '컷 <small>(광고주 안 봄)</small>'
           : '컷 사양 ' + cutRows.length + '개 — 글로 확인하기') + '</summary>' +
         R().cuts(cutRows, {
           role: "admin", compact: true,
@@ -3238,10 +3238,12 @@
       // 새 흐름이 도는 동안에는 「컷 설계 보기」 링크를 띄우지 않는다 —
       // 검수할 컷 목록이 바로 아래 펼쳐져 있는데 같은 곳으로 가는 링크가 또 있으면
       // 어느 쪽이 본 자리인지 모르게 된다.
+      // ★ 순서(Dan 09-27 「콘티 승인 페이지가 매우 어지럽다」): 할 일(버튼) → 광고주에게 보이는 콘티(메인) →
+      //   제작용 컷 설계(작게 · 검수 단계 아니면 접힘) → 기록(시트 원본·이전 판 · 접힘). 「○○ 진행 중」 떠 있는 글은 뺐다 — 할 일 칸이 같은 말을 한다
       storyboard: costLine(p, "storyboard") +
-        (boardFlow ? "" : boardLink(BOARD_REVIEW_STAGE)) + storyboardBody +
-        (p.step === BOARD_REVIEW_STAGE ? productionAction : "") +
-        scriptFold(p) + sheetFold(p) + oldBoardsHtml(p),   // 지난 콘티 판은 칸 맨 아래 — 위는 지금 할 일(뽑기·검수) 자리 (Dan 09-24)
+        (boardFlow ? "" : boardLink(BOARD_REVIEW_STAGE)) + scriptFold(p) + storyboardBody +
+        (p.step === BOARD_REVIEW_STAGE && !boardFlow ? productionAction : "") +
+        recordsFold(p),   // 지난 콘티 판은 칸 맨 아래 — 위는 지금 할 일(뽑기·검수) 자리 (Dan 09-24)
       // 제작 자료는 **돈이 나가는 첫 자리**다. 무엇을 근거로 시작하는지를
       // 그 자리에 적는다 — 광고주 승인이 그 근거다.
       // 유료 단계는 자기 본문을 갖는다. 「현재 절차에 따라 진행 중입니다」는
@@ -3508,6 +3510,11 @@
 
   /** 지난 콘티 판(수정 요청 전·교체된 시트)을 접어서 — 새 판과 나란히 대조하려고 (Dan 09-24 「예전 콘티는 못 보게 막은 거?」) */
   /** 지금 판 콘티 시트 한 장 — 관리자 콘티 칸 아래 접어서 (위는 컷별 그림+설명) */
+  /** 기록 — 시트 원본 · 이전 판을 한 칸에 접는다 (09-27) */
+  function recordsFold(p) {
+    var inner = sheetFold(p) + oldBoardsHtml(p);
+    return inner ? '<details class="board-old records"><summary>기록 — 시트 원본 · 이전 판</summary>' + inner + "</details>" : "";
+  }
   function sheetFold(p) {
     var cur = (p.files || []).filter(function (f) { return f.kind === "board" && f.cut_n == null && f.url && boardCurrent(p, f); })
       .sort(function (x, y) { return String(y.created_at).localeCompare(String(x.created_at)); })[0];
@@ -3555,14 +3562,13 @@
         '<div class="sc-txt">' + cells + (mine(n) ? '<div class="lc-check"><b>우리 제안</b>' + mine(n) + "</div>" : "") +
         noteBox(n, label) + "</div></div>";
     };
-    var head = '<div class="lc-head"><b>광고주에게 보이는 모습 그대로</b><span>컷마다 의견을 적으면 반영한 새 글과 답변이 이 자리에 뜹니다(무료). ' +
-      "그림까지 바꿔야 하면 답변이 수정 요청으로 안내합니다</span></div>" +
+    var head = '<p class="cv-lead">광고주 화면과 똑같습니다. 바꿀 점은 그 컷 아래 의견 칸에 — 반영한 새 글과 답변이 그 자리에 뜹니다(무료). 그림까지 바꿔야 하면 답변이 수정 요청으로 안내합니다.</p>' +
       (busy ? '<span class="lc-msg warn" style="display:block"><b>의견을 반영하는 중</b> — ' + esc(hhmm(sent.at)) +
         " 보냄 · 「" + esc(String(sent.note).slice(0, 60)) + "」 · 보통 3~5분 뒤 새 제안과 답변이 이 자리에 뜹니다(무료)</span>" : "") +
-      (sync && sync.note ? '<span class="lc-msg" style="display:block"><b>보내신 의견</b> — ' + esc(sync.note) + "</span>" : "") +
-      (sync && sync.reply_ko ? '<span class="lc-msg" style="display:block"><b>답변</b> — ' + esc(sync.reply_ko) + "</span>" : "") +
       (items.length
-        ? '<div class="lc"' + tag + '><span class="lc-msg warn">바꿀 곳 ' + items.length + "건 — 반영 전입니다 · " + esc(sync.summary_ko || "") + "</span>" +
+        ? '<div class="lc cv-prop"' + tag + '><div class="lc-head"><b>우리 제안 ' + items.length + "건 — 반영 전</b><span>" + esc(sync.summary_ko || "") + "</span></div>" +
+          (sync.note ? '<span class="lc-msg" style="display:block"><b>보내신 의견</b> — ' + esc(sync.note) + "</span>" : "") +
+          (sync.reply_ko ? '<span class="lc-msg" style="display:block"><b>답변</b> — ' + esc(sync.reply_ko) + "</span>" : "") +
           items.filter(function (it) { return it.n == null; }).map(textSyncItemLine).join("") +
           '<div class="lc-row"><button class="btn" type="button" data-lc="apply-text-sync" data-at="' + esc(sync.at) + '"' + tag +
           ">이대로 반영</button></div><span class=\"lc-msg\" data-lc-msg></span></div>"
@@ -3579,7 +3585,7 @@
     var ec = ecp ? row("ec", ecp.url, null, null,
       cell("화면", "제품 히어로샷 + 슬로건·제품명·CTA — 영상 끝 1~2초에 편집으로 얹는 화면") +
       cell("자막", ((ecp.meta || {}).lines || []).concat([(ecp.meta || {}).cta || ""]).filter(Boolean).join(" / ")), "엔드카드") : "";
-    return '<details class="board-old client-view" open><summary>광고주에게 보이는 콘티 — 그림 + 장면별 대본' + (ecp ? " + 엔드카드" : "") + "</summary>" +
+    return '<details class="board-old client-view" open><summary>광고주에게 보이는 콘티' + (ecp ? " · 엔드카드 포함" : "") + "</summary>" +
       head + '<div class="script-msg"><span>이 영상이 전하는 말</span><b>' + esc(sc.message || "") + "</b>" +
       (sc.bgm_note ? "<small>음악(예정) — " + esc(sc.bgm_note) + "</small>" : "") + "</div>" +
       '<div class="script-rows">' + rows + ec + "</div></details>";
