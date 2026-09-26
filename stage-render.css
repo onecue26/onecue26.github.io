@@ -405,3 +405,8 @@ details.flow-step > summary.flow-summary::after { position: absolute; right: 12p
 
 /* 제작용(광고주 안 봄) 표시 — 관리자 컷 카드 (09-26) */
 .prod-tag { display:inline-block; margin-right:6px; padding:0 6px; border-radius:4px; font-size:10px; line-height:16px; background:var(--sunk); color:var(--muted); border:1px solid var(--rule); vertical-align:1px; }
+
+/* 관리자 · 광고주에게 보이는 콘티의 컷별 의견 칸 (09-27) */
+.sc-note{display:flex;gap:6px;align-items:flex-start;margin-top:4px;padding:0;border:0;background:none}
+.sc-note textarea{flex:1;min-height:30px}
+.client-view .lc-check b{font-size:12px}

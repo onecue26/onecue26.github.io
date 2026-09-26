@@ -1778,7 +1778,7 @@
     }
     if (act.phase === "final.review") {
       // 101 · 글 맞추기 — 승인 칸 위에. 콘티를 여러 번 고치는 사이 광고주에게 가는 글이 그림과 어긋날 수 있다(Blendie 09-26)
-      return sheetHtml + textSyncBox(p) + reviewBox("final", "완성 콘티를 확인해 주세요",
+      return sheetHtml + reviewBox("final", "완성 콘티를 확인해 주세요",
         "승인하면 광고주에게 보낼 수 있습니다",
         '<button class="btn ghost" type="button" data-lc="back"' + tag +
         ">취소 · 전 단계로</button>");
@@ -1819,8 +1819,8 @@
     }
     if (act.phase === "final.sent") {
       // 보내기 직전에도 글 제안·의견 칸 — 완성 콘티를 승인하면 이 단계로 넘어와 칸이 안 보였다 (Dan 09-27 「사이트 내에서 할 수 있는 건 없는 거야?」)
-      return sheetHtml + textSyncBox(p) + '<div class="lc lc-approved"' + tag + ">" +
-        head("완성 콘티 승인됨", "이제 광고주에게 보낼 수 있습니다") +
+      return sheetHtml + '<div class="lc lc-approved"' + tag + ">" +
+        head("완성 콘티 승인됨", "보내기 전에 아래 「광고주에게 보이는 콘티」에서 글·엔드카드를 확인하고, 바꿀 곳은 그 컷에 의견을 적어 주세요") +
         '<div class="lc-row">' +
         '<button class="btn" type="button" data-lc="send-client"' + tag + ">광고주에게 보내기</button>" +
         '<button class="btn ghost" type="button" data-lc="back"' + tag +
@@ -3521,21 +3521,63 @@
   function scriptFold(p) {
     var sc = p.development && p.development.client_script;
     if (!sc || !(sc.rows || []).length) {
-      return '<details class="board-old"><summary>장면별 대본 — 아직 없음</summary><p class="muted">작업기가 콘티·구성·각본에서 정리합니다(무료).</p></details>';
+      return '<details class="board-old"><summary>광고주에게 보이는 콘티 — 아직 없음</summary><p class="muted">작업기가 콘티·구성·각본에서 장면별 대본을 정리합니다(무료).</p></details>';
     }
+    // ★ Dan 09-27 — 위는 제작용, 아래는 **광고주에게 보이는 모습 그대로** + 컷마다 의견. 우리 제안(글 맞추기)도 그 컷 아래.
+    //   의견을 보내면 반영한 새 글과 답변이 이 자리에 뜨고, 「이대로 반영」으로 확정한다. 그림까지 바꿔야 하면 답변이 수정 요청으로 안내한다.
+    var tag = ' data-slug="' + esc(p.slug) + '" data-step="storyboard"';
     var sec = function (v) { return String(Math.round(Number(v) || 0)); };
-    return '<details class="board-old" open><summary>장면별 대본 — 광고주에게 그대로 보이는 글(콘티 그림과 같이)</summary>' +
-      '<p><b>이 영상이 전하는 말</b> · ' + esc(sc.message || "") + (sc.narration_note ? " · 내레이션 없음 — " + esc(sc.narration_note) : "") + "</p>" +
-      (sc.bgm_note ? '<p><b>음악(예정)</b> · ' + esc(sc.bgm_note) + "</p>" : "") +
-      '<table class="script-tbl"><tr><th>장면</th><th>화면</th><th>연출(예정)</th><th>자막</th><th>내레이션</th><th>소리(예정)</th></tr>' +
-      sc.rows.map(function (r) {
-        // 휴대폰에서는 줄마다 카드로 쌓는다 — 6칸이 좁아 글자가 한 자씩 세로로 흘렀다 (09-26 Dan)
-        return '<tr><td class="sc-no">' + esc(r.n) + "<br><small>" + sec(r.t_start) + "~" + sec(r.t_end) + "초</small></td>" +
-          '<td data-k="화면">' + esc(r.screen) + '</td><td data-k="연출(예정)">' + esc(r.direction || "—") +
-          '</td><td data-k="자막">' + esc(r.caption) + '</td><td data-k="내레이션">' + esc(r.narration) +
-          '</td><td data-k="소리(예정)">' + esc(r.sound) + "</td></tr>";
-      }).join("") + "</table></details>";
+    var crop = {};
+    (p.files || []).forEach(function (f) { if (f.kind === "board" && f.cut_n != null && f.url && boardCurrent(p, f)) crop[f.cut_n] = f; });
+    var sheets = (p.files || []).filter(function (f) { return f.kind === "board" && f.cut_n == null && boardCurrent(p, f); })
+      .sort(function (x, y) { return String(y.created_at).localeCompare(String(x.created_at)); });
+    var sync = sheets[0] && (sheets[0].meta || {}).text_sync;
+    if (sync && sync.based_on_sheet !== sheets[0].id) sync = null;
+    var items = (sync && !sync.applied && sync.items) || [];
+    var ecp = (p.files || []).filter(function (f) { return f.kind === "doc" && (f.meta || {}).endcard_preview && !(f.meta || {}).superseded && f.url; })
+      .sort(function (x, y) { return String(y.created_at).localeCompare(String(x.created_at)); })[0];
+    var cell = function (k, v) { return '<div class="sc-f"><span class="sc-k">' + k + "</span><span>" + esc(v || "—") + "</span></div>"; };
+    var mine = function (n) {       // 이 컷에 걸린 우리 제안 — 광고주 글(client_script n)과 그 컷 설계(cuts n)
+      return items.filter(function (it) { return Number(it.n) === Number(n); }).map(textSyncItemLine).join("");
+    };
+    var noteBox = function (n, label) {
+      return '<div class="lc sc-note"' + tag + '><textarea class="lc-note" data-text-sync-note data-prefix="' + esc(label) +
+        ': " rows="1" placeholder="' + esc(label + " 의견 — 글이든 그림이든 바꿀 점") + '"></textarea>' +
+        '<button class="btn ghost" type="button" data-lc="note-text-sync"' + tag + '>의견 보내기</button>' +
+        '<span class="lc-msg" data-lc-msg></span></div>';
+    };
+    var row = function (n, pic, t0, t1, cells, label) {
+      return '<div class="sc-row"><div class="sc-pic">' + (pic ? '<img src="' + esc(pic) + '" alt="' + esc(label) + '" onclick="window.open(this.src)">' : "") +
+        '<span class="sc-n">' + esc(label) + (t0 != null ? " · " + t0 + "~" + t1 + "초" : "") + "</span></div>" +
+        '<div class="sc-txt">' + cells + (mine(n) ? '<div class="lc-check"><b>우리 제안</b>' + mine(n) + "</div>" : "") +
+        noteBox(n, label) + "</div></div>";
+    };
+    var head = '<div class="lc-head"><b>광고주에게 보이는 모습 그대로</b><span>컷마다 의견을 적으면 반영한 새 글과 답변이 이 자리에 뜹니다(무료). ' +
+      "그림까지 바꿔야 하면 답변이 수정 요청으로 안내합니다</span></div>" +
+      (sync && sync.note ? '<span class="lc-msg" style="display:block"><b>보내신 의견</b> — ' + esc(sync.note) + "</span>" : "") +
+      (sync && sync.reply_ko ? '<span class="lc-msg" style="display:block"><b>답변</b> — ' + esc(sync.reply_ko) + "</span>" : "") +
+      (items.length
+        ? '<div class="lc"' + tag + '><span class="lc-msg warn">바꿀 곳 ' + items.length + "건 — 반영 전입니다 · " + esc(sync.summary_ko || "") + "</span>" +
+          items.filter(function (it) { return it.n == null; }).map(textSyncItemLine).join("") +
+          '<div class="lc-row"><button class="btn" type="button" data-lc="apply-text-sync" data-at="' + esc(sync.at) + '"' + tag +
+          ">이대로 반영</button></div><span class=\"lc-msg\" data-lc-msg></span></div>"
+        : (sync && sync.applied ? '<span class="lc-msg">반영됨(' + esc(hhmm(sync.applied_at || sync.at)) + ") · " + esc(sync.summary_ko || "") + "</span>" : ""));
+    var rows = sc.rows.map(function (r) {
+      var c = crop[r.n];
+      return row(r.n, c && c.url, sec(r.t_start), sec(r.t_end),
+        cell("화면", r.screen) + (r.direction && r.direction !== "—" ? cell("연출(예정)", r.direction) : "") +
+        cell("자막", r.caption) + cell("내레이션", r.narration) + cell("소리(예정)", r.sound), r.n + "번");
+    }).join("");
+    // 6번 칸 — 엔드카드(히어로샷 + CTA). 후반과 같은 조판의 미리보기라 이대로 납품본에 붙는다 (Dan 09-27)
+    var ec = ecp ? row("ec", ecp.url, null, null,
+      cell("화면", "제품 히어로샷 + 슬로건·제품명·CTA — 영상 끝 1~2초에 편집으로 얹는 화면") +
+      cell("자막", ((ecp.meta || {}).lines || []).concat([(ecp.meta || {}).cta || ""]).filter(Boolean).join(" / ")), "엔드카드") : "";
+    return '<details class="board-old client-view" open><summary>광고주에게 보이는 콘티 — 그림 + 장면별 대본' + (ecp ? " + 엔드카드" : "") + "</summary>" +
+      head + '<div class="script-msg"><span>이 영상이 전하는 말</span><b>' + esc(sc.message || "") + "</b>" +
+      (sc.bgm_note ? "<small>음악(예정) — " + esc(sc.bgm_note) + "</small>" : "") + "</div>" +
+      '<div class="script-rows">' + rows + ec + "</div></details>";
   }
+
 
   function oldBoardsHtml(p) {
     var old = (p.files || []).filter(function (f) { return f.kind === "board" && f.cut_n == null && f.url && !boardCurrent(p, f); })
@@ -4167,6 +4209,7 @@
         if (what === "note-text-sync") {
           var tsNote = wrap && wrap.querySelector("[data-text-sync-note]");
           var tsText = tsNote ? (tsNote.value || "").trim() : "";
+          if (tsText && tsNote.dataset.prefix) tsText = tsNote.dataset.prefix + tsText;   // 컷마다 의견 — 「5번: …」
           if (!tsText) {
             if (msg) { msg.className = "lc-msg err"; msg.textContent = "무엇을 고칠지 적어 주세요."; }
             if (tsNote) tsNote.focus();

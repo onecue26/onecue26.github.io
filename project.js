@@ -785,7 +785,17 @@
             '<div class="sc-txt">' + cell("화면", r.screen) + (r.direction && r.direction !== "—" ? cell("연출(예정)", r.direction) : "") +
             cell("자막", r.caption, r.caption && r.caption !== "—" ? "on" : "") +
             cell("내레이션", r.narration) + cell("소리(예정)", r.sound) + "</div></div>";
-        }).join("") + "</div>" +
+        }).join("") + (function () {
+          // 6번 칸 — 엔드카드(영상 끝에 편집으로 얹는 화면). 후반과 같은 조판의 미리보기라 이대로 들어간다 (Dan 09-27)
+          var ecs = (assets || []).filter(function (a) { return a.kind === "doc" && a.url && (a.meta || {}).endcard_preview && !(a.meta || {}).superseded; });
+          var ec = ecs[ecs.length - 1];
+          if (!ec) return "";
+          var m = ec.meta || {};
+          return '<div class="sc-row"><div class="sc-pic"><img src="' + esc(ec.url) + '" data-big="' + esc(ec.url) + '" alt="엔드카드">' +
+            '<span class="sc-n">엔드카드 · 영상 끝</span></div><div class="sc-txt">' +
+            cell("화면", "제품과 슬로건·제품명·안내 문구로 끝나는 화면입니다(편집으로 얹습니다)") +
+            cell("자막", (m.lines || []).concat([m.cta || ""]).filter(Boolean).join(" / "), "on") + "</div></div>";
+        })() + "</div>" +
         // ★ 약속하는 것과 흐름으로 보여 드리는 것을 가른다 (Dan 09-25 「결과물과 조금 달라질 수 있지 않나」)
         //   전하는 말·자막·내레이션은 우리가 정하고 후반에서 얹는다 → 그대로. 화면·소리는 영상 엔진이 만든다 → 세부가 달라질 수 있다
         '<p class="board-note"><b>전하는 말·자막·내레이션은 이대로 들어갑니다.</b> 화면과 소리는 흐름을 보여 드리는 것이라, ' +
