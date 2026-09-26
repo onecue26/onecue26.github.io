@@ -139,7 +139,7 @@
 /* ★ 컷 그림은 제 비율 그대로 전부 보인다 — 4:5 칸에 cover 로 채우니 세로로 긴 콘티 컷(약 1:1.9)의 위아래가
    잘려 눌러야 보였다 (Dan 09-26 「광고주한테 보낼 때 콘티 컷이 전부 보이게」) */
 .cut.panel .cut-panel {
-  display: block; width: 100%; height: auto; object-fit: contain;
+  display: block; width: 100%; height: auto; aspect-ratio: auto; object-fit: contain;   /* style.css 의 .cut img 4:5·16:9 고정을 푼다 */
   background: var(--sunk); border-bottom: 1px solid var(--rule); cursor: zoom-in;
 }
 .cut.panel .cut-empty {
