@@ -3471,7 +3471,17 @@
         '<span class="lc-msg">승인된 그림과 각본을 비교해 제안을 만드는 중입니다(무료 · 보통 1~2분)</span></div>';
     }
     var items = sync.items || [];
-    var body = head + (sync.note ? '<span class="lc-msg" style="display:block"><b>보내신 의견</b> — ' + esc(sync.note) + "</span>" : "") +
+    // 엔드카드 미리보기 — 콘티에 없는 끝 화면을 보내기 전에 본다(coordination/endcard_preview.py · 후반과 같은 조판 · 무료)
+    //   Dan 09-27 「엔드카드는 콘티에 없어서 어떻게 되는지 관리자인 나도 몰라」
+    var ecp = (p.files || []).filter(function (f) { return f.kind === "doc" && (f.meta || {}).endcard_preview && !(f.meta || {}).superseded && f.url; })
+      .sort(function (x, y) { return String(y.created_at).localeCompare(String(x.created_at)); })[0];
+    var ecHtml = ecp
+      ? '<div class="lc-check" style="display:flex;gap:12px;align-items:flex-start"><img src="' + esc(ecp.url) +
+        '" alt="엔드카드 미리보기" style="width:150px;border:1px solid var(--rule);border-radius:6px;cursor:zoom-in" onclick="window.open(this.src)">' +
+        '<span class="lc-msg"><b>엔드카드 미리보기</b> — 영상 끝(마지막 1~2초)에 붙는 화면입니다. 후반과 같은 조판이라 이대로 납품본에 들어갑니다. ' +
+        "배경색·문구를 바꾸고 싶으면 아래 의견 칸에 적어 주세요.</span></div>"
+      : "";
+    var body = head + ecHtml + (sync.note ? '<span class="lc-msg" style="display:block"><b>보내신 의견</b> — ' + esc(sync.note) + "</span>" : "") +
       (sync.reply_ko ? '<span class="lc-msg" style="display:block"><b>답변</b> — ' + esc(sync.reply_ko) + "</span>" : "");
     if (sync.applied) {
       body += '<span class="lc-msg">' + esc(sync.summary_ko || "") + " · 반영됨(" + esc(hhmm(sync.applied_at || sync.at)) + ")</span>" +
