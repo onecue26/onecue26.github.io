@@ -136,8 +136,10 @@
 /* 컷 그림 — 그림이 나오면 그 컷 글 위에 붙는다. 글과 그림이 떨어져 있으면
    「이 그림이 그 컷 맞나」를 눈으로 짝지어야 한다. 콘티를 보는 일은 그
    짝이 맞는지 보는 일이라, 짝을 지어 놓는 게 화면이 할 일이다. */
+/* ★ 컷 그림은 제 비율 그대로 전부 보인다 — 4:5 칸에 cover 로 채우니 세로로 긴 콘티 컷(약 1:1.9)의 위아래가
+   잘려 눌러야 보였다 (Dan 09-26 「광고주한테 보낼 때 콘티 컷이 전부 보이게」) */
 .cut.panel .cut-panel {
-  display: block; width: 100%; aspect-ratio: 4/5; object-fit: cover;
+  display: block; width: 100%; height: auto; object-fit: contain;
   background: var(--sunk); border-bottom: 1px solid var(--rule); cursor: zoom-in;
 }
 .cut.panel .cut-empty {
