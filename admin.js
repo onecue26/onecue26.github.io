@@ -1825,7 +1825,7 @@
         '<button class="btn" type="button" data-lc="send-client"' + tag + ">광고주에게 보내기</button>" +
         '<button class="btn ghost" type="button" data-lc="back"' + tag +
         ">취소 · 전 단계로</button></div>" +
-        '<span class="lc-msg">보내면 광고주 화면에 콘티 시트 한 장과 「흐름을 보여 주는 밑그림」 안내가 바로 뜹니다</span></div>';
+        '<span class="lc-msg">보내면 광고주 화면에 아래 「광고주에게 보이는 콘티」가 그대로 뜹니다</span></div>';
     }
     return "";
   }
@@ -3436,9 +3436,11 @@
   /** 101 · 글 맞추기 — coordination/board_text_sync.py 가 최신 콘티 시트 asset 의 meta.text_sync 에 적은 제안.
    *  칸 이름: cuts.action/who · developments.copies/arc/end_card/subtitle_plan/cta/client_script */
   function textSyncFieldLabel(table, field) {
-    if (table === "cuts") return field === "action" ? "동작(action)" : "피사체(who)";
-    return { copies: "자막(copies)", arc: "구성·각본(arc)", end_card: "엔드카드", subtitle_plan: "자막 계획",
-      cta: "CTA", client_script: "장면별 대본" }[field] || field;
+    // 화면 글은 우리말만 — 칸 이름(arc·subtitle_plan·colors)을 그대로 보였다 (09-27)
+    if (table === "endcard") return "엔드카드 색";
+    if (table === "cuts") return field === "action" ? "컷 설명" : "등장 요소";
+    return { copies: "자막", arc: "구성·각본", end_card: "엔드카드 설명", subtitle_plan: "자막 계획",
+      cta: "안내 문구(CTA)", client_script: "광고주 대본" }[field] || "기타";
   }
   function textSyncFmt(v) {
     if (v && typeof v === "object") {
@@ -3447,6 +3449,12 @@
     return String(v == null ? "" : v);
   }
   function textSyncItemLine(it) {
+    if (it.table === "endcard" && it.after && typeof it.after === "object") {   // 색은 색 견본으로
+      var sw = function (c, t) { return '<span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px"><i style="width:16px;height:16px;border-radius:4px;border:1px solid var(--rule);background:' +
+        esc(c || "#fff") + '"></i>' + t + "</span>"; };
+      return '<span class="lc-msg" style="display:block"><b>엔드카드 색</b> — ' + sw(it.after.main, "배경") + sw(it.after.dark, "글자·버튼") + sw(it.after.light, "가운데 밝은 부분") +
+        (it.why ? " <em>(" + esc(it.why) + ")</em>" : "") + "</span>";
+    }
     var where = (it.table === "cuts" ? it.n + "번 컷 · " : "") +
       (it.field === "client_script" && it.n != null ? it.n + "번 행 · " : "") +
       textSyncFieldLabel(it.table, it.field);
