@@ -3536,6 +3536,9 @@
     var items = (sync && !sync.applied && sync.items) || [];
     var ecp = (p.files || []).filter(function (f) { return f.kind === "doc" && (f.meta || {}).endcard_preview && !(f.meta || {}).superseded && f.url; })
       .sort(function (x, y) { return String(y.created_at).localeCompare(String(x.created_at)); })[0];
+    var sent = null;
+    try { sent = JSON.parse(localStorage.getItem("onecue_textnote_" + p.slug) || "null"); } catch (e) { sent = null; }
+    var busy = sent && (!sync || new Date(sync.at).getTime() < new Date(sent.at).getTime());
     var cell = function (k, v) { return '<div class="sc-f"><span class="sc-k">' + k + "</span><span>" + esc(v || "—") + "</span></div>"; };
     var mine = function (n) {       // 이 컷에 걸린 우리 제안 — 광고주 글(client_script n)과 그 컷 설계(cuts n)
       return items.filter(function (it) { return Number(it.n) === Number(n); }).map(textSyncItemLine).join("");
@@ -3554,6 +3557,8 @@
     };
     var head = '<div class="lc-head"><b>광고주에게 보이는 모습 그대로</b><span>컷마다 의견을 적으면 반영한 새 글과 답변이 이 자리에 뜹니다(무료). ' +
       "그림까지 바꿔야 하면 답변이 수정 요청으로 안내합니다</span></div>" +
+      (busy ? '<span class="lc-msg warn" style="display:block"><b>의견을 반영하는 중</b> — ' + esc(hhmm(sent.at)) +
+        " 보냄 · 「" + esc(String(sent.note).slice(0, 60)) + "」 · 보통 3~5분 뒤 새 제안과 답변이 이 자리에 뜹니다(무료)</span>" : "") +
       (sync && sync.note ? '<span class="lc-msg" style="display:block"><b>보내신 의견</b> — ' + esc(sync.note) + "</span>" : "") +
       (sync && sync.reply_ko ? '<span class="lc-msg" style="display:block"><b>답변</b> — ' + esc(sync.reply_ko) + "</span>" : "") +
       (items.length
@@ -3562,6 +3567,8 @@
           '<div class="lc-row"><button class="btn" type="button" data-lc="apply-text-sync" data-at="' + esc(sync.at) + '"' + tag +
           ">이대로 반영</button></div><span class=\"lc-msg\" data-lc-msg></span></div>"
         : (sync && sync.applied ? '<span class="lc-msg">반영됨(' + esc(hhmm(sync.applied_at || sync.at)) + ") · " + esc(sync.summary_ko || "") + "</span>" : ""));
+    // 컷에 속하지 않는 의견(전체) — 맨 위 제안에도 의견을 달 수 있게 (Dan 09-27 「의견 쓰고 싶어도 쓸 수가 없고」)
+    head += noteBox(0, "전체");
     var rows = sc.rows.map(function (r) {
       var c = crop[r.n];
       return row(r.n, c && c.url, sec(r.t_start), sec(r.t_end),
@@ -4216,6 +4223,8 @@
             return;
           }
           lock(b);
+          // 보낸 시각을 남겨 「반영 중」을 보여 준다 — 보내고 나서 화면이 그대로라 안 된 줄 알았다 (Dan 09-27)
+          try { localStorage.setItem("onecue_textnote_" + slug, JSON.stringify({ at: new Date().toISOString(), note: tsText })); } catch (e) { /* 저장 못 해도 동작 */ }
           return rpc(slug, "onecue_board_text_note", { p_note: tsText }).then(load).catch(fail(b, msg));
         }
         // 잘못 눌렀으면 칸만 접는다 — 아무것도 저장하지 않는다
