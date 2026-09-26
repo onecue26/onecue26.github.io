@@ -15,7 +15,7 @@
 
   // MINE — 이 건을 넣은 광고주 본인인가.
   // 판단하는 자리(5안 선택·콘티 승인)는 광고주의 것이다. 관리자가 대신 누르면 안 된다
-  var cfg = window.ONECUE || {}, db = null, P = null, MINE = false, LOGGED_IN = false;
+  var cfg = window.ONECUE || {}, db = null, P = null, MINE = false, LOGGED_IN = false, ADMIN_VIEW = false;
 
   // 내부 단계 순서. **이름은 우리 것이라 화면에 쓰지 않는다** — 순서를 비교하는
   // 데만 쓴다(IDX). 광고주가 보는 이름과 칸은 아래 CLIENT_FLOW 가 정한다.
@@ -538,7 +538,13 @@
   }
 
   function deliverForm() {
-    if (!MINE) return "";
+    // ★ 09-26 — 관리자가 보면 버튼이 아예 없어 「모바일에 승인 버튼이 없다」로 보였다(Dan). 광고주에게 보이는 모양을 잠근 채 보여 준다
+    if (!MINE) {
+      return ADMIN_VIEW ? '<div class="gate col"><div class="txt"><b>납품되었습니다</b>' +
+        '<small>관리자 보기 — 광고주에게는 여기에 아래 버튼이 보입니다(관리자는 누를 수 없습니다).</small></div>' +
+        '<div class="acts"><button class="btn" disabled>확인했습니다 · 승인</button>' +
+        '<button class="btn ghost" disabled>고쳐주세요</button></div></div>' : "";
+    }
     return '<div class="gate col"><div class="txt"><b>납품되었습니다</b>' +
       '<small>완성본을 확인하시고 승인해 주세요. 고칠 곳이 있으면 적어 주세요.</small></div>' +
       '<label for="finalNote">남기실 말씀</label>' +
@@ -1087,6 +1093,7 @@
         //   전에는 관리자 표시만 있으면 광고주 버튼을 다 숨겨서, 자기 의뢰에서도 아무것도 못 눌렀다.
         MINE = !!(access[0].data && access[0].data.owner_id === user.id);
         if (!MINE && !admin) { P = null; denied(); return; }
+        ADMIN_VIEW = !MINE && admin;   // 관리자가 광고주 화면을 보는 중 — 광고주 버튼은 잠긴 미리보기로만 (09-26)
         setConn("ok", "연결됨");
         var id = P.id;
         return Promise.all([
