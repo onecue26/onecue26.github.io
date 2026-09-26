@@ -736,7 +736,7 @@
     // 기록 원문(건 이름·메모)을 이어 붙이면 읽을 수 없다 — 합계 한 줄, 내역은 접는다
     function tidy(x) {
       var w = String(x.what || x.engine || "").split("★")[0];
-      w = w.replace(/^[0-9A-Za-z_]+ · (video|anchors|storyboard) · /, "").trim();
+      w = w.replace(/^[^·]+ · (video|anchors|storyboard|post|concepts|strategy|deliver) · /, "").trim();   // 건 이름에 한글이 있어도 뗀다 (09-26)
       return w.length > 40 ? w.slice(0, 40) + "…" : w;
     }
     return '<div class="cost-line">' +
@@ -789,6 +789,7 @@
     if (!fin) return '<div class="lc-box"><b>보낼 완성본이 아직 없습니다</b></div>';
     var m = fin.meta || {};
     var name = String(fin.storage_path || "").split("/").pop();
+    var sup = m.supplement || null;     // 097 · 납품 전 자동 보충 — 후반에서 고칠 수 있는 것만 두 번까지
     var st, cls, open = false, body = "";
     if (!m.review || m.review === "pending") {
       st = "검수 중"; cls = "wait";
@@ -805,8 +806,11 @@
         (m.my_take ? '<div class="dg-take">' + esc(m.my_take) + "</div>" : "") +
         "고쳐서 새 완성본을 만들거나, 아래에 이유를 적고 「이대로 납품」을 고릅니다.";
     }
+    if (sup && sup.state === "보충 중") { st = "자동 보충 중"; cls = "wait"; open = false; }
     return '<div class="lc-box deliver-gate"><b>완성본을 광고주에게 보냅니다</b>' +
       '<span class="dg-state ' + cls + '">' + esc(st) + "</span>" +
+      (sup ? '<span class="lc-msg">자동 보충 ' + esc(sup.state || "") + (sup.round ? " · " + sup.round + "/" + (sup.max || 2) + "회" : "") +
+        (sup.why ? " — " + esc(sup.why) : "") + "</span>" : "") +
       '<span class="lc-msg">보낼 판 · ' + esc(name) + " (" + esc(hhmm(fin.created_at)) + ")<br>" + body + "</span>" +
       (st === "결정 필요"
         ? '<div class="lc-row"><input type="text" data-override-why="' + esc(fin.id) + '" placeholder="이대로 보내는 이유 (필수)">' +
@@ -2021,10 +2025,10 @@
     }
 
     // 「다시 만들어 주세요」 — 제일 위에 둔다. 못 보고 지나가면 안 되는 것이다
-    var GNAME = { strategy: "전략 설계", concepts: "콘셉트 5안", storyboard: "콘티 승인" };
+    var GNAME = { strategy: "전략 설계", concepts: "콘셉트 5안", storyboard: "콘티 승인", video: "영상", deliver: "납품본", post: "완성본" };
     var redo = p.redo
       ? '<div class="said redo' + (p.redoDone ? " ok" : "") + '"><span class="lbl">' +
-        esc(GNAME[p.redo.gate] || p.redo.gate) + " — 광고주가 남긴 말 · " +
+        esc(GNAME[p.redo.gate] || STEP_NAME[p.redo.gate] || "진행 단계") + " — 광고주가 남긴 말 · " +
         ago(p.redo.decided_at) +
         (p.redoDone ? " · 처리 완료 (" + ago(p.sentAt) + " 다시 보냄)" : " · 처리 전") +
         "</span>" + esc(p.redo.note || "") + "</div>"
@@ -2388,8 +2392,9 @@
       var basis = (window.ONECUE_CREDIT_RATES || {}).estimate_basis || {};
       function krw(c) { return esc(won(c).replace(/^ · /, "")) || "—"; }
       function item(x) {
+        // ★ 건 이름(slug)에 한글이 섞여 옛 정규식이 못 지웠다 — 「slug · 영어 단계 · 」 앞부분을 통째로 뗀다 (09-26 버튼 순회 로봇)
         var w = String(x.what || "").split("★")[0]
-          .replace(/^[0-9A-Za-z_]+ · (video|anchors|storyboard) · /, "").trim();
+          .replace(/^[^·]+ · (video|anchors|storyboard|post|concepts|strategy|deliver) · /, "").trim();
         return w || x.engine || "";
       }
       function mark(x) {
