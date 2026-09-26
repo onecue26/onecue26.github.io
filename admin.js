@@ -1777,7 +1777,8 @@
         "수정 요청하면 이 칸과 컷 칸 의견을 모아 시트 전체를 다시 그립니다(유료 · 다시 「콘티 뽑기」)", "", bcTop, bcFill, cutNs.length > 0);   // 장 수는 계속 바뀌어 뺐다 (09-26 Dan)
     }
     if (act.phase === "final.review") {
-      return sheetHtml + reviewBox("final", "완성 콘티를 확인해 주세요",
+      // 101 · 글 맞추기 — 승인 칸 위에. 콘티를 여러 번 고치는 사이 광고주에게 가는 글이 그림과 어긋날 수 있다(Blendie 09-26)
+      return sheetHtml + textSyncBox(p) + reviewBox("final", "완성 콘티를 확인해 주세요",
         "승인하면 광고주에게 보낼 수 있습니다",
         '<button class="btn ghost" type="button" data-lc="back"' + tag +
         ">취소 · 전 단계로</button>");
@@ -3429,6 +3430,71 @@
     return f.kind === "board" && !(f.meta || {}).superseded && (f.approved || !at || String(f.created_at || "") > at);
   }
 
+  /** 101 · 글 맞추기 — coordination/board_text_sync.py 가 최신 콘티 시트 asset 의 meta.text_sync 에 적은 제안.
+   *  칸 이름: cuts.action/who · developments.copies/arc/end_card/subtitle_plan/cta/client_script */
+  function textSyncFieldLabel(table, field) {
+    if (table === "cuts") return field === "action" ? "동작(action)" : "피사체(who)";
+    return { copies: "자막(copies)", arc: "구성·각본(arc)", end_card: "엔드카드", subtitle_plan: "자막 계획",
+      cta: "CTA", client_script: "장면별 대본" }[field] || field;
+  }
+  function textSyncFmt(v) {
+    if (v && typeof v === "object") {
+      return Object.keys(v).map(function (k) { return k + ": " + v[k]; }).join(" · ");
+    }
+    return String(v == null ? "" : v);
+  }
+  function textSyncItemLine(it) {
+    var where = (it.table === "cuts" ? it.n + "번 컷 · " : "") +
+      (it.field === "client_script" && it.n != null ? it.n + "번 행 · " : "") +
+      textSyncFieldLabel(it.table, it.field);
+    var before = textSyncFmt(it.before), after = textSyncFmt(it.after);
+    var body = esc(before) + " → " + esc(after);
+    if (before.length > 60 || after.length > 60) {
+      return '<details><summary>' + esc(where) + (it.why ? " — " + esc(it.why) : "") + '</summary>' +
+        '<div style="margin:.3em 0 .6em">원래: ' + esc(before) + '<br>바뀐 글: ' + esc(after) + '</div></details>';
+    }
+    return '<span class="lc-msg" style="display:block"><b>' + esc(where) + '</b> — ' + body +
+      (it.why ? " <em>(" + esc(it.why) + ")</em>" : "") + "</span>";
+  }
+  function textSyncBox(p) {
+    var tag = ' data-slug="' + esc(p.slug) + '" data-step="storyboard"';
+    var sheets = (p.files || []).filter(function (f) { return f.kind === "board" && f.cut_n == null && boardCurrent(p, f); })
+      .sort(function (x, y) { return String(y.created_at).localeCompare(String(x.created_at)); });
+    var sh = sheets[0];
+    var sync = sh && (sh.meta || {}).text_sync;
+    // Dan 09-26 — 승인 → 우리가 바꿀 글을 제안 → 관리자 OK 또는 의견 → 의견을 반영한 새 제안·답변 → OK 하면 반영
+    var head = '<div class="lc-head"><b>그림에 맞춰 바꿀 글 — 제안</b><span>승인된 콘티 그림과 원래 각본을 비교해 바꿀 글을 제안합니다(무료). ' +
+      "「이대로 반영」 또는 의견을 주세요</span></div>";
+    if (!sync || sync.based_on_sheet !== (sh || {}).id) {
+      return '<div class="lc lc-review"' + tag + ">" + head +
+        '<span class="lc-msg">승인된 그림과 각본을 비교해 제안을 만드는 중입니다(무료 · 보통 1~2분)</span></div>';
+    }
+    var items = sync.items || [];
+    var body = head + (sync.note ? '<span class="lc-msg" style="display:block"><b>보내신 의견</b> — ' + esc(sync.note) + "</span>" : "") +
+      (sync.reply_ko ? '<span class="lc-msg" style="display:block"><b>답변</b> — ' + esc(sync.reply_ko) + "</span>" : "");
+    if (sync.applied) {
+      body += '<span class="lc-msg">' + esc(sync.summary_ko || "") + " · 반영됨(" + esc(hhmm(sync.applied_at || sync.at)) + ")</span>" +
+        (items.length
+          ? '<details class="board-old"><summary>바뀐 기록 (' + items.length + "건)</summary>" +
+            items.map(textSyncItemLine).join("") + "</details>"
+          : "");
+    } else {
+      body += items.length
+        ? '<span class="lc-msg warn">바꿀 곳 ' + items.length + "건 — 반영 전입니다(광고주에게 보내기 전에 확인)</span>" +
+          '<span class="lc-msg">' + esc(sync.summary_ko || "") + "</span>" +
+          '<div class="lc-check">' + items.map(textSyncItemLine).join("") + "</div>" +
+          '<div class="lc-row"><button class="btn" type="button" data-lc="apply-text-sync" data-at="' +
+          esc(sync.at) + '"' + tag + ">이대로 반영</button></div>"
+        : '<span class="lc-msg">' + esc(sync.summary_ko || "그림과 어긋난 곳을 찾지 못했습니다") + "</span>";
+      body += '<textarea class="lc-note" data-text-sync-note rows="2" placeholder="' +
+        esc("의견을 적어 주세요 — 반영한 새 제안과 답변이 이 자리에 뜹니다(예: 5번은 뚜껑 열고 마시는 걸로)") + '"></textarea>' +
+        '<div class="lc-row"><button class="btn ghost" type="button" data-lc="note-text-sync"' + tag +
+        ">의견 보내기</button></div>";
+    }
+    body += '<span class="lc-msg" data-lc-msg></span>';
+    return '<div class="lc lc-review"' + tag + ">" + body + "</div>";
+  }
+
   /** 지난 콘티 판(수정 요청 전·교체된 시트)을 접어서 — 새 판과 나란히 대조하려고 (Dan 09-24 「예전 콘티는 못 보게 막은 거?」) */
   /** 지금 판 콘티 시트 한 장 — 관리자 콘티 칸 아래 접어서 (위는 컷별 그림+설명) */
   function sheetFold(p) {
@@ -3447,7 +3513,7 @@
       return '<details class="board-old"><summary>장면별 대본 — 아직 없음</summary><p class="muted">작업기가 콘티·구성·각본에서 정리합니다(무료).</p></details>';
     }
     var sec = function (v) { return String(Math.round(Number(v) || 0)); };
-    return '<details class="board-old" open><summary>장면별 대본 — 광고주 콘티에 그림과 같이 뜹니다</summary>' +
+    return '<details class="board-old" open><summary>장면별 대본 — 광고주에게 그대로 보이는 글(콘티 그림과 같이)</summary>' +
       '<p><b>이 영상이 전하는 말</b> · ' + esc(sc.message || "") + (sc.narration_note ? " · 내레이션 없음 — " + esc(sc.narration_note) : "") + "</p>" +
       (sc.bgm_note ? '<p><b>음악(예정)</b> · ' + esc(sc.bgm_note) + "</p>" : "") +
       '<table class="script-tbl"><tr><th>장면</th><th>화면</th><th>연출(예정)</th><th>자막</th><th>내레이션</th><th>소리(예정)</th></tr>' +
@@ -4086,6 +4152,18 @@
           if (note) note.focus();
           return;
         }
+        // 101 · 글 맞추기 — 「글만 다시 쓰기」는 무엇을 고칠지 적어야 보낸다(그 칸 전용 textarea)
+        if (what === "note-text-sync") {
+          var tsNote = wrap && wrap.querySelector("[data-text-sync-note]");
+          var tsText = tsNote ? (tsNote.value || "").trim() : "";
+          if (!tsText) {
+            if (msg) { msg.className = "lc-msg err"; msg.textContent = "무엇을 고칠지 적어 주세요."; }
+            if (tsNote) tsNote.focus();
+            return;
+          }
+          lock(b);
+          return rpc(slug, "onecue_board_text_note", { p_note: tsText }).then(load).catch(fail(b, msg));
+        }
         // 잘못 눌렀으면 칸만 접는다 — 아무것도 저장하지 않는다
         if (what === "direct-cancel") {
           var d = b.closest("details"); if (d) d.open = false;
@@ -4170,6 +4248,7 @@
           : what === "revise" ? stageRevise(slug, step, text)
           : what === "next" ? stageNext(slug, step)
           : what === "make-board" ? rpc(slug, "onecue_board_request", {})
+          : what === "apply-text-sync" ? rpc(slug, "onecue_board_text_apply", { p_at: b.dataset.at })
           : null;
         if (!call) { b.disabled = false; return; }
         return call.then(load).catch(fail(b, msg));
