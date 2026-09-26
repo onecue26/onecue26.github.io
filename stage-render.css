@@ -389,3 +389,6 @@ details.flow-step > summary.flow-summary::after { position: absolute; right: 12p
 
 /* 09-26 · 장면별 대본 표 — 휴대폰에서는 장면마다 카드로 (칸이 좁아 글자가 세로로 한 자씩 흘렀다) */
 @media(max-width:700px){.script-tbl,.script-tbl tbody,.script-tbl tr,.script-tbl td{display:block;width:auto}.script-tbl tr:first-child{display:none}.script-tbl tr{border:1px solid var(--rule,#e2ded6);border-radius:8px;margin:8px 0;padding:6px 10px}.script-tbl td{border:0;padding:4px 0}.script-tbl td.sc-no{font-weight:700}.script-tbl td.sc-no br{display:none}.script-tbl td.sc-no small{margin-left:6px;font-weight:400;color:var(--muted,#777)}.script-tbl td[data-k]::before{content:attr(data-k);display:block;font-size:11.5px;color:var(--muted,#777);font-weight:600}}
+
+/* 09-26 · 대본 표 내레이션 칸이 38px 로 좁았다(버튼 순회 로봇) */
+@media(min-width:701px){.script-tbl td,.script-tbl th{min-width:64px}.script-tbl td:first-child,.script-tbl th:first-child{min-width:48px}}
