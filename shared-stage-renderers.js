@@ -230,6 +230,52 @@
       body + "</section>";
   }
 
+  // 09-26 · 콘셉트 tags 의 장치 — devices(사전 id) · new_devices(목록 밖 새 장치) ·
+  // device_scenes(「id 또는 이름 → 장면 한 줄」). 장치 이름 사전은 화면에 없으니
+  // 저장된 장면 문구를 그대로 보여 준다. 관리자 접힘(internal) 안에서만 쓴다.
+  function sceneKeyValue(x) {
+    if (x && typeof x === "object") {
+      return [text(x.id || x.name || x.device), text(x.scene || x.what)];
+    }
+    var s = text(x);
+    var m = s.split(/\s*(?:→|->|=>)\s*/);
+    if (m.length < 2) m = s.split(/\s*[:：]\s*|\s+[—-]\s+/);
+    return m.length < 2 ? [s, ""] : [m[0].trim(), m.slice(1).join(" ").trim()];
+  }
+
+  function deviceLines(tg) {
+    if (!tg) return "";
+    var asList = function (v) { return Array.isArray(v) ? v : (has(v) ? [v] : []); };
+    var scenes = {}, order = [];
+    asList(tg.device_scenes).forEach(function (x) {
+      var kv = sceneKeyValue(x);
+      if (!kv[0]) return;
+      scenes[kv[0]] = kv[1];
+      order.push(kv[0]);
+    });
+    var used = {}, rows = [];
+    asList(tg.devices).forEach(function (id) {
+      var k = text(id);
+      if (!k) return;
+      used[k] = 1;
+      rows.push('<li><span><code>' + esc(k) + "</code> — " +
+        (has(scenes[k]) ? esc(scenes[k]) : "(장면 없음)") + "</span></li>");
+    });
+    asList(tg.new_devices).forEach(function (x) {
+      var kv = sceneKeyValue(x);
+      if (!kv[0]) return;
+      used[kv[0]] = 1;
+      var scene = has(scenes[kv[0]]) ? scenes[kv[0]] : kv[1];
+      rows.push('<li class="new"><span><b class="dev-new">새 장치</b> ' + esc(kv[0]) + " — " +
+        (has(scene) ? esc(scene) : "(장면 없음)") + "</span></li>");
+    });
+    order.forEach(function (k) {      // tags 에는 없는데 장면만 적힌 것도 버리지 않는다
+      if (used[k]) return;
+      rows.push("<li><span>" + esc(k) + (has(scenes[k]) ? " — " + esc(scenes[k]) : "") + "</span></li>");
+    });
+    return rows.length ? '<ul class="cc-devices">' + rows.join("") + "</ul>" : "";
+  }
+
   // ── 콘셉트 한 장 ────────────────────────────────────────────────────────────
   //
   // 콘셉트 5안은 **다섯 발상 중 하나를 고르는 자리**다. 초·컷·카메라·장면 순서는
@@ -264,9 +310,11 @@
     var tg = row.tags && typeof row.tags === "object" ? row.tags : null;
     var tagLine = tg ? ["genre", "structure", "type", "look"].filter(function (k) { return has(tg[k]); })
       .map(function (k) { return esc(text(tg[k])); }).join(" · ") : "";
+    var devList = deviceLines(tg);
     var internal =
       (tagLine ? part("tags", "장르·결", "<span>" + tagLine +
         (has(tg.why) ? " — " + esc(text(tg.why)) : "") + "</span>") : "") +
+      (devList ? part("devices", "장치", devList) : "") +
       (has(row.axis) ? part("axis", "내부 축", "<span>" + esc(text(row.axis)) + "</span>") : "") +
       (flow.lead ? part("full", "내부 원문", paragraphs(flow.lead, "stage-para", 3)) : "") +
       (flow.steps.length ? part("time", "내부 시간표", timelineList(flow.steps)) : "") +
