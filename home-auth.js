@@ -1,6 +1,6 @@
 // 첫 화면 오른쪽 위 — 로그인 상태에 맞게 (09-26 Dan)
 //
-// 로그아웃: [로그인] [제작 의뢰 ↗]  (HTML 에 기본으로 들어 있다 — 스크립트가 없어도 이 모양)
+// 로그아웃: [제작 의뢰 ↗] 하나 — 고객 로그인은 푸터 (09-26 Dan: 제작사형 사이트는 행동 버튼 하나)
 // 로그인  : [작업 공간 →] [계정 ▾]  — 광고주는 「내 프로젝트」(studio), 관리자는 「제작 관리」(admin)
 //           계정 메뉴: 이름·이메일 · 새 제작 의뢰 · 로그아웃
 // Dan: 「로그인된 상태면 현재 로그인된 사람이 뜨고 로그아웃 버튼과 작업하는 곳으로 들어가도록」
@@ -37,6 +37,9 @@
     document.getElementById("hdrOut").addEventListener("click", function () {
       db.auth.signOut().then(function () { location.reload(); });
     });
+    // 푸터 「고객 로그인」도 로그인 상태면 작업 공간으로 (09-26 — 로그인은 헤더에서 빼고 푸터로)
+    var ft = document.getElementById("ftLogin");
+    if (ft) { ft.href = work.href; ft.innerHTML = esc(work.label) + ' <i data-lucide="arrow-right" aria-hidden="true"></i>'; }
     if (window.lucide) window.lucide.createIcons();
   }
 
