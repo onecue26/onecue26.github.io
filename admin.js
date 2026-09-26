@@ -3335,8 +3335,11 @@
       (sc.bgm_note ? '<p><b>음악(예정)</b> · ' + esc(sc.bgm_note) + "</p>" : "") +
       '<table class="script-tbl"><tr><th>장면</th><th>화면</th><th>연출(예정)</th><th>자막</th><th>내레이션</th><th>소리(예정)</th></tr>' +
       sc.rows.map(function (r) {
-        return "<tr><td>" + esc(r.n) + "<br><small>" + sec(r.t_start) + "~" + sec(r.t_end) + "초</small></td><td>" + esc(r.screen) +
-          "</td><td>" + esc(r.direction || "—") + "</td><td>" + esc(r.caption) + "</td><td>" + esc(r.narration) + "</td><td>" + esc(r.sound) + "</td></tr>";
+        // 휴대폰에서는 줄마다 카드로 쌓는다 — 6칸이 좁아 글자가 한 자씩 세로로 흘렀다 (09-26 Dan)
+        return '<tr><td class="sc-no">' + esc(r.n) + "<br><small>" + sec(r.t_start) + "~" + sec(r.t_end) + "초</small></td>" +
+          '<td data-k="화면">' + esc(r.screen) + '</td><td data-k="연출(예정)">' + esc(r.direction || "—") +
+          '</td><td data-k="자막">' + esc(r.caption) + '</td><td data-k="내레이션">' + esc(r.narration) +
+          '</td><td data-k="소리(예정)">' + esc(r.sound) + "</td></tr>";
       }).join("") + "</table></details>";
   }
 
