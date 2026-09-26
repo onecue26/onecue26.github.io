@@ -3512,7 +3512,7 @@
     var cur = (p.files || []).filter(function (f) { return f.kind === "board" && f.cut_n == null && f.url && boardCurrent(p, f); })
       .sort(function (x, y) { return String(y.created_at).localeCompare(String(x.created_at)); })[0];
     if (!cur) return "";
-    return '<details class="board-old"><summary>콘티 한 장으로 보기 — 광고주 화면에는 이 한 장이 뜹니다</summary>' +
+    return '<details class="board-old"><summary>콘티 시트 원본 한 장 보기</summary>' +
       '<div class="board-sheet"><img src="' + esc(cur.url) + '" data-big="' + esc(cur.url) + '" data-kind="img" alt="콘티 시트"><span>' +
       esc(cur.role || "콘티 시트") + " · " + esc(when(cur.created_at)) + "</span></div></details>";
   }
