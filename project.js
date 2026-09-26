@@ -775,13 +775,15 @@
       };
       return "<h2>콘티</h2>" +
         '<div class="script-msg"><span>이 영상이 전하는 말</span><b>' + esc(SCRIPT.message || "") + "</b>" +
-        (SCRIPT.narration_note ? "<small>내레이션 없음 — " + esc(SCRIPT.narration_note) + "</small>" : "") + "</div>" +
+        (SCRIPT.narration_note ? "<small>내레이션 없음 — " + esc(SCRIPT.narration_note) + "</small>" : "") +
+        (SCRIPT.bgm_note ? "<small>음악(예정) — " + esc(SCRIPT.bgm_note) + "</small>" : "") + "</div>" +
         '<div class="script-rows">' + SCRIPT.rows.map(function (r) {
           var c = crop[r.n];
           return '<div class="sc-row"><div class="sc-pic">' +
             (c ? '<img src="' + esc(c.url) + '" data-big="' + esc(c.url) + '" alt="' + esc(r.n) + '번 장면">' : "") +
             '<span class="sc-n">' + esc(r.n) + " · " + sec(r.t_start) + "~" + sec(r.t_end) + "초</span></div>" +
-            '<div class="sc-txt">' + cell("화면", r.screen) + cell("자막", r.caption, r.caption && r.caption !== "—" ? "on" : "") +
+            '<div class="sc-txt">' + cell("화면", r.screen) + (r.direction && r.direction !== "—" ? cell("연출(예정)", r.direction) : "") +
+            cell("자막", r.caption, r.caption && r.caption !== "—" ? "on" : "") +
             cell("내레이션", r.narration) + cell("소리(예정)", r.sound) + "</div></div>";
         }).join("") + "</div>" +
         // ★ 약속하는 것과 흐름으로 보여 드리는 것을 가른다 (Dan 09-25 「결과물과 조금 달라질 수 있지 않나」)

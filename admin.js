@@ -2094,6 +2094,7 @@
       return '<div class="ess"><div class="ess-h">광고 필수 요소</div>' +
         row("자막", d.subtitle_plan, true) + row("CTA", d.cta, true) +
         row("마무리 컷(히어로샷·엔드카드)", d.end_card, true) + row("내레이션", d.narration_plan, true) +
+        row("BGM 계획", d.bgm_plan, false) +
         ((d.subtitle_plan || d.cta || d.end_card) ? "" :
           '<small class="muted">이 건은 필수 칸이 생기기 전(09-25)에 쓴 구성·각본입니다.</small>') + "</div>";
     })() : "";
@@ -3331,10 +3332,11 @@
     var sec = function (v) { return String(Math.round(Number(v) || 0)); };
     return '<details class="board-old" open><summary>장면별 대본 — 광고주 콘티에 그림과 같이 뜹니다</summary>' +
       '<p><b>이 영상이 전하는 말</b> · ' + esc(sc.message || "") + (sc.narration_note ? " · 내레이션 없음 — " + esc(sc.narration_note) : "") + "</p>" +
-      '<table class="script-tbl"><tr><th>장면</th><th>화면</th><th>자막</th><th>내레이션</th><th>소리(예정)</th></tr>' +
+      (sc.bgm_note ? '<p><b>음악(예정)</b> · ' + esc(sc.bgm_note) + "</p>" : "") +
+      '<table class="script-tbl"><tr><th>장면</th><th>화면</th><th>연출(예정)</th><th>자막</th><th>내레이션</th><th>소리(예정)</th></tr>' +
       sc.rows.map(function (r) {
         return "<tr><td>" + esc(r.n) + "<br><small>" + sec(r.t_start) + "~" + sec(r.t_end) + "초</small></td><td>" + esc(r.screen) +
-          "</td><td>" + esc(r.caption) + "</td><td>" + esc(r.narration) + "</td><td>" + esc(r.sound) + "</td></tr>";
+          "</td><td>" + esc(r.direction || "—") + "</td><td>" + esc(r.caption) + "</td><td>" + esc(r.narration) + "</td><td>" + esc(r.sound) + "</td></tr>";
       }).join("") + "</table></details>";
   }
 
@@ -4766,7 +4768,7 @@
               "revision_at,revision_note,ai_job_id,revision_reply,revision_kind,revision_reply_at,revision_reply_for")
             .in("project_id", ids),
           // 구성·각본 결과 — 등록되면 그 단계 안에서 상세로 펼친다
-          db.from("developments").select("project_id,arc,copies,narration_tone,slogan,bgm,client_script,subtitle_plan,cta,end_card,narration_plan")
+          db.from("developments").select("project_id,arc,copies,narration_tone,slogan,bgm,client_script,subtitle_plan,cta,end_card,narration_plan,bgm_plan")
             .in("project_id", ids),
           // 콘티 컷 — 광고주 화면과 같은 공용 렌더로 같은 구조로 편다.
           // admin_cuts 는 board.js 가 이미 쓰는 관리자용 보기다
