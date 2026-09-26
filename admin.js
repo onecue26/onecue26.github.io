@@ -1083,6 +1083,33 @@
         : se.revision_at ? '<div class="redo-reply wait"><b>제작 쪽이 읽고 답을 쓰는 중</b><span>질문이면 답만 달고, 고쳐 달라는 말이면 계획을 고칩니다(무료 · 몇 분)</span></div>' : "");
   }
 
+  /** 098 · 물체 교체 — 판 전체를 다시 뽑지 않고 **제품만** 바꾼다 (힉스필드 Genjutsu · hf_mult_replace_object).
+   *  환타 09-26: 연출은 괜찮은데 병 모양·크기가 광고주 300 ml 병과 달랐다 — 다시 뽑기는 좋은 연출까지 버린다.
+   *  값: 09-26 get_cost 실측 15초 480p = 48cr → 초당 3.2cr(480p 만 잼). 그 밖은 값을 적지 않는다(지어내지 않는다). */
+  var REPLACE_CR_PER_SEC = { "480p": 3.2 };
+  function replaceCost(p, f) {
+    var m = f.meta || {};
+    var call = ((p.render_plan || {}).calls || []).filter(function (c) { return c.id === m.covers_call; })[0] || {};
+    var res = call.resolution || m.resolution || "480p";
+    var sec = Number(call.duration_sec) || 0;
+    return sec && REPLACE_CR_PER_SEC[res] ? Math.ceil(Math.round(sec) * REPLACE_CR_PER_SEC[res]) : null;
+  }
+  function replaceBox(p, s) {
+    if (s !== "video" || !canWrite) return "";
+    return newestTakes(p, s).map(function (f) {
+      var n = replaceCost(p, f);
+      var label = "물체 교체 — 제품만 바꾸기" + (n ? " (약 " + n + "크레딧)" : "");
+      return '<div class="lc-replace" data-replace-form>' +
+        '<span class="lc-msg"><b>제품만 틀렸으면</b> — 연출은 그대로 두고 이 판(' + esc((f.meta || {}).covers_call || "") +
+        ")의 제품만 승인된 제품 사진으로 바꿉니다. 다시 뽑기보다 좋았던 연출을 잃지 않습니다.</span>" +
+        '<textarea class="lc-note" data-replace-text placeholder="' +
+        esc("무엇이 틀렸고 무엇으로 바꿀지 적어 주세요 (필수) — 예: 병이 길쭉한 500 ml로 나왔습니다. 모든 장면의 병을 광고주 300 ml 짧은 병으로") +
+        '"></textarea>' +
+        '<div class="lc-row"><button class="btn ghost" type="button" data-replace="' + esc(f.id) + '" data-cost="' + (n || "") + '"' +
+        (checkBlocks(p) ? " disabled" : "") + ">" + esc(label) + "</button></div></div>";
+    }).join("");
+  }
+
   function paidBody(p, s, act) {
     if (!canWrite) {
       var pl = act && act.plan;
@@ -1244,6 +1271,7 @@
             '<button class="btn" type="button" data-lc="approve"' + tag + ">승인</button>" +
             '<button class="btn ghost" type="button" data-lc="revise"' + tag + ">수정 요청</button>") +
         "</div>" +
+        replaceBox(p, s) +
         '<span class="lc-msg" data-lc-msg></span></div>';
     }
     if (at === "approved") {
@@ -4147,6 +4175,34 @@
     //   지난 판은 **기록**이다. 찾아볼 때만 펼치면 된다. 그릴 때마다 닫는다.
     document.querySelectorAll("details.made-old[open]").forEach(function (d) {
       d.open = false;
+    });
+
+    // 098 · 물체 교체 — 누름 한 번 = 생성 한 번. 다시 뽑기처럼 한 번 묻고, 적은 글이 없으면 안 누른다
+    document.querySelectorAll("[data-replace]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var box = b.closest("[data-replace-form]");
+        var t = box && box.querySelector("[data-replace-text]");
+        var what = ((t && t.value) || "").trim();
+        if (what.length < 4) {
+          window.alert("무엇이 틀렸고 무엇으로 바꿀지 적어 주세요 — 이 글이 교체 지시에 그대로 들어갑니다.");
+          if (t) t.focus();
+          return;
+        }
+        var cost = b.dataset.cost ? "약 " + b.dataset.cost + "크레딧이" : "크레딧이";
+        if (!window.confirm("이 판의 제품만 바꿉니다. " + cost + " 나갑니다.\n\n적으신 내용:\n" + what)) return;
+        var label = b.textContent;
+        b.disabled = true; b.textContent = "요청하는 중…";
+        db.rpc("onecue_replace_request", { p_asset_id: b.dataset.replace, p_what: what })
+          .then(rpcOk)
+          .then(function (r) {
+            if (r && r.ok === false) throw new Error(r.why || "요청이 거부됐습니다");
+          })
+          .then(load)
+          .catch(function (e) {
+            b.disabled = false; b.textContent = label;
+            window.alert("물체 교체를 요청하지 못했습니다 — " + (e.message || e));
+          });
+      });
     });
 
     // 「이 답변대로 갑니다」 — 돈은 안 나간다. 다시 뽑기를 **열어 줄 뿐**이다.
