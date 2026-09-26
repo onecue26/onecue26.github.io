@@ -1619,11 +1619,13 @@
         (why ? "<span>" + esc(why) + "</span>" : "") + "</div>";
     };
     // 검수 칸 — 겹 전체에 대한 의견과 승인·수정. 컷마다는 컷 옆에 따로 붙는다.
-    var reviewBox = function (layer, what, why, extra) {
+    // top — 머리 아래에 끼울 것(자동 검수 결과) · prefill — 수정 요청 칸에 미리 채울 글
+    var reviewBox = function (layer, what, why, extra, top, prefill) {
       return '<div class="lc lc-review"' + tag + ' data-layer="' + esc(layer) + '">' +
-        head(what, why) +
+        head(what, why) + (top || "") +
         '<textarea class="lc-note" data-lc-note placeholder="' +
-        esc("수정 요청은 무엇을 고칠지 적어야 보냅니다") + '"></textarea>' +
+        esc("수정 요청은 무엇을 고칠지 적어야 보냅니다") + '"' + (prefill ? ' rows="3"' : "") + ">" +
+        esc(prefill || "") + "</textarea>" +
         '<div class="lc-row">' +
         '<button class="btn" type="button" data-lc="review-ok" data-layer="' + esc(layer) +
         '"' + tag + ">승인</button>" +
@@ -1703,8 +1705,26 @@
       .sort(function (x, y) { return String(y.created_at).localeCompare(String(x.created_at)); });
     var sheetHtml = "";   // 시트 한 장은 칸 아래 「콘티 한 장으로 보기」로 옮겼다 — sheetFold()
     if (act.phase === "board.review") {
+      // ★ 자동 검수(099 · coordination/board_review.py) — 컷 그림을 설계 없이 받아 적고 컷 설계와 대조한 결과를 맨 위에.
+      //   09-26 Blendie 5번 컷(스트랩이 손목이 아니라 컵에 매달림)이 아무 검수 없이 이 칸으로 넘어왔다.
+      var bc = ((sheets[0] || {}).meta || {}).board_check || {};
+      var bcTop, bcFill = "";
+      if (!sheets[0] || bc.based_on !== sheets[0].id) {
+        bcTop = '<span class="lc-msg">자동 검수 중 — 컷 그림을 컷 설계와 대조하고 있습니다(무료 · 몇 분)</span>';
+      } else if (bc.verdict === "failed") {
+        bcTop = '<span class="lc-msg warn">자동 검수를 받지 못했습니다 — 컷 그림을 직접 확인해 주세요</span>';
+      } else if (!(bc.findings || []).length) {
+        bcTop = '<span class="lc-msg">자동 검수 — 컷 설계와 어긋난 곳을 찾지 못했습니다</span>';
+      } else {
+        bcTop = '<div class="lc-check"><span class="lc-msg">자동 검수 — 컷 설계와 다른 곳 ' + bc.findings.length + "건</span>" +
+          bc.findings.map(function (i) {
+            return '<span class="lc-msg' + (i.severity === "high" ? " warn" : "") + '" style="display:block">' +
+              (i.severity === "high" ? "★ " : "") + esc(i.cut ? i.cut + "번 컷 — " : "") + esc(i.what || "") + "</span>";
+          }).join("") + "</div>";
+        bcFill = bc.revise_text || "";
+      }
       return sheetHtml + reviewBox("board", "콘티 그림을 검수해 주세요",
-        "콘티 시트 " + (n.board || 0) + "장 · 수정 요청하면 시트 전체를 다시 그립니다(유료 · 다시 「콘티 뽑기」)");
+        "콘티 시트 · 수정 요청하면 시트 전체를 다시 그립니다(유료 · 다시 「콘티 뽑기」)", "", bcTop, bcFill);   // 장 수는 계속 바뀌어 뺐다 (09-26 Dan)
     }
     if (act.phase === "final.review") {
       return sheetHtml + reviewBox("final", "완성 콘티를 확인해 주세요",
