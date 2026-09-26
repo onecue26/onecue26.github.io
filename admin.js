@@ -816,6 +816,23 @@
       ">" + (open ? "승인하고 광고주에게 납품" : "납품 — " + esc(st)) + "</button></div></div>";
   }
 
+  /** 받침에 맞는 목적격 조사 — 「납품본을」 「콘티를」 */
+  function josa(w) {
+    var c = String(w || "").slice(-1).charCodeAt(0);
+    return c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 ? "을" : "를";
+  }
+
+  /** ★ 09-26 — 최종 납품본을 남긴다: 광고주에게 보낸 판(승인 표시된 완성본) 하나를 맨 위에.
+   *  완료한 뒤 완성본 다섯 판이 나란히 떠서 어느 것이 나갔는지 안 보였다 (Dan: 「납품 버전이 최종으로 남게」). */
+  function deliveredFinal(p, last) {
+    var fin = (p.files || []).filter(function (x) { return x.kind === "final" && x.approved && x.url; })[0];
+    if (!fin) return "";
+    return '<div class="delivered-final"><b>최종 납품본</b>' +
+      '<video src="' + esc(fin.url) + '" controls playsinline preload="metadata"></video>' +
+      '<small>' + esc(String(fin.storage_path || "").split("/").pop()) + " · 만든 시각 " + esc(when(fin.created_at)) +
+      (last && last.decision === "ok" ? " · 광고주 승인 " + esc(when(last.decided_at)) : "") + "</small></div>";
+  }
+
   function planReady(p, s) {
     var pick = SE().of(p, s) || {};
     if (!pick.revision_at) return true;      // 처음 뽑는 자리는 해당 없음
@@ -1782,14 +1799,14 @@
 
     // ★ 광고주가 정한 것 — 우리에게 보낸 유일한 말이다. 조용히 단계만 넘어가면
     //   무슨 일이 있었는지 알려면 DB 를 봐야 한다.
-    var GATE_NAME = { concepts: "콘셉트", storyboard: "콘티", video: "영상", strategy: "방향" };
+    var GATE_NAME = { concepts: "콘셉트", storyboard: "콘티", video: "영상", strategy: "방향", deliver: "납품본", post: "완성본" };
     var decided = (p.approvals || []).slice().sort(function (a, b) {
       return String(b.decided_at).localeCompare(String(a.decided_at));
     })[0];
     var clientSaid = decided
       ? '<div class="client-said ' + (decided.decision === "ok" ? "ok" : "revise") + '">' +
-        '<b>광고주가 ' + esc(GATE_NAME[decided.gate] || decided.gate) +
-        (decided.decision === "ok" ? "를 승인했습니다" : " 수정을 요청했습니다") + "</b>" +
+        '<b>광고주가 ' + esc(GATE_NAME[decided.gate] || "진행 단계") +
+        (decided.decision === "ok" ? josa(GATE_NAME[decided.gate] || "진행 단계") + " 승인했습니다" : " 수정을 요청했습니다") + "</b>" +
         '<span class="at">' + esc(when(decided.decided_at)) +
         " · " + esc(ago(decided.decided_at)) + "</span>" +
         (decided.note ? '<span class="said">“' + esc(decided.note) + '”</span>' : "") +
@@ -2178,7 +2195,7 @@
       if (p.state === "done") {
         return '<div class="close-box done"><b>프로젝트 완료</b>' +
           '<span>' + esc(personName(p.closed_by)) + " · " + esc(when(p.closed_at)) + " · 총 원가 " + spentAll(p) +
-          "cr" + won(spentAll(p)) + "</span></div>";
+          "cr" + won(spentAll(p)) + "</span></div>" + deliveredFinal(p, last);
       }
       if (p.state === "idle" && last && last.decision === "ok") {
         // ★ 광고주 승인으로 끝나지 않는다 — 관리자가 닫아야 한 건이 끝난다 (068 · Dan 09-23)
@@ -2188,7 +2205,7 @@
           '<p>남은 일이 없으면 프로젝트를 닫습니다. 닫으면 목록 아래 「완료된 프로젝트」로 내려가고, ' +
           "이 건의 원가·판 수가 제작 기록에 남습니다.</p>" +
           (canWrite ? '<button class="btn" type="button" data-close-project="' + esc(p.id) + '">프로젝트 완료</button>' : "") +
-          "</div>" + backBox(p);
+          "</div>" + deliveredFinal(p, last) + backBox(p);
       }
       if (!canWrite) return "";
       // 보내기 전에 한 번 더 본다 — 승인 버튼 바로 위 (Dan 09-23)
@@ -2858,7 +2875,10 @@
               esc(m.camera_lock) + "</span>" : "") +
             (facts.length ? '<span class="facts">' + facts.join(" · ") + "</span>" : "") +
             checks +
-            (f.approved ? '<span class="ok">승인됨</span>' : "") +
+            (f.kind === "final" && f.approved ? '<span class="ok">최종 납품본</span>'
+              : f.kind === "final" && p.step === "deliver" && (p.files || []).some(function (x) { return x.kind === "final" && x.approved; })
+              ? '<span class="gone">납품하지 않은 판</span>'
+              : f.approved ? '<span class="ok">승인됨</span>' : "") +
             (m.made_why ? '<span class="madewhy">' + esc(m.made_why) + "</span>" : "") +
             addedLater(p, step, f) +
             verdictOf(f, isOld) +
