@@ -4020,9 +4020,9 @@
         }
         if (what === "approve-anchor") {
           lock(b);
-          return rpc(slug, "onecue_asset_approve",
-            { p_asset_id: b.dataset.asset, p_approved: true })
-            .then(load).catch(fail(b, msg));
+          // ★ 자산 단위 함수라 rpc()(p_project_id 를 끼워 넣음)를 쓰면 「함수를 못 찾음」이 난다 — 직접 부른다 (09-26 블렌디)
+          return db.rpc("onecue_asset_approve", { p_asset_id: b.dataset.asset, p_approved: true })
+            .then(rpcOk).then(load).catch(fail(b, msg));
         }
         // 전송은 되돌릴 수 있는 일이 아니다 — 누르는 순간 광고주 화면에 뜬다.
         // 그래서 한 번 묻는다. 「취소」는 반대로 내리는 일이라 묻지 않는다.
