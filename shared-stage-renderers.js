@@ -496,9 +496,9 @@
         '<div class="head"><span class="n">' + esc(text(row.n)) + "</span>" +
         (has(row.block) ? '<span class="blk">' + esc(text(row.block)) + "</span>" : "") +
         "</div>" +
-        (has(row.action) ? '<p class="what">' + esc(text(row.action)) + "</p>" : "") +
+        (has(row.action) ? '<p class="what"><span class="prod-tag">제작용</span>' + esc(text(row.action)) + "</p>" : "") +
         (beat ? '<p class="beat">' + esc(beat) + "</p>" : "") +
-        (rows ? '<details class="cut-more"><summary>자세히</summary>' + rows + "</details>" : "") +
+        (rows ? '<details class="cut-more"><summary>자세히 · 제작용(광고주 안 봄)</summary>' + rows + "</details>" : "") +
         mine +
         "</figcaption></figure>";
     }
@@ -522,15 +522,18 @@
         rows + "</div></div>";
     }
 
+    // ★ 광고주 콘티(그림이 있는 칸)에는 그림과 장면별 대본만 — 컷 설명·의도·등장 요소는 제작용 세부라 관리자에게만
+    //   (Dan 09-26 「디테일은 광고주에게 안 가게 · 관리자 페이지에서 구분해서」). 구성·각본(글만)은 textOnly 길이라 그대로
+    var prodOnly = media && !isAdmin(opts);
     return '<div class="cut' + (media ? "" : " noimg") + '">' +
       (media || '<div class="noimg-n">' + esc(text(row.n)) + "</div>") +
       '<div class="body">' +
       '<div class="head"><span class="n">' + esc(text(row.n)) + "</span>" +
       '<span class="tt">' + esc(when) + "</span>" +
       '<span class="blk">' + esc(text(row.block)) + "</span></div>" +
-      (has(row.action) ? '<div class="cut-row what"><b>행동</b><span>' +
+      (!prodOnly && has(row.action) ? '<div class="cut-row what"><b>행동</b><span>' +
         esc(text(row.action)) + "</span></div>" : "") +
-      rows +
+      (prodOnly ? "" : rows) +
       "</div></div>";
   }
 
