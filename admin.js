@@ -1767,6 +1767,12 @@
       bcTop += '<span class="lc-msg" style="display:block">' + (cutNs.length
         ? "<b>담아 둔 컷 의견 " + cutNs.length + "개</b>(" + esc(cutNs.join("·")) + "번) — 「수정 요청」을 누르면 이 칸 글과 함께 반영합니다"
         : "이 칸은 시트 전체 의견 · 한 컷만이면 아래 그 컷 칸에 담아 두고 여기서 「수정 요청」") + "</span>";
+      // ★ 자동 검수가 끝나기 전에는 승인·수정 요청을 잠근다 — 검수 중인데 버튼이 열려 있었다 (Dan 09-26)
+      if (!sheets[0] || bc.based_on !== sheets[0].id) {
+        return sheetHtml + reviewBox("board", "콘티 그림 자동 검수 중",
+          "자동 검수가 끝나면 승인·수정 요청이 열립니다", "", bcTop, "")
+          .replace(/(data-lc="review-(?:ok|revise)")/g, '$1 disabled title="자동 검수가 끝나면 열립니다"');
+      }
       return sheetHtml + reviewBox("board", "콘티 그림을 검수해 주세요",
         "수정 요청하면 이 칸과 컷 칸 의견을 모아 시트 전체를 다시 그립니다(유료 · 다시 「콘티 뽑기」)", "", bcTop, bcFill, cutNs.length > 0);   // 장 수는 계속 바뀌어 뺐다 (09-26 Dan)
     }
