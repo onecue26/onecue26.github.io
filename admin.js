@@ -592,7 +592,8 @@
           : (paidAt === "start" || paidAt === "choose")
             ? '<em class="ai-update choice">유료 생성 대기</em>'
           : "";
-        var badge = bph === "board.make" ? '<em class="ai-update choice">' + (boardRedoAt(p) ? "콘티 다시 그릴 차례" : "콘티 뽑기 차례") + "</em>"
+        var badge = (bph === "board.make" && boardFixState(p).pending) ? '<em class="ai-update working">수정 반영 준비 중</em>'
+          : bph === "board.make" ? '<em class="ai-update choice">' + (boardRedoAt(p) ? "콘티 다시 그릴 차례" : "콘티 뽑기 차례") + "</em>"
           : bph === "board.working" ? '<em class="ai-update working">AI 작업 중 · 콘티 그림</em>'
           : paidBadge ? paidBadge
           : needsPick ? '<em class="ai-update choice">실행 주체 선택 대기</em>'
@@ -1688,10 +1689,38 @@
             : '<span class="lc-msg err">등록된 제품 이미지가 없습니다 — 광고주 자료를 먼저 받아야 합니다</span>') +
           '<span class="lc-msg" data-lc-msg></span></div>';
       }
+      // 100 · 수정 요청 뒤에는 우리가 먼저 판단한다(coordination/board_fix.py) — 반영 계획이 나오기 전에는 뽑기를 닫는다
+      //   (Dan 09-26 「콘티 뽑기 전에 뭔가 과정이 있어야 … 상태 표시도 변하고, 버튼도 활성화되면 안 되는 거 아닌가?」)
+      var bf = boardFixState(p);
+      if (bf.pending) {
+        return '<div class="lc lc-working"' + tag + ">" +
+          head("수정 반영 준비 중", "적어 주신 수정 요청을 컷 그림·컷 설계와 대조해 무엇을 어떻게 고쳐 그릴지 정하고 있습니다(무료)") +
+          '<span class="lc-msg"><b>수정 반영 준비 중</b> — ' + esc(hhmm(bf.at)) + " 요청 · 보통 2~3분 · " +
+          esc(hhmm(bf.at, 3)) + "쯤 반영 계획이 뜨고 「콘티 뽑기」가 열립니다</span>" +
+          '<div class="lc-row"><button class="btn" type="button" disabled title="반영 계획이 나오면 열립니다">콘티 뽑기 — 반영 준비 중</button></div>' +
+          '<span class="lc-msg" data-lc-msg></span></div>';
+      }
+      var fixHtml = "", fixN = 0;
+      if (bf.plan) {
+        var items = bf.plan.items || [];
+        fixN = items.length;
+        fixHtml = '<div class="lc-check"><span class="lc-msg"><b>이렇게 고쳐 그립니다</b> — ' + esc(bf.plan.reply_ko || "") + "</span>" +
+          items.map(function (i) {
+            var redesign = i.change_beat || i.change_framing;
+            return '<span class="lc-msg" style="display:block">' + esc(i.n + "번 컷 — " + (i.reply_ko || "")) +
+              (redesign ? " <em>(컷 설계도 고침)</em>" : "") + "</span>";
+          }).join("") +
+          (bf.plan.cannot || []).map(function (c) {
+            return '<span class="lc-msg warn" style="display:block">그림으로는 못 보이는 것 — ' + esc(c.note || "") +
+              (c.why ? " · " + esc(c.why) : "") + "</span>";
+          }).join("") + "</div>";
+      }
       return '<div class="lc lc-start"' + tag + ">" +
         head("콘티 그림을 뽑습니다", "승인된 컷 설계 " + (n.cuts || 0) + "개를 기준으로 한 판 뽑아 컷마다 잘라 넣습니다") +
+        fixHtml +
         '<div class="lc-row">' +
-        '<button class="btn" type="button" data-lc="make-board"' + tag + ">콘티 뽑기</button>" +
+        '<button class="btn" type="button" data-lc="make-board"' + tag + ">" +
+        (bf.plan ? "콘티 뽑기 (수정 " + fixN + "건 반영)" : "콘티 뽑기") + "</button>" +
         "</div>" +
         '<span class="lc-msg">유료 생성(약 2cr) — 누르면 바로 한 판 그리고 컷마다 잘라 붙인 뒤 멈춥니다</span>' +
         '<span class="lc-msg" data-lc-msg></span></div>';
@@ -3359,6 +3388,20 @@
     return (p.reviews || []).filter(function (r) {
       return r.step === "storyboard" && (r.layer === "board" || r.layer === "final") && r.decision === "revise" && r.cut_n == null;
     }).map(function (r) { return String(r.decided_at || ""); }).sort().pop() || "";
+  }
+  /** 100 · 수정 요청 반영 계획 상태 — DB onecue_board_fix_pending 과 같은 규칙.
+   *  요청(R) 전에 그린 시트가 있고 · R 뒤에 그린 시트가 없고 · 어느 시트에도 R 이후 계획(board_fix)이 없으면 pending */
+  function boardFixState(p) {
+    var at = boardRedoAt(p);
+    if (!at) return { pending: false, at: "", plan: null };
+    var t = new Date(at).getTime();
+    var sheets = (p.files || []).filter(function (f) { return f.kind === "board" && f.cut_n == null; });
+    var plan = sheets.map(function (f) { return (f.meta || {}).board_fix; })
+      .filter(function (x) { return x && x.based_on_review_at && new Date(x.based_on_review_at).getTime() >= t; })
+      .sort(function (x, y) { return String(y.at).localeCompare(String(x.at)); })[0] || null;
+    var before = sheets.some(function (f) { return new Date(f.created_at).getTime() < t; });
+    var after = sheets.some(function (f) { return new Date(f.created_at).getTime() > t; });
+    return { pending: before && !after && !plan, at: at, plan: after ? null : plan };
   }
   function boardCurrent(p, f) {
     var at = boardRedoAt(p);
