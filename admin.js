@@ -1595,13 +1595,16 @@
         esc(last.decision === "ok" ? "승인함" : "수정 요청함") +
         (last.note ? " · " + esc(last.note) : "") + "</span>"
       : "";
+    // 그림 단계의 컷 의견은 담아 두기만 한다 — 다시 그리는 건 위 「수정 요청」이 모아서 한 번에 (board_fix.py).
+    //   화면에 그 말이 없어 위 칸과 컷 칸 중 어디에 써야 하는지 헷갈렸다 (Dan 09-26)
+    var draw = layer === "board" || layer === "final";
     return '<div class="cut-review"' + tag + ">" + said +
       '<textarea class="lc-note" data-lc-note rows="2" placeholder="' +
-      esc(n + "번 컷만 고칠 점") + '"></textarea>' +
+      esc(draw ? n + "번 컷만 고칠 점 — 담아 두면 위 「수정 요청」 때 함께 반영합니다" : n + "번 컷만 고칠 점") + '"></textarea>' +
       '<div class="lc-row">' +
       '<button class="btn ghost" type="button" data-lc="review-ok"' + tag + ">이 컷 승인</button>" +
       '<button class="btn ghost" type="button" data-lc="review-revise"' + tag +
-      ">이 컷 수정</button></div>" +
+      ">" + (draw ? "이 컷 의견 담기" : "이 컷 수정") + "</button></div>" +
       '<span class="lc-msg" data-lc-msg></span></div>';
   }
 
@@ -1621,10 +1624,11 @@
     };
     // 검수 칸 — 겹 전체에 대한 의견과 승인·수정. 컷마다는 컷 옆에 따로 붙는다.
     // top — 머리 아래에 끼울 것(자동 검수 결과) · prefill — 수정 요청 칸에 미리 채울 글
-    var reviewBox = function (layer, what, why, extra, top, prefill) {
+    // allowEmpty — 컷 칸에 담아 둔 의견이 있으면 이 칸이 비어도 「수정 요청」이 눌린다
+    var reviewBox = function (layer, what, why, extra, top, prefill, allowEmpty) {
       return '<div class="lc lc-review"' + tag + ' data-layer="' + esc(layer) + '">' +
         head(what, why) + (top || "") +
-        '<textarea class="lc-note" data-lc-note placeholder="' +
+        '<textarea class="lc-note" data-lc-note' + (allowEmpty ? " data-lc-allow-empty" : "") + ' placeholder="' +
         esc("수정 요청은 무엇을 고칠지 적어야 보냅니다") + '"' + (prefill ? ' rows="3"' : "") + ">" +
         esc(prefill || "") + "</textarea>" +
         '<div class="lc-row">' +
@@ -1752,8 +1756,19 @@
           }).join("") + "</div>";
         bcFill = bc.revise_text || "";
       }
+      // 이 시트 뒤에 담아 둔 컷 의견 — 위 「수정 요청」이 함께 가져간다
+      var since = String((sheets[0] || {}).created_at || "");
+      var cutNotes = (p.reviews || []).filter(function (r) {
+        return r.step === "storyboard" && r.layer === "board" && r.cut_n != null && r.decision === "revise" &&
+          (r.note || "").trim() && String(r.decided_at || "") > since;
+      });
+      var cutNs = cutNotes.map(function (r) { return Number(r.cut_n); })
+        .filter(function (v, i, a) { return a.indexOf(v) === i; }).sort(function (x, y) { return x - y; });
+      bcTop += '<span class="lc-msg" style="display:block">' + (cutNs.length
+        ? "<b>담아 둔 컷 의견 " + cutNs.length + "개</b>(" + esc(cutNs.join("·")) + "번) — 「수정 요청」을 누르면 이 칸 글과 함께 반영합니다"
+        : "이 칸은 시트 전체 의견 · 한 컷만이면 아래 그 컷 칸에 담아 두고 여기서 「수정 요청」") + "</span>";
       return sheetHtml + reviewBox("board", "콘티 그림을 검수해 주세요",
-        "콘티 시트 · 수정 요청하면 시트 전체를 다시 그립니다(유료 · 다시 「콘티 뽑기」)", "", bcTop, bcFill);   // 장 수는 계속 바뀌어 뺐다 (09-26 Dan)
+        "수정 요청하면 이 칸과 컷 칸 의견을 모아 시트 전체를 다시 그립니다(유료 · 다시 「콘티 뽑기」)", "", bcTop, bcFill, cutNs.length > 0);   // 장 수는 계속 바뀌어 뺐다 (09-26 Dan)
     }
     if (act.phase === "final.review") {
       return sheetHtml + reviewBox("final", "완성 콘티를 확인해 주세요",
@@ -4042,7 +4057,7 @@
       var btns = wrap ? Array.prototype.filter.call(wrap.querySelectorAll('[data-lc="revise"],[data-lc="review-revise"]'),
         function (x) { return x.closest(".cut-review, .lc") === wrap; }) : [];
       function sync() {
-        var empty = !(t.value || "").trim();
+        var empty = !(t.value || "").trim() && !t.hasAttribute("data-lc-allow-empty");
         Array.prototype.forEach.call(btns, function (x) {
           x.disabled = empty;
           x.title = empty ? "무엇을 고칠지 적으면 눌립니다" : "";
