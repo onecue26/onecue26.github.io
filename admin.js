@@ -1082,6 +1082,10 @@
 
   /** 089 · 수정 요청 칸의 글과 작업기의 답 — 질문이면 답만 달고 요청을 거둔다(승인 버튼이 다시 뜬다) (Dan 09-25 「사이트 통해서 처리되게」) */
   function revisionBox(se, note) {
+    // 09-28 — 작업기가 스스로 제작 자료로 되돌린 안내는 질문이 아니다. 한 줄 안내로만
+    if (/^\(자동 안내\)/.test(se.revision_reply || "")) {
+      return '<div class="redo-note"><b>자동 안내</b><span>' + esc(String(se.revision_reply).replace(/^\(자동 안내\)\s*/, "")) + "</span></div>";
+    }
     var asked = se.revision_kind === "question" && !se.revision_at;
     var answered = se.revision_reply && (asked || se.revision_reply_for === se.revision_at);
     var tag = { question: "질문으로 읽었습니다 — 다시 만들지 않습니다", fix: "고쳐 달라는 요청으로 읽었습니다 — 계획을 고쳤습니다",
@@ -2934,7 +2938,8 @@
             var nid = String(path).slice(5);
             var mine = (p.files || []).filter(function (f) { return f.kind === "anchor" && (f.meta || {}).covers_call === nid; })
               .sort(function (x, y) { return String(y.created_at).localeCompare(String(x.created_at)); });
-            var use = mine.filter(function (f) { return f.approved; })[0] || mine[0];
+            // 제작 자료 검토 중에는 가장 새 판이 지금 판이다(계획이 바뀌어 새로 뽑은 판) — 그 밖에는 승인된 가장 새 판(작업기가 물리는 것)
+            var use = p.step === "anchors" ? mine[0] : (mine.filter(function (f) { return f.approved; })[0] || mine[0]);
             if (use) inPlan[use.storage_path] = "Image " + (k + 1);
           } else inPlan[path] = "Image " + (k + 1);
         });
