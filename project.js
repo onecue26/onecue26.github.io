@@ -214,12 +214,15 @@
     return (k && k.label) || kind;
   }
 
+  /** 우리가 만든 것(엔드카드 시안 등 made_by: system)은 광고주가 보낸 자료가 아니다 (09-27 엔드카드 시안 17장이 「보내주신 자료」에 섞였다) */
+  function fromClient(a) { return !((a.meta || {}).made_by === "system"); }
+
   /** 종류별로 몇 개나 받았나. 모자란 것을 세는 쪽과 보여주는 쪽이 같은 수를 본다. */
   function clientCounts(assets) {
     var mine = clientKinds();
     var counts = {};
     (assets || []).forEach(function (a) {
-      if (!mine[a.kind]) return;
+      if (!mine[a.kind] || !fromClient(a)) return;
       counts[a.kind] = (counts[a.kind] || 0) + 1;
     });
     return counts;
@@ -227,7 +230,7 @@
 
   function secFiles(assets) {
     var mine = clientKinds();
-    var f = (assets || []).filter(function (a) { return !!mine[a.kind]; });
+    var f = (assets || []).filter(function (a) { return !!mine[a.kind] && fromClient(a); });
     if (!f.length) return "";
     return "<h2>보내주신 자료 " + f.length + "</h2><div class=\"files\">" +
       f.map(function (a) {

@@ -2491,7 +2491,8 @@
       var spec = window.ONECUE_AD_TYPE_MATERIALS || {};
       var mine = (p.files || []).filter(function (f) {
         var k = spec.kinds && spec.kinds[f.kind];
-        return f.url && (!k || k.by === "client" || k.by === "both") &&
+        // 우리가 만든 것(엔드카드 시안 등 made_by: system)은 광고주 자료가 아니다 (09-27 Dan 「이것들이 왜 광고주에 올린 자료에」)
+        return f.url && (f.meta || {}).made_by !== "system" && (!k || k.by === "client" || k.by === "both") &&
           ["product_ref", "logo", "brand_guide", "mood_ref", "place_ref", "char_ref", "screen_ref", "legal_text", "doc"].indexOf(f.kind) >= 0;
       });
       if (!mine.length) return '<div class="said"><span class="lbl">광고주가 올린 자료</span><span class="sub">없음</span></div>';
