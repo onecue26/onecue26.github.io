@@ -770,6 +770,16 @@
     return !!(at && new Date(at) > new Date(t.meta.settled_at) && chk && chk.at && new Date(chk.at) > new Date(at));
   }
 
+  /** 제작 자료 — 사장님이 의견을 달고 「이 답변대로」 정하신 가장 새 판들과 그 준비물(계획 needs). applied = 그 준비물 프롬프트에 반영됨 */
+  function anchorRedo(p) {
+    var needs = [].concat.apply([], ((p.render_plan || {}).calls || []).map(function (c) { return c.needs || []; }));
+    return newestTakes(p, "anchors").filter(function (f) { var m = f.meta || {}; return m.dan_take && m.settled_at; })
+      .map(function (f) {
+        var n = needs.filter(function (x) { return x.id === (f.meta || {}).covers_call; })[0] || {};
+        return { f: f, n: n, applied: !!n.applied_for && n.applied_for === f.meta.settled_at };
+      });
+  }
+
   /** 반영 대기 중 무엇을 기다리나 — 오더 고치는 중인지, 고쳐 놓고 검사 중인지. 시작 시각·끝날 무렵을 같이 (09-26 Dan 「이렇게 오래 걸린다고?」) */
   function applyWait(p, s) {
     var t = newestTakes(p, s).filter(function (f) { return (f.meta || {}).settled_at; })[0];
@@ -1263,6 +1273,21 @@
           : s === "video" && takeOpen(p, s)
           ? '<span class="lc-msg"><b>아래 판 옆 의견·답변에서 정해 주세요</b> — 「답변대로 다시 뽑기 준비」와 「이 영상으로 승인」이 거기 있습니다.</span>' +
             '<div class="lc-row">'
+          : s === "anchors" && anchorRedo(p).length
+          // ★ 09-27 — 제작 자료 판에 의견 → 답변 → 「이 답변대로」를 하셨는데 누를 버튼이 없었다(판 카드는 「다시 뽑기를 누르시면」이라고 적혀 있었다)
+          ? (function () {
+              var r = anchorRedo(p);
+              var wait = r.filter(function (x) { return !x.applied; });
+              var cr = r.reduce(function (a, x) { return a + (Number(x.n.credits_estimate) || 0); }, 0);
+              var names = r.map(function (x) { return x.n.id || (x.f.meta || {}).covers_call; }).join(" · ");
+              return wait.length
+                ? '<span class="lc-msg"><b>정하신 답변대로 프롬프트를 고치는 중입니다</b> — ' + esc(names) + " · 보통 1~2분 · 끝나면 이 자리에 다시 만들기가 열립니다</span>" +
+                  '<div class="lc-row"><button class="btn" type="button" disabled>다시 만들기 — 고치는 중</button>'
+                : '<span class="lc-msg"><b>답변대로 프롬프트를 고쳤습니다</b> — ' + esc(names) + " " + r.length +
+                  "장만 다시 만듭니다. 나머지는 그대로 둡니다.</span>" +
+                  '<div class="lc-row"><button class="btn" type="button" data-lc="rerun"' + tag + ">고친 " + r.length + "장 다시 만들기 (" + money(cr) + ")</button>" +
+                  '<button class="btn ghost" type="button" data-lc="approve"' + tag + ">그래도 지금 것으로 승인</button>";
+            })()
           : s === "video"
           ? '<span class="lc-msg">고칠 곳·궁금한 점은 <b>아래 판 옆 「의견」 칸</b>에 적어 주세요 — 제작 쪽 답변이 달리고, 정하시면 오더를 고쳐 다시 뽑습니다.</span>' +
             '<div class="lc-row"><button class="btn" type="button" data-lc="approve"' + tag + ">승인</button>"
