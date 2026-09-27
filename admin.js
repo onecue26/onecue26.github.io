@@ -1252,7 +1252,7 @@
         head(s === "anchors" ? "제작 자료를 검수해 주세요" : "영상을 검수해 주세요",
              s === "video"
                ? "괜찮으면 승인 · 고칠 곳은 아래 의견 칸에 — 다시 뽑으면 " + money(plan.credits) + "이 또 나갑니다"
-               : "고칠 곳을 적으시면 그것만 다시 만듭니다. 승인하면 다음 단계로 갑니다") +
+               : "괜찮으면 승인 · 고칠 곳은 아래 판 옆 의견 칸에 — 답변을 보고 정하시면 그 판만 다시 만듭니다") +
         // 089 · 질문으로 읽혀 답이 달린 요청 — 검수 자리로 돌아와도 답이 보여야 한다
         (function () {
           var se = SE().of(p, s) || {};
@@ -1270,9 +1270,6 @@
           ? '<span class="lc-msg"><b>답변대로 오더를 고쳤습니다</b>' + (checkBlocks(p) ? " — 콘티 대조 검사가 끝나면 다시 뽑기가 열립니다" : " · 콘티 대조 검사 통과") + "</span>" +
             '<div class="lc-row"><button class="btn" type="button" data-lc="rerun"' + tag + (checkBlocks(p) ? " disabled" : "") + ">다시 뽑기 (" + money(plan.credits) + ")</button>" +
             '<button class="btn ghost" type="button" data-lc="approve"' + tag + ">그래도 이 영상으로 승인</button>"
-          : s === "video" && takeOpen(p, s)
-          ? '<span class="lc-msg"><b>아래 판 옆 의견·답변에서 정해 주세요</b> — 「답변대로 다시 뽑기 준비」와 「이 영상으로 승인」이 거기 있습니다.</span>' +
-            '<div class="lc-row">'
           : s === "anchors" && anchorRedo(p).length
           // ★ 09-27 — 제작 자료 판에 의견 → 답변 → 「이 답변대로」를 하셨는데 누를 버튼이 없었다(판 카드는 「다시 뽑기를 누르시면」이라고 적혀 있었다)
           ? (function () {
@@ -1288,7 +1285,11 @@
                   '<div class="lc-row"><button class="btn" type="button" data-lc="rerun"' + tag + ">고친 " + r.length + "장 다시 만들기 (" + money(cr) + ")</button>" +
                   '<button class="btn ghost" type="button" data-lc="approve"' + tag + ">그래도 지금 것으로 승인</button>";
             })()
-          : s === "video"
+          // ★ 09-27 — 제작 자료도 입력칸을 판 옆 의견 칸 하나로(위 통합 수정 칸 + 아래 판 의견 칸이 따로 있어 어디 적을지 몰랐다 · Dan)
+          : (s === "video" || s === "anchors") && takeOpen(p, s)
+          ? '<span class="lc-msg"><b>아래 판 옆 의견·답변에서 정해 주세요</b> — 「답변대로 다시 뽑기 준비」와 「" + (s === "anchors" ? "이대로 승인" : "이 영상으로 승인") + "」이 거기 있습니다.</span>' +
+            '<div class="lc-row">'
+          : (s === "video" || s === "anchors")
           ? '<span class="lc-msg">고칠 곳·궁금한 점은 <b>아래 판 옆 「의견」 칸</b>에 적어 주세요 — 제작 쪽 답변이 달리고, 정하시면 오더를 고쳐 다시 뽑습니다.</span>' +
             '<div class="lc-row"><button class="btn" type="button" data-lc="approve"' + tag + ">승인</button>"
           : '<textarea class="lc-note" data-lc-note placeholder="' +
