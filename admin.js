@@ -3078,7 +3078,8 @@
         //   (검수 전 = pending)는 의견도, 적을 칸도 없이 영상만 떴다
         //   (Dan 2026-09-23: 「지금은 그냥 아무것도 안써있고」).
         //   지난 판은 전처럼 걸린 것만 기록으로 남긴다.
-        if (v !== "blocked" && v !== "ask" && (isOld || !f.kind || f.kind === "anchor")) return "";
+        // 09-27 — 제작 자료 그림도 자동 검수(anchor_review)가 붙는다. 통과·의견도 보여 준다(전엔 걸렸을 때만)
+        if (v !== "blocked" && v !== "ask" && (isOld || !f.kind)) return "";
         var head = v === "blocked"
           ? "검수에서 걸렸습니다 · 치명 " + (m.critical || (m.spec_fail ? 1 : 0)) + "건"
           : v === "ask" ? "정해야 할 것 " + (m.asks || 0) + "건"
