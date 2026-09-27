@@ -1247,6 +1247,13 @@
         '이 단계에서는 다시 뽑기 버튼을 두지 않습니다 (두 번 나가는 것을 막습니다).</span>' +
         "</div>";
     }
+    // ★ 09-27 — 영상이 막 나와 검수 중이면(영상은 검수와 함께 올라온다) 승인 버튼 대신 「몇 시에 나왔고 언제쯤 올라온다」만.
+    //   전엔 영상도 안 보이는데 「영상을 검수해 주세요 · 승인」이 떠 있었다 (Dan 「영상 어딨냐」)
+    var pendTake = at === "review" && s === "video" ? unseenTake(p, s) : null;
+    if (pendTake && (!(pendTake.meta || {}).review || pendTake.meta.review === "pending")) {
+      return '<div class="lc lc-review"' + tag + ">" + head("영상이 나왔습니다 — 자동 검수 중", "") +
+        takeWaiting(p, s) + '<span class="lc-msg" data-lc-msg></span></div>';
+    }
     if (at === "review") {
       return '<div class="lc lc-review"' + tag + ">" +
         head(s === "anchors" ? "제작 자료를 검수해 주세요" : "영상을 검수해 주세요",
