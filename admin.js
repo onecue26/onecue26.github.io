@@ -2866,12 +2866,21 @@
       //   앞으로 더 나올 것이고, 무엇이 언제 왜 나왔는지 다 남아야 견줄 수 있다
       //   (Dan 2026-09-22: 「버전을 붙여서 예전것들은 계속 쌓여서 볼수잇게」).
       //   만든 차례가 곧 버전이다. 지우지 않으므로 번호가 비지 않는다.
-      var verOf = {};
+      var verOf = {}, verSeq = {};
       (p.files || []).filter(function (f) { return want.indexOf(f.kind) >= 0 && !(f.meta || {}).material && !(f.meta || {}).material; })
         .sort(function (x, y) {
           return String(x.created_at || "") < String(y.created_at || "") ? -1 : 1;
         })
-        .forEach(function (f, i) { verOf[f.id] = i + 1; });
+        // ★ 09-27 — 버전은 **그림(자리 covers_call)마다 따로** 센다. 제작 자료 P1·N1·N2 를 한 줄로 v1~v5 로 세어 헷갈렸다 (Dan)
+        .forEach(function (f) {
+          var cc = (f.meta || {}).covers_call || "";
+          verSeq[cc] = (verSeq[cc] || 0) + 1;
+          verOf[f.id] = verSeq[cc];
+        });
+      var verLabel = function (f) {
+        var cc = (f.meta || {}).covers_call || "";
+        return (step === "anchors" && cc ? cc + " " : "") + "v" + (verOf[f.id] || "?");
+      };
 
       // ★ 자리(covers_call)마다 **새 것부터 몇 번째인가.** 0 = 지금 판, 1 = 직전 판.
       //
@@ -2988,7 +2997,7 @@
       function oldBox() {
         if (!older.length) return "";
         var why = (SE().of(p, step) || {}).revision_note || "";
-        var names = older.map(function (f) { return "v" + verOf[f.id]; }).join(" · ");
+        var names = older.map(verLabel).join(" · ");
         return '<details class="made-old"><summary>지난 버전 ' + names +
           " — 눌러서 펼치면 그대로 보실 수 있습니다</summary>" +
           (why ? '<div class="old-why"><b>고쳐 달라고 적으신 것</b><span>' +
@@ -3002,7 +3011,7 @@
       }
       if (!mine.length) return oldBox();
       return '<div class="made" data-made-step="' + esc(step) + '"><span class="made-lbl">만든 것 ' + mine.length +
-        " (지금 v" + Math.max.apply(null, mine.map(function (f) { return verOf[f.id] || 0; })) +
+        " (지금 " + (step === "anchors" ? mine.map(verLabel).join(" · ") : "v" + Math.max.apply(null, mine.map(function (f) { return verOf[f.id] || 0; }))) +
         ") · 눌러서 크게 · 영상은 두 번 누르십시오</span>" +
         mine.map(function (f, i) { return one(f, i, isPast(f)); }).join("") +
         "</div>" + oldBox();
@@ -3024,7 +3033,7 @@
             }).join("") + "</dl>"
             : "";
           return '<figure class="made-one">' +
-            '<span class="made-n">v' + (verOf[f.id] || (i + 1)) + "</span>" +
+            '<span class="made-n">' + esc(verLabel(f)) + "</span>" +
             (f.url
               ? (vid
                 ? '<video src="' + esc(f.url) + '" controls preload="metadata" ' +
