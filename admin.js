@@ -1600,7 +1600,7 @@
     var draw = layer === "board" || layer === "final";
     return '<div class="cut-review"' + tag + ">" + said +
       '<textarea class="lc-note" data-lc-note rows="2" placeholder="' +
-      esc(draw ? n + "번 컷만 고칠 점 — 담아 두면 위 「수정 요청」 때 함께 반영합니다" : n + "번 컷만 고칠 점") + '"></textarea>' +
+      esc(draw ? n + "번 컷 고칠 점 (위 「수정 요청」 때 함께)" : n + "번 컷만 고칠 점") + '"></textarea>' +
       '<div class="lc-row">' +
       '<button class="btn ghost" type="button" data-lc="review-ok"' + tag + ">이 컷 승인</button>" +
       '<button class="btn ghost" type="button" data-lc="review-revise"' + tag +
@@ -2072,7 +2072,9 @@
         (atConceptStage ? "관리자 검토" : "선택 완료 · 보관본") + '</span>' +
         "<h3>콘셉트 " + ((p.concepts || []).some(function (c) { return c.batch > 1; })
           ? "5안 + 추가 " + (p.concepts || []).filter(function (c) { return c.batch > 1; }).length + "안" : "5안") +
-        "</h3><p>" + (atConceptStage
+        "</h3><p>" + (atConceptStage && p.state === "ready"
+          ? "광고주에게 보냈습니다 — 광고주가 고르면 다음 단계로 넘어갑니다."
+          : atConceptStage
           ? "추천은 참고값입니다. 다섯 방향의 차이와 위험을 확인한 뒤 광고주에게 보내세요."
           : "이 프로젝트에서 실제로 제안하고 선택한 콘셉트 기록입니다.") + '</p></div>' +
         strategyLine + conceptList(p.concepts) + reviewActions(p, atConceptStage, replanBusy) + replanBox + '</section>';
@@ -2100,7 +2102,9 @@
 
     // 1차 검수 — 정지점에 와 있으면 우리가 먼저 보고 광고주에게 넘긴다.
     // 이 버튼을 누르기 전까지 광고주 화면에는 판단 버튼이 안 뜬다
-    var g = GATE[p.step];
+    // ★ 09-27 — 콘티는 콘티 칸의 「광고주에게 보내기」(그림·장면별 대본을 함께 보냄)만 쓴다. 공용 버튼이 접힌 칸에 또 있어서
+    //   누르면 콘티는 안 가고 상태만 「광고주 차례」가 됐다(시험 한 바퀴에서 잡음)
+    var g = p.step === "storyboard" ? null : GATE[p.step];
     var check = "";
     // 광고주가 되돌려보낸 건인가 — 그러면 「아직 안 보낸 것」과 다른 말을 해야 한다
     var back = p.redo && p.redo.gate === p.step && p.redo.decision === "revise" &&
@@ -2565,7 +2569,7 @@
     function postFor(p) {
       var pick = SE().of(p, "post") || {};
       if (!pick.chosen_at) return "<span></span>";
-      if (!pick.directions) return postBody(p, "후반에서 입힐 것 — AI 계획");
+      if (!pick.directions) return pausedNote(p, "post") + postBody(p, "후반에서 입힐 것 — AI 계획");
       var applied = p.render_mode_at && pick.directions_at &&
         new Date(p.render_mode_at) > new Date(pick.directions_at);
       return applied ? postBody(p, "요청사항대로 입힐 것") : "<span></span>";
@@ -2580,7 +2584,7 @@
         }).join("");
         var ec = raw.endcard || {};
         var end = (ec.lines || []).length ? "<li><b>" + esc(ec.from) + "초부터 엔드카드</b> — <span>" +
-          (ec.lines || []).map(esc).join(" / ") + "</span></li>" : "";
+          (ec.lines || []).map(esc).join(" / ") + (ec.cta ? " · 행동 문구 「" + esc(ec.cta) + "」" : "") + "</span></li>" : "";
         return '<div class="stage-content post-work"><div class="pw-head"><b>' + esc(title || "후반에서 입힐 것") + '</b>' +
           (raw.source ? "<span>영상 " + esc(raw.source) + " 에</span>" : "") + "</div>" +
           '<ol class="pw-list">' + caps + end + "</ol>" +
@@ -2589,7 +2593,7 @@
       var list = Array.isArray(raw) ? raw : [];
       if (!list.length) {
         return '<div class="stage-content"><p class="none">' +
-          '후반에 할 일이 계획에 아직 없습니다 — 구성·각본 단계에서 정합니다.</p></div>';
+          '후반 계획(자막·엔드카드)은 AI 작업을 시작하면 승인된 장면별 대본과 영상을 보고 먼저 씁니다.</p></div>';
       }
       var left = list.filter(function (x) { return x.unresolved; });
       return '<div class="stage-content post-work">' +
@@ -2658,7 +2662,7 @@
         buttons = paidBody(p, step, act);
       }
       // 계획 목록은 「누가 맡습니까」 고르기 전에만 — 고른 뒤에는 아래 만들기 칸이 같은 목록을 보여 준다
-      return chk + (step === "anchors" && !(SE().of(p, "anchors") || {}).chosen_at ? needsPlan(p) : "") + buttons + readyNote(p, step) + doneNote(p, step) + askNote(p, step) +
+      return chk + (step === "anchors" && !(SE().of(p, "anchors") || {}).chosen_at ? needsPlan(p) : "") + pausedNote(p, step) + buttons + readyNote(p, step) + doneNote(p, step) + askNote(p, step) +
         blockedNote(p, step) + assetList(p, step);
     }
 
@@ -2669,6 +2673,26 @@
     //   거기서 멈추는데, 화면이 그 사실을 말하지 않으면 사장님은 무엇을 보고
     //   무엇을 눌러야 하는지 알 수 없다. 그림을 그 자리에 세우고, 다음에
     //   무엇이 일어나는지 값과 함께 적는다.
+    /** 누르셨는데 작업기가 만들지 않고 되돌린 이유 (stage_paused) — 없으면 버튼만 다시 떠서 「눌렀는데 아무 일 없음」이 된다.
+     *  다시 누르셨거나(pressed_at) 돌고 있거나 그 뒤 새 판이 나왔으면 지난 일이다.
+     *  한 판 뽑고 규칙대로 멈춘 것(「한 번 뽑았으므로」·「준비물을 만들고」)은 되돌림이 아니다. */
+    function pausedNote(p, step) {
+      if (p.step !== step) return "";
+      var e = (p.paused || []).filter(function (x) { return x.to_step === step; })[0];
+      if (!e) return "";
+      var why = (e.payload || {}).why || "";
+      if (/^(준비물을 만들고 멈췄습니다|한 번 뽑았으므로 멈췄습니다)/.test(why)) return "";
+      var se = SE().of(p, step) || {};
+      var at = new Date(e.ts).getTime();
+      if (se.started_at || (se.pressed_at && new Date(se.pressed_at).getTime() > at)) return "";
+      var kinds = stageKinds(step);
+      if ((p.files || []).some(function (f) { return kinds.indexOf(f.kind) >= 0 && new Date(f.created_at).getTime() > at; })) return "";
+      return '<div class="client-said revise worker-stop"><b>누르셨지만 만들지 않고 되돌렸습니다</b>' +
+        '<span class="at">' + esc(when(e.ts)) + "</span>" +
+        '<span class="said">' + esc(why) + "</span>" +
+        '<span class="said">크레딧은 나가지 않았습니다. 걸린 것이 고쳐지면 다시 누르시면 됩니다.</span></div>';
+    }
+
     function readyNote(p, step) {
       if (step !== "video") return "";
       var pick = SE().of(p, step) || {};
@@ -2684,6 +2708,12 @@
         // ★ 제작 자료 단계에서 만들고 승인한 준비물은 이미 끝난 일이다 — 영상 단계에 「나왔습니다」로 크게 다시 띄우지 않는다
         //   (09-25 Dan 「이게 나올 필요가 있냐」 — 누가 맡을지 고르기도 전에 사무실 사진이 크게 떴다)
         if (f.kind !== "anchor" || !f.url || isMaterial(f) || f.approved) return false;
+        // ★ 09-27 — 같은 준비물의 더 새 판이나 승인된 판이 있으면 이 판은 버린 판이다(버린 v1 이 크게 떴다)
+        var cc = (f.meta || {}).covers_call || "";
+        if ((p.files || []).some(function (g) {
+          return g.id !== f.id && g.kind === "anchor" && ((g.meta || {}).covers_call || "") === cc &&
+            (g.approved || String(g.created_at) > String(f.created_at));
+        })) return false;
         var made = f.created_at || (f.meta || {}).made_at;
         return !!made && (!mark || String(made) > String(mark));
       }).sort(function (x, y) {
@@ -2703,7 +2733,7 @@
         '" loading="lazy" data-big="' + esc(f.url) + '">' +
         '<span class="what"><b>' + esc(f.role || "준비물") + "</b>" +
         (m.why ? " — " + esc(m.why) : "") + "</span>" +
-        '<span class="next">이것을 보시고 괜찮으면 <b>다시 뽑기</b>를 눌러 영상을 뽑습니다. ' +
+        '<span class="next">이것을 보시고 괜찮으면 위의 <b>영상 뽑기</b>를 눌러 영상을 뽑습니다. ' +
         "여기서 걸리는 게 있으면 눌러서 크게 보시고 말씀해 주십시오 — " +
         "영상을 뽑은 뒤에는 이 물건을 못 바꿉니다.</span></div>";
     }
@@ -2775,10 +2805,14 @@
         return ((f.meta || {}).review || "") === "blocked";
       });
       if (!bad.length) return "";
+      var rv = (SE().of(p, step) || {}).revision_at;
+      if (rv && new Date(rv) > new Date(bad[0].created_at)) return "";   // 이미 수정 요청하셨다 — 위 칸이 그 다음을 말한다
       var m = bad[0].meta || {};
-      return '<div class="blocked-note"><b>검수에서 걸려 다시 만들고 있습니다</b>' +
-        (m.critical ? '<span class="n">치명 ' + m.critical + "건</span>" : "") +
-        (m.why ? '<span class="why">' + esc(m.why) + "</span>" : "") +
+      // ★ 09-27 — 「다시 만들고 있습니다」라고 적었지만 작업기는 누르시기 전엔 다시 만들지 않는다(버튼 한 번 = 생성 한 번)
+      var crit = m.critical || (m.spec_fail ? 1 : 0);
+      return '<div class="blocked-note"><b>가장 새 판이 검수에서 걸렸습니다 — 고칠 곳을 위 칸에 적어 「수정 요청」하시면 계획을 고쳐 다시 만듭니다</b>' +
+        (crit ? '<span class="n">치명 ' + crit + "건</span>" : "") +
+        ((m.why || m.review_summary) ? '<span class="why">' + esc(m.why || m.review_summary) + "</span>" : "") +
         '<span class="who">검토 · ' + esc(m.reviewer || "독립 검토") + "</span></div>";
     }
 
@@ -2852,10 +2886,13 @@
       ((p.render_plan || {}).calls || []).forEach(function (c) {
         (c.image_reference_paths || []).forEach(function (path, k) {
           if (String(path).indexOf("need:") === 0) {
+            // ★ 09-27 — 같은 준비물의 판이 여럿이면 영상에 물리는 것은 **승인된 가장 새 판**(작업기 resolve_ref), 승인 전이면 가장 새 판 하나.
+            //   전에는 v1·v2 가 둘 다 「지금 영상에 Image 2 로 쓰는 중」이었다
             var nid = String(path).slice(5);
-            (p.files || []).forEach(function (f) {
-              if (f.kind === "anchor" && (f.meta || {}).covers_call === nid) inPlan[f.storage_path] = "Image " + (k + 1);
-            });
+            var mine = (p.files || []).filter(function (f) { return f.kind === "anchor" && (f.meta || {}).covers_call === nid; })
+              .sort(function (x, y) { return String(y.created_at).localeCompare(String(x.created_at)); });
+            var use = mine.filter(function (f) { return f.approved; })[0] || mine[0];
+            if (use) inPlan[use.storage_path] = "Image " + (k + 1);
           } else inPlan[path] = "Image " + (k + 1);
         });
       });
@@ -3043,13 +3080,14 @@
         //   지난 판은 전처럼 걸린 것만 기록으로 남긴다.
         if (v !== "blocked" && v !== "ask" && (isOld || !f.kind || f.kind === "anchor")) return "";
         var head = v === "blocked"
-          ? "검수에서 걸렸습니다 · 치명 " + (m.critical || 0) + "건"
+          ? "검수에서 걸렸습니다 · 치명 " + (m.critical || (m.spec_fail ? 1 : 0)) + "건"
           : v === "ask" ? "정해야 할 것 " + (m.asks || 0) + "건"
           : (!v || v === "pending") ? "검수하고 있습니다 — 끝나면 여기에 검수와 제작 쪽 의견이 붙습니다"
           : "검수 통과 — 치명적인 것은 없습니다";
+        var why = m.why || m.review_summary || "";
         return '<div class="verdict v-' + esc(v || "pending") + '">' +
           "<b>" + head + "</b>" +
-          (m.why ? '<span class="what">' + esc(m.why) + "</span>" : "") +
+          (why ? '<span class="what">' + esc(why) + "</span>" : "") +
           (m.dropped ? '<details class="kept"><summary>안 잡은 것과 그 이유</summary>' +
             "<span>" + esc(m.dropped) + "</span></details>" : "") +
           '<span class="who">검토 · ' + esc(m.reviewer || "독립 검토") + "</span>" +
@@ -3098,8 +3136,8 @@
                 // 후반 완성본은 다시 만들어도 크레딧이 안 든다 (ffmpeg)
                 ? '<span class="call">괜찮으면 위의 <b>승인</b> · 고칠 점은 이 <b>의견 칸</b>에 — ' +
                   "답을 달고, 정하시면 다시 만듭니다(크레딧 없음).</span></div>"
-                : '<span class="call">보시고 정하십시오 — <b>다시 뽑기</b>' +
-                  "(값이 또 나갑니다) 또는 <b>이대로 승인</b>.</span></div>"));
+                : '<span class="call">보시고 정하십시오 — 괜찮으면 위의 <b>승인</b>(이대로 승인) · 고칠 점은 이 <b>의견 칸</b>에 적으시면 ' +
+                  "답을 달고, 정하시면 <b>다시 뽑기</b>(값이 또 나갑니다).</span></div>"));
       }
 
       /** 의견 → 답변 → 결정. **이 순서가 곧 잠금이다.**
@@ -3262,8 +3300,9 @@
       //   해당되는거아냐?」). 고르기 전에는 아무것도 안 보인다.
       // 후반은 계획 아래에 **올라온 완성본**(검수·의견 칸 포함)을 붙인다 — 전에는 승인
       //   버튼만 있고 영상이 없었다 (09-23 15:26)
-      post: postFor(p) + (p.step === "post" || (SE().of(p, "post") || {}).approved_at
-        ? assetList(p, "post") : "") + (p.step === "post" ? backBox(p) : ""),
+      // 한 칸으로 묶는다 — 계획이 비면 격자 왼쪽이 비어 「되돌리기」가 오른쪽 칸으로 밀렸다 (09-27 시험 한 바퀴)
+      post: '<div class="post-wrap">' + postFor(p) + (p.step === "post" || (SE().of(p, "post") || {}).approved_at
+        ? assetList(p, "post") : "") + (p.step === "post" ? backBox(p) : "") + "</div>",
       // 한 칸으로 묶어 위에서 아래로 쌓는다 — 원가 → 완성본 → 보내기 → 되돌리기 (격자 두 칸에 흩어져 나란히 섰다)
       deliver: '<div class="deliver-wrap">' + totalLine(p) + (p.step === "deliver" ? deliverBody(p) : "") + "</div>"
     };
@@ -3578,6 +3617,11 @@
     (p.files || []).forEach(function (f) { if (f.kind === "board" && f.cut_n != null && f.url && boardCurrent(p, f)) crop[f.cut_n] = f; });
     var sheets = (p.files || []).filter(function (f) { return f.kind === "board" && f.cut_n == null && boardCurrent(p, f); })
       .sort(function (x, y) { return String(y.created_at).localeCompare(String(x.created_at)); });
+    // ★ 09-27 — 콘티 그림이 나오기 전에는 광고주 보기를 펼치지 않는다. 그림 없이 의견 칸만 떠서 무엇을 보고 쓰는지 몰랐다
+    if (!sheets.length) {
+      return '<details class="board-old"><summary>광고주에게 보이는 콘티 — 콘티 그림이 나오면 여기서 확인합니다</summary>' +
+        '<p class="muted">그림·장면별 대본·엔드카드를 광고주 화면과 똑같이 보여 주고, 컷마다 의견을 적을 수 있습니다.</p></details>';
+    }
     var sync = sheets[0] && (sheets[0].meta || {}).text_sync;
     if (sync && sync.based_on_sheet !== sheets[0].id) sync = null;
     var items = (sync && !sync.applied && sync.items) || [];
@@ -5084,7 +5128,9 @@
           db.from("events").select("project_id,kind,to_step,ts,payload")
             .in("kind", ["production_enroll_requested", "production_enrolled", "astra_draft",
               // 작업기가 멈췄다 / 다시 돌았다 — 화면에 「어디서 왜 멈췄나」를 띄운다 (09-24)
-              "worker_stopped", "worker_retry", "facts_written", "board_made", "order_written", "anchors_skipped"])
+              "worker_stopped", "worker_retry", "facts_written", "board_made", "order_written", "anchors_skipped",
+              // 누른 뒤 작업기가 검사에 걸려 되돌렸다 — 이유를 버튼 위에 (09-27 시험 한 바퀴: 이유 없이 버튼만 다시 떴다)
+              "stage_paused"])
             .in("project_id", ids).order("ts", { ascending: false }),
           // 실제로 나간 크레딧. 예상은 계획에 있고, 이건 쓴 것이다.
           db.from("credit_spend").select("project_id,step,engine,credits,what,spent_at,outcome")
@@ -5280,6 +5326,7 @@
               });
               return mine.length && mine[0].kind === "worker_stopped" ? mine[0] : null;
             })();
+            p.paused = enrollEvents.filter(function (e) { return e.project_id === p.id && e.kind === "stage_paused"; });
             p.productionEnrolled = enrollEvents.filter(function (e) {
               return e.project_id === p.id && e.kind === "production_enrolled";
             })[0] || null;
