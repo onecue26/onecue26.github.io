@@ -1037,6 +1037,8 @@
 
     var ap = el("approveBoard"), rv = el("reviseBoard");
     if (ap) ap.addEventListener("click", function () {
+      // 한 번 더 묻는다 — 승인하면 바로 제작 단계로 넘어간다 (Dan 09-27 「버튼 안 눌렀는데 저절로 넘어가네」)
+      if (!window.confirm("콘티를 승인합니다. 승인하면 이 콘티로 제작을 시작합니다.")) return;
       ap.disabled = true; ap.textContent = "처리 중…";
       decideBoard("ok").then(load).catch(function (e) {
         ap.disabled = false; ap.textContent = "실패 — " + e.message;
