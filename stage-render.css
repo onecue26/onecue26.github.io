@@ -419,3 +419,16 @@ details.flow-step > summary.flow-summary::after { position: absolute; right: 12p
 .client-view .cv-lead { margin: 8px 0 10px; font-size: 13px; color: var(--muted); }
 .client-view .cv-prop { border-left: 4px solid #c0392b; }
 .records > summary { color: var(--muted); }
+
+/* 엔드카드 옵션 고르기 (09-27) */
+.ec-pick{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.ec-rec{font-size:13px}
+.ec-opts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.ec-opt{display:flex;flex-direction:column;gap:4px;align-items:stretch;text-align:left;padding:6px;border:1px solid var(--rule);border-radius:8px;background:var(--panel);cursor:pointer;font:inherit;color:inherit}
+.ec-opt img{width:100%;max-width:100%;border-radius:5px;display:block}
+.ec-opt span{font-size:12px}.ec-opt em{font-style:normal;font-size:11px;padding:0 6px;border-radius:99px;background:#b0404f;color:#fff}
+.ec-opt small{color:var(--muted);font-size:11.5px}
+.ec-opt.on{outline:2px solid #b0404f;outline-offset:1px}
+.ec-opt[disabled]{opacity:.55;cursor:default}
+.ec-more{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:560px){.ec-opts{grid-template-columns:repeat(2,minmax(0,1fr))}.ec-more{grid-template-columns:1fr}}

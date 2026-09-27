@@ -3519,6 +3519,26 @@
   /** 지난 콘티 판(수정 요청 전·교체된 시트)을 접어서 — 새 판과 나란히 대조하려고 (Dan 09-24 「예전 콘티는 못 보게 막은 거?」) */
   /** 지금 판 콘티 시트 한 장 — 관리자 콘티 칸 아래 접어서 (위는 컷별 그림+설명) */
   /** 기록 — 시트 원본 · 이전 판을 한 칸에 접는다 (09-27) */
+  /** 엔드카드 옵션 고르기 — 조판 4안(무료) · 영상 안에서 한 번에 · (AI 배경 합성 준비 중). 우리 추천을 먼저 보여 준다 (Dan 09-27) */
+  function endcardPicker(p, cur) {
+    var opts = (p.files || []).filter(function (f) { return f.kind === "doc" && (f.meta || {}).endcard_option && !(f.meta || {}).superseded && f.url; })
+      .sort(function (x, y) { return ["studio", "bleed", "clean", "graphic"].indexOf(x.meta.layout) - ["studio", "bleed", "clean", "graphic"].indexOf(y.meta.layout); });
+    if (!opts.length) return "";
+    var rec = opts.filter(function (f) { return f.meta.recommended; })[0];
+    var inVideo = cur.method === "in_video";
+    var btn = function (key, val, inner, on) {
+      return '<button type="button" class="ec-opt' + (on ? " on" : "") + '" data-ec-pick="' + key + ":" + val + '" data-pid="' + esc(p.id) + '">' + inner + "</button>";
+    };
+    return '<div class="ec-pick"><div class="ec-rec">' + (rec ? "<b>추천 · " + esc(rec.meta.label) + "</b> — " + esc(rec.meta.reason || "") : "") + "</div>" +
+      '<div class="ec-opts">' + opts.map(function (f) {
+        var m = f.meta;
+        return btn("layout", m.layout, '<img src="' + esc(f.url) + '" alt="' + esc(m.label) + '"><span>' + esc(m.label) + (m.recommended ? ' <em>추천</em>' : "") + "</span>",
+          !inVideo && cur.layout === m.layout);
+      }).join("") + "</div>" +
+      '<div class="ec-more">' + btn("method", "in_video", "<b>영상 안에서 한 번에</b><small>마지막 1.5초를 히어로샷 장면으로 · 추가 비용 없음 · 제품이 틀리면 고른 조판으로 대체</small>", inVideo) +
+      '<button type="button" class="ec-opt" disabled><b>AI 배경 + 실제 제품 합성</b><small>스타일을 골라 시안 만들기(약 1cr) — 준비 중</small></button></div>' +
+      '<span class="lc-msg" data-ec-msg></span></div>';
+  }
   function recordsFold(p) {
     var inner = sheetFold(p) + oldBoardsHtml(p);
     return inner ? '<details class="board-old records"><summary>기록 — 시트 원본 · 이전 판</summary>' + inner + "</details>" : "";
@@ -3590,9 +3610,12 @@
         cell("자막", r.caption) + cell("내레이션", r.narration) + cell("소리(예정)", r.sound), r.n + "번");
     }).join("");
     // 6번 칸 — 엔드카드(히어로샷 + CTA). 후반과 같은 조판의 미리보기라 이대로 납품본에 붙는다 (Dan 09-27)
+    var ecm = (ecp && ecp.meta) || {};
     var ec = ecp ? row("ec", ecp.url, null, null,
-      cell("화면", "제품 히어로샷 + 슬로건·제품명·CTA — 영상 끝 1~2초에 편집으로 얹는 화면") +
-      cell("자막", ((ecp.meta || {}).lines || []).concat([(ecp.meta || {}).cta || ""]).filter(Boolean).join(" / ")), "엔드카드") : "";
+      cell("화면", ecm.method === "in_video"
+        ? "영상 마지막 1.5초를 히어로샷 장면으로(영상에서 함께 만듦) — 그림은 영상이 나오기 전 대신 보이는 조판"
+        : "제품 히어로샷 + 슬로건·제품명·CTA — 영상 끝 1~2초에 편집으로 얹는 화면") +
+      cell("자막", (ecm.lines || []).concat([ecm.cta || ""]).filter(Boolean).join(" / ")) + endcardPicker(p, ecm), "엔드카드") : "";
     return '<details class="board-old client-view" open><summary>광고주에게 보이는 콘티' + (ecp ? " · 엔드카드 포함" : "") + "</summary>" +
       head + '<div class="script-msg"><span>이 영상이 전하는 말</span><b>' + esc(sc.message || "") + "</b>" +
       (sc.bgm_note ? "<small>음악(예정) — " + esc(sc.bgm_note) + "</small>" : "") + "</div>" +
@@ -4211,6 +4234,18 @@
       }
       t.addEventListener("input", sync);
       sync();
+    });
+    document.querySelectorAll("[data-ec-pick]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var kv = b.dataset.ecPick.split(":"), payload = { by: "admin" };
+        if (kv[0] === "layout") { payload.layout = kv[1]; payload.method = "layout"; } else { payload.method = kv[1]; }
+        var msg = b.closest(".ec-pick") && b.closest(".ec-pick").querySelector("[data-ec-msg]");
+        b.disabled = true;
+        if (msg) { msg.className = "lc-msg"; msg.textContent = "반영하는 중 — 몇 초 뒤 엔드카드가 바뀝니다"; }
+        db.from("events").insert({ project_id: b.dataset.pid, kind: "endcard_choice", payload: payload }).then(function (r) {
+          if (r.error) throw r.error;
+        }).catch(function (e) { b.disabled = false; if (msg) { msg.className = "lc-msg err"; msg.textContent = "고르지 못했습니다 — " + (e.message || e); } });
+      });
     });
     document.querySelectorAll("[data-lc]").forEach(function (b) {
       b.addEventListener("click", function () {
