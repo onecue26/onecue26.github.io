@@ -3526,13 +3526,22 @@
     if (!opts.length) return "";
     var rec = opts.filter(function (f) { return f.meta.recommended; })[0];
     var inVideo = cur.method === "in_video";
+    // 고른 뒤 반영 중인가 — 보낸 시각이 지금 엔드카드보다 뒤면 잠근다 (Dan 09-27 「선택하고 나서도 계속 버튼이 눌려」)
+    var sent = null;
+    try { sent = JSON.parse(localStorage.getItem("onecue_ecpick_" + p.slug) || "null"); } catch (e) { sent = null; }
+    var ecNow = (p.files || []).filter(function (f) { return f.kind === "doc" && (f.meta || {}).endcard_preview && !(f.meta || {}).superseded; })
+      .map(function (f) { return String(f.created_at || ""); }).sort().pop() || "";
+    var busy = sent && new Date(sent.at).getTime() > new Date(ecNow).getTime();
     var btn = function (key, val, inner, on) {
-      return '<button type="button" class="ec-opt' + (on ? " on" : "") + '" data-ec-pick="' + key + ":" + val + '" data-pid="' + esc(p.id) + '">' + inner + "</button>";
+      var state = on ? '<span class="ec-state on">✓ 사용 중</span>' : '<span class="ec-state">이 안으로 바꾸기</span>';
+      return '<button type="button" class="ec-opt' + (on ? " on" : "") + '"' + (on || busy ? " disabled" : "") +
+        ' data-ec-pick="' + key + ":" + val + '" data-pid="' + esc(p.id) + '" data-slug="' + esc(p.slug) + '">' + inner + state + "</button>";
     };
     return '<div class="ec-pick"><div class="ec-rec">' + (rec ? "<b>추천 · " + esc(rec.meta.label) + "</b> — " + esc(rec.meta.reason || "") : "") + "</div>" +
+      (busy ? '<span class="lc-msg warn" style="display:block"><b>반영 중</b> — 「' + esc(sent.label || "") + "」 적용 중입니다(몇 초 · 끝나면 화면이 저절로 바뀝니다)</span>" : "") +
       '<div class="ec-opts">' + opts.map(function (f) {
         var m = f.meta;
-        return btn("layout", m.layout, '<img src="' + esc(f.url) + '" alt="' + esc(m.label) + '"><span>' + esc(m.label) + (m.recommended ? ' <em>추천</em>' : "") + "</span>",
+        return btn("layout", m.layout, '<img src="' + esc(f.url) + '" alt="' + esc(m.label) + '"><span class="ec-name">' + esc(m.label) + (m.recommended ? ' <em>추천</em>' : "") + "</span>",
           !inVideo && cur.layout === m.layout);
       }).join("") + "</div>" +
       '<div class="ec-more">' + btn("method", "in_video", "<b>영상 안에서 한 번에</b><small>마지막 1.5초를 히어로샷 장면으로 · 추가 비용 없음 · 제품이 틀리면 고른 조판으로 대체</small>", inVideo) +
@@ -3561,6 +3570,9 @@
     // ★ Dan 09-27 — 위는 제작용, 아래는 **광고주에게 보이는 모습 그대로** + 컷마다 의견. 우리 제안(글 맞추기)도 그 컷 아래.
     //   의견을 보내면 반영한 새 글과 답변이 이 자리에 뜨고, 「이대로 반영」으로 확정한다. 그림까지 바꿔야 하면 답변이 수정 요청으로 안내한다.
     var tag = ' data-slug="' + esc(p.slug) + '" data-step="storyboard"';
+    // ★ 광고주에게 보낸 뒤에는 글·엔드카드를 바꾸지 않는다 — 보낸 것과 달라진다 (Dan 09-27 「콘티 보내기 하면 우선 다 비활성화」)
+    var bph = (p.step === BOARD_REVIEW_STAGE) ? SE().boardActions(p, p.boardCounts).phase : "";
+    var locked = p.step !== BOARD_REVIEW_STAGE || bph === "final.done";
     var sec = function (v) { return String(Math.round(Number(v) || 0)); };
     var crop = {};
     (p.files || []).forEach(function (f) { if (f.kind === "board" && f.cut_n != null && f.url && boardCurrent(p, f)) crop[f.cut_n] = f; });
@@ -3579,6 +3591,7 @@
       return items.filter(function (it) { return Number(it.n) === Number(n); }).map(textSyncItemLine).join("");
     };
     var noteBox = function (n, label) {
+      if (locked) return "";
       return '<div class="lc sc-note"' + tag + '><textarea class="lc-note" data-text-sync-note data-prefix="' + esc(label) +
         ': " rows="1" placeholder="' + esc(label + " 의견 — 글이든 그림이든 바꿀 점") + '"></textarea>' +
         '<button class="btn ghost" type="button" data-lc="note-text-sync"' + tag + '>의견 보내기</button>' +
@@ -3593,7 +3606,8 @@
     var head = '<p class="cv-lead">광고주 화면과 똑같습니다. 바꿀 점은 그 컷 아래 의견 칸에 — 반영한 새 글과 답변이 그 자리에 뜹니다(무료). 그림까지 바꿔야 하면 답변이 수정 요청으로 안내합니다.</p>' +
       (busy ? '<span class="lc-msg warn" style="display:block"><b>의견을 반영하는 중</b> — ' + esc(hhmm(sent.at)) +
         " 보냄 · 「" + esc(String(sent.note).slice(0, 60)) + "」 · 보통 3~5분 뒤 새 제안과 답변이 이 자리에 뜹니다(무료)</span>" : "") +
-      (items.length
+      (locked ? '<span class="lc-msg" style="display:block"><b>광고주에게 보낸 콘티입니다</b> — 보낸 그대로 잠겨 있습니다. 고치려면 위 「내리고 다시 고치기」를 누르세요.</span>' : "") +
+      (items.length && !locked
         ? '<div class="lc cv-prop"' + tag + '><div class="lc-head"><b>우리 제안 ' + items.length + "건 — 반영 전</b><span>" + esc(sync.summary_ko || "") + "</span></div>" +
           (sync.note ? '<span class="lc-msg" style="display:block"><b>보내신 의견</b> — ' + esc(sync.note) + "</span>" : "") +
           (sync.reply_ko ? '<span class="lc-msg" style="display:block"><b>답변</b> — ' + esc(sync.reply_ko) + "</span>" : "") +
@@ -3615,7 +3629,7 @@
       cell("화면", ecm.method === "in_video"
         ? "영상 마지막 1.5초를 히어로샷 장면으로(영상에서 함께 만듦) — 그림은 영상이 나오기 전 대신 보이는 조판"
         : "제품 히어로샷 + 슬로건·제품명·CTA — 영상 끝 1~2초에 편집으로 얹는 화면") +
-      cell("자막", (ecm.lines || []).concat([ecm.cta || ""]).filter(Boolean).join(" / ")) + endcardPicker(p, ecm), "엔드카드") : "";
+      cell("자막", (ecm.lines || []).concat([ecm.cta || ""]).filter(Boolean).join(" / ")) + (locked ? "" : endcardPicker(p, ecm)), "엔드카드") : "";
     return '<details class="board-old client-view" open><summary>광고주에게 보이는 콘티' + (ecp ? " · 엔드카드 포함" : "") + "</summary>" +
       head + '<div class="script-msg"><span>이 영상이 전하는 말</span><b>' + esc(sc.message || "") + "</b>" +
       (sc.bgm_note ? "<small>음악(예정) — " + esc(sc.bgm_note) + "</small>" : "") + "</div>" +
@@ -4239,8 +4253,10 @@
       b.addEventListener("click", function () {
         var kv = b.dataset.ecPick.split(":"), payload = { by: "admin" };
         if (kv[0] === "layout") { payload.layout = kv[1]; payload.method = "layout"; } else { payload.method = kv[1]; }
-        var msg = b.closest(".ec-pick") && b.closest(".ec-pick").querySelector("[data-ec-msg]");
-        b.disabled = true;
+        var box = b.closest(".ec-pick"), msg = box && box.querySelector("[data-ec-msg]");
+        if (box) Array.prototype.forEach.call(box.querySelectorAll("[data-ec-pick]"), function (x) { x.disabled = true; });
+        var label = ((b.querySelector(".ec-name") || b.querySelector("b") || {}).textContent || "").replace("추천", "").trim();
+        try { localStorage.setItem("onecue_ecpick_" + b.dataset.slug, JSON.stringify({ at: new Date().toISOString(), label: label })); } catch (e) { /* 없어도 동작 */ }
         if (msg) { msg.className = "lc-msg"; msg.textContent = "반영하는 중 — 몇 초 뒤 엔드카드가 바뀝니다"; }
         db.from("events").insert({ project_id: b.dataset.pid, kind: "endcard_choice", payload: payload }).then(function (r) {
           if (r.error) throw r.error;

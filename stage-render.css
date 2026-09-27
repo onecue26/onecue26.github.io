@@ -432,3 +432,10 @@ details.flow-step > summary.flow-summary::after { position: absolute; right: 12p
 .ec-opt[disabled]{opacity:.55;cursor:default}
 .ec-more{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 @media(max-width:560px){.ec-opts{grid-template-columns:repeat(2,minmax(0,1fr))}.ec-more{grid-template-columns:1fr}}
+
+.ec-opt .ec-state{font-size:11.5px;color:var(--muted);margin-top:auto}
+.ec-opt .ec-state.on{color:#b0404f;font-weight:700}
+.ec-opt.on{border-color:#b0404f;box-shadow:0 0 0 2px #b0404f inset;opacity:1;cursor:default}
+.ec-opt:not(.on):not([disabled]):hover{border-color:#b0404f}
+.ec-opt .ec-name{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.ec-opt em{white-space:nowrap}
