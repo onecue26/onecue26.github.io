@@ -1027,7 +1027,13 @@
 
   /** 영상 단계에서 물리는 준비물 — 제작 자료 단계에서 승인된 것. 작은 그림 한 줄로만 */
   function usedAnchors(p) {
-    var ok = (p.files || []).filter(function (f) { return f.kind === "anchor" && f.approved && f.url && !isMaterial(f); });
+    // ★ 09-28 — 작업기(resolve_ref)와 같은 규칙: 계획의 준비물마다 **승인된 가장 새 판 하나**. 전엔 승인된 판을 전부 보여 줘 예전 P1(손 든 판)까지 떴다(Dan)
+    var ids = [].concat.apply([], ((p.render_plan || {}).calls || []).map(function (c) { return (c.needs || []).map(function (n) { return n.id; }); }));
+    var ok = ids.map(function (id) {
+      return (p.files || []).filter(function (f) {
+        return f.kind === "anchor" && f.approved && f.url && !isMaterial(f) && (f.meta || {}).covers_call === id;
+      }).sort(function (x, y) { return String(y.created_at).localeCompare(String(x.created_at)); })[0];
+    }).filter(Boolean);
     if (!ok.length) return "";
     return '<div class="used-anchors"><b>이 영상에 물리는 준비물</b>' + ok.map(function (f) {
       return '<img src="' + esc(f.url) + '" data-big="' + esc(f.url) + '" data-kind="img" alt="" title="' + esc(f.role || "") + '">';
@@ -2723,6 +2729,9 @@
       var se = SE().of(p, step) || {};
       var at = new Date(e.ts).getTime();
       if (se.started_at || (se.pressed_at && new Date(se.pressed_at).getTime() > at)) return "";
+      // 제작 자료로 되돌아가 만든 뒤 승인까지 끝났으면 지난 일이다(09-28 — 승인 뒤에도 「되돌렸습니다」가 남아 있었다)
+      var anc = SE().of(p, "anchors") || {};
+      if (step === "video" && anc.approved_at && new Date(anc.approved_at).getTime() > at) return "";
       var kinds = stageKinds(step);
       if ((p.files || []).some(function (f) { return kinds.indexOf(f.kind) >= 0 && new Date(f.created_at).getTime() > at; })) return "";
       return '<div class="client-said revise worker-stop"><b>누르셨지만 만들지 않고 되돌렸습니다</b>' +
