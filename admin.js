@@ -1161,8 +1161,10 @@
     }
 
     // 무엇을 왜 만드는지 — 만들기 전에는 계획이, 만든 뒤에는 자산의 설명이 말한다.
-    var needs = plan.needs.length
-      ? '<ul class="need-list">' + plan.needs.map(function (n) {
+    // 09-28 — 제작 자료는 이번에 실제로 만들 것만 늘어놓는다(승인된 것까지 4장 다 떠서 전부 다시 만드는 줄 알았다)
+    var shown = s === "anchors" && plan.todo && plan.todo.length ? plan.todo : plan.needs;
+    var needs = shown.length
+      ? '<ul class="need-list">' + shown.map(function (n) {
         return "<li><b>" + esc(n.what || n.kind) + "</b>" +
           (n.credits_estimate ? '<em class="c">' + n.credits_estimate + " 크레딧</em>" : "") +
           (n.why ? '<span class="why">' + esc(n.why) + "</span>" : "") + lookLine(n) + "</li>";
@@ -1187,9 +1189,14 @@
               ? (s === "anchors" ? "다시 만들기" : "다시 뽑기") +
                 (locked ? " · 잠겨 있습니다" : " · 누르실 수 있습니다")
               : (s === "anchors" ? "제작 자료를 만듭니다" : "영상을 뽑습니다"),
-             (again ? "누르면 <b>또</b> " : "예상 ") + money(plan.credits) +
+             (again ? "누르면 <b>또</b> " : "예상 ") + money(s === "anchors" && plan.todo ? plan.todoCredits : plan.credits) +
              (plan.mode ? " · " + esc(plan.mode === "one_shot" ? "영상은 한 판" : plan.mode) : "") +
-             (s === "anchors" && (plan.needs || []).length > 1 ? " · 한 번 누르면 " + plan.needs.length + "장을 모두 만들고 멈춥니다" : "")) +
+             // 09-28 — 실제로 뽑힐 것만 센다(작업기와 같은 규칙). 전엔 승인된 것까지 「4장을 모두」라 했다
+             (s === "anchors" && plan.todo
+               ? (plan.todo.length < (plan.needs || []).length
+                   ? " · 이번에 만드는 것 " + plan.todo.length + "장(" + plan.todo.map(function (n) { return esc(n.id); }).join("·") + ") — 나머지는 승인된 그대로 씁니다"
+                   : ((plan.needs || []).length > 1 ? " · 한 번 누르면 " + plan.needs.length + "장을 모두 만들고 멈춥니다" : ""))
+               : "")) +
         ((SE().of(p, s) || {}).directions
           ? '<div class="redo-note"><b>사장님 요청사항 — 이대로 만듭니다</b><span>' +
             esc((SE().of(p, s) || {}).directions) + "</span></div>" : "") +

@@ -306,8 +306,31 @@
     var credits = step === "anchors"
       ? needs.reduce(function (a, n) { return a + (Number(n.credits_estimate) || 0); }, 0)
       : mine.reduce(function (a, c) { return a + (Number(c.credits_estimate) || 0); }, 0);
+    // ★ 09-28 블렌디 — 「4장을 모두 만든다 · 9.75 크레딧」이라 떴는데 작업기는 바뀐 P1 한 장만 뽑았다.
+    //   작업기(onecue_worker.already)와 같은 규칙으로 **이번 누름에 실제로 뽑힐 것**을 따로 센다:
+    //   그 준비물의 판이 없거나 — 걸린 판·사장님이 고쳐 달라고 정한 판·계획이 바뀌기(changed_at) 전 판·
+    //   수정 요청(revision_at) 전 판만 있으면 뽑는다.
+    var todo = needs;
+    if (step === "anchors") {
+      var since = (of(project, step) || {}).revision_at || null;
+      var files = project.files || [];
+      todo = needs.filter(function (n) {
+        return !files.some(function (f) {
+          var m = f.meta || {};
+          if (f.kind !== "anchor" || m.covers_call !== n.id) return false;
+          if (m.review === "blocked") return false;
+          if (m.dan_take && m.settled_at) return false;
+          if (n.changed_at && String(f.created_at || "") < String(n.changed_at)) return false;
+          if (since && String(f.created_at || "") < String(since)) return false;
+          return true;
+        });
+      });
+    }
+    var todoCredits = step === "anchors"
+      ? todo.reduce(function (a, n) { return a + (Number(n.credits_estimate) || 0); }, 0)
+      : credits;
     return { mode: project.render_mode || null, calls: mine,
-             credits: credits, needs: needs };
+             credits: credits, needs: needs, todo: todo, todoCredits: todoCredits };
   }
 
   function phase(project, step, hasResult) {
