@@ -1062,7 +1062,9 @@
     };
     var head = !issues.length ? "콘티 대조 검사 통과 — 어긋난 곳 없음"
       : high.length && !c.accepted_at ? "콘티와 어긋난 곳 " + high.length + "건 — 고치기 전에는 만들기 버튼이 잠깁니다"
-      : high.length ? "콘티와 어긋난 곳 " + high.length + "건 — 관리자가 보고 「그대로 진행」했습니다"
+      // 09-28 — 무엇에 대한 것이고 언제 그대로 진행했는지 적는다(영상 칸에서 앞 단계 것처럼 보였다)
+      : high.length ? "콘티와 어긋난 곳 " + high.length + "건(" + esc(high.map(function (i) { return (i.where || "") + ": " + String(i.what || "").slice(0, 30); }).join(" · ")) +
+          ") — " + esc(when(c.accepted_at)) + " 관리자가 보고 「그대로 진행」"
       : "콘티 대조 검사 통과 — 작은 차이 " + issues.length + "건";
     if (!(high.length && !c.accepted_at)) {     // 통과 — 한 줄로, 상세는 접어서
       return '<details class="pchk ok"><summary><b>' + head + "</b></summary>" +
@@ -3037,6 +3039,16 @@
           '<div class="made" data-made-step="' + esc(step) + '" data-made-old="1">' + older.map(function (f, i) {
             return one(f, i, true);
           }).join("") + "</div></details>";
+      }
+      // ★ 09-28 블렌디 — 의견을 달고 「이 답변대로」 정한 뒤 준비물을 고치러 다녀오면(자동 되돌리기) 영상 칸이
+      //   처음 뽑는 것처럼 「영상을 뽑습니다」만 뜨고 마지막 판(v5)과 의견·답변은 지난 버전 안에 접혀 있었다.
+      //   Dan: 「영상 단계에서는 내가 전에 했던 것의 마지막 단계가 보여야 하는 거 아냐?」
+      //   → 새 판이 아직 없으면, 정하신 마지막 판을 펼쳐 둔다(정할 버튼 없이 · 의견·답변과 함께).
+      if (!mine.length && step === "video" && older.length && (older[0].meta || {}).settled_at) {
+        var last = older.shift();
+        return '<div class="made made-last" data-made-step="' + esc(step) + '"><span class="made-lbl">직전 판 ' + esc(verLabel(last)) +
+          " — 적으신 의견과 정하신 답변대로 고쳤습니다. 위에서 다시 뽑으시면 새 판이 여기에 올라옵니다</span>" +
+          one(last, 0, true) + "</div>" + oldBox();
       }
       if (!mine.length) return oldBox();
       return '<div class="made" data-made-step="' + esc(step) + '"><span class="made-lbl">만든 것 ' + mine.length +
