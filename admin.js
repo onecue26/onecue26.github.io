@@ -3872,6 +3872,8 @@
       db.channel("onecue-events")
         .on("postgres_changes", { event: "INSERT", schema: "public", table: "events" },
             function (msg) {
+              // 09-28 — 생성 거절 기록은 화면을 바꾸지 않는다(6초마다 쌓여 아래쪽이 계속 새로 그려졌다)
+              if (msg && msg.new && msg.new.kind === "generation_refused") return;
               if (msg && msg.new && msg.new.id) LAST_SEEN_EVENT = msg.new.id;
               freshen();
             })
@@ -3879,7 +3881,7 @@
     } catch (e) { /* 실시간이 없으면 아래 안전망만 */ }
     setInterval(function () {
       if (!authorized || document.hidden) return;
-      db.from("events").select("id").order("id", { ascending: false }).limit(1)
+      db.from("events").select("id").neq("kind", "generation_refused").order("id", { ascending: false }).limit(1)
         .then(function (r) {
           if (r.error || !r.data || !r.data.length) return;
           var top = r.data[0].id;
