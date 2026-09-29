@@ -448,6 +448,63 @@
       (p.production_track_at ? " · " + esc(when(p.production_track_at)) + " 저장" : " · 아직 안 정하면 옵션 1") + "</p></div>";
   }
 
+  // ★ 09-29 — 옵션 2 브리프 양식 (Dan). 유튜브 오퍼스·아스트라 대결의 형식 + 우리 칸(제품 사실·마무리·화면 문구).
+  //   칸을 채우면 그 형식 그대로 한 장의 글로 조립돼 Claude 에게 간다. 예시는 안내글(placeholder)로만.
+  var O2_STYLES = [
+    ["real", "실사 · 밝고 선명 (음식·음료·제품)", "실사. 밝은 노출과 높은 채도 유지"],
+    ["cine", "시네마틱 (자동차·고급 제품·브랜드 필름)", "시네마틱 실사. 영화 같은 빛과 색감, 깊은 대비 유지"],
+    ["phone", "실사 · 폰으로 찍은 일상 (후기·인플루언서)", "실사. 휴대폰으로 찍은 듯한 자연스러운 일상 톤"],
+    ["anim3d", "3D 애니메이션", "3D 장편 애니메이션 렌더. 실사 금지"],
+    ["clay", "클레이 · 스톱모션", "클레이 스톱모션. 실사 금지"]
+  ];
+  function o2Conditions(p, styleKey) {
+    var sec = p.running_sec || 15, asp = (p.aspects && p.aspects[0]) || "9:16";
+    var st = O2_STYLES.filter(function (s) { return s[0] === styleKey; })[0] || O2_STYLES[0];
+    return "[조건]\n시댄스 2.5 / " + sec + "초 / " + asp + " / 480p (드래프트)\n" +
+      "첨부한 시트의 인물 · 소품 · 배경만 사용\n" +
+      "컷 수, 컷 길이, 앵글, 카메라 무브, 템포, 편집 리듬은 전부 직접 설계할 것\n" +
+      "배경 시트를 그대로 재현하지 말고, 시트를 기준으로 앵글마다 공간을 확장해 구성할 것\n" +
+      "오디오: " + sec + "초 내내 끊김 없는 배경음악(상황에 맞게 리드미컬하고 속도감 있게) + 효과음\n" +
+      "화풍: " + st[2];
+  }
+  function o2Text(b) {
+    var L = [b.conditions_text || "", "", "[과제] " + (b.task || ""), "시트: " + (b.sheets || ""), "",
+      "골: " + (b.goal || ""), "필수: " + (b.must || ""), "제품 사실: " + (b.facts || "")];
+    if (b.cond) L.push("조건: " + b.cond);
+    if (b.ending) L.push("마무리: " + b.ending);
+    return L.join("\n");
+  }
+  function briefPanel(p) {
+    if (!canWrite || p.production_track !== "option2") return "";
+    var b = p.option2_brief || {}, sk = b.style || "real";
+    var anchors = (p.files || []).filter(function (f) { return f.kind === "anchor" && f.approved && f.url; });
+    var fld = function (k, label, ph, rows) {
+      return '<label class="o2-l">' + label + '</label>' + (rows
+        ? '<textarea data-o2="' + k + '" rows="' + rows + '" placeholder="' + esc(ph) + '">' + esc(b[k] || "") + "</textarea>"
+        : '<input data-o2="' + k + '" placeholder="' + esc(ph) + '" value="' + esc(b[k] || "") + '">');
+    };
+    return '<div class="needs need-admin o2-brief" data-o2slug="' + esc(p.slug) + '"><h4>브리프 (옵션 2)</h4>' +
+      '<p class="need-type">칸을 채우면 아래 형식 그대로 Claude에게 갑니다 · 회색 글은 예시 · 골·필수·제품 사실은 꼭</p>' +
+      '<label class="o2-l">화풍</label><select data-o2="style">' + O2_STYLES.map(function (s) {
+        return '<option value="' + s[0] + '"' + (s[0] === sk ? " selected" : "") + ">" + esc(s[1]) + "</option>"; }).join("") + "</select>" +
+      '<label class="o2-l">[조건] 공통 — 의뢰의 길이·비율과 우리 기본값으로 자동 · 필요하면 고치십시오</label>' +
+      '<textarea data-o2="conditions_text" rows="7">' + esc(b.conditions_text || o2Conditions(p, sk)) + "</textarea>" +
+      fld("task", "과제명", "치킨 광고") +
+      (anchors.length ? '<div class="o2-anchors">' + anchors.map(function (f) {
+        return '<img loading="lazy" src="' + esc(f.url) + '" title="' + esc((f.meta || {}).covers_call || "") + '">'; }).join("") + "</div>" : "") +
+      fld("sheets", "시트 — 제작 자료의 앵커를 번호로", "@CA01 여자 / @OB01 치킨 / @BG01 치킨집") +
+      fld("goal", "골 (한 문장)", "첫 한 입, 바삭함이 화면을 뚫고 나온다.") +
+      fld("must", "필수", "속도감 있는 컷 구성과 멀티앵글로 높은 몰입감을 만들 것.") +
+      fld("facts", "제품 · 음식 사실 (틀리면 광고가 안 되는 것)", "속살은 완전히 익은 흰 살 · 뚜껑은 돌려서 뺀다", 2) +
+      fld("cond", "조건 (선택)", "사용하는 도구는 @OB01 팬국자뿐이다. 칼·총기 등 다른 무기 금지.") +
+      fld("ending", "마무리 (선택)", "@OB01 치킨 히어로 샷 — 시트 배치를 옮기지 말고 움직임 있게") +
+      fld("onscreen", "화면 문구 — 후반 자막·CTA (영상에는 넣지 않음)", "넣고 · 갈고 · 마시고 / CTA: 프로필에서 지금 만나보기", 2) +
+      '<div class="need-pick"><button class="btn" data-o2-save="' + esc(p.slug) + '">브리프 저장</button>' +
+      '<span class="msg" data-o2-msg="' + esc(p.slug) + '">' + (p.option2_brief_at ? esc(when(p.option2_brief_at)) + " 저장됨" : "") + "</span></div>" +
+      (b.text ? '<details class="o2-prev"><summary>Claude에게 가는 글 (저장된 판)</summary><pre>' + esc(b.text) + "</pre></details>" : "") +
+      "</div>";
+  }
+
   function needsPanel(p) {
     var G = window.ONECUE_MATERIAL_GAPS, spec = window.ONECUE_AD_TYPE_MATERIALS;
     if (!G || !spec) return "";
@@ -680,7 +737,7 @@
           (bact || act || devTwo || SE().isPaid(s.key) || status === "upcoming" || s.key === "deliver" || s.key === "brief" || s.key === "facts" || s.key === "strategy" || s.key === "concepts" ? "" : execPicker(p, s.key)) +
           deliverBox(p, s.key) +
           (s.key === "facts" ? needsPanel(p) : "") +
-          (s.key === "develop" ? trackPanel(p) : "") +
+          (s.key === "develop" ? trackPanel(p) + briefPanel(p) : "") +
           (status === "upcoming" ? ''
             : (bodies[s.key] || '<p class="stage-empty">저장된 상세 내용이 없습니다.</p>')) +
           '</div>';
@@ -4014,6 +4071,31 @@
         });
       });
     });
+    // 옵션 2 화풍을 바꾸면 [조건] 칸의 화풍 줄만 바꾼다(손으로 고친 다른 줄은 그대로)
+    document.querySelectorAll('.o2-brief [data-o2="style"]').forEach(function (sel) {
+      sel.addEventListener("change", function () {
+        var box = sel.closest(".o2-brief"), ta = box.querySelector('[data-o2="conditions_text"]');
+        var st = O2_STYLES.filter(function (s) { return s[0] === sel.value; })[0];
+        if (ta && st) ta.value = ta.value.replace(/화풍:.*$/m, "화풍: " + st[2]);
+      });
+    });
+    document.querySelectorAll("[data-o2-save]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var slug = b.dataset.o2Save, box = document.querySelector('.o2-brief[data-o2slug="' + slug + '"]');
+        var msg = document.querySelector('[data-o2-msg="' + slug + '"]');
+        var row = ROWS.filter(function (x) { return x.slug === slug; })[0];
+        if (!box || !row) return;
+        var br = {};
+        box.querySelectorAll("[data-o2]").forEach(function (el) { br[el.dataset.o2] = el.value.trim(); });
+        if (!br.goal || !br.must || !br.facts) { msg.className = "msg err"; msg.textContent = "골 · 필수 · 제품 사실은 꼭 채워 주십시오."; return; }
+        br.text = o2Text(br);
+        b.disabled = true; b.textContent = "저장 중…";
+        db.rpc("onecue_set_brief", { p_project_id: row.id, p_brief: br }).then(function (r) {
+          if (r.error) { b.disabled = false; b.textContent = "브리프 저장"; msg.className = "msg err"; msg.textContent = "저장 실패 — " + r.error.message; return; }
+          load();
+        });
+      });
+    });
     document.querySelectorAll("[data-track-save]").forEach(function (b) {
       b.addEventListener("click", function () {
         var slug = b.dataset.trackSave;
@@ -5201,7 +5283,7 @@
     el("stamp").textContent = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 16);
 
     return db.from("projects")
-      .select("id,slug,brand,product,step,state,running_sec,cut_count,aspects,created_at,ad_type,ad_type_by,render_mode,render_plan,render_mode_by,render_mode_at,closed_at,closed_by,channels,production_track,production_track_at")
+      .select("id,slug,brand,product,step,state,running_sec,cut_count,aspects,created_at,ad_type,ad_type_by,render_mode,render_plan,render_mode_by,render_mode_at,closed_at,closed_by,channels,production_track,production_track_at,option2_brief,option2_brief_at")
       // ★ render_mode_at 을 안 읽어 오면 「수정사항 적용 완료」가 영원히
       //   안 뜬다 — 계획이 언제 손봐졌는지를 모르니 늘 「아직」이 되고,
       //   다시 뽑기 버튼이 계속 잠긴 채로 남는다. 화면이 쓰는 칸은
