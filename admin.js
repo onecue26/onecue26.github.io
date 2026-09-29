@@ -433,6 +433,21 @@
   //
   // 종류는 광고주에게 고르라고 하지 않는다. 의뢰 글을 읽고 우리가 판단하고,
   // 여기서 **맞는지만** 확인한다. ai: 로 남은 것은 짐작이고 human: 은 확인된 것이다.
+  // ★ 09-29 — 제작 방식 옵션 1 / 옵션 2 (Dan). 컨셉까지는 같고 구성·각본부터 갈라진다 → 이 단계 맨 위에서 고른다.
+  //   옵션 2(브리프 방식)는 시험 중 — 고르면 Head 가 브리프 → 키프레임 → 드래프트 480p 로 진행한다. 광고주 화면에는 안 보인다.
+  function trackPanel(p) {
+    if (!canWrite) return "";
+    var t = p.production_track || "option1";
+    return '<div class="needs need-admin track-pick"><h4>제작 방식</h4>' +
+      '<div class="need-pick"><select data-track="' + esc(p.slug) + '">' +
+      '<option value="option1"' + (t === "option1" ? " selected" : "") + '>옵션 1 · 지금 방식 (구성·각본 → 콘티 → 제작 자료 → 영상)</option>' +
+      '<option value="option2"' + (t === "option2" ? " selected" : "") + '>옵션 2 · 브리프 방식 시험 (브리프 → 키프레임 → 드래프트 480p)</option>' +
+      '</select><button class="btn ghost" data-track-save="' + esc(p.slug) + '">저장</button>' +
+      '<span class="msg" data-track-msg="' + esc(p.slug) + '"></span></div>' +
+      '<p class="need-type">컨셉을 고른 직후 여기서 정합니다 · 광고주 화면에는 보이지 않습니다' +
+      (p.production_track_at ? " · " + esc(when(p.production_track_at)) + " 저장" : " · 아직 안 정하면 옵션 1") + "</p></div>";
+  }
+
   function needsPanel(p) {
     var G = window.ONECUE_MATERIAL_GAPS, spec = window.ONECUE_AD_TYPE_MATERIALS;
     if (!G || !spec) return "";
@@ -665,6 +680,7 @@
           (bact || act || devTwo || SE().isPaid(s.key) || status === "upcoming" || s.key === "deliver" || s.key === "brief" || s.key === "facts" || s.key === "strategy" || s.key === "concepts" ? "" : execPicker(p, s.key)) +
           deliverBox(p, s.key) +
           (s.key === "facts" ? needsPanel(p) : "") +
+          (s.key === "develop" ? trackPanel(p) : "") +
           (status === "upcoming" ? ''
             : (bodies[s.key] || '<p class="stage-empty">저장된 상세 내용이 없습니다.</p>')) +
           '</div>';
@@ -3998,6 +4014,25 @@
         });
       });
     });
+    document.querySelectorAll("[data-track-save]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var slug = b.dataset.trackSave;
+        var sel = document.querySelector('[data-track="' + slug + '"]');
+        var msg = document.querySelector('[data-track-msg="' + slug + '"]');
+        var row = ROWS.filter(function (x) { return x.slug === slug; })[0];
+        if (!sel || !row) return;
+        b.disabled = true; b.textContent = "저장 중…";
+        db.rpc("onecue_set_track", { p_project_id: row.id, p_track: sel.value })
+          .then(function (r) {
+            if (r.error) {
+              b.disabled = false; b.textContent = "저장";
+              msg.className = "msg err"; msg.textContent = "저장 실패 — " + r.error.message;
+              return;
+            }
+            load();
+          });
+      });
+    });
     // 광고 종류 확정 — 짐작(ai:)을 사람이 확인하면 human: 으로 바뀐다.
     // 둘을 한 칸에 섞으면 「누가 정한 건지」를 영영 알 수 없게 된다.
     document.querySelectorAll("[data-adtype-save]").forEach(function (b) {
@@ -5166,7 +5201,7 @@
     el("stamp").textContent = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 16);
 
     return db.from("projects")
-      .select("id,slug,brand,product,step,state,running_sec,cut_count,aspects,created_at,ad_type,ad_type_by,render_mode,render_plan,render_mode_by,render_mode_at,closed_at,closed_by,channels")
+      .select("id,slug,brand,product,step,state,running_sec,cut_count,aspects,created_at,ad_type,ad_type_by,render_mode,render_plan,render_mode_by,render_mode_at,closed_at,closed_by,channels,production_track,production_track_at")
       // ★ render_mode_at 을 안 읽어 오면 「수정사항 적용 완료」가 영원히
       //   안 뜬다 — 계획이 언제 손봐졌는지를 모르니 늘 「아직」이 되고,
       //   다시 뽑기 버튼이 계속 잠긴 채로 남는다. 화면이 쓰는 칸은
