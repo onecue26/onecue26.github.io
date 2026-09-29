@@ -597,8 +597,15 @@
     var cur = F.map(function (x) { return x.key; }).indexOf(p.step), closed = p.state === "done";
     if (cur < 0 && p.step === "storyboard") cur = F.map(function (x) { return x.key; }).indexOf("anchors");
     var cls = function (i) { return (closed || i < cur) ? "done" : i === cur ? "now" : ""; };
-    return '<div class="abar-wrap"><div class="abar">' + F.map(function (s, i) { return '<i class="' + cls(i) + '"></i>'; }).join("") +
-      '</div><div class="abar-names">' + F.map(function (s, i) {
+    // 09-30 — 칸 수(옵션 1 10칸 · 옵션 2 9칸)에 맞춰 막대와 글씨를 같은 격자로 — 글씨가 막대와 어긋났다(Dan)
+    var cols = ' style="grid-template-columns:repeat(' + F.length + ',minmax(0,1fr))"';
+    var t2 = p.production_track === "option2";
+    // 옵션 1 · 옵션 2 전환 — 누르면 제작 방식이 바뀌고 막대도 그 단계로 바뀐다(관리자만 · Dan 09-30)
+    var sw = canWrite ? '<span class="track-sw">' +
+      '<button type="button" data-track-sw="option1" data-slug="' + esc(p.slug) + '"' + (t2 ? "" : ' class="on"') + '>옵션 1</button>' +
+      '<button type="button" data-track-sw="option2" data-slug="' + esc(p.slug) + '"' + (t2 ? ' class="on"' : "") + '>옵션 2</button></span>' : "";
+    return '<div class="abar-wrap">' + sw + '<div class="abar"' + cols + '>' + F.map(function (s, i) { return '<i class="' + cls(i) + '"></i>'; }).join("") +
+      '</div><div class="abar-names"' + cols + '>' + F.map(function (s, i) {
         return '<span class="' + cls(i) + '">' + esc(stepName(p, s.key)) + "</span>";
       }).join("") + "</div></div>";
   }
@@ -4111,6 +4118,19 @@
         b.disabled = true; b.textContent = "저장 중…";
         db.rpc("onecue_set_brief", { p_project_id: row.id, p_brief: br }).then(function (r) {
           if (r.error) { b.disabled = false; b.textContent = "브리프 저장"; msg.className = "msg err"; msg.textContent = "저장 실패 — " + r.error.message; return; }
+          load();
+        });
+      });
+    });
+    document.querySelectorAll("[data-track-sw]").forEach(function (b) {
+      b.addEventListener("click", function (ev) {
+        ev.preventDefault(); ev.stopPropagation();          // 카드 머리(summary) 안이라 접힘이 같이 눌리지 않게
+        if (b.classList.contains("on")) return;
+        var row = ROWS.filter(function (x) { return x.slug === b.dataset.slug; })[0];
+        if (!row) return;
+        b.disabled = true;
+        db.rpc("onecue_set_track", { p_project_id: row.id, p_track: b.dataset.trackSw }).then(function (r) {
+          if (r.error) { b.disabled = false; b.title = "전환 실패 — " + r.error.message; return; }
           load();
         });
       });
