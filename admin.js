@@ -601,9 +601,16 @@
     var cols = ' style="grid-template-columns:repeat(' + F.length + ',minmax(0,1fr))"';
     var t2 = p.production_track === "option2";
     // 옵션 1 · 옵션 2 전환 — 누르면 제작 방식이 바뀌고 막대도 그 단계로 바뀐다(관리자만 · Dan 09-30)
-    var sw = canWrite ? '<span class="track-sw">' +
-      '<button type="button" data-track-sw="option1" data-slug="' + esc(p.slug) + '"' + (t2 ? "" : ' class="on"') + '>옵션 1</button>' +
-      '<button type="button" data-track-sw="option2" data-slug="' + esc(p.slug) + '"' + (t2 ? ' class="on"' : "") + '>옵션 2</button></span>' : "";
+    // 09-30 — 처음(의뢰 접수)부터 고르고, 컨셉을 고른 뒤(구성·각본 이후)에는 잠근다 — 중간에 바꾸면 만든 것과 단계가 섞인다(Dan)
+    var locked = ["develop", "storyboard", "anchors", "video", "post", "deliver"].indexOf(p.step) >= 0;
+    var dis = locked ? " disabled" : "";
+    var sw = canWrite ? '<span class="track-sw' + (locked ? " locked" : "") + '"' + (locked ? ' title="컨셉을 고른 뒤라 바꿀 수 없습니다"' : "") + '>' +
+      '<button type="button" data-track-sw="option1" data-slug="' + esc(p.slug) + '"' + (t2 ? "" : ' class="on"') + dis + '>옵션 1</button>' +
+      '<button type="button" data-track-sw="option2" data-slug="' + esc(p.slug) + '"' + (t2 ? ' class="on"' : "") + dis + '>옵션 2</button></span>' +
+      '<details class="track-help"><summary>?</summary><div>' +
+      '<p><b>옵션 1 · 지금 방식</b> — 콘티를 그려 광고주와 맞춘 뒤 그대로 영상으로. 10단계(구성·각본 → 콘티 → 제작 자료 → 영상). 광고주가 장면을 미리 보고 확정하지만, 콘티에 끌려가 밋밋해지기 쉽습니다.</p>' +
+      '<p><b>옵션 2 · 브리프 방식</b> — 목표 한 줄과 조건만 주고 컷 구성은 AI가 직접 설계. 9단계(제작 자료 → 브리프 → 영상, 콘티 없음). 사람은 브리프 한 장(골·필수·제품 사실·조건·마무리)만 씁니다. 빠르고 역동적이지만, 제품 사실을 꼭 적어야 틀리지 않습니다.</p>' +
+      "<p>의뢰 접수 때 고르고, 컨셉을 고른 뒤에는 바꿀 수 없습니다.</p></div></details>" : "";
     return '<div class="abar-wrap">' + sw + '<div class="abar"' + cols + '>' + F.map(function (s, i) { return '<i class="' + cls(i) + '"></i>'; }).join("") +
       '</div><div class="abar-names"' + cols + '>' + F.map(function (s, i) {
         return '<span class="' + cls(i) + '">' + esc(stepName(p, s.key)) + "</span>";
@@ -4122,9 +4129,13 @@
         });
       });
     });
+    document.querySelectorAll(".track-help > summary").forEach(function (s) {
+      s.addEventListener("click", function (ev) { ev.preventDefault(); ev.stopPropagation(); s.parentNode.open = !s.parentNode.open; });
+    });
     document.querySelectorAll("[data-track-sw]").forEach(function (b) {
       b.addEventListener("click", function (ev) {
         ev.preventDefault(); ev.stopPropagation();          // 카드 머리(summary) 안이라 접힘이 같이 눌리지 않게
+        if (b.disabled) return;
         if (b.classList.contains("on")) return;
         var row = ROWS.filter(function (x) { return x.slug === b.dataset.slug; })[0];
         if (!row) return;
