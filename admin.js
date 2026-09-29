@@ -959,6 +959,10 @@
     })[0];
     var m = (f && f.meta) || {};
     // ★ 정하신 뒤 — 합의를 프롬프트로 옮기는 중이다
+    if (m.settled_at && f && f.kind === "final") {
+      return '<div class="plan-same"><b>후반 계획을 고쳐 완성본을 다시 만드는 중입니다</b><span>' +
+        "정해 주신 대로 자막·문구 배치를 고치고 있습니다. 새 완성본이 나오면 여기서 보시고 승인하시면 됩니다(크레딧 0).</span></div>";
+    }
     if (m.settled_at) {
       return '<div class="plan-same"><b>프롬프트에 반영하는 중입니다</b><span>' +
         "정해 주신 대로 제작 문장을 고치고 있습니다. 끝나면 <b>무엇이 어떻게 " +
@@ -3276,7 +3280,12 @@
           threadStep(3, "정하기", "done") +
           '<div class="mytake reply"><b>제작 쪽 답변</b><span>' +
           esc(reply) + "</span></div>" +
-          (planAfter(p, m)
+          // 09-29 — 후반(완성본)은 프롬프트가 없다. 후반 계획을 고쳐 완성본을 다시 만든다(크레딧 0)
+          (f && f.kind === "final"
+            ? '<p class="thread-now"><b>후반 계획을 고쳐 완성본을 다시 만드는 중입니다</b><span>' +
+              "정하신 것은 " + esc(when(m.settled_at)) + "에 기록했습니다. 자막·문구 배치를 고친 새 완성본이 " +
+              "여기에 올라옵니다(보통 1~2분 · 크레딧 0).</span></p>"
+          : planAfter(p, m)
             ? '<p class="thread-ok"><b>반영 완료 · ' +
               esc(when(p.render_mode_at)) + "</b><span>정해 주신 대로 제작 " +
               "문장을 고쳤습니다. 이제 <b>다시 뽑기</b>를 누르시면 바뀐 문장으로 " +
