@@ -611,7 +611,8 @@
       '<p><b>옵션 1 · 지금 방식</b> — 콘티를 그려 광고주와 맞춘 뒤 그대로 영상으로. 10단계(구성·각본 → 콘티 → 제작 자료 → 영상). 광고주가 장면을 미리 보고 확정하지만, 콘티에 끌려가 밋밋해지기 쉽습니다.</p>' +
       '<p><b>옵션 2 · 브리프 방식</b> — 목표 한 줄과 조건만 주고 컷 구성은 AI가 직접 설계. 9단계(제작 자료 → 브리프 → 영상, 콘티 없음). 사람은 브리프 한 장(골·필수·제품 사실·조건·마무리)만 씁니다. 빠르고 역동적이지만, 제품 사실을 꼭 적어야 틀리지 않습니다.</p>' +
       "<p>의뢰 접수 때 고르고, 컨셉을 고른 뒤에는 바꿀 수 없습니다.</p></div></details>" : "";
-    return '<div class="abar-wrap">' + sw + '<div class="abar"' + cols + '>' + F.map(function (s, i) { return '<i class="' + cls(i) + '"></i>'; }).join("") +
+    // 전환·설명은 가로 스크롤 틀 밖에 — 안에 두면 휴대폰에서 설명 상자 오른쪽이 잘린다
+    return '<div class="track-row">' + sw + '</div><div class="abar-wrap"><div class="abar"' + cols + '>' + F.map(function (s, i) { return '<i class="' + cls(i) + '"></i>'; }).join("") +
       '</div><div class="abar-names"' + cols + '>' + F.map(function (s, i) {
         return '<span class="' + cls(i) + '">' + esc(stepName(p, s.key)) + "</span>";
       }).join("") + "</div></div>";
