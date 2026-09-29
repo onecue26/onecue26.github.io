@@ -40,7 +40,7 @@
     if (!v.length) return "";
     return "<h2>영상 " + v.length + "판</h2><div class=\"clips\">" + v.map(function (c) {
       return '<figure class="clip"><video src="' + esc(c.url) +
-        '" controls playsinline preload="metadata"></video>' +
+        '" controls playsinline preload="none"></video>' +
         "<figcaption>" + esc(c.role || "") +
         ' · <a href="' + esc(c.url) + '" target="_blank" rel="noopener">새 창</a>' +
         "</figcaption></figure>";
@@ -57,7 +57,7 @@
       "누르기 전에는 광고주에게 안 보입니다.</p>" +
       '<div class="clips">' + v.map(function (c) {
         return '<figure class="clip"><video src="' + esc(c.url) +
-          '" controls playsinline preload="metadata"></video>' +
+          '" controls playsinline preload="none"></video>' +
           "<figcaption>" + esc(c.role || "") +
           ' · <a href="' + esc(c.url) + '" target="_blank" rel="noopener">새 창</a>' +
           '<br><button type="button" class="btn' + (c.approved ? " ghost" : "") +
@@ -73,7 +73,7 @@
       return a.kind === "board" && a.cut_n == null;
     })[0];
     if (!sheet) return "";
-    return "<h2>콘티 시트</h2><div class=\"board\"><img src=\"" + esc(sheet.url) +
+    return "<h2>콘티 시트</h2><div class=\"board\"><img loading=\"lazy\" src=\"" + esc(sheet.url) +
       '" alt="콘티 시트" loading="lazy"></div>';
   }
 
@@ -93,13 +93,13 @@
     if (!b && !a && !v) return '<div class="noimg-n">' + n + "</div>";
     function pic(label, x, cls) {
       return '<figure class="' + cls + (x ? " on" : "") + '">' +
-        (x ? '<img src="' + esc(x.url) + '" alt="컷 ' + n + '" loading="lazy">'
+        (x ? '<img loading="lazy" src="' + esc(x.url) + '" alt="컷 ' + n + '" loading="lazy">'
            : '<div class="none">—</div>') +
         "<figcaption>" + (x ? label : "대기") + "</figcaption></figure>";
     }
     function vid(x) {
       return '<figure class="made' + (x ? " on" : "") + '">' +
-        (x ? '<video src="' + esc(x.url) + '" controls playsinline preload="metadata"></video>'
+        (x ? '<video src="' + esc(x.url) + '" controls playsinline preload="none"></video>'
            : '<div class="none">—</div>') +
         "<figcaption>" + (x ? "영상" : "대기") + "</figcaption></figure>";
     }

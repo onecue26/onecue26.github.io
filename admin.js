@@ -843,7 +843,7 @@
     var fin = (p.files || []).filter(function (x) { return x.kind === "final" && x.approved && x.url; })[0];
     if (!fin) return "";
     return '<div class="delivered-final"><b>최종 납품본</b>' +
-      '<video src="' + esc(fin.url) + '" controls playsinline preload="metadata"></video>' +
+      '<video src="' + esc(fin.url) + '" controls playsinline preload="none"></video>' +
       '<small>' + esc(String(fin.storage_path || "").split("/").pop()) + " · 만든 시각 " + esc(when(fin.created_at)) +
       (last && last.decision === "ok" ? " · 광고주 승인 " + esc(when(last.decided_at)) : "") + "</small></div>";
   }
@@ -1036,7 +1036,7 @@
     }).filter(Boolean);
     if (!ok.length) return "";
     return '<div class="used-anchors"><b>이 영상에 물리는 준비물</b>' + ok.map(function (f) {
-      return '<img src="' + esc(f.url) + '" data-big="' + esc(f.url) + '" data-kind="img" alt="" title="' + esc(f.role || "") + '">';
+      return '<img loading="lazy" src="' + esc(f.url) + '" data-big="' + esc(f.url) + '" data-kind="img" alt="" title="' + esc(f.role || "") + '">';
     }).join("") + "<span>제작 자료 단계에서 승인됨</span></div>";
   }
 
@@ -1982,7 +1982,7 @@
         sent.map(function (f) {
           var img = (f.mime || "").indexOf("image/") === 0;
           return '<a href="' + esc(f.url) + '" target="_blank" rel="noopener" download>' +
-            (img ? '<img src="' + esc(f.url) + '" alt="' + esc(f.role) + '">'
+            (img ? '<img loading="lazy" src="' + esc(f.url) + '" alt="' + esc(f.role) + '">'
                  : '<span class="doc">PDF</span>') +
             "<em>" + esc(f.role) + "</em></a>";
         }).join("") + "</div>"
@@ -2307,7 +2307,7 @@
       var f = panelBy[c && c.n];
       // 컷별 조각이 없고 시트 한 판만 있으면 「그림 준비 전」 대신 시트의 몇 번 칸인지 알린다 (09-24)
       if (!f) return hasSheet ? '<div class="cut-empty"><span>위 콘티 시트 ' + esc(String(c && c.n)) + '번 칸</span></div>' : "";
-      return '<img class="cut-panel" src="' + esc(f.url) + '" alt="컷 ' + esc(String(c.n)) +
+      return '<img loading="lazy" class="cut-panel" src="' + esc(f.url) + '" alt="컷 ' + esc(String(c.n)) +
         ' 콘티" loading="lazy" data-big="' + esc(f.url) + '" data-kind="img">';
     }
     var storyboardBody = storyboardHead + ((cutRows.length && showCuts)
@@ -2373,7 +2373,7 @@
       var fin = (p.files || []).filter(function (x) { return x.kind === "final" && x.url; })
         .sort(function (a, b) { return a.created_at < b.created_at ? 1 : -1; })[0];
       return (fin ? '<div class="deliver-final"><video src="' + esc(fin.url) +
-          '" controls playsinline preload="metadata"></video><small>보낼 완성본 · ' +
+          '" controls playsinline preload="none"></video><small>보낼 완성본 · ' +
           esc(hhmm(fin.created_at)) + ' 판</small></div>' : "") +
         deliverGate(p, fin) + backBox(p);
     }
@@ -2526,7 +2526,7 @@
         mine.map(function (f) {
           var img = /^image\//.test(f.mime || "") || /\.(jpe?g|png|webp|gif)(\?|$)/i.test(f.url);
           return '<figure>' + (img
-            ? '<img src="' + esc(f.url) + '" loading="lazy" data-big="' + esc(f.url) + '" data-kind="img" alt="">'
+            ? '<img loading="lazy" src="' + esc(f.url) + '" loading="lazy" data-big="' + esc(f.url) + '" data-kind="img" alt="">'
             : '<a href="' + esc(f.url) + '" target="_blank" rel="noopener">파일 열기</a>') +
             '<figcaption>' + esc(f.role || f.kind) + '</figcaption></figure>';
         }).join("") + "</div></div>";
@@ -2677,7 +2677,7 @@
       if (!m.length) return "";
       return '<div class="said"><span class="lbl">제작 재료 ' + m.length + '개 — 광고주 자료를 우리가 가공한 것</span><div class="client-files">' +
         m.map(function (f) {
-          return '<figure>' + (f.url ? '<img src="' + esc(f.url) + '" loading="lazy" data-big="' + esc(f.url) + '" data-kind="img" alt="">' : "") +
+          return '<figure>' + (f.url ? '<img loading="lazy" src="' + esc(f.url) + '" loading="lazy" data-big="' + esc(f.url) + '" data-kind="img" alt="">' : "") +
             '<figcaption>' + esc(f.role || "") + (f.approved ? " · 승인됨" : "") + '</figcaption>' +
             (!f.approved && canWrite
               ? '<div class="lc"><button class="btn" type="button" data-lc="approve-anchor" data-asset="' + esc(f.id) +
@@ -2785,7 +2785,7 @@
       return '<div class="ready"><b>영상에 물릴 준비물이 나왔습니다</b>' +
         '<span class="when">' + esc(when(f.created_at)) + " · " + esc(ago(f.created_at)) +
         (m.credits ? " · " + m.credits + " 크레딧" : "") + "</span>" +
-        '<img src="' + esc(f.url) + '" alt="' + esc(f.role || "준비물") +
+        '<img loading="lazy" src="' + esc(f.url) + '" alt="' + esc(f.role || "준비물") +
         '" loading="lazy" data-big="' + esc(f.url) + '">' +
         '<span class="what"><b>' + esc(f.role || "준비물") + "</b>" +
         (m.why ? " — " + esc(m.why) : "") + "</span>" +
@@ -3077,9 +3077,9 @@
             '<span class="made-n">' + esc(verLabel(f)) + "</span>" +
             (f.url
               ? (vid
-                ? '<video src="' + esc(f.url) + '" controls preload="metadata" ' +
+                ? '<video src="' + esc(f.url) + '" controls preload="none" ' +
                   'data-big="' + esc(f.url) + '" data-vid="1"></video>'
-                : '<img src="' + esc(f.url) + '" alt="' + esc(f.role || f.kind) +
+                : '<img loading="lazy" src="' + esc(f.url) + '" alt="' + esc(f.role || f.kind) +
                   '" loading="lazy" data-big="' + esc(f.url) + '">')
               : '<div class="none">파일을 불러오지 못했습니다</div>') +
             '<figcaption><b>' + esc(f.role || f.kind) +
@@ -3602,7 +3602,7 @@
     var ecp = (p.files || []).filter(function (f) { return f.kind === "doc" && (f.meta || {}).endcard_preview && !(f.meta || {}).superseded && f.url; })
       .sort(function (x, y) { return String(y.created_at).localeCompare(String(x.created_at)); })[0];
     var ecHtml = ecp
-      ? '<div class="lc-check" style="display:flex;gap:12px;align-items:flex-start"><img src="' + esc(ecp.url) +
+      ? '<div class="lc-check" style="display:flex;gap:12px;align-items:flex-start"><img loading=\"lazy\" src="' + esc(ecp.url) +
         '" alt="엔드카드 미리보기" style="width:150px;border:1px solid var(--rule);border-radius:6px;cursor:zoom-in" onclick="window.open(this.src)">' +
         '<span class="lc-msg"><b>엔드카드 미리보기</b> — 영상 끝(마지막 1~2초)에 붙는 화면입니다. 후반과 같은 조판이라 이대로 납품본에 들어갑니다. ' +
         "배경색·문구를 바꾸고 싶으면 아래 의견 칸에 적어 주세요.</span></div>"
@@ -3657,7 +3657,7 @@
       (busy ? '<span class="lc-msg warn" style="display:block"><b>반영 중</b> — 「' + esc(sent.label || "") + "」 적용 중입니다(몇 초 · 끝나면 화면이 저절로 바뀝니다)</span>" : "") +
       '<div class="ec-opts">' + opts.map(function (f) {
         var m = f.meta;
-        return btn("layout", m.layout, '<img src="' + esc(f.url) + '" alt="' + esc(m.label) + '"><span class="ec-name">' + esc(m.label) + (m.recommended ? ' <em>추천</em>' : "") + "</span>",
+        return btn("layout", m.layout, '<img loading="lazy" src="' + esc(f.url) + '" alt="' + esc(m.label) + '"><span class="ec-name">' + esc(m.label) + (m.recommended ? ' <em>추천</em>' : "") + "</span>",
           !inVideo && cur.layout === m.layout);
       }).join("") + "</div>" +
       '<div class="ec-more">' + btn("method", "in_video", "<b>영상 안에서 한 번에</b><small>마지막 1.5초를 히어로샷 장면으로 · 추가 비용 없음 · 제품이 틀리면 고른 조판으로 대체</small>", inVideo) +
@@ -3673,7 +3673,7 @@
       .sort(function (x, y) { return String(y.created_at).localeCompare(String(x.created_at)); })[0];
     if (!cur) return "";
     return '<details class="board-old"><summary>콘티 시트 원본 한 장 보기</summary>' +
-      '<div class="board-sheet"><img src="' + esc(cur.url) + '" data-big="' + esc(cur.url) + '" data-kind="img" alt="콘티 시트"><span>' +
+      '<div class="board-sheet"><img loading=\"lazy\" src="' + esc(cur.url) + '" data-big="' + esc(cur.url) + '" data-kind="img" alt="콘티 시트"><span>' +
       esc(cur.role || "콘티 시트") + " · " + esc(when(cur.created_at)) + "</span></div></details>";
   }
 
@@ -3719,7 +3719,7 @@
         '<span class="lc-msg" data-lc-msg></span></div>';
     };
     var row = function (n, pic, t0, t1, cells, label) {
-      return '<div class="sc-row"><div class="sc-pic">' + (pic ? '<img src="' + esc(pic) + '" alt="' + esc(label) + '" onclick="window.open(this.src)">' : "") +
+      return '<div class="sc-row"><div class="sc-pic">' + (pic ? '<img loading="lazy" src="' + esc(pic) + '" alt="' + esc(label) + '" onclick="window.open(this.src)">' : "") +
         '<span class="sc-n">' + esc(label) + (t0 != null ? " · " + t0 + "~" + t1 + "초" : "") + "</span></div>" +
         '<div class="sc-txt">' + cells + (mine(n) ? '<div class="lc-check"><b>우리 제안</b>' + mine(n) + "</div>" : "") +
         noteBox(n, label) + "</div></div>";
@@ -3764,7 +3764,7 @@
     if (!old.length) return "";
     return '<details class="board-old"><summary>이전 콘티 ' + old.length + '판 보기 — 지금 판으로 세지 않고 광고주에게도 나가지 않습니다</summary>' +
       old.map(function (f) {
-        return '<div class="board-sheet"><img src="' + esc(f.url) + '" data-big="' + esc(f.url) + '" data-kind="img" alt="이전 콘티"><span>' +
+        return '<div class="board-sheet"><img loading=\"lazy\" src="' + esc(f.url) + '" data-big="' + esc(f.url) + '" data-kind="img" alt="이전 콘티"><span>' +
           esc(when(f.created_at)) + "</span></div>";
       }).join("") + "</details>";
   }
@@ -4026,7 +4026,7 @@
         box.className = "bigview";
         box.innerHTML = isVid
           ? '<video src="' + img.dataset.big + '" controls autoplay></video>'
-          : '<img src="' + img.dataset.big + '" alt="크게 보기">';
+          : '<img loading="lazy" src="' + img.dataset.big + '" alt="크게 보기">';
         function close() {
           box.remove();
           document.removeEventListener("keydown", onKey);
