@@ -40,6 +40,20 @@
     { key: "post", owner: "AI · 관리자 승인" },
     { key: "deliver", owner: "관리자 → 광고주" },
   ];
+  // ★ 09-29 — 옵션 2(브리프 방식)는 단계를 줄여 보인다 (Dan 「단계에 맞게 간소화」).
+  //   콘티를 빼고, 구성·각본 자리는 「옵션 선택」만, 브리프는 제작 자료(앵커) 아래에서 쓴다 — 앵커 → 브리프 → 영상 순.
+  //   DB 의 단계 진행은 그대로라 칸 키는 같고, 보이는 목록과 이름만 다르다.
+  function flowFor(p) {
+    if (!p || p.production_track !== "option2") return FLOW;
+    return FLOW.filter(function (s) { return s.key !== "storyboard"; });
+  }
+  function stepName(p, k) {
+    if (p && p.production_track === "option2") {
+      if (k === "develop") return "옵션 선택";
+      if (k === "anchors") return "제작 자료 · 브리프";
+    }
+    return STEP_NAME[k] || k;
+  }
   // 이 단계로 옮기면 광고주가 판단할 차례가 된다
   var GATE = { strategy: "검토", concepts: "선택", storyboard: "승인" };
   // 콘티(board.html)가 속한 단계. 이름이 이 파일에 적히는 자리는 여기 하나이고,
@@ -579,23 +593,27 @@
   /** 카드 머리 가로 진행 막대 — 광고주 화면 맨 위 막대와 같은 모양, 우리 10단계로 (Dan 09-25 「관리자에도 있었는데 사라졌다」)
    *  09-21 「전체 제작 흐름」이 가로 줄에서 세로 목록으로 바뀌며 한눈에 보던 막대가 없어졌다. 접힌 카드에서도 보이게 머리에 둔다 */
   function stepBar(p) {
-    var cur = FLOW.map(function (x) { return x.key; }).indexOf(p.step), closed = p.state === "done";
+    var F = flowFor(p);
+    var cur = F.map(function (x) { return x.key; }).indexOf(p.step), closed = p.state === "done";
+    if (cur < 0 && p.step === "storyboard") cur = F.map(function (x) { return x.key; }).indexOf("anchors");
     var cls = function (i) { return (closed || i < cur) ? "done" : i === cur ? "now" : ""; };
-    return '<div class="abar-wrap"><div class="abar">' + FLOW.map(function (s, i) { return '<i class="' + cls(i) + '"></i>'; }).join("") +
-      '</div><div class="abar-names">' + FLOW.map(function (s, i) {
-        return '<span class="' + cls(i) + '">' + esc(STEP_NAME[s.key] || s.key) + "</span>";
+    return '<div class="abar-wrap"><div class="abar">' + F.map(function (s, i) { return '<i class="' + cls(i) + '"></i>'; }).join("") +
+      '</div><div class="abar-names">' + F.map(function (s, i) {
+        return '<span class="' + cls(i) + '">' + esc(stepName(p, s.key)) + "</span>";
       }).join("") + "</div></div>";
   }
 
   function flow(p, bodies) {
-    var current = FLOW.map(function (x) { return x.key; }).indexOf(p.step);
+    var FL = flowFor(p);
+    var current = FL.map(function (x) { return x.key; }).indexOf(p.step);
+    if (current < 0 && p.step === "storyboard") current = FL.map(function (x) { return x.key; }).indexOf("anchors");
     var history = p.aiHistory || [];
     function stageAi(key) {
       return history.filter(function (h) { return h.step === key; })[0] || null;
     }
     return '<div class="flow-wrap"><div class="flow-head"><span class="lbl">전체 제작 흐름</span>' +
       '<span class="now-owner">현재 담당 <b>' + esc(currentOwner(p)) + '</b></span></div>' +
-      '<div class="flow-track">' + FLOW.map(function (s, i) {
+      '<div class="flow-track">' + FL.map(function (s, i) {
         // 프로젝트를 닫으면(068) 마지막 납품 단계까지 「완료」다
         var closed = p.state === "done";
         var status = (i < current || closed) ? "done" : (i === current ? "current" : "upcoming");
@@ -737,13 +755,14 @@
           (bact || act || devTwo || SE().isPaid(s.key) || status === "upcoming" || s.key === "deliver" || s.key === "brief" || s.key === "facts" || s.key === "strategy" || s.key === "concepts" ? "" : execPicker(p, s.key)) +
           deliverBox(p, s.key) +
           (s.key === "facts" ? needsPanel(p) : "") +
-          (s.key === "develop" ? trackPanel(p) + briefPanel(p) : "") +
+          (s.key === "develop" ? trackPanel(p) : "") +
+          (s.key === "anchors" ? briefPanel(p) : "") +
           (status === "upcoming" ? ''
             : (bodies[s.key] || '<p class="stage-empty">저장된 상세 내용이 없습니다.</p>')) +
           '</div>';
         return '<details class="flow-step ' + status + '"' + (status === "current" ? ' open' : '') + '>' +
           '<summary class="flow-summary"><span class="flow-marker">' + marker + '</span><strong>' +
-          esc(STEP_NAME[s.key]) + '</strong>' + versionBadge + personBadge + badge +
+          esc(stepName(p, s.key)) + '</strong>' + versionBadge + personBadge + badge +
           '<small>' + esc(s.owner) + '</small>' + costChip(p, s.key) + signoff(p, s.key) + '</summary>' + detail + '</details>';
       }).join("") + '</div></div>';
   }
