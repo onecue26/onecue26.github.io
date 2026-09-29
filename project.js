@@ -188,7 +188,7 @@
     if (!v.length) return "";
     return "<h2>완성본</h2><div class=\"clips\">" + v.map(function (c) {
       return '<figure class="clip"><video src="' + esc(c.url) +
-        '" controls playsinline preload="metadata" data-big="' + esc(c.url) +
+        '" controls playsinline preload="none" data-big="' + esc(c.url) +
         '" data-kind="vid"></video><figcaption>' + esc(c.role || "완성본") +
         "</figcaption></figure>";
     }).join("") + "</div>";
@@ -237,7 +237,7 @@
         var img = (a.mime || "").indexOf("image/") === 0;
         var name = a.role || kindLabel(a.kind);
         return '<a href="' + esc(a.url) + '" target="_blank" rel="noopener">' +
-          (img ? '<img src="' + esc(a.url) + '" alt="' + esc(name) + '" loading="lazy">'
+          (img ? '<img loading="lazy" src="' + esc(a.url) + '" alt="' + esc(name) + '" loading="lazy">'
                : '<span class="doc">' + esc(kindLabel(a.kind)) + "</span>") +
           "<em>" + esc(name) + "</em></a>";
       }).join("") + "</div>";
@@ -671,7 +671,7 @@
     })[0];
     if (!sheet) return "";
     return "<h2>콘티 시트</h2>" +
-      '<div class="board"><img src="' + esc(sheet.url) + '" alt="콘티 시트" loading="lazy">' +
+      '<div class="board"><img loading=\"lazy\" src="' + esc(sheet.url) + '" alt="콘티 시트" loading="lazy">' +
       "<p>이 시트는 <b>컷 순서와 구도를 정하는 자료</b>입니다. " +
       "실제 영상은 승인 후 컷마다 다시 만들기 때문에 그림이 이것과 똑같지는 않습니다.</p></div>";
   }
@@ -693,7 +693,7 @@
     function pic(label, x, cls) {
       if (!x) return "";
       return '<figure class="' + cls + ' on">' +
-        '<img src="' + esc(x.url) + '" alt="컷 ' + n + '" loading="lazy"' +
+        '<img loading="lazy" src="' + esc(x.url) + '" alt="컷 ' + n + '" loading="lazy"' +
         ' data-big="' + esc(x.url) + '" data-kind="img">' +
         "<figcaption>" + label + "</figcaption></figure>";
     }
@@ -702,7 +702,7 @@
       if (!vs.length) return "";
       return vs.map(function (x) {
         return '<figure class="made on"><video src="' + esc(x.url) +
-          '" controls playsinline preload="metadata" data-big="' + esc(x.url) +
+          '" controls playsinline preload="none" data-big="' + esc(x.url) +
           '" data-kind="vid"></video><figcaption>' +
           esc(x.role || "영상") + "</figcaption></figure>";
       }).join("");
@@ -722,7 +722,7 @@
     w.className = "big";
     w.innerHTML = kind === "vid"
       ? '<video src="' + esc(url) + '" controls autoplay playsinline></video>'
-      : '<img src="' + esc(url) + '" alt="크게 보기">';
+      : '<img loading="lazy" src="' + esc(url) + '" alt="크게 보기">';
     function close() {
       w.remove();
       document.removeEventListener("keydown", onKey);
@@ -783,7 +783,7 @@
         '<div class="script-rows">' + SCRIPT.rows.map(function (r) {
           var c = crop[r.n];
           return '<div class="sc-row"><div class="sc-pic">' +
-            (c ? '<img src="' + esc(c.url) + '" data-big="' + esc(c.url) + '" alt="' + esc(r.n) + '번 장면">' : "") +
+            (c ? '<img loading="lazy" src="' + esc(c.url) + '" data-big="' + esc(c.url) + '" alt="' + esc(r.n) + '번 장면">' : "") +
             '<span class="sc-n">' + esc(r.n) + " · " + sec(r.t_start) + "~" + sec(r.t_end) + "초</span></div>" +
             '<div class="sc-txt">' + cell("화면", r.screen) + (r.direction && r.direction !== "—" ? cell("연출(예정)", r.direction) : "") +
             cell("자막", r.caption, r.caption && r.caption !== "—" ? "on" : "") +
@@ -794,7 +794,7 @@
           var ec = ecs[ecs.length - 1];
           if (!ec) return "";
           var m = ec.meta || {};
-          return '<div class="sc-row"><div class="sc-pic"><img src="' + esc(ec.url) + '" data-big="' + esc(ec.url) + '" alt="엔드카드">' +
+          return '<div class="sc-row"><div class="sc-pic"><img loading=\"lazy\" src="' + esc(ec.url) + '" data-big="' + esc(ec.url) + '" alt="엔드카드">' +
             '<span class="sc-n">엔드카드 · 영상 끝</span></div><div class="sc-txt">' +
             cell("화면", "제품과 슬로건·제품명·안내 문구로 끝나는 화면입니다(편집으로 얹습니다)") +
             cell("자막", (m.lines || []).concat([m.cta || ""]).filter(Boolean).join(" / "), "on") + "</div></div>";
@@ -803,14 +803,14 @@
         //   전하는 말·자막·내레이션은 우리가 정하고 후반에서 얹는다 → 그대로. 화면·소리는 영상 엔진이 만든다 → 세부가 달라질 수 있다
         '<p class="board-note"><b>전하는 말·자막·내레이션은 이대로 들어갑니다.</b> 화면과 소리는 흐름을 보여 드리는 것이라, ' +
         "만들면서 세부(화면 구성·각도·인물·배경·음악 느낌)가 달라질 수 있습니다. 제품의 모양과 색은 보내 주신 사진 그대로 지킵니다.</p>" +
-        '<details class="fix-prev"><summary>콘티 한 장으로 보기</summary><div class="board-sheet-client"><img src="' +
+        '<details class="fix-prev"><summary>콘티 한 장으로 보기</summary><div class="board-sheet-client"><img loading=\"lazy\" src="' +
         esc(sheet.url) + '" data-big="' + esc(sheet.url) + '" alt="콘티 — ' + cuts.length + '개 장면"></div></details>';
     }
     if (sheet) {
       return "<h2>콘티</h2>" +
         '<p class="board-note">콘티는 광고의 <b>흐름</b>을 보여 드리는 밑그림입니다. 실제 영상의 화면 구성·각도·인물·배경은 ' +
         '제작하면서 더 좋게 달라질 수 있고, 제품의 모양과 색은 보내 주신 사진 그대로 지킵니다.</p>' +
-        '<div class="board-sheet-client"><img src="' + esc(sheet.url) + '" data-big="' + esc(sheet.url) +
+        '<div class="board-sheet-client"><img loading=\"lazy\" src="' + esc(sheet.url) + '" data-big="' + esc(sheet.url) +
         '" alt="콘티 — ' + cuts.length + '개 장면"></div>';
     }
     // 글 구조는 공용 렌더가 만든다. 그림 칸만 이 화면이 만든다 —

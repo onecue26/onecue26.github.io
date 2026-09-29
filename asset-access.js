@@ -9,10 +9,21 @@
   //     화면은 그린다 — 콘티 한 장 때문에 진행 상황까지 안 보이면 안 된다.
   function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
+  // ★ 2026-09-29 — 화면을 다시 그릴 때마다 서명 주소를 **새로** 받아 주소가 매번 달랐다.
+  //   주소가 바뀌면 브라우저는 같은 파일을 캐시에서 못 찾고 처음부터 다시 받는다.
+  //   저장 0.2GB 인데 이번 달 내보낸 양이 145GB — 사건마다 화면이 다시 그려지며 수십 장을 통째로 다시 받았다.
+  //   Supabase 무료 한도를 넘겨 사이트 전체가 멈췄다(09-29 07:25).
+  //   → 받은 주소를 **유효한 동안 재사용**한다(같은 주소 = 브라우저 캐시). 끝나기 5분 전에만 새로 받는다.
+  var TTL = 3600, CACHE = {};
   async function sign(db, path) {
+    var now = Date.now() / 1000, hit = CACHE[path];
+    if (hit && hit.exp - now > 300) return hit.url;
     for (var i = 0; i < 2; i++) {
-      var result = await db.storage.from("uploads").createSignedUrl(path, 900);
-      if (!result.error && result.data && result.data.signedUrl) return result.data.signedUrl;
+      var result = await db.storage.from("uploads").createSignedUrl(path, TTL);
+      if (!result.error && result.data && result.data.signedUrl) {
+        CACHE[path] = { url: result.data.signedUrl, exp: now + TTL };
+        return result.data.signedUrl;
+      }
       if (i === 0) await wait(600);
     }
     return null;
