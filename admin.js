@@ -441,7 +441,7 @@
     return '<div class="needs need-admin track-pick"><h4>제작 방식</h4>' +
       '<div class="need-pick"><select data-track="' + esc(p.slug) + '">' +
       '<option value="option1"' + (t === "option1" ? " selected" : "") + '>옵션 1 · 지금 방식 (구성·각본 → 콘티 → 제작 자료 → 영상)</option>' +
-      '<option value="option2"' + (t === "option2" ? " selected" : "") + '>옵션 2 · 브리프 방식 시험 (브리프 → 키프레임 → 드래프트 480p)</option>' +
+      '<option value="option2"' + (t === "option2" ? " selected" : "") + '>옵션 2 · 브리프 방식 시험 (앵커 먼저 → 브리프 → 영상 한 번에 · 드래프트 480p)</option>' +
       '</select><button class="btn ghost" data-track-save="' + esc(p.slug) + '">저장</button>' +
       '<span class="msg" data-track-msg="' + esc(p.slug) + '"></span></div>' +
       '<p class="need-type">컨셉을 고른 직후 여기서 정합니다 · 광고주 화면에는 보이지 않습니다' +
