@@ -508,6 +508,7 @@
     var fld = function (k, label, ph, rows) {
       var g = GUIDE[k];
       ph = "";
+      if (!rows && ["sheets", "goal", "must", "cond", "ending"].indexOf(k) >= 0) rows = 2;   // AI 초안 긴 문장이 한 줄 칸에서 잘렸다
       return '<label class="o2-l">' + label + '</label>' + (g ? '<div class="o2-guide">' + esc(g[0]) + '<br><span>예) ' + esc(g[1]) + "</span></div>" : "") + (rows
         ? '<textarea data-o2="' + k + '" rows="' + rows + '" placeholder="' + esc(ph) + '">' + esc(b[k] || "") + "</textarea>"
         : '<input data-o2="' + k + '" placeholder="' + esc(ph) + '" value="' + esc(b[k] || "") + '">');
