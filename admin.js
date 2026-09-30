@@ -494,13 +494,30 @@
     if (!canWrite || p.production_track !== "option2") return "";
     var b = p.option2_brief || {}, sk = b.style || (p.visual_style && p.visual_style !== "auto" ? p.visual_style : "real");
     var anchors = (p.files || []).filter(function (f) { return f.kind === "anchor" && f.approved && f.url; });
+    // 09-30 — 사람이 쓸 때 칸마다 쓰는 법과 실제 예시를 입력란 위에(Dan) · 예시는 유튜브 원문·우리 시험에서
+    var GUIDE = {
+      task: ["짧은 이름 하나", "최가네 김밥집 광고 · 치킨 광고"],
+      sheets: ["앵커를 번호로 지목만 합니다 — 모습을 글로 묘사하지 않습니다. @CA 인물 · @OB 제품·소품 · @BG 배경", "@CA01 손님 / @OB01 김밥 / @BG01 가게 외관 / @BG02 매장 내부"],
+      goal: ["장면 목록이 아니라 「무엇을 느끼게 할지」 한 문장", "첫 한 입, 바삭함이 화면을 뚫고 나온다. · 새벽 해안 산길을 소리 없이, 그러나 누구보다 빠르게 가르는 전기차."],
+      must: ["꼭 지킬 연출 한 줄 — 기본 문장에 이 건에 꼭 필요한 것만 더합니다", "속도감 있는 컷 구성과 멀티앵글로 높은 몰입감을 만들 것."],
+      facts: ["틀리면 광고가 안 되는 사실과 크기(손·사람 대비) — 광고주 자료에 있는 것만", "속살은 완전히 익은 흰 살, 결대로 찢어진다 / 크기: 닭다리 한 조각이 손바닥보다 조금 길다"],
+      cond: ["금지·잠금이 있을 때만", "사용하는 도구는 @OB01 팬국자뿐이다. 칼·총기 등 다른 무기 금지. · 간판·메뉴판 글자는 시트 그대로"],
+      ending: ["마지막 장면을 움직임 있게 — 시트 배치를 그대로 옮긴 정지 화면이 되지 않게", "@OB01 치킨 히어로 샷 — 시트 배치를 옮기지 말고 움직임 있게"],
+      onscreen: ["후반에 얹을 자막·CTA — 영상에는 넣지 않습니다", "넣고 · 갈고 · 마시고 / CTA: 프로필에서 지금 만나보기"]
+    };
     var fld = function (k, label, ph, rows) {
-      return '<label class="o2-l">' + label + '</label>' + (rows
+      var g = GUIDE[k];
+      ph = "";
+      return '<label class="o2-l">' + label + '</label>' + (g ? '<div class="o2-guide">' + esc(g[0]) + '<br><span>예) ' + esc(g[1]) + "</span></div>" : "") + (rows
         ? '<textarea data-o2="' + k + '" rows="' + rows + '" placeholder="' + esc(ph) + '">' + esc(b[k] || "") + "</textarea>"
         : '<input data-o2="' + k + '" placeholder="' + esc(ph) + '" value="' + esc(b[k] || "") + '">');
     };
     return '<div class="needs need-admin o2-brief" data-o2slug="' + esc(p.slug) + '"><h4>브리프 (옵션 2)</h4>' +
-      '<p class="need-type">칸을 채우면 아래 형식 그대로 Claude에게 갑니다 · 회색 글은 예시 · 골·필수·제품 사실은 꼭</p>' +
+      (b.by === "ai" && b.draft
+        ? '<p class="o2-ai">AI가 채운 초안입니다 — 고칠 곳만 고쳐 「브리프 저장」을 누르세요. 전면으로 바꾸려면 아래 「AI에게 의견」.' +
+          (b.redo_note ? "<br><small>반영한 의견 · " + esc(b.redo_note) + "</small>" : "") + "</p>"
+        : !p.option2_brief ? '<p class="o2-ai">AI가 초안을 쓰는 중입니다 — 실행 주체를 「담당자」로 정한 건은 직접 채웁니다.</p>'
+        : '<p class="need-type">칸을 채우면 아래 형식 그대로 Claude에게 갑니다 · 골·필수·제품 사실은 꼭</p>') +
       '<label class="o2-l">화풍</label><select data-o2="style">' + O2_STYLES.map(function (s) {
         return '<option value="' + s[0] + '"' + (s[0] === sk ? " selected" : "") + ">" + esc(s[1]) + "</option>"; }).join("") + "</select>" +
       '<label class="o2-l">[조건] 공통 — 의뢰의 길이·비율과 우리 기본값으로 자동 · 필요하면 고치십시오</label>' +
@@ -516,9 +533,17 @@
       fld("cond", "조건 (선택)", "사용하는 도구는 @OB01 팬국자뿐이다. 칼·총기 등 다른 무기 금지.") +
       fld("ending", "마무리 (선택)", "@OB01 치킨 히어로 샷 — 시트 배치를 옮기지 말고 움직임 있게") +
       fld("onscreen", "화면 문구 — 후반 자막·CTA (영상에는 넣지 않음)", "넣고 · 갈고 · 마시고 / CTA: 프로필에서 지금 만나보기", 2) +
+      ((b.anchors || []).length ? '<label class="o2-l">앵커 계획 — 광고주 자료로 되는 것 / 새로 만들 것(유료·승인 뒤)</label><ul class="o2-anchors-plan">' +
+        b.anchors.map(function (a) {
+          var nw = String(a.source || "").indexOf("new") === 0;
+          return "<li><b>" + esc(a.id || "") + " " + esc(a.name || "") + "</b> · " + (nw ? '<span class="new">새로 만듦</span>' : "광고주 자료 · " + esc(String(a.source || "").replace(/^client:/, ""))) +
+            (a.why ? " — " + esc(a.why) : "") + "</li>"; }).join("") + "</ul>" : "") +
       '<div class="need-pick"><button class="btn" data-o2-save="' + esc(p.slug) + '">브리프 저장</button>' +
       '<span class="msg" data-o2-msg="' + esc(p.slug) + '">' + (p.option2_brief_at ? esc(when(p.option2_brief_at)) + " 저장됨" : "") + "</span></div>" +
       (b.text ? '<details class="o2-prev"><summary>Claude에게 가는 글 (저장된 판)</summary><pre>' + esc(b.text) + "</pre></details>" : "") +
+      '<details class="o2-redo"><summary>AI에게 의견 — 전면으로 다시 쓰기</summary>' +
+      '<textarea data-o2-note="' + esc(p.slug) + '" rows="3" placeholder="예) 김밥보다 가게를 찾아오는 장면을 더 앞에 · 사장님이 말아 주는 장면을 넣어 줘"></textarea>' +
+      '<button class="btn ghost" data-o2-redo="' + esc(p.slug) + '">이 의견으로 다시 쓰기</button> <span class="msg" data-o2-redo-msg="' + esc(p.slug) + '"></span></details>' +
       "</div>";
   }
 
@@ -4158,10 +4183,26 @@
         box.querySelectorAll("[data-o2]").forEach(function (el) { br[el.dataset.o2] = el.value.trim(); });
         if (!br.goal || !br.must || !br.facts) { msg.className = "msg err"; msg.textContent = "골 · 필수 · 제품 사실은 꼭 채워 주십시오."; return; }
         br.text = o2Text(br);
+        var prevB = row.option2_brief || {};
+        br.anchors = prevB.anchors || [];          // AI 가 세운 앵커 계획은 저장해도 남긴다
+        br.by = prevB.by === "ai" ? "ai+human" : "human"; br.draft = false;
         b.disabled = true; b.textContent = "저장 중…";
         db.rpc("onecue_set_brief", { p_project_id: row.id, p_brief: br }).then(function (r) {
           if (r.error) { b.disabled = false; b.textContent = "브리프 저장"; msg.className = "msg err"; msg.textContent = "저장 실패 — " + r.error.message; return; }
           load();
+        });
+      });
+    });
+    document.querySelectorAll("[data-o2-redo]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var slug = b.dataset.o2Redo, row = ROWS.filter(function (x) { return x.slug === slug; })[0];
+        var note = (document.querySelector('[data-o2-note="' + slug + '"]') || {}).value || "";
+        var msg = document.querySelector('[data-o2-redo-msg="' + slug + '"]');
+        if (!row || !note.trim()) { msg.textContent = "바꿀 점을 적어 주세요."; return; }
+        b.disabled = true; msg.textContent = "보내는 중…";
+        db.rpc("onecue_brief_redo", { p_project_id: row.id, p_note: note.trim() }).then(function (r) {
+          b.disabled = false;
+          msg.textContent = r.error ? "보내지 못했습니다 — " + r.error.message : "보냈습니다 — AI가 다시 쓰면 이 칸이 바뀝니다(2분 안팎)";
         });
       });
     });
