@@ -541,6 +541,32 @@
         '<span class="hint" id="msgMsg" role="status" aria-live="polite"></span></div>' : "") + "</details>";
   }
 
+  // 09-30 — 화풍(106·107): 화풍을 먼저 정해야 거기 맞는 콘셉트를 짠다(Dan). 콘셉트를 쓰기 전까지 광고주가 바꾼다
+  var STYLES = [["real", "실사 · 밝고 선명", "제품이 또렷하게 · 음식·음료·생활용품"],
+    ["cine", "시네마틱", "영화 같은 빛과 분위기 · 고급 제품·브랜드"],
+    ["phone", "폰으로 찍은 일상", "자연스럽고 친근하게 · 후기·SNS 느낌"],
+    ["anim3d", "3D 애니메이션", "귀엽고 선명한 입체 캐릭터"],
+    ["clay", "클레이 · 스톱모션", "손으로 빚은 모형처럼 따뜻하게"]];
+  function secStyle(P) {
+    var cur = P.visual_style || "auto";
+    var open = MINE && ["brief", "facts", "strategy"].indexOf(P.step) >= 0 && P.state !== "done";
+    var pick = STYLES.filter(function (x) { return x[0] === cur; })[0];
+    if (!open) {
+      return '<section class="style-now"><h2>화면 느낌</h2><p>' + (pick
+        ? '<img src="img/style/' + pick[0] + '.jpg" alt="" loading="lazy"><b>' + esc(pick[1]) + "</b> · " + esc(pick[2])
+        : "<b>추천에 맡기셨습니다</b> · 제품에 맞게 저희가 정합니다") + "</p></section>";
+    }
+    return '<section class="style-pick"><h2>원하는 화면 느낌</h2><p class="hint">같은 장면을 다섯 가지로 그려 봤습니다 · 고른 느낌에 맞춰 아이디어를 짭니다 · 아이디어를 쓰기 전까지 바꾸실 수 있습니다</p>' +
+      '<div class="styles" role="radiogroup" aria-label="원하는 화면 느낌">' +
+      STYLES.map(function (x) {
+        return '<label class="style-card"><input type="radio" name="pstyle" value="' + x[0] + '"' + (cur === x[0] ? " checked" : "") +
+          '><img src="img/style/' + x[0] + '.jpg" alt="' + esc(x[1]) + ' 예시" loading="lazy"><b>' + esc(x[1]) + "</b><small>" + esc(x[2]) + "</small></label>";
+      }).join("") +
+      '<label class="style-card auto"><input type="radio" name="pstyle" value="auto"' + (cur === "auto" ? " checked" : "") +
+      '><span class="q">?</span><b>잘 모르겠어요</b><small>제품에 맞게 추천해 드립니다</small></label></div>' +
+      '<span class="hint" id="styleMsg" role="status" aria-live="polite"></span></section>';
+  }
+
   function deliverForm() {
     // ★ 09-26 — 관리자가 보면 버튼이 아예 없어 「모바일에 승인 버튼이 없다」로 보였다(Dan). 광고주에게 보이는 모양을 잠근 채 보여 준다
     if (!MINE) {
@@ -966,6 +992,14 @@
         el("videoMsg").textContent = "저장하지 못했습니다. 진행 상태를 확인한 뒤 다시 시도해주세요.";
       });
     }
+    document.querySelectorAll('input[name="pstyle"]').forEach(function (r) {
+      r.addEventListener("change", function () {
+        el("styleMsg").textContent = "저장하는 중…";
+        db.rpc("onecue_set_style", { p_project_id: P.id, p_style: r.value }).then(function (res) {
+          el("styleMsg").textContent = res.error ? "바꾸지 못했습니다 — 아이디어를 이미 쓰기 시작했을 수 있습니다" : "저장했습니다";
+        });
+      });
+    });
     var ms = el("msgSend");
     // 09-30 — 고른 첨부를 목록으로 보여 주고 하나씩 뺄 수 있게, 여러 번 나눠 더 고를 수 있게(Dan)
     var msgPicked = [];
@@ -1114,7 +1148,7 @@
       }
       if (auth.error) throw auth.error;
       LOGGED_IN = true;
-      return db.from("projects").select("id,client_id,slug,brand,product,running_sec,cut_count,aspect,aspects,channels,step,state,ad_type,ad_type_by,closed_at").eq("slug", slug).maybeSingle();
+      return db.from("projects").select("id,client_id,slug,brand,product,running_sec,cut_count,aspect,aspects,channels,step,state,ad_type,ad_type_by,closed_at,visual_style").eq("slug", slug).maybeSingle();
     })
       .then(function (r) {
         if (!r) return;
@@ -1181,7 +1215,7 @@
             (P.state === "done"
               ? '<div class="gate done"><div class="txt"><b>프로젝트가 완료되었습니다</b><small>' +
                 esc(P.closed_at ? new Date(P.closed_at).toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 10) : "") + " · 함께해 주셔서 감사합니다. 완성본은 아래 납품 칸에서 언제든 받으실 수 있습니다.</small></div></div>"
-              : secGate(P, x[5].data)) + secMessages(x[6].data) + flow(x) +
+              : secGate(P, x[5].data)) + secStyle(P) + secMessages(x[6].data) + flow(x) +
             '<footer><span><a href="index.html">← 목록</a></span>' +
             '<span class="mono">' + new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 16) +
             "</span></footer>";
