@@ -611,6 +611,7 @@
       '<button type="button" data-track-sw="option1" data-slug="' + esc(p.slug) + '"' + (t2 ? "" : ' class="on"') + dis + '>옵션 1</button>' +
       '<button type="button" data-track-sw="option2" data-slug="' + esc(p.slug) + '"' + (t2 ? ' class="on"' : "") + dis + '>옵션 2</button></span>' +
       // 09-30 — 화풍: 광고주가 의뢰서에서 고르고(106) 관리자는 컨셉 전까지 바꾼다 — 전략·콘셉트가 이 화풍 안에서 짜인다(Dan)
+      ((p.visual_style && p.visual_style !== "auto") ? '<img class="style-thumb" src="img/style/' + esc(p.visual_style) + '.jpg" alt="">' : "") +
       '<select class="style-sel" data-style-sel="' + esc(p.slug) + '"' + dis + ' title="' + (locked ? "컨셉을 고른 뒤라 바꿀 수 없습니다" : "화풍 — 전략·콘셉트가 이 안에서 짜입니다") + '">' +
       [["auto", "화풍 · 추천에 맡김"]].concat(O2_STYLES.map(function (x) { return [x[0], "화풍 · " + x[1].split(" (")[0]]; })).map(function (o) {
         return '<option value="' + o[0] + '"' + ((p.visual_style || "auto") === o[0] ? " selected" : "") + ">" + esc(o[1]) + "</option>"; }).join("") +
