@@ -509,9 +509,12 @@
       var g = GUIDE[k];
       ph = "";
       if (!rows && ["sheets", "goal", "must", "cond", "ending"].indexOf(k) >= 0) rows = 2;   // AI 초안 긴 문장이 한 줄 칸에서 잘렸다
-      return '<label class="o2-l">' + label + '</label>' + (g ? '<div class="o2-guide">' + esc(g[0]) + '<br><span>예) ' + esc(g[1]) + "</span></div>" : "") + (rows
+      // 09-30 — 칸마다 한 덩어리 · 쓰는 법·예시는 접어 두고(빈 칸만 펼침) · 글꼴은 본문과 같게(Dan 「가독성이 떨어져」)
+      return '<div class="o2-field"><div class="o2-head"><span class="o2-l">' + label + "</span>" +
+        (g ? '<details class="o2-guide"' + (b[k] ? "" : " open") + "><summary>쓰는 법 · 예시</summary><p>" + esc(g[0]) + '</p><p class="ex">예) ' + esc(g[1]) + "</p></details>" : "") +
+        "</div>" + (rows
         ? '<textarea data-o2="' + k + '" rows="' + rows + '" placeholder="' + esc(ph) + '">' + esc(b[k] || "") + "</textarea>"
-        : '<input data-o2="' + k + '" placeholder="' + esc(ph) + '" value="' + esc(b[k] || "") + '">');
+        : '<input data-o2="' + k + '" placeholder="' + esc(ph) + '" value="' + esc(b[k] || "") + '">') + "</div>";
     };
     return '<div class="needs need-admin o2-brief" data-o2slug="' + esc(p.slug) + '"><h4>브리프 (옵션 2)</h4>' +
       (b.by === "ai" && b.draft
@@ -519,10 +522,10 @@
           (b.redo_note ? "<br><small>반영한 의견 · " + esc(b.redo_note) + "</small>" : "") + "</p>"
         : !p.option2_brief ? '<p class="o2-ai">AI가 초안을 쓰는 중입니다 — 실행 주체를 「담당자」로 정한 건은 직접 채웁니다.</p>'
         : '<p class="need-type">칸을 채우면 아래 형식 그대로 Claude에게 갑니다 · 골·필수·제품 사실은 꼭</p>') +
-      '<label class="o2-l">화풍</label><select data-o2="style">' + O2_STYLES.map(function (s) {
-        return '<option value="' + s[0] + '"' + (s[0] === sk ? " selected" : "") + ">" + esc(s[1]) + "</option>"; }).join("") + "</select>" +
-      '<label class="o2-l">[조건] 공통 — 의뢰의 길이·비율과 우리 기본값으로 자동 · 필요하면 고치십시오</label>' +
-      '<textarea data-o2="conditions_text" rows="7">' + esc(b.conditions_text || o2Conditions(p, sk)) + "</textarea>" +
+      '<div class="o2-field"><div class="o2-head"><span class="o2-l">화풍</span><small>의뢰서에서 고른 화면 느낌</small></div><select data-o2="style">' + O2_STYLES.map(function (s) {
+        return '<option value="' + s[0] + '"' + (s[0] === sk ? " selected" : "") + ">" + esc(s[1]) + "</option>"; }).join("") + "</select></div>" +
+      '<details class="o2-field o2-cond"><summary><span class="o2-l">[조건] 공통</span> <small>길이·비율·화풍으로 자동 — 필요할 때만 펼쳐 고칩니다</small></summary>' +
+      '<textarea data-o2="conditions_text" rows="8">' + esc(b.conditions_text || o2Conditions(p, sk)) + "</textarea></details>" +
       fld("task", "과제명", "치킨 광고") +
       (anchors.length ? '<div class="o2-anchors">' + anchors.map(function (f) {
         return '<img loading="lazy" src="' + esc(f.url) + '" title="' + esc((f.meta || {}).covers_call || "") + '">'; }).join("") + "</div>" : "") +
@@ -534,11 +537,11 @@
       fld("cond", "조건 (선택)", "사용하는 도구는 @OB01 팬국자뿐이다. 칼·총기 등 다른 무기 금지.") +
       fld("ending", "마무리 (선택)", "@OB01 치킨 히어로 샷 — 시트 배치를 옮기지 말고 움직임 있게") +
       fld("onscreen", "화면 문구 — 후반 자막·CTA (영상에는 넣지 않음)", "넣고 · 갈고 · 마시고 / CTA: 프로필에서 지금 만나보기", 2) +
-      ((b.anchors || []).length ? '<label class="o2-l">앵커 계획 — 광고주 자료로 되는 것 / 새로 만들 것(유료·승인 뒤)</label><ul class="o2-anchors-plan">' +
+      ((b.anchors || []).length ? '<div class="o2-field"><div class="o2-head"><span class="o2-l">앵커 계획</span><small>새로 만드는 것은 유료 — 승인 뒤에 만듭니다</small></div><table class="o2-plan">' +
         b.anchors.map(function (a) {
           var nw = String(a.source || "").indexOf("new") === 0;
-          return "<li><b>" + esc(a.id || "") + " " + esc(a.name || "") + "</b> · " + (nw ? '<span class="new">새로 만듦</span>' : "광고주 자료 · " + esc(String(a.source || "").replace(/^client:/, ""))) +
-            (a.why ? " — " + esc(a.why) : "") + "</li>"; }).join("") + "</ul>" : "") +
+          return "<tr><td><b>" + esc(a.id || "") + "</b></td><td>" + esc(a.name || "") + "</td><td>" +
+            (nw ? '<span class="tag new">새로 만듦</span>' : '<span class="tag">광고주 자료</span>') + '</td><td class="why">' + esc(a.why || "") + "</td></tr>"; }).join("") + "</table></div>" : "") +
       '<div class="need-pick"><button class="btn" data-o2-save="' + esc(p.slug) + '">브리프 저장</button>' +
       '<span class="msg" data-o2-msg="' + esc(p.slug) + '">' + (p.option2_brief_at ? esc(when(p.option2_brief_at)) + " 저장됨" : "") + "</span></div>" +
       (b.text ? '<details class="o2-prev"><summary>Claude에게 가는 글 (저장된 판)</summary><pre>' + esc(b.text) + "</pre></details>" : "") +
