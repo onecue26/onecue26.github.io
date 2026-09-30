@@ -45,11 +45,11 @@
   //   DB 의 단계 진행은 그대로라 칸 키는 같고, 보이는 목록과 이름만 다르다.
   function flowFor(p) {
     if (!p || p.production_track !== "option2") return FLOW;
-    return FLOW.filter(function (s) { return s.key !== "storyboard"; });
+    // 09-30 — 옵션은 의뢰 접수 때 고른다. 구성·각본(옛 「옵션 선택」) 칸도 옵션 2 에는 없다(Dan 「옵션 설계 단계 뭐냐」)
+    return FLOW.filter(function (s) { return s.key !== "storyboard" && s.key !== "develop"; });
   }
   function stepName(p, k) {
     if (p && p.production_track === "option2") {
-      if (k === "develop") return "옵션 선택";
       if (k === "anchors") return "제작 자료 · 브리프";
     }
     return STEP_NAME[k] || k;
@@ -598,7 +598,7 @@
   function stepBar(p) {
     var F = flowFor(p);
     var cur = F.map(function (x) { return x.key; }).indexOf(p.step), closed = p.state === "done";
-    if (cur < 0 && p.step === "storyboard") cur = F.map(function (x) { return x.key; }).indexOf("anchors");
+    if (cur < 0 && (p.step === "storyboard" || p.step === "develop")) cur = F.map(function (x) { return x.key; }).indexOf("anchors");
     var cls = function (i) { return (closed || i < cur) ? "done" : i === cur ? "now" : ""; };
     // 09-30 — 칸 수(옵션 1 10칸 · 옵션 2 9칸)에 맞춰 막대와 글씨를 같은 격자로 — 글씨가 막대와 어긋났다(Dan)
     var cols = ' style="grid-template-columns:repeat(' + F.length + ',minmax(0,1fr))"';
@@ -624,7 +624,7 @@
   function flow(p, bodies) {
     var FL = flowFor(p);
     var current = FL.map(function (x) { return x.key; }).indexOf(p.step);
-    if (current < 0 && p.step === "storyboard") current = FL.map(function (x) { return x.key; }).indexOf("anchors");
+    if (current < 0 && (p.step === "storyboard" || p.step === "develop")) current = FL.map(function (x) { return x.key; }).indexOf("anchors");
     var history = p.aiHistory || [];
     function stageAi(key) {
       return history.filter(function (h) { return h.step === key; })[0] || null;
@@ -773,7 +773,7 @@
           (bact || act || devTwo || SE().isPaid(s.key) || status === "upcoming" || s.key === "deliver" || s.key === "brief" || s.key === "facts" || s.key === "strategy" || s.key === "concepts" ? "" : execPicker(p, s.key)) +
           deliverBox(p, s.key) +
           (s.key === "facts" ? needsPanel(p) : "") +
-          (s.key === "develop" ? trackPanel(p) : "") +
+          /* 09-30 — 제작 방식은 카드 위 옵션 전환에서만 고른다(의뢰 접수 때) — 여기 선택 상자는 뺐다 */
           (s.key === "anchors" ? briefPanel(p) : "") +
           (status === "upcoming" ? ''
             : (bodies[s.key] || '<p class="stage-empty">저장된 상세 내용이 없습니다.</p>')) +
