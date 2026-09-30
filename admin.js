@@ -935,6 +935,7 @@
     var t = newestTakes(p, s).filter(function (f) { return (f.meta || {}).settled_at; })[0];
     if (!t) return true;
     var at = p.render_mode_at, chk = (p.render_plan || {}).check;
+    if ((p.render_plan || {}).option2) return !!(at && new Date(at) > new Date(t.meta.settled_at));   // 옵션 2 는 콘티 대조 검사가 없다(111)
     return !!(at && new Date(at) > new Date(t.meta.settled_at) && chk && chk.at && new Date(chk.at) > new Date(at));
   }
 
@@ -1465,7 +1466,7 @@
             '<div class="lc-row"><button class="btn" type="button" disabled>' + applyWait(p, s).btn + '</button>'
           : s === "video" && takeOpen(p, s) && newestTakes(p, s).some(function (f) { return (f.meta || {}).settled_at; })
           // 답변대로 정하셨다 — 오더는 고쳐졌다. 여기서 다시 뽑거나, 그래도 이 영상으로 승인한다 (한 자리 · 09-25)
-          ? '<span class="lc-msg"><b>답변대로 오더를 고쳤습니다</b>' + (checkBlocks(p) ? " — 콘티 대조 검사가 끝나면 다시 뽑기가 열립니다" : " · 콘티 대조 검사 통과") + "</span>" +
+          ? '<span class="lc-msg"><b>답변대로 오더를 고쳤습니다</b>' + (checkBlocks(p) ? " — 콘티 대조 검사가 끝나면 다시 뽑기가 열립니다" : (p.render_plan || {}).option2 ? "" : " · 콘티 대조 검사 통과") + "</span>" +
             '<div class="lc-row"><button class="btn" type="button" data-lc="rerun"' + tag + (checkBlocks(p) ? " disabled" : "") + ">다시 뽑기 (" + money(plan.credits) + ")</button>" +
             '<button class="btn ghost" type="button" data-lc="approve"' + tag + ">그래도 이 영상으로 승인</button>"
           : s === "anchors" && anchorRedo(p).length
