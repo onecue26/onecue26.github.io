@@ -142,10 +142,22 @@
   // ── 파일 ──────────────────────────────────────────────────────────────────
   // 제품 실물 사진이 팩트를 교정한다 — PADO 에서 캔에 적힌 「무가당」을 읽고
   // USP 가 추측에서 사실로 바뀌었다. 텍스트 브리프만으로는 못 잡던 것이다.
+  // 09-30 — 고른 파일을 하나씩 빼고, 여러 번 나눠 더 고를 수 있게(Dan 「선택하고 지우는 기능이 없다」).
+  //   input 의 FileList 는 고칠 수 없어 고른 목록을 배열로 따로 들고, 올릴 때도 이 배열을 쓴다
+  var picked = [];
+  function addFiles() {
+    var inp = el("files");
+    Array.prototype.forEach.call(inp.files, function (f) {
+      var dup = picked.some(function (p) { return p.name === f.name && p.size === f.size; });
+      if (!dup) picked.push(f);
+    });
+    inp.value = "";
+    previewFiles();
+  }
   function previewFiles() {
-    var box = el("picked"), files = el("files").files;
+    var box = el("picked");
     box.innerHTML = "";
-    Array.prototype.forEach.call(files, function (f) {
+    picked.forEach(function (f, i) {
       var fig = document.createElement("figure");
       var img = document.createElement("img");
       if (f.type.indexOf("image/") === 0) {
@@ -154,7 +166,11 @@
       }
       var cap = document.createElement("figcaption");
       cap.textContent = f.name;
-      fig.appendChild(img); fig.appendChild(cap); box.appendChild(fig);
+      var rm = document.createElement("button");
+      rm.type = "button"; rm.className = "rm"; rm.textContent = "×";
+      rm.title = "이 파일 빼기"; rm.setAttribute("aria-label", f.name + " 빼기");
+      rm.addEventListener("click", function () { picked.splice(i, 1); previewFiles(); });
+      fig.appendChild(img); fig.appendChild(rm); fig.appendChild(cap); box.appendChild(fig);
     });
   }
 
@@ -176,7 +192,7 @@
   }
 
   function uploadAll(projectId) {
-    var files = Array.prototype.slice.call(el("files").files);
+    var files = picked.slice();
     if (!files.length) return Promise.resolve(0);
     var okCount = 0;
     return files.reduce(function (chain, f, i) {
@@ -225,7 +241,7 @@
     el("stamp").textContent = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 16);
     syncPlacements();
 
-    el("files").addEventListener("change", previewFiles);
+    el("files").addEventListener("change", addFiles);
     el("channels").addEventListener("change", syncPlacements);
     el("placements").addEventListener("change", syncRecommendations);
     el("runtimes").addEventListener("change", syncRecommendations);

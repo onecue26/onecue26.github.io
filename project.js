@@ -536,6 +536,7 @@
         '<div class="msg-attach"><select id="msgFileKind"><option value="product_ref">제품 사진</option>' +
         '<option value="mood_ref">참고 이미지·영상</option><option value="doc">문서·기타</option></select>' +
         '<input type="file" id="msgFiles" multiple accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.zip"></div>' +
+        '<div class="msg-picked" id="msgPicked"></div>' +
         '<button class="btn" id="msgSend" data-reply-to="' + esc(last.id) + '">보내기</button>' +
         '<span class="hint" id="msgMsg" role="status" aria-live="polite"></span></div>' : "") + "</details>";
   }
@@ -966,9 +967,32 @@
       });
     }
     var ms = el("msgSend");
+    // 09-30 — 고른 첨부를 목록으로 보여 주고 하나씩 뺄 수 있게, 여러 번 나눠 더 고를 수 있게(Dan)
+    var msgPicked = [];
+    function showMsgPicked() {
+      var box = el("msgPicked");
+      if (!box) return;
+      box.innerHTML = msgPicked.map(function (f, i) {
+        return '<span><b title="' + esc(f.name) + '">' + esc(f.name) + '</b><button type="button" data-rm="' + i +
+          '" aria-label="' + esc(f.name) + ' 빼기" title="이 파일 빼기">×</button></span>';
+      }).join("");
+    }
+    if (el("msgFiles")) el("msgFiles").addEventListener("change", function () {
+      Array.prototype.forEach.call(this.files || [], function (f) {
+        if (!msgPicked.some(function (p) { return p.name === f.name && p.size === f.size; })) msgPicked.push(f);
+      });
+      this.value = "";
+      showMsgPicked();
+    });
+    if (el("msgPicked")) el("msgPicked").addEventListener("click", function (e) {
+      var b = e.target.closest("[data-rm]");
+      if (!b) return;
+      msgPicked.splice(+b.getAttribute("data-rm"), 1);
+      showMsgPicked();
+    });
     if (ms) ms.addEventListener("click", function () {
       var body = (el("msgReply").value || "").trim();
-      var files = el("msgFiles") ? Array.prototype.slice.call(el("msgFiles").files || []) : [];
+      var files = msgPicked.slice();
       var kind = el("msgFileKind") ? el("msgFileKind").value : "product_ref";
       if (!body && !files.length) { el("msgMsg").textContent = "보낼 말을 적거나 파일을 골라 주세요."; return; }
       ms.disabled = true; el("msgMsg").textContent = files.length ? "파일을 올리는 중…" : "보내는 중…";

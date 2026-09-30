@@ -85,7 +85,9 @@ input[type=file]{width:100%;padding:10px 12px;border:1px dashed var(--rule);
   font-size:13.5px;cursor:pointer}
 input[type=file]:focus{outline:2px solid var(--cue);outline-offset:1px}
 .picked{display:flex;flex-wrap:wrap;gap:8px;margin-top:9px}
-.picked figure{margin:0;width:88px}
+.picked figure{margin:0;width:88px;position:relative}
+.picked .rm{position:absolute;top:-7px;right:-7px;width:24px;height:24px;border-radius:50%;border:1px solid var(--rule);background:var(--paper,#fff);color:var(--ink,#222);font-size:15px;line-height:20px;padding:0;cursor:pointer}
+.picked .rm:hover,.picked .rm:focus-visible{border-color:var(--cue);color:var(--cue)}
 .picked img{width:88px;height:88px;object-fit:cover;border-radius:8px;
   border:1px solid var(--rule);display:block;background:var(--sunk)}
 .picked figcaption{font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--faint);
