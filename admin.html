@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="style.css?v=1f228d76">
-<link rel="stylesheet" href="stage-render.css?v=needs-260930-v258">
+<link rel="stylesheet" href="stage-render.css?v=needs-260930-v259">
 <style>
 /* 관리자 화면 — 훑고 조작하는 곳이라 정보 밀도를 우선한다 */
 
@@ -369,8 +369,15 @@
 .needs.need-admin{margin-top:14px;border-top:1px solid var(--rule);padding-top:12px}
 .need-pick{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 .o2-brief{display:flex;flex-direction:column;gap:4px}
-.o2-brief .o2-l{font-size:11px;color:var(--muted);margin-top:8px}
-.o2-brief input,.o2-brief textarea,.o2-brief select{font:13px/1.5 inherit;padding:7px 9px;border:1px solid var(--rule);border-radius:6px;background:transparent;color:inherit;width:100%;box-sizing:border-box}
+.o2-brief .o2-field{border-top:1px solid var(--rule);padding:12px 0 4px}
+.o2-brief .o2-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin-bottom:6px}
+.o2-brief .o2-l{font-size:14px;font-weight:700;color:var(--ink,#222)}.o2-brief .o2-head small{color:var(--muted);font-size:12px}
+.o2-brief .o2-guide{font-size:12.5px;color:var(--muted)}.o2-brief .o2-guide summary{cursor:pointer;color:var(--cue,#c0392b)}
+.o2-brief .o2-guide p{margin:4px 0}.o2-brief .o2-guide .ex{color:var(--ink,#222);background:var(--sunk,#f3f1ec);padding:4px 8px;border-radius:4px}
+.o2-brief input,.o2-brief textarea,.o2-brief select{font-family:inherit;font-size:14px;line-height:1.6;letter-spacing:normal;padding:8px 10px;border:1px solid var(--rule);border-radius:6px;background:var(--paper,#fff);color:inherit;width:100%;box-sizing:border-box}
+.o2-brief .o2-cond summary{cursor:pointer;margin-bottom:6px}.o2-brief .o2-cond small{color:var(--muted);font-size:12px}
+.o2-brief .o2-plan{width:100%;border-collapse:collapse;font-size:13px}.o2-brief .o2-plan td{padding:6px 8px;border-bottom:1px solid var(--rule);vertical-align:top}
+.o2-brief .o2-plan .why{color:var(--muted);font-size:12px}.o2-brief .tag{font-size:11.5px;padding:1px 7px;border-radius:10px;border:1px solid var(--rule);white-space:nowrap}.o2-brief .tag.new{color:var(--cue,#c0392b);border-color:var(--cue,#c0392b)}
 .o2-brief textarea[data-o2="conditions_text"]{font-family:ui-monospace,Consolas,monospace;font-size:12px}
 .o2-brief .o2-anchors{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .o2-brief .o2-anchors img{height:64px;border-radius:4px;border:1px solid var(--rule)}
@@ -680,9 +687,7 @@
 .lc-row:has(> details.lc-direct[open]) > [data-lc="approve"]{display:none}
 /* 요청사항 칸을 적는 동안에는 AI 계획을 숨긴다 */
 details.flow-step:has(details.lc-direct[open]) .post-work{display:none}
-.o2-guide{font-size:12px;color:var(--muted);margin:2px 0 4px;line-height:1.5}.o2-guide span{color:var(--ink,#222)}
 .o2-ai{background:var(--sunk,#f3f1ec);border-left:3px solid var(--cue,#c0392b);padding:8px 10px;font-size:13px;margin:6px 0 10px}
-.o2-anchors-plan{margin:4px 0 10px;padding-left:18px;font-size:13px}.o2-anchors-plan .new{color:var(--cue,#c0392b);font-weight:700}
 .o2-redo{margin-top:10px}.o2-redo summary{cursor:pointer;font-size:13px}.o2-redo textarea{width:100%;margin:6px 0}
 </style>
 <link rel="stylesheet" href="studio.css?v=3"><script defer src="studio-shell.js?v=3"></script>
@@ -747,16 +752,16 @@ details.flow-step:has(details.lc-direct[open]) .post-work{display:none}
 <script src="asset-access.js?v=retry260923"></script>
 <!-- 폼 계약은 stage-executor.js 보다 먼저 온다. 계약이 없으면 검사가 닫히는 쪽으로 실패한다 -->
 <script src="stage-form-contract.js?v=contract-260921-v3"></script>
-<script src="stage-executor.js?v=needs-260930-v258"></script>
-<script src="credit-rates.js?v=needs-260930-v258"></script>
-<script src="ad-type-materials.js?v=needs-260930-v258"></script>
-<script src="material-gaps.js?v=needs-260930-v258"></script>
+<script src="stage-executor.js?v=needs-260930-v259"></script>
+<script src="credit-rates.js?v=needs-260930-v259"></script>
+<script src="ad-type-materials.js?v=needs-260930-v259"></script>
+<script src="material-gaps.js?v=needs-260930-v259"></script>
 <script src="shared-stage-renderers.js?v=stage-read-260926-v18"></script>
-<script src="admin.js?v=needs-260930-v258"></script>
+<script src="admin.js?v=needs-260930-v259"></script>
 <script>
 /* 09-28 — 폰이 예전 화면 코드를 붙들고 있었다(물리는 준비물 6장 · PC 는 4장). 열 때·화면으로 돌아올 때 배포 버전과 비교해 다르면 새 주소로 다시 연다 */
 (function () {
-  var ME = "needs-260930-v258";
+  var ME = "needs-260930-v259";
   function chk() {
     fetch(location.pathname + "?vchk=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.text(); }).then(function (t) {
       var m = t.match(/needs-\d{6}-v\d+/);
