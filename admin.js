@@ -595,6 +595,22 @@
 
   /** 카드 머리 가로 진행 막대 — 광고주 화면 맨 위 막대와 같은 모양, 우리 10단계로 (Dan 09-25 「관리자에도 있었는데 사라졌다」)
    *  09-21 「전체 제작 흐름」이 가로 줄에서 세로 목록으로 바뀌며 한눈에 보던 막대가 없어졌다. 접힌 카드에서도 보이게 머리에 둔다 */
+  // 09-30 — 화면 느낌(화풍 · 106): 의뢰 조건 안에 보여 주고, 바꾸기는 한 번 더 펼쳐야 열린다(잘못 누르지 않게)
+  function styleLine(p) {
+    var cur = p.visual_style || "auto";
+    var pk = O2_STYLES.filter(function (x) { return x[0] === cur; })[0];
+    var name = pk ? pk[1].split(" (")[0] : "추천에 맡김";
+    var who = !p.visual_style_by ? "" : p.visual_style_by.indexOf("client:") === 0 ? " · 광고주가 고름" : " · 관리자가 바꿈";
+    var locked = ["develop", "storyboard", "anchors", "video", "post", "deliver"].indexOf(p.step) >= 0;
+    return '<span class="sub style-line">화면 느낌 · ' +
+      (pk ? '<img class="style-thumb" src="img/style/' + esc(cur) + '.jpg" alt="">' : "") + "<b>" + esc(name) + "</b>" + esc(who) + "</span>" +
+      (canWrite && !locked ? '<details class="style-change"><summary>화면 느낌 바꾸기</summary>' +
+        '<select class="style-sel" data-style-sel="' + esc(p.slug) + '">' +
+        [["auto", "추천에 맡김"]].concat(O2_STYLES.map(function (x) { return [x[0], x[1].split(" (")[0]]; })).map(function (o) {
+          return '<option value="' + o[0] + '"' + (cur === o[0] ? " selected" : "") + ">" + esc(o[1]) + "</option>"; }).join("") +
+        '</select> <small>전략·콘셉트가 이 느낌 안에서 짜입니다 · 콘셉트를 고른 뒤에는 바꿀 수 없습니다</small></details>' : "");
+  }
+
   function stepBar(p) {
     var F = flowFor(p);
     var cur = F.map(function (x) { return x.key; }).indexOf(p.step), closed = p.state === "done";
@@ -610,12 +626,7 @@
     var sw = canWrite ? '<span class="track-sw' + (locked ? " locked" : "") + '"' + (locked ? ' title="컨셉을 고른 뒤라 바꿀 수 없습니다"' : "") + '>' +
       '<button type="button" data-track-sw="option1" data-slug="' + esc(p.slug) + '"' + (t2 ? "" : ' class="on"') + dis + '>옵션 1</button>' +
       '<button type="button" data-track-sw="option2" data-slug="' + esc(p.slug) + '"' + (t2 ? ' class="on"' : "") + dis + '>옵션 2</button></span>' +
-      // 09-30 — 화풍: 광고주가 의뢰서에서 고르고(106) 관리자는 컨셉 전까지 바꾼다 — 전략·콘셉트가 이 화풍 안에서 짜인다(Dan)
-      ((p.visual_style && p.visual_style !== "auto") ? '<img class="style-thumb" src="img/style/' + esc(p.visual_style) + '.jpg" alt="">' : "") +
-      '<select class="style-sel" data-style-sel="' + esc(p.slug) + '"' + dis + ' title="' + (locked ? "컨셉을 고른 뒤라 바꿀 수 없습니다" : "화풍 — 전략·콘셉트가 이 안에서 짜입니다") + '">' +
-      [["auto", "화풍 · 추천에 맡김"]].concat(O2_STYLES.map(function (x) { return [x[0], "화풍 · " + x[1].split(" (")[0]]; })).map(function (o) {
-        return '<option value="' + o[0] + '"' + ((p.visual_style || "auto") === o[0] ? " selected" : "") + ">" + esc(o[1]) + "</option>"; }).join("") +
-      "</select>" +
+      // 09-30 — 화풍은 카드 머리가 아니라 「의뢰 접수」 칸 안에(Dan 「실수로 바꾸면 문제가 생길 거 아냐」)
       '<details class="track-help"><summary>?</summary><div>' +
       '<p><b>옵션 1 · 지금 방식</b> — 콘티를 그려 광고주와 맞춘 뒤 그대로 영상으로. 10단계(구성·각본 → 콘티 → 제작 자료 → 영상). 광고주가 장면을 미리 보고 확정하지만, 콘티에 끌려가 밋밋해지기 쉽습니다.</p>' +
       '<p><b>옵션 2 · 브리프 방식</b> — 목표 한 줄과 조건만 주고 컷 구성은 AI가 직접 설계. 8단계(컨셉 → 제작 자료·브리프 → 영상, 구성·각본과 콘티 없음). 사람은 브리프 한 장(골·필수·제품 사실·조건·마무리)만 씁니다. 빠르고 역동적이지만, 제품 사실을 꼭 적어야 틀리지 않습니다.</p>' +
@@ -2143,7 +2154,7 @@
         return PLACEMENT_NAME[x] || x;
       }).join(" / ") || "입력 안 함") + '</span>' +
       '<span class="sub">영상 · ' + esc(p.running_sec + "초 · " + (p.aspects || []).join(" / ")) +
-      '</span>' + digestConditions(p).map(function (c) {
+      '</span>' + styleLine(p) + digestConditions(p).map(function (c) {
         return '<span class="sub added">광고주 답 · ' + esc(c) + '</span>';   // 071 — 답이 오면 바로 여기 붙는다
       }).join("") + '</div>';
 
