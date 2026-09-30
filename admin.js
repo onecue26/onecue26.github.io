@@ -1193,7 +1193,7 @@
   /** 088 · 콘티 대조 검사가 유료 버튼을 막고 있는가 — 새 방식 오더(based_on)만. DB onecue_may_generate 와 같은 조건 */
   function checkBlocks(p) {
     var plan = p.render_plan || {};
-    if (!plan.based_on) return false;
+    if (!plan.based_on || plan.option2) return false;   // 111 · 옵션 2 는 대조할 콘티가 없다 — DB 도 비껴감
     return !(plan.check && plan.check.ok_to_generate === true);
   }
 
@@ -1215,7 +1215,7 @@
   /** 088 · 콘티 대조 검사 결과 — 승인된 콘티 ↔ 영상 오더·기준 그림 계획 (Dan 09-25 「사이트가 잡아내야」) */
   function checkBox(p) {
     var plan = p.render_plan || {};
-    if (!plan.based_on || !(plan.calls || []).length) return "";
+    if (!plan.based_on || !(plan.calls || []).length || plan.option2) return "";
     var c = plan.check;
     if (!c) {
       return '<div class="pchk wait"><b>콘티 대조·연출 판정 중</b><span>승인된 콘티와 영상 오더·기준 그림 계획을 맞대 보고, 프롬프트 전체의 훅·정점·카메라·완급을 봅니다 — ' +
