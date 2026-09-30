@@ -462,7 +462,7 @@
       // ★ 칸 상태는 네 말·네 색만 — 완료(초록) · ○○하실 차례(빨강) · 진행 중(파랑) · 수정 중(주황) (Dan 09-25 「색이나 용어를 통일」)
       box("ask", "의뢰 내용", P.step === "brief" ? "진행 중" : "완료",
         // 「필요한 자료」는 광고주에게 보이지 않는다 — 가진 자료 안에서 만든다 (Dan 09-24). 관리자 화면에만 참고로
-        secBrief(brief, MINE && canEditBrief(P)) + secFiles(assets), now.ask),
+        secBrief(brief, MINE && canEditBrief(P)) + secStyle(P) + secFiles(assets), now.ask),
       // 콘셉트 — 보내기 전(준비 중)·보낸 뒤(고르실 차례)·고른 뒤(선택 완료) (09-24)
       box("pick", "콘셉트 선택",
         (concepts || []).some(function (c) { return c.is_chosen; }) ? "완료"
@@ -548,15 +548,20 @@
     ["anim3d", "3D 애니메이션", "귀엽고 선명한 입체 캐릭터"],
     ["clay", "클레이 · 스톱모션", "손으로 빚은 모형처럼 따뜻하게"]];
   function secStyle(P) {
+    // 09-30 — 의뢰 내용 안에 두고 접을 수 있게(Dan 「의뢰 내용에서 선택할 텐데 왜 맨 위에」 · 「그 안에서도 접을 수 있게」)
     var cur = P.visual_style || "auto";
     var open = MINE && ["brief", "facts", "strategy"].indexOf(P.step) >= 0 && P.state !== "done";
     var pick = STYLES.filter(function (x) { return x[0] === cur; })[0];
+    var name = pick ? pick[1] : "추천에 맡김";
+    var head = '<summary><b>원하는 화면 느낌</b> <span class="style-cur">' + esc(name) + "</span>" +
+      (open ? ' <small>· 아이디어를 쓰기 전까지 바꾸실 수 있습니다</small>' : "") + "</summary>";
     if (!open) {
-      return '<section class="style-now"><h2>화면 느낌</h2><p>' + (pick
-        ? '<img src="img/style/' + pick[0] + '.jpg" alt="" loading="lazy"><b>' + esc(pick[1]) + "</b> · " + esc(pick[2])
-        : "<b>추천에 맡기셨습니다</b> · 제품에 맞게 저희가 정합니다") + "</p></section>";
+      return '<details class="style-fold">' + head + '<p class="style-now">' + (pick
+        ? '<img src="img/style/' + pick[0] + '.jpg" alt="" loading="lazy"><span>' + esc(pick[2]) + "</span>"
+        : "<span>제품에 맞게 저희가 정합니다</span>") + "</p></details>";
     }
-    return '<section class="style-pick"><h2>원하는 화면 느낌</h2><p class="hint">같은 장면을 다섯 가지로 그려 봤습니다 · 고른 느낌에 맞춰 아이디어를 짭니다 · 아이디어를 쓰기 전까지 바꾸실 수 있습니다</p>' +
+    return '<details class="style-fold"' + (cur === "auto" ? " open" : "") + ">" + head +
+      '<p class="hint">같은 장면을 다섯 가지로 그려 봤습니다 · 고른 느낌에 맞춰 아이디어를 짭니다</p>' +
       '<div class="styles" role="radiogroup" aria-label="원하는 화면 느낌">' +
       STYLES.map(function (x) {
         return '<label class="style-card"><input type="radio" name="pstyle" value="' + x[0] + '"' + (cur === x[0] ? " checked" : "") +
@@ -564,7 +569,7 @@
       }).join("") +
       '<label class="style-card auto"><input type="radio" name="pstyle" value="auto"' + (cur === "auto" ? " checked" : "") +
       '><span class="q">?</span><b>잘 모르겠어요</b><small>제품에 맞게 추천해 드립니다</small></label></div>' +
-      '<span class="hint" id="styleMsg" role="status" aria-live="polite"></span></section>';
+      '<span class="hint" id="styleMsg" role="status" aria-live="polite"></span></details>';
   }
 
   function deliverForm() {
@@ -997,6 +1002,9 @@
         el("styleMsg").textContent = "저장하는 중…";
         db.rpc("onecue_set_style", { p_project_id: P.id, p_style: r.value }).then(function (res) {
           el("styleMsg").textContent = res.error ? "바꾸지 못했습니다 — 아이디어를 이미 쓰기 시작했을 수 있습니다" : "저장했습니다";
+          var nm = STYLES.filter(function (x) { return x[0] === r.value; })[0];
+          var cs = document.querySelector(".style-fold .style-cur");
+          if (cs && !res.error) cs.textContent = nm ? nm[1] : "추천에 맡김";
         });
       });
     });
@@ -1215,7 +1223,7 @@
             (P.state === "done"
               ? '<div class="gate done"><div class="txt"><b>프로젝트가 완료되었습니다</b><small>' +
                 esc(P.closed_at ? new Date(P.closed_at).toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 10) : "") + " · 함께해 주셔서 감사합니다. 완성본은 아래 납품 칸에서 언제든 받으실 수 있습니다.</small></div></div>"
-              : secGate(P, x[5].data)) + secStyle(P) + secMessages(x[6].data) + flow(x) +
+              : secGate(P, x[5].data)) + secMessages(x[6].data) + flow(x) +
             '<footer><span><a href="index.html">← 목록</a></span>' +
             '<span class="mono">' + new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 16) +
             "</span></footer>";
