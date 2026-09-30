@@ -323,6 +323,7 @@
           client_id: client.id, slug: slug, brand: brand, product: product,
           running_sec: sec, cut_count: cutsFor(sec),
           aspect: aspects[0], aspects: aspects, channels: chosenChannels,
+          visual_style: (document.querySelector('input[name="vstyle"]:checked') || {}).value || "auto",   // 106 · 09-30
           step: "brief", state: "pending",
         }).then(function (p) {
           if (p.error) throw p.error;
