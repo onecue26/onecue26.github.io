@@ -4177,6 +4177,19 @@
         if (ta && st) ta.value = ta.value.replace(/화풍:.*$/m, "화풍: " + st[2]);
       });
     });
+    // 10-01 Dan 「만드는 중엔 수정을 못하게」 — 잠금 이유는 DB(onecue_brief_lock · 112)가 정한다. 저장도 DB 가 다시 막는다
+    document.querySelectorAll(".o2-brief[data-o2slug]").forEach(function (box) {
+      var row = ROWS.filter(function (x) { return x.slug === box.dataset.o2slug; })[0];
+      if (!row) return;
+      db.rpc("onecue_brief_lock", { p_project_id: row.id }).then(function (r) {
+        if (r.error || !r.data) return;
+        box.querySelectorAll("[data-o2], [data-o2-note], [data-o2-save], [data-o2-redo]").forEach(function (el) { el.disabled = true; });
+        var note = document.createElement("p");
+        note.className = "o2-lock";
+        note.textContent = "🔒 " + r.data;
+        box.insertBefore(note, box.children[1] || null);
+      });
+    });
     document.querySelectorAll("[data-o2-save]").forEach(function (b) {
       b.addEventListener("click", function () {
         var slug = b.dataset.o2Save, box = document.querySelector('.o2-brief[data-o2slug="' + slug + '"]');
