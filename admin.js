@@ -2851,7 +2851,8 @@
       var raw = (p.render_plan || {}).post;
       // 자막·엔드카드 계획(auto_post 가 읽는 모양)이면 그대로 보여 준다
       if (raw && !Array.isArray(raw) && (raw.captions || raw.endcard)) {
-        var caps = (raw.captions || []).map(function (c) {
+        // 10-01 — 가상인물 표시는 조판 코드가 왼쪽 위에 따로 넣고 자막에서는 뺀다(auto_post). 목록도 실제 영상과 같게
+        var caps = (raw.captions || []).filter(function (c) { return String(c.text || "").indexOf("가상인물") < 0; }).map(function (c) {
           return "<li><b>" + esc(c.from) + "~" + esc(c.to) + "초 자막</b> — <span>" + esc(c.text) + "</span></li>";
         }).join("");
         var ec = raw.endcard || {};
@@ -3477,15 +3478,17 @@
             (m.our_reply_at ? " · " + esc(when(m.our_reply_at)) : "") +
             "</b><span>" + esc(reply) + "</span></div>" +
             '<p class="thread-now"><b>이 답변대로 가시겠습니까.</b>' +
-            "<span>괜찮으시면 아래를 누르십시오. 그때 다시 뽑기가 열립니다. " +
+            "<span>" + (step === "post" ? "괜찮으시면 아래를 누르십시오. 완성본을 바로 다시 만듭니다(크레딧 0). "
+                                      : "괜찮으시면 아래를 누르십시오. 그때 다시 뽑기가 열립니다. ") +
             "아니면 의견을 더 적어 주십시오 — 다시 답을 답니다.</span></p>" +
             // ★ 결정은 여기 한 자리 — 「답변대로 고쳐 다시 뽑기」와 「그대로 승인」을 나란히 (Dan 09-25 「승인이랑 다시 뽑기랑 뭔 차이야 통일하라니까」)
             '<div class="lc-row"><button class="btn" data-take-settle="' + esc(f.id) + '">' +
-            "이 답변대로 — 오더 고치고 다시 뽑기 준비</button>" +
+            (step === "post" ? "이 답변대로 — 완성본 다시 만들기 (크레딧 0)" : "이 답변대로 — 오더 고치고 다시 뽑기 준비") + "</button>" +
             (step === "video"
               ? '<button class="btn ghost" type="button" data-lc="approve" data-slug="' + esc(p.slug) + '" data-step="video">' +
                 "그래도 이 영상으로 승인</button>" : "") + "</div>" +
-            '<span class="lc-msg">다시 뽑기는 오더를 고친 뒤 위에서 한 번 더 누르셔야 시작됩니다(돈은 그때 나갑니다). 승인하면 이 영상으로 후반 작업을 시작합니다.</span>' +
+            (step === "post" ? "" :
+            '<span class="lc-msg">다시 뽑기는 오더를 고친 뒤 위에서 한 번 더 누르셔야 시작됩니다(돈은 그때 나갑니다). 승인하면 이 영상으로 후반 작업을 시작합니다.</span>') +
             writeBox(f, m, true) + "</div>";
         }
 
