@@ -596,6 +596,16 @@
   /** 카드 머리 가로 진행 막대 — 광고주 화면 맨 위 막대와 같은 모양, 우리 10단계로 (Dan 09-25 「관리자에도 있었는데 사라졌다」)
    *  09-21 「전체 제작 흐름」이 가로 줄에서 세로 목록으로 바뀌며 한눈에 보던 막대가 없어졌다. 접힌 카드에서도 보이게 머리에 둔다 */
   // 09-30 — 화면 느낌(화풍 · 106): 의뢰 조건 안에 보여 주고, 바꾸기는 한 번 더 펼쳐야 열린다(잘못 누르지 않게)
+  // 09-30 — 의뢰 해석(108): 광고 대상을 맨 앞에서 못 박는다(Dan 「제품명을 김밥집으로 명확히 썼는데」)
+  var SUBJECT = { product: "제품", place: "가게·매장", service: "서비스", brand: "브랜드" };
+  function adReading(ar) {
+    if (!ar || !ar.subject) return "";
+    return '<dt>의뢰 해석</dt><dd class="ad-reading"><b>광고 대상 · ' + esc(SUBJECT[ar.subject] || ar.subject) + " — " + esc(ar.subject_name || "") + "</b>" +
+      "<br>바라는 행동 · " + esc(ar.desired_action || "") + "<br>주인공 · " + esc(ar.hero || "") +
+      ((ar.must_show || []).length ? "<br>꼭 보일 것 · " + esc(ar.must_show.join(" · ")) : "") +
+      (ar.assets_meaning ? "<br>보낸 자료의 뜻 · " + esc(ar.assets_meaning) : "") +
+      (ar.why ? '<br><small>근거 · ' + esc(ar.why) + "</small>" : "") + "</dd>";
+  }
   function styleLine(p) {
     var cur = p.visual_style || "auto";
     var pk = O2_STYLES.filter(function (x) { return x[0] === cur; })[0];
@@ -2156,7 +2166,9 @@
         return PLACEMENT_NAME[x] || x;
       }).join(" / ") || "입력 안 함") + '</span>' +
       '<span class="sub">영상 · ' + esc(p.running_sec + "초 · " + (p.aspects || []).join(" / ")) +
-      '</span>' + styleLine(p) + digestConditions(p).map(function (c) {
+      '</span>' + (p.facts && p.facts.ad_reading && p.facts.ad_reading.subject
+        ? '<span class="sub">광고 대상 · <b>' + esc(SUBJECT[p.facts.ad_reading.subject] || p.facts.ad_reading.subject) + '</b> — ' + esc(p.facts.ad_reading.subject_name || "") + "</span>" : "") +
+      styleLine(p) + digestConditions(p).map(function (c) {
         return '<span class="sub added">광고주 답 · ' + esc(c) + '</span>';   // 071 — 답이 오면 바로 여기 붙는다
       }).join("") + '</div>';
 
@@ -2329,6 +2341,7 @@
     }
     var factsBody = p.facts
       ? '<div class="stage-content"><dl class="stage-data">' +
+        adReading(p.facts.ad_reading) +
         '<dt>확인된 사실</dt><dd>' + factList(p.facts.facts) + '</dd>' +
         '<dt>제품 잠금</dt><dd>' + esc(readable(p.facts.product_lock)) + '</dd>' +
         '<dt>표기 문구</dt><dd>' + esc(readable(p.facts.label_text)) + '</dd>' +
@@ -5426,7 +5439,7 @@
           // 실제로 나간 크레딧. 예상은 계획에 있고, 이건 쓴 것이다.
           db.from("credit_spend").select("project_id,step,engine,credits,what,spent_at,outcome")
             .in("project_id", ids).order("spent_at"),
-          db.from("product_facts").select("project_id,facts,label_text,claims,product_lock,device_note")
+          db.from("product_facts").select("project_id,facts,label_text,claims,product_lock,device_note,ad_reading")
             .in("project_id", ids),
           db.from("strategies").select("project_id,insight,insight_flip,usp,one_message,tone,direction,written_by,client_who,client_what,client_why,client_feel,prev_client")
             .in("project_id", ids),
