@@ -1455,7 +1455,9 @@
         // 089 · 질문으로 읽혀 답이 달린 요청 — 검수 자리로 돌아와도 답이 보여야 한다
         (function () {
           var se = SE().of(p, s) || {};
-          return se.revision_kind === "question" && !se.revision_at && se.revision_reply && se.revision_note
+          // 10-01 김밥집 — 되돌리며 적은 수정 요청과 그 답(되물음·고침)이 검수 화면에 안 떠 아무 일도 없는 것처럼 보였다
+          return (se.revision_kind === "question" && !se.revision_at && se.revision_reply && se.revision_note) ||
+                 (se.revision_at && se.revision_note)
             ? revisionBox(se, se.revision_note) : "";
         })() +
         // ★ 영상 단계는 입력칸을 하나로 — 판 옆 「의견」 칸(답변 → 정하기 → 오더 고치기 → 다시 뽑기)으로 모은다.
