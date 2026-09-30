@@ -1632,11 +1632,54 @@
     b.dataset.label = b.textContent;
     b.textContent = "처리 중…";
   }
+  /** 10-01 — DB 오류가 영어 그대로 화면에 떴다(「Nothing to approve yet」). 아는 것은 한국어로, 모르는 것은 원문을 괄호로 */
+  var ERR_KO = {
+    "Administrator only": "관리자만 할 수 있습니다",
+    "Project not found": "프로젝트를 찾지 못했습니다",
+    "Invalid step": "단계 이름이 맞지 않습니다",
+    "Note too long": "글이 너무 깁니다",
+    "No execution record for this stage": "이 단계의 실행 기록이 없습니다 — 먼저 시작해야 합니다",
+    "Invalid decision": "고른 값이 맞지 않습니다",
+    "Say what to change": "무엇을 고칠지 적어 주세요",
+    "Write what to change": "무엇을 고칠지 적어 주세요",
+    "Project access denied": "이 프로젝트에 권한이 없습니다",
+    "This lifecycle covers develop, anchors and video": "이 단계에서는 쓸 수 없는 버튼입니다",
+    "Field too long": "칸 글이 너무 깁니다",
+    "Stale approval gate": "화면이 오래됐습니다 — 새로 읽은 뒤 다시 눌러 주세요",
+    "Nothing to approve yet": "아직 승인할 결과가 없습니다",
+    "No released final": "내보낸 완성본이 없습니다",
+    "Invalid concept key": "콘셉트 번호가 맞지 않습니다",
+    "Stage result already registered": "이 단계 결과는 이미 올라가 있습니다",
+    "Planning is already running": "기획이 이미 돌고 있습니다",
+    "Planning already past this point": "기획이 이미 이 단계를 지났습니다",
+    "No such asset": "자료를 찾지 못했습니다",
+    "Choose who takes this stage first": "이 단계를 누가 맡을지 먼저 정해 주세요",
+    "Unknown step": "단계 이름이 맞지 않습니다",
+    "Unknown render mode": "제작 방식이 맞지 않습니다",
+    "There is no storyboard image to approve": "승인할 콘티 그림이 없습니다",
+    "There is no final to deliver": "납품할 완성본이 없습니다",
+    "There is no cut design to approve": "승인할 컷 설계가 없습니다",
+    "The project is not on the storyboard stage": "지금 콘티 단계가 아닙니다",
+    "The project is not on the delivery stage": "지금 납품 단계가 아닙니다",
+    "The project is not on that stage": "지금 그 단계가 아닙니다",
+    "The plan has no calls": "제작 계획에 생성 항목이 없습니다",
+    "Start the stage the project is on": "지금 단계부터 시작해 주세요",
+    "Plain-language review not confirmed": "쉬운 말 확인이 아직 안 됐습니다",
+    "Not on the planning stages": "지금 기획 단계가 아닙니다",
+    "No next stage": "다음 단계가 없습니다",
+    "No chosen concept yet": "아직 고른 콘셉트가 없습니다",
+    "Goal, must and product facts are required": "골·필수·제품 사실은 꼭 채워 주세요"
+  };
+  function errKo(e) {
+    var t = String((e && (e.message || e.error_description)) || e || "");
+    if (ERR_KO[t]) return ERR_KO[t];
+    return /[가-힣]/.test(t) ? t : "처리하지 못했습니다 (" + t + ")";
+  }
   function fail(b, msg) {
     return function (e) {
       b.disabled = false;
       if (b.dataset.label) b.textContent = b.dataset.label;
-      var why = (e && (e.message || e.error_description)) || String(e);
+      var why = errKo(e);
       if (msg) { msg.className = "lc-msg err"; msg.textContent = why; }
       else window.alert(why);
     };
@@ -4165,7 +4208,7 @@
         b.disabled = true; b.textContent = "등록 요청 중…";
         requestEnrollment(b.dataset.enroll).then(load).catch(function (e) {
           b.disabled = false; b.textContent = "AI 제작 시작";
-          window.alert("등록하지 못했습니다 — " + (e.message || e));
+          window.alert("등록하지 못했습니다 — " + errKo(e));
         });
       });
     });
@@ -4205,7 +4248,7 @@
         br.by = prevB.by === "ai" ? "ai+human" : "human"; br.draft = false;
         b.disabled = true; b.textContent = "저장 중…";
         db.rpc("onecue_set_brief", { p_project_id: row.id, p_brief: br }).then(function (r) {
-          if (r.error) { b.disabled = false; b.textContent = "브리프 저장"; msg.className = "msg err"; msg.textContent = "저장 실패 — " + r.error.message; return; }
+          if (r.error) { b.disabled = false; b.textContent = "브리프 저장"; msg.className = "msg err"; msg.textContent = "저장 실패 — " + errKo(r.error); return; }
           load();
         });
       });
@@ -4219,7 +4262,7 @@
         b.disabled = true; msg.textContent = "보내는 중…";
         db.rpc("onecue_brief_redo", { p_project_id: row.id, p_note: note.trim() }).then(function (r) {
           b.disabled = false;
-          msg.textContent = r.error ? "보내지 못했습니다 — " + r.error.message : "보냈습니다 — AI가 다시 쓰면 이 칸이 바뀝니다(2분 안팎)";
+          msg.textContent = r.error ? "보내지 못했습니다 — " + errKo(r.error) : "보냈습니다 — AI가 다시 쓰면 이 칸이 바뀝니다(2분 안팎)";
         });
       });
     });
@@ -4235,7 +4278,7 @@
         if (!row) return;
         b.disabled = true;
         db.rpc("onecue_set_track", { p_project_id: row.id, p_track: b.dataset.trackSw }).then(function (r) {
-          if (r.error) { b.disabled = false; b.title = "전환 실패 — " + r.error.message; return; }
+          if (r.error) { b.disabled = false; b.title = "전환 실패 — " + errKo(r.error); return; }
           load();
         });
       });
@@ -4248,7 +4291,7 @@
         if (!row) return;
         sel.disabled = true;
         db.rpc("onecue_set_style", { p_project_id: row.id, p_style: sel.value }).then(function (r) {
-          if (r.error) { sel.disabled = false; sel.title = "바꾸지 못했습니다 — " + r.error.message; return; }
+          if (r.error) { sel.disabled = false; sel.title = "바꾸지 못했습니다 — " + errKo(r.error); return; }
           load();
         });
       });
@@ -4265,7 +4308,7 @@
           .then(function (r) {
             if (r.error) {
               b.disabled = false; b.textContent = "저장";
-              msg.className = "msg err"; msg.textContent = "저장 실패 — " + r.error.message;
+              msg.className = "msg err"; msg.textContent = "저장 실패 — " + errKo(r.error);
               return;
             }
             load();
@@ -4290,7 +4333,7 @@
             if (r.error) {
               b.disabled = false; b.textContent = label;
               msg.className = "msg err";
-              msg.textContent = "저장 실패 — " + r.error.message;
+              msg.textContent = "저장 실패 — " + errKo(r.error);
               return;
             }
             load();
@@ -4341,7 +4384,7 @@
             if (r.error) {
               b.disabled = false; b.textContent = label;
               msg.className = "msg err";
-              msg.textContent = "적지 못했습니다 — " + r.error.message;
+              msg.textContent = "적지 못했습니다 — " + errKo(r.error);
               return;
             }
             load();
@@ -4358,7 +4401,7 @@
         // 쉬운말 게이트에 걸리면 보내지 않는다. 왜 막혔는지 그 자리에서 말해 준다
         send(b.dataset.send).then(load, function (e) {
           b.disabled = false; b.textContent = label;
-          window.alert(e.message || String(e));
+          window.alert(errKo(e));
         });
       });
     });
@@ -4384,7 +4427,7 @@
         b.disabled = true; b.textContent = "재기획 요청 중…";
         requestReplan(slug, note, scope, keys).then(load).catch(function (e) {
           b.disabled = false; b.textContent = label;
-          window.alert("재기획을 요청하지 못했습니다 — " + (e.message || e));
+          window.alert("재기획을 요청하지 못했습니다 — " + errKo(e));
         });
       });
     });
@@ -4423,7 +4466,7 @@
           .then(load)
           .catch(function (e) {
             buttons.forEach(function (x, i) { x.disabled = false; x.textContent = labels[i]; });
-            fail("실행 주체를 정하지 못했습니다 — " + (e.message || e));
+            fail("실행 주체를 정하지 못했습니다 — " + errKo(e));
           });
       });
     });
@@ -4444,7 +4487,7 @@
           .then(function (r) { if (r.error) throw r.error; return load(); })
           .catch(function (e) {
             b.disabled = false; b.textContent = "되돌리기";
-            window.alert("되돌리지 못했습니다 — " + (e.message || e));
+            window.alert("되돌리지 못했습니다 — " + errKo(e));
           });
       });
     });
@@ -4457,7 +4500,7 @@
         b.disabled = true;
         db.rpc("onecue_message_draft", { p_project_id: id, p_kind: kind, p_body: body })
           .then(function (r) { if (r.error) throw r.error; return load(); })
-          .catch(function (e) { b.disabled = false; window.alert("저장하지 못했습니다 — " + (e.message || e)); });
+          .catch(function (e) { b.disabled = false; window.alert("저장하지 못했습니다 — " + errKo(e)); });
       });
     });
     document.querySelectorAll("[data-msg-send]").forEach(function (b) {
@@ -4470,7 +4513,7 @@
         b.disabled = true; b.textContent = "보내는 중…";
         db.rpc("onecue_message_send", { p_message_id: b.dataset.msgSend })
           .then(function (r) { if (r.error) throw r.error; return load(); })
-          .catch(function (e) { b.disabled = false; b.textContent = "광고주에게 보내기"; window.alert("보내지 못했습니다 — " + (e.message || e)); });
+          .catch(function (e) { b.disabled = false; b.textContent = "광고주에게 보내기"; window.alert("보내지 못했습니다 — " + errKo(e)); });
       });
     });
     document.querySelectorAll("[data-retry-job]").forEach(function (b) {
@@ -4484,7 +4527,7 @@
               payload: { by: "admin", worker: b.dataset.retryWorker, job: b.dataset.retryJob } });
           })
           .then(function (r) { if (r && r.error) throw r.error; return load(); })
-          .catch(function (e) { b.disabled = false; b.textContent = "다시 돌리기"; window.alert("다시 돌리지 못했습니다 — " + (e.message || e)); });
+          .catch(function (e) { b.disabled = false; b.textContent = "다시 돌리기"; window.alert("다시 돌리지 못했습니다 — " + errKo(e)); });
       });
     });
     document.querySelectorAll("[data-brief-confirm]").forEach(function (b) {
@@ -4492,7 +4535,7 @@
         b.disabled = true; b.textContent = "넘기는 중…";
         db.rpc("onecue_brief_confirm", { p_project_id: b.dataset.briefConfirm })
           .then(function (r) { if (r.error) throw r.error; return load(); })
-          .catch(function (e) { b.disabled = false; b.textContent = "의뢰 확정 → 전략 설계로"; window.alert("넘기지 못했습니다 — " + (e.message || e)); });
+          .catch(function (e) { b.disabled = false; b.textContent = "의뢰 확정 → 전략 설계로"; window.alert("넘기지 못했습니다 — " + errKo(e)); });
       });
     });
     document.querySelectorAll("[data-plan-start]").forEach(function (b) {
@@ -4503,7 +4546,7 @@
         b.disabled = true; b.textContent = "시작하는 중…";
         db.rpc("onecue_plan_start", { p_project_id: b.dataset.planStart })
           .then(function (r) { if (r.error) throw r.error; return load(); })
-          .catch(function (e) { b.disabled = false; b.textContent = "AI에게 맡기기"; window.alert("시작하지 못했습니다 — " + (e.message || e)); });
+          .catch(function (e) { b.disabled = false; b.textContent = "AI에게 맡기기"; window.alert("시작하지 못했습니다 — " + errKo(e)); });
       });
     });
     document.querySelectorAll("[data-toggle-form]").forEach(function (b) {
@@ -4518,7 +4561,7 @@
         b.disabled = true;
         db.rpc("onecue_back_to_strategy", { p_project_id: b.dataset.backStrategy })
           .then(function (r) { if (r.error) throw r.error; return load(); })
-          .catch(function (e) { b.disabled = false; window.alert("돌아가지 못했습니다 — " + (e.message || e)); });
+          .catch(function (e) { b.disabled = false; window.alert("돌아가지 못했습니다 — " + errKo(e)); });
       });
     });
     document.querySelectorAll("[data-pchk]").forEach(function (b) {
@@ -4528,7 +4571,7 @@
         b.disabled = true; b.textContent = "처리 중…";
         db.rpc(fix ? "onecue_plan_fix_request" : "onecue_plan_check_accept", { p_project_id: b.dataset.pid })
           .then(function (r) { if (r.error) throw r.error; return load(); })
-          .catch(function (e) { b.disabled = false; b.textContent = fix ? "지적대로 오더 고치기 (무료)" : "지적을 보고 그대로 진행"; window.alert("처리하지 못했습니다 — " + (e.message || e)); });
+          .catch(function (e) { b.disabled = false; b.textContent = fix ? "지적대로 오더 고치기 (무료)" : "지적을 보고 그대로 진행"; window.alert("처리하지 못했습니다 — " + errKo(e)); });
       });
     });
     document.querySelectorAll("[data-dv-save]").forEach(function (b) {
@@ -4555,7 +4598,7 @@
           p_development: { arc: arc, copies: lines(v.copies), slogan: v.slogan || "", narration_tone: "",
             subtitle_plan: v.subtitle_plan, cta: v.cta, end_card: v.end_card, narration_plan: v.narration_plan }, p_beats: beats })
           .then(function (r) { if (r.error) throw r.error; return load(); })
-          .catch(function (e) { b.disabled = false; b.textContent = "구성·각본 올리기 → 콘티 확인"; window.alert("올리지 못했습니다 — " + (e.message || e)); });
+          .catch(function (e) { b.disabled = false; b.textContent = "구성·각본 올리기 → 콘티 확인"; window.alert("올리지 못했습니다 — " + errKo(e)); });
       });
     });
     document.querySelectorAll("[data-ms-save]").forEach(function (b) {
@@ -4569,7 +4612,7 @@
           p_client_who: v.client_who || "", p_client_what: v.client_what || "", p_client_feel: v.client_feel || "",
           p_client_why: v.client_why || "" })
           .then(function (r) { if (r.error) throw r.error; return load(); })
-          .catch(function (e) { b.disabled = false; b.textContent = "전략 올리기 → 콘셉트 5안"; window.alert("올리지 못했습니다 — " + (e.message || e)); });
+          .catch(function (e) { b.disabled = false; b.textContent = "전략 올리기 → 콘셉트 5안"; window.alert("올리지 못했습니다 — " + errKo(e)); });
       });
     });
     document.querySelectorAll("[data-mc-save]").forEach(function (b) {
@@ -4590,7 +4633,7 @@
         db.rpc("onecue_concepts_manual", { p_project_id: id, p_concepts: list,
           p_one_message: (form.querySelector("[data-mc-msg]").value || "").trim() })
           .then(function (r) { if (r.error) throw r.error; return load(); })
-          .catch(function (e) { b.disabled = false; b.textContent = "콘셉트 올리기 → 검토"; window.alert("올리지 못했습니다 — " + (e.message || e)); });
+          .catch(function (e) { b.disabled = false; b.textContent = "콘셉트 올리기 → 검토"; window.alert("올리지 못했습니다 — " + errKo(e)); });
       });
     });
     document.querySelectorAll("[data-close-project]").forEach(function (b) {
@@ -4601,7 +4644,7 @@
           .then(function (r) { if (r.error) throw r.error; return load(); })
           .catch(function (e) {
             b.disabled = false; b.textContent = "프로젝트 완료";
-            window.alert("닫지 못했습니다 — " + (e.message || e));
+            window.alert("닫지 못했습니다 — " + errKo(e));
           });
       });
     });
@@ -4621,7 +4664,7 @@
           return load();
         }).catch(function (e) {
           b.disabled = false; b.textContent = "이대로 납품으로 표시";
-          window.alert("표시하지 못했습니다 — " + (e.message || e));
+          window.alert("표시하지 못했습니다 — " + errKo(e));
         });
       });
     });
@@ -4635,7 +4678,7 @@
           return load();
         }).catch(function (e) {
           b.disabled = false; b.textContent = "승인하고 광고주에게 납품";
-          window.alert("보내지 못했습니다 — " + (e.message || e));
+          window.alert("보내지 못했습니다 — " + errKo(e));
         });
       });
     });
@@ -4666,7 +4709,7 @@
         if (msg) { msg.className = "lc-msg"; msg.textContent = "반영하는 중 — 몇 초 뒤 엔드카드가 바뀝니다"; }
         db.from("events").insert({ project_id: b.dataset.pid, kind: "endcard_choice", payload: payload }).then(function (r) {
           if (r.error) throw r.error;
-        }).catch(function (e) { b.disabled = false; if (msg) { msg.className = "lc-msg err"; msg.textContent = "고르지 못했습니다 — " + (e.message || e); } });
+        }).catch(function (e) { b.disabled = false; if (msg) { msg.className = "lc-msg err"; msg.textContent = "고르지 못했습니다 — " + errKo(e); } });
       });
     });
     document.querySelectorAll("[data-lc]").forEach(function (b) {
@@ -4857,7 +4900,7 @@
           .then(load)
           .catch(function (e) {
             b.disabled = false; b.textContent = label;
-            window.alert("누가 맡는지(실행 주체) 저장하지 못했습니다 — " + (e.message || e));
+            window.alert("누가 맡는지(실행 주체) 저장하지 못했습니다 — " + errKo(e));
           });
       });
     });
@@ -4897,7 +4940,7 @@
           .then(load)
           .catch(function (e) {
             b.disabled = false; b.textContent = label;
-            window.alert("물체 교체를 요청하지 못했습니다 — " + (e.message || e));
+            window.alert("물체 교체를 요청하지 못했습니다 — " + errKo(e));
           });
       });
     });
@@ -4911,7 +4954,7 @@
           .then(load)
           .catch(function (e) {
             b.disabled = false; b.textContent = label;
-            window.alert("정하지 못했습니다 — " + (e.message || e));
+            window.alert("정하지 못했습니다 — " + errKo(e));
           });
       });
     });
@@ -4968,7 +5011,7 @@
           .then(load)
           .catch(function (e) {
             b.disabled = false; b.textContent = label;
-            window.alert("의견을 저장하지 못했습니다 — " + (e.message || e));
+            window.alert("의견을 저장하지 못했습니다 — " + errKo(e));
           });
       });
     });
