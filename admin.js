@@ -602,13 +602,15 @@
     var name = pk ? pk[1].split(" (")[0] : "추천에 맡김";
     var who = !p.visual_style_by ? "" : p.visual_style_by.indexOf("client:") === 0 ? " · 광고주가 고름" : " · 관리자가 바꿈";
     var locked = ["develop", "storyboard", "anchors", "video", "post", "deliver"].indexOf(p.step) >= 0;
-    return '<span class="sub style-line">화면 느낌 · ' +
-      (pk ? '<img class="style-thumb" src="img/style/' + esc(cur) + '.jpg" alt="">' : "") + "<b>" + esc(name) + "</b>" + esc(who) + "</span>" +
-      (canWrite && !locked ? '<details class="style-change"><summary>화면 느낌 바꾸기</summary>' +
-        '<select class="style-sel" data-style-sel="' + esc(p.slug) + '">' +
+    // 09-30 — 접힌 한 줄 · 펼치면 예시 그림을 크게 · 바꾸기도 펼친 안에서만(Dan)
+    return '<details class="sub style-line"><summary>화면 느낌 · <b>' + esc(name) + "</b>" + esc(who) + "</summary>" +
+      '<div class="style-open">' + (pk ? '<img src="img/style/' + esc(cur) + '.jpg" alt="' + esc(name) + ' 예시">' : "") +
+      '<div><p>' + (pk ? esc(pk[1]) : "광고주가 추천에 맡겼습니다 — 전략 단계에서 정합니다") + "</p>" +
+      (canWrite && !locked ? '<label>바꾸기 <select class="style-sel" data-style-sel="' + esc(p.slug) + '">' +
         [["auto", "추천에 맡김"]].concat(O2_STYLES.map(function (x) { return [x[0], x[1].split(" (")[0]]; })).map(function (o) {
           return '<option value="' + o[0] + '"' + (cur === o[0] ? " selected" : "") + ">" + esc(o[1]) + "</option>"; }).join("") +
-        '</select> <small>전략·콘셉트가 이 느낌 안에서 짜입니다 · 콘셉트를 고른 뒤에는 바꿀 수 없습니다</small></details>' : "");
+        '</select></label><small>전략·콘셉트가 이 느낌 안에서 짜입니다 · 콘셉트를 고른 뒤에는 바꿀 수 없습니다</small>' : "<small>콘셉트를 고른 뒤라 바꿀 수 없습니다</small>") +
+      "</div></div></details>";
   }
 
   function stepBar(p) {
