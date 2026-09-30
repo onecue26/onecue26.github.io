@@ -1827,6 +1827,8 @@
       }
       return '<div class="lc lc-review"' + tag + ">" +
         head("결과를 검토해 주세요", "괜찮으면 승인 · 고칠 점은 아래 완성본의 의견 칸에") +
+        // 10-01 김밥집 — 납품에서 되돌리며 적은 요청과 그 답이 후반 검수 화면에 안 떴다
+        (function () { var se = SE().of(p, key) || {}; return se.revision_at && se.revision_note ? revisionBox(se, se.revision_note) : ""; })() +
         '<div class="lc-row">' +
         '<button class="btn" type="button" data-lc="approve"' + tag + ">승인</button>" +
         "</div>" + '<span class="lc-msg" data-lc-msg></span></div>';
