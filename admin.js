@@ -492,7 +492,7 @@
   }
   function briefPanel(p) {
     if (!canWrite || p.production_track !== "option2") return "";
-    var b = p.option2_brief || {}, sk = b.style || "real";
+    var b = p.option2_brief || {}, sk = b.style || (p.visual_style && p.visual_style !== "auto" ? p.visual_style : "real");
     var anchors = (p.files || []).filter(function (f) { return f.kind === "anchor" && f.approved && f.url; });
     var fld = function (k, label, ph, rows) {
       return '<label class="o2-l">' + label + '</label>' + (rows
@@ -610,6 +610,11 @@
     var sw = canWrite ? '<span class="track-sw' + (locked ? " locked" : "") + '"' + (locked ? ' title="컨셉을 고른 뒤라 바꿀 수 없습니다"' : "") + '>' +
       '<button type="button" data-track-sw="option1" data-slug="' + esc(p.slug) + '"' + (t2 ? "" : ' class="on"') + dis + '>옵션 1</button>' +
       '<button type="button" data-track-sw="option2" data-slug="' + esc(p.slug) + '"' + (t2 ? ' class="on"' : "") + dis + '>옵션 2</button></span>' +
+      // 09-30 — 화풍: 광고주가 의뢰서에서 고르고(106) 관리자는 컨셉 전까지 바꾼다 — 전략·콘셉트가 이 화풍 안에서 짜인다(Dan)
+      '<select class="style-sel" data-style-sel="' + esc(p.slug) + '"' + dis + ' title="' + (locked ? "컨셉을 고른 뒤라 바꿀 수 없습니다" : "화풍 — 전략·콘셉트가 이 안에서 짜입니다") + '">' +
+      [["auto", "화풍 · 추천에 맡김"]].concat(O2_STYLES.map(function (x) { return [x[0], "화풍 · " + x[1].split(" (")[0]]; })).map(function (o) {
+        return '<option value="' + o[0] + '"' + ((p.visual_style || "auto") === o[0] ? " selected" : "") + ">" + esc(o[1]) + "</option>"; }).join("") +
+      "</select>" +
       '<details class="track-help"><summary>?</summary><div>' +
       '<p><b>옵션 1 · 지금 방식</b> — 콘티를 그려 광고주와 맞춘 뒤 그대로 영상으로. 10단계(구성·각본 → 콘티 → 제작 자료 → 영상). 광고주가 장면을 미리 보고 확정하지만, 콘티에 끌려가 밋밋해지기 쉽습니다.</p>' +
       '<p><b>옵션 2 · 브리프 방식</b> — 목표 한 줄과 조건만 주고 컷 구성은 AI가 직접 설계. 8단계(컨셉 → 제작 자료·브리프 → 영상, 구성·각본과 콘티 없음). 사람은 브리프 한 장(골·필수·제품 사실·조건·마무리)만 씁니다. 빠르고 역동적이지만, 제품 사실을 꼭 적어야 틀리지 않습니다.</p>' +
@@ -4150,6 +4155,19 @@
         });
       });
     });
+    document.querySelectorAll("[data-style-sel]").forEach(function (sel) {
+      ["click", "mousedown"].forEach(function (k) { sel.addEventListener(k, function (ev) { ev.stopPropagation(); }); });
+      sel.addEventListener("change", function (ev) {
+        ev.stopPropagation();
+        var row = ROWS.filter(function (x) { return x.slug === sel.dataset.styleSel; })[0];
+        if (!row) return;
+        sel.disabled = true;
+        db.rpc("onecue_set_style", { p_project_id: row.id, p_style: sel.value }).then(function (r) {
+          if (r.error) { sel.disabled = false; sel.title = "바꾸지 못했습니다 — " + r.error.message; return; }
+          load();
+        });
+      });
+    });
     document.querySelectorAll("[data-track-save]").forEach(function (b) {
       b.addEventListener("click", function () {
         var slug = b.dataset.trackSave;
@@ -5337,7 +5355,7 @@
     el("stamp").textContent = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 16);
 
     return db.from("projects")
-      .select("id,slug,brand,product,step,state,running_sec,cut_count,aspects,created_at,ad_type,ad_type_by,render_mode,render_plan,render_mode_by,render_mode_at,closed_at,closed_by,channels,production_track,production_track_at,option2_brief,option2_brief_at")
+      .select("id,slug,brand,product,step,state,running_sec,cut_count,aspects,created_at,ad_type,ad_type_by,render_mode,render_plan,render_mode_by,render_mode_at,closed_at,closed_by,channels,production_track,production_track_at,option2_brief,option2_brief_at,visual_style,visual_style_by")
       // ★ render_mode_at 을 안 읽어 오면 「수정사항 적용 완료」가 영원히
       //   안 뜬다 — 계획이 언제 손봐졌는지를 모르니 늘 「아직」이 되고,
       //   다시 뽑기 버튼이 계속 잠긴 채로 남는다. 화면이 쓰는 칸은
