@@ -1156,13 +1156,15 @@
       }
       if (auth.error) throw auth.error;
       LOGGED_IN = true;
-      return db.from("projects").select("id,client_id,slug,brand,product,running_sec,cut_count,aspect,aspects,channels,step,state,ad_type,ad_type_by,closed_at,visual_style").eq("slug", slug).maybeSingle();
+      return db.from("projects").select("id,client_id,slug,brand,product,running_sec,cut_count,aspect,aspects,channels,step,state,ad_type,ad_type_by,closed_at,visual_style,production_track").eq("slug", slug).maybeSingle();
     })
       .then(function (r) {
         if (!r) return;
         if (r.error) throw r.error;
         if (!r.data) { denied(); return; }
         P = r.data;
+        // 10-01 — 옵션 2(브리프 방식)는 콘티 단계가 없다. 막대에 「콘티 확인」이 남아 광고주가 헷갈렸다
+        if (P.production_track === "option2") CLIENT_FLOW = CLIENT_FLOW.filter(function (f) { return f.key !== "board"; });
         return Promise.all([
           db.from("clients").select("owner_id").eq("id", P.client_id).maybeSingle(),
           db.from("profiles").select("is_admin").eq("id", user.id).maybeSingle(),
