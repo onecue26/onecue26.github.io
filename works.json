@@ -221,6 +221,19 @@
   "mb": 2.0
  },
  {
+  "id": "onecue-ysl",
+  "group": "ONECUE",
+  "title": "입셍로랑 / 립스틱-파워",
+  "note": "ONECUE 시험 · 옵션 2",
+  "mp4": "works-media/onecue-ysl.mp4",
+  "poster": "works-media/onecue-ysl.jpg",
+  "provenance": "자체 제작",
+  "sec": 15,
+  "w": 720,
+  "h": 1280,
+  "mb": 1.2
+ },
+ {
   "id": "onecue-blendie",
   "group": "ONECUE",
   "title": "Blendie / Blendie Go 미니 블렌더",
