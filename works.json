@@ -6,7 +6,10 @@
   "note": "AD01 · 9:16",
   "mp4": "works-media/tomori-01.mp4",
   "poster": "works-media/tomori-01.jpg",
+  "provenance": "자체 제작",
   "sec": 20,
+  "w": 720,
+  "h": 1280,
   "mb": 2.3
  },
  {
@@ -16,7 +19,10 @@
   "note": "AD02 · 9:16",
   "mp4": "works-media/tomori-02.mp4",
   "poster": "works-media/tomori-02.jpg",
+  "provenance": "자체 제작",
   "sec": 17,
+  "w": 720,
+  "h": 1280,
   "mb": 1.9
  },
  {
@@ -26,7 +32,10 @@
   "note": "AD03 · 9:16",
   "mp4": "works-media/tomori-03.mp4",
   "poster": "works-media/tomori-03.jpg",
+  "provenance": "자체 제작",
   "sec": 13,
+  "w": 720,
+  "h": 1280,
   "mb": 1.2
  },
  {
@@ -36,7 +45,10 @@
   "note": "AD04 · 9:16",
   "mp4": "works-media/tomori-04.mp4",
   "poster": "works-media/tomori-04.jpg",
+  "provenance": "자체 제작",
   "sec": 13,
+  "w": 720,
+  "h": 1280,
   "mb": 1.8
  },
  {
@@ -46,7 +58,10 @@
   "note": "AD05 · 9:16",
   "mp4": "works-media/tomori-05.mp4",
   "poster": "works-media/tomori-05.jpg",
+  "provenance": "자체 제작",
   "sec": 18,
+  "w": 720,
+  "h": 1280,
   "mb": 2.5
  },
  {
@@ -56,7 +71,10 @@
   "note": "AD06 · 9:16",
   "mp4": "works-media/tomori-06.mp4",
   "poster": "works-media/tomori-06.jpg",
+  "provenance": "자체 제작",
   "sec": 14,
+  "w": 720,
+  "h": 1280,
   "mb": 1.2
  },
  {
@@ -66,7 +84,10 @@
   "note": "AD07 · 9:16",
   "mp4": "works-media/tomori-07.mp4",
   "poster": "works-media/tomori-07.jpg",
+  "provenance": "자체 제작",
   "sec": 13,
+  "w": 720,
+  "h": 1280,
   "mb": 0.9
  },
  {
@@ -76,7 +97,10 @@
   "note": "AD08 · 9:16",
   "mp4": "works-media/tomori-08.mp4",
   "poster": "works-media/tomori-08.jpg",
+  "provenance": "자체 제작",
   "sec": 17,
+  "w": 720,
+  "h": 1280,
   "mb": 0.9
  },
  {
@@ -86,7 +110,10 @@
   "note": "AD09 · 9:16",
   "mp4": "works-media/tomori-09.mp4",
   "poster": "works-media/tomori-09.jpg",
+  "provenance": "자체 제작",
   "sec": 13,
+  "w": 720,
+  "h": 1280,
   "mb": 1.1
  },
  {
@@ -96,7 +123,10 @@
   "note": "1편",
   "mp4": "works-media/summer-1.mp4",
   "poster": "works-media/summer-1.jpg",
+  "provenance": "자체 제작",
   "sec": 58,
+  "w": 720,
+  "h": 406,
   "mb": 3.3
  },
  {
@@ -106,7 +136,10 @@
   "note": "2편",
   "mp4": "works-media/summer-2.mp4",
   "poster": "works-media/summer-2.jpg",
+  "provenance": "자체 제작",
   "sec": 68,
+  "w": 720,
+  "h": 406,
   "mb": 4.2
  },
  {
@@ -116,7 +149,10 @@
   "note": "음료 광고 시험",
   "mp4": "works-media/pado-1.mp4",
   "poster": "works-media/pado-1.jpg",
+  "provenance": "자체 제작",
   "sec": 15,
+  "w": 480,
+  "h": 854,
   "mb": 1.1
  },
  {
@@ -126,7 +162,10 @@
   "note": "음료 광고 시험",
   "mp4": "works-media/pado-2.mp4",
   "poster": "works-media/pado-2.jpg",
+  "provenance": "자체 제작",
   "sec": 15,
+  "w": 480,
+  "h": 854,
   "mb": 1.0
  },
  {
@@ -136,7 +175,10 @@
   "note": "ONECUE 시험",
   "mp4": "works-media/onecue-aloha.mp4",
   "poster": "works-media/onecue-aloha.jpg",
+  "provenance": "자체 제작",
   "sec": 30,
+  "w": 480,
+  "h": 854,
   "mb": 1.6
  },
  {
@@ -146,7 +188,10 @@
   "note": "ONECUE 납품",
   "mp4": "works-media/onecue-rush.mp4",
   "poster": "works-media/onecue-rush.jpg",
+  "provenance": "자체 제작",
   "sec": 15,
+  "w": 720,
+  "h": 1280,
   "mb": 1.1
  },
  {
@@ -156,7 +201,10 @@
   "note": "ONECUE 납품",
   "mp4": "works-media/onecue-fanta.mp4",
   "poster": "works-media/onecue-fanta.jpg",
+  "provenance": "자체 제작",
   "sec": 15,
+  "w": 720,
+  "h": 1280,
   "mb": 2.8
  },
  {
@@ -166,7 +214,10 @@
   "note": "ONECUE 납품 · 옵션 2",
   "mp4": "works-media/onecue-choi.mp4",
   "poster": "works-media/onecue-choi.jpg",
+  "provenance": "자체 제작",
   "sec": 15,
+  "w": 720,
+  "h": 1280,
   "mb": 2.0
  },
  {
@@ -176,7 +227,179 @@
   "note": "ONECUE 납품",
   "mp4": "works-media/onecue-blendie.mp4",
   "poster": "works-media/onecue-blendie.jpg",
+  "provenance": "자체 제작",
   "sec": 15,
+  "w": 720,
+  "h": 1280,
   "mb": 1.6
+ },
+ {
+  "id": "pre-massif",
+  "group": "사이트 이전 광고",
+  "title": "MASSIF MERIDIAN",
+  "note": "자동차 30초 TVC · 09-06",
+  "mp4": "works-media/pre-massif.mp4",
+  "poster": "works-media/pre-massif.jpg",
+  "provenance": "자체 제작",
+  "sec": 30,
+  "w": 720,
+  "h": 404,
+  "mb": 1.8
+ },
+ {
+  "id": "pre-baro",
+  "group": "사이트 이전 광고",
+  "title": "바로유산균",
+  "note": "30초 광고 · 09-01",
+  "mp4": "works-media/pre-baro.mp4",
+  "poster": "works-media/pre-baro.jpg",
+  "provenance": "자체 제작",
+  "sec": 30,
+  "w": 720,
+  "h": 404,
+  "mb": 1.0
+ },
+ {
+  "id": "pre-r7",
+  "group": "사이트 이전 광고",
+  "title": "코웨이 비렉스 R7",
+  "note": "스트레칭 모션베드 · 07-18",
+  "mp4": "works-media/pre-r7.mp4",
+  "poster": "works-media/pre-r7.jpg",
+  "provenance": "자체 제작",
+  "sec": 37,
+  "w": 720,
+  "h": 1280,
+  "mb": 2.5
+ },
+ {
+  "id": "pre-aquaveil",
+  "group": "사이트 이전 광고",
+  "title": "aqua veil",
+  "note": "화장품 · 07-12",
+  "mp4": "works-media/pre-aquaveil.mp4",
+  "poster": "works-media/pre-aquaveil.jpg",
+  "provenance": "자체 제작",
+  "sec": 26,
+  "w": 720,
+  "h": 1276,
+  "mb": 2.6
+ },
+ {
+  "id": "pre-dhai-donut",
+  "group": "사이트 이전 광고",
+  "title": "DHAI DONUT",
+  "note": "도넛 · 07-02",
+  "mp4": "works-media/pre-dhai-donut.mp4",
+  "poster": "works-media/pre-dhai-donut.jpg",
+  "provenance": "자체 제작",
+  "sec": 26,
+  "w": 720,
+  "h": 1280,
+  "mb": 2.1
+ },
+ {
+  "id": "pre-blushed",
+  "group": "사이트 이전 광고",
+  "title": "BLUSHED Blur Pixie Tint",
+  "note": "틴트 · 07-01",
+  "mp4": "works-media/pre-blushed.mp4",
+  "poster": "works-media/pre-blushed.jpg",
+  "provenance": "자체 제작",
+  "sec": 24,
+  "w": 720,
+  "h": 1280,
+  "mb": 2.9
+ },
+ {
+  "id": "pre-dhai-coffee",
+  "group": "사이트 이전 광고",
+  "title": "DHAI SPARKLING COFFEE",
+  "note": "커피 · 07-01",
+  "mp4": "works-media/pre-dhai-coffee.mp4",
+  "poster": "works-media/pre-dhai-coffee.jpg",
+  "provenance": "자체 제작",
+  "sec": 15,
+  "w": 720,
+  "h": 1280,
+  "mb": 0.9
+ },
+ {
+  "id": "beach-1",
+  "group": "해변 시리즈",
+  "title": "TOMORI 해변 / 스시녀 2PM",
+  "note": "1편 · 9:16",
+  "mp4": "works-media/beach-1.mp4",
+  "poster": "works-media/beach-1.jpg",
+  "provenance": "외부 수급 — 영상은 친구 제작, 후작업은 Dan",
+  "sec": 18,
+  "w": 720,
+  "h": 1280,
+  "mb": 3.2
+ },
+ {
+  "id": "beach-2",
+  "group": "해변 시리즈",
+  "title": "TOMORI 해변 / 고민상담 밤",
+  "note": "2편 · 9:16",
+  "mp4": "works-media/beach-2.mp4",
+  "poster": "works-media/beach-2.jpg",
+  "provenance": "외부 수급 — 영상은 친구 제작, 후작업은 Dan",
+  "sec": 18,
+  "w": 720,
+  "h": 1280,
+  "mb": 2.1
+ },
+ {
+  "id": "beach-3",
+  "group": "해변 시리즈",
+  "title": "TOMORI 해변 / 이행시 낮",
+  "note": "3편 · 9:16",
+  "mp4": "works-media/beach-3.mp4",
+  "poster": "works-media/beach-3.jpg",
+  "provenance": "외부 수급 — 영상은 친구 제작, 후작업은 Dan",
+  "sec": 18,
+  "w": 720,
+  "h": 1280,
+  "mb": 2.4
+ },
+ {
+  "id": "beach-4",
+  "group": "해변 시리즈",
+  "title": "TOMORI 해변 / 밤 석양",
+  "note": "4편 · 9:16",
+  "mp4": "works-media/beach-4.mp4",
+  "poster": "works-media/beach-4.jpg",
+  "provenance": "외부 수급 — 영상은 친구 제작, 후작업은 Dan",
+  "sec": 13,
+  "w": 720,
+  "h": 1280,
+  "mb": 1.5
+ },
+ {
+  "id": "beach-5",
+  "group": "해변 시리즈",
+  "title": "TOMORI 해변 / 서른 밤",
+  "note": "5편 · 9:16",
+  "mp4": "works-media/beach-5.mp4",
+  "poster": "works-media/beach-5.jpg",
+  "provenance": "외부 수급 — 영상은 친구 제작, 후작업은 Dan",
+  "sec": 18,
+  "w": 720,
+  "h": 1280,
+  "mb": 1.9
+ },
+ {
+  "id": "beach-6",
+  "group": "해변 시리즈",
+  "title": "TOMORI 해변 / 추석 밤",
+  "note": "6편 · 9:16",
+  "mp4": "works-media/beach-6.mp4",
+  "poster": "works-media/beach-6.jpg",
+  "provenance": "외부 수급 — 영상은 친구 제작, 후작업은 Dan",
+  "sec": 18,
+  "w": 720,
+  "h": 1280,
+  "mb": 2.0
  }
 ]
