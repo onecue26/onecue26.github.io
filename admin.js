@@ -4269,9 +4269,11 @@
         box.querySelectorAll("[data-o2]").forEach(function (el) { br[el.dataset.o2] = el.value.trim(); });
         if (!br.goal || !br.must || !br.facts) { msg.className = "msg err"; msg.textContent = "골 · 필수 · 제품 사실은 꼭 채워 주십시오."; return; }
         // 10-01 Dan — 저장하면 인물 기준 그림이 자동으로 만들어진다(유료). 한 번 더 묻는다
-        var newOnes = ((row.option2_brief || {}).anchors || []).filter(function (a) { return String(a.source || "").indexOf("new") === 0; }).length;
+        // 새로 그리는 것은 인물(@CA)뿐 — 공간·소품은 영상 프롬프트에서 글로 처리한다(오더 작성기 needs = 인물)
+        var newOnes = ((row.option2_brief || {}).anchors || []).filter(function (a) {
+          return String(a.source || "").indexOf("new") === 0 && /^@?CA/i.test(String(a.id || "")); }).length;
         if (row.step === "anchors" && newOnes &&
-            !window.confirm("브리프를 저장하면 인물 기준 그림 " + newOnes + "장(약 " + (newOnes * 6.5) + "cr)을 바로 만듭니다. 크레딧이 나갑니다.")) return;
+            !window.confirm("브리프를 저장하면 인물 기준 그림 " + newOnes + "장(약 " + (newOnes * 6.5) + "cr)을 바로 만듭니다. 크레딧이 나갑니다. 영상(약 45cr)은 인물을 승인할 때 따로 묻습니다.")) return;
         br.text = o2Text(br);
         var prevB = row.option2_brief || {};
         br.anchors = prevB.anchors || [];          // AI 가 세운 앵커 계획은 저장해도 남긴다
