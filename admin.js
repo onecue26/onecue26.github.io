@@ -1630,6 +1630,12 @@
   var LIFECYCLE_STEP = "develop";
 
   // 누르는 동안 잠근다. 잠그지 않으면 같은 버튼이 두 번 눌려 작업이 둘 생긴다.
+  /** 10-01 Dan 「취소 눌렀는데 처리 중으로 떠」 — 확인 창에서 취소하면 버튼을 원래대로 (아무것도 안 했다) */
+  function cancelled(b) {
+    b.disabled = false;
+    if (b.dataset.label) b.textContent = b.dataset.label;
+    return Promise.reject({ message: "__cancel__" });
+  }
   function lock(b) {
     b.disabled = true;
     b.dataset.label = b.textContent;
@@ -1682,6 +1688,7 @@
     return function (e) {
       b.disabled = false;
       if (b.dataset.label) b.textContent = b.dataset.label;
+      if (e && e.message === "__cancel__") return;     // 확인 창 취소 — 알릴 것 없음
       var why = errKo(e);
       if (msg) { msg.className = "lc-msg err"; msg.textContent = why; }
       else window.alert(why);
@@ -4852,12 +4859,12 @@
           : what === "rechoose" ? clearStageChoice(slug, step)
           // 10-01 Dan 「크레딧이 나갑니다라고 한 번 더 묻고 승인하면 진행」 — 유료 단계 시작·옵션 2 자동 진행 승인도 확인 창
           : what === "start" ? (["anchors", "video", "storyboard"].indexOf(step) < 0 ||
-              window.confirm(paidStartMsg(bySlug(slug), step)) ? stageStart(slug, step) : Promise.resolve())
+              window.confirm(paidStartMsg(bySlug(slug), step)) ? stageStart(slug, step) : cancelled(b))
           : what === "approve" && step === "anchors" && (bySlug(slug) || {}).production_track === "option2" &&
-              !window.confirm("승인하면 영상 한 판(시댄스 2.5 · 15초 · 480p · 약 45cr)을 바로 만듭니다. 크레딧이 나갑니다.") ? Promise.resolve()
+              !window.confirm("승인하면 영상 한 판(시댄스 2.5 · 15초 · 480p · 약 45cr)을 바로 만듭니다. 크레딧이 나갑니다.") ? cancelled(b)
           // 답변대로 정한 뒤 다시 뽑기 — 한 번 누름 = 한 판 (되돌림 기록을 남기고 바로 시작)
           // ★ 수정 요청 기록을 남기지 않는다 — 남기면 수정 요청 자동 답변(089)이 검사를 통과한 오더를 또 고치려 든다
-          : what === "rerun" ? (window.confirm("다시 뽑습니다. 크레딧이 나갑니다.") ? stageStart(slug, step) : Promise.resolve())
+          : what === "rerun" ? (window.confirm("다시 뽑습니다. 크레딧이 나갑니다.") ? stageStart(slug, step) : cancelled(b))
           : what === "approve" ? stageApprove(slug, step)
           : what === "revise" ? stageRevise(slug, step, text)
           : what === "next" ? stageNext(slug, step)
