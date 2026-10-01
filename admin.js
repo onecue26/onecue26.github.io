@@ -1825,10 +1825,21 @@
           head("고칠 점을 처리하는 중입니다", "승인은 새 판이 나온 뒤에") + TAKE_OPEN_NOTE +
           '<span class="lc-msg" data-lc-msg></span></div>';
       }
+      // 10-01 블렌디 — 새 완성본이 검수 중이면 판이 안 보이는데 「승인」만 떠 있었다(Dan 「영상 안 뜨는데? 승인 눌러야 뜨냐?」)
+      var pendPost = unseenTake(p, key);
+      if (pendPost && (!(pendPost.meta || {}).review || pendPost.meta.review === "pending")) {
+        return '<div class="lc lc-review"' + tag + ">" + head("완성본이 나왔습니다 — 자동 검수 중", "검수가 붙으면 아래에 완성본과 승인이 뜹니다") +
+          takeWaiting(p, key) + '<span class="lc-msg" data-lc-msg></span></div>';
+      }
       return '<div class="lc lc-review"' + tag + ">" +
         head("결과를 검토해 주세요", "괜찮으면 승인 · 고칠 점은 아래 완성본의 의견 칸에") +
-        // 10-01 김밥집 — 납품에서 되돌리며 적은 요청과 그 답이 후반 검수 화면에 안 떴다
-        (function () { var se = SE().of(p, key) || {}; return se.revision_at && se.revision_note ? revisionBox(se, se.revision_note) : ""; })() +
+        // 10-01 김밥집 — 납품에서 되돌리며 적은 요청과 그 답이 후반 검수 화면에 안 떴다.
+        //   그 뒤에 새 완성본이 나왔으면 이미 처리된 옛 요청이다 — 띄우지 않는다(블렌디 09-29 요청이 다시 떴다)
+        (function () {
+          var se = SE().of(p, key) || {};
+          var newer = (p.files || []).some(function (f) { return f.kind === "final" && String(f.created_at || "") > String(se.revision_at || ""); });
+          return se.revision_at && se.revision_note && !newer ? revisionBox(se, se.revision_note) : "";
+        })() +
         '<div class="lc-row">' +
         '<button class="btn" type="button" data-lc="approve"' + tag + ">승인</button>" +
         "</div>" + '<span class="lc-msg" data-lc-msg></span></div>';
