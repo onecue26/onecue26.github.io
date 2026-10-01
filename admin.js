@@ -1688,6 +1688,13 @@
     };
   }
 
+  /** 유료 단계 시작 확인 문구 — 계획에 적힌 값이 있으면 그 값 */
+  function paidStartMsg(p, step) {
+    var plan = (p && p.render_plan) || {};
+    var cr = step === "video" ? (plan.credits_video || plan.credits_total) : step === "anchors" ? plan.credits_needs : null;
+    var what = step === "video" ? "영상(시댄스 2.5 · 480p)을" : step === "anchors" ? "제작 자료(기준 그림)를" : "콘티 그림을";
+    return what + " 만들기 시작합니다." + (cr ? " 약 " + cr + "cr" : "") + " 크레딧이 나갑니다.";
+  }
   function bySlug(slug) {
     return ROWS.filter(function (x) { return x.slug === slug; })[0] || null;
   }
@@ -4261,6 +4268,10 @@
         var br = {};
         box.querySelectorAll("[data-o2]").forEach(function (el) { br[el.dataset.o2] = el.value.trim(); });
         if (!br.goal || !br.must || !br.facts) { msg.className = "msg err"; msg.textContent = "골 · 필수 · 제품 사실은 꼭 채워 주십시오."; return; }
+        // 10-01 Dan — 저장하면 인물 기준 그림이 자동으로 만들어진다(유료). 한 번 더 묻는다
+        var newOnes = ((row.option2_brief || {}).anchors || []).filter(function (a) { return String(a.source || "").indexOf("new") === 0; }).length;
+        if (row.step === "anchors" && newOnes &&
+            !window.confirm("브리프를 저장하면 인물 기준 그림 " + newOnes + "장(약 " + (newOnes * 6.5) + "cr)을 바로 만듭니다. 크레딧이 나갑니다.")) return;
         br.text = o2Text(br);
         var prevB = row.option2_brief || {};
         br.anchors = prevB.anchors || [];          // AI 가 세운 앵커 계획은 저장해도 남긴다
@@ -4836,7 +4847,11 @@
         }
         var call = what === "choose-ai" ? chooseStageExecutor(slug, step, "ai", "", "")
           : what === "rechoose" ? clearStageChoice(slug, step)
-          : what === "start" ? stageStart(slug, step)
+          // 10-01 Dan 「크레딧이 나갑니다라고 한 번 더 묻고 승인하면 진행」 — 유료 단계 시작·옵션 2 자동 진행 승인도 확인 창
+          : what === "start" ? (["anchors", "video", "storyboard"].indexOf(step) < 0 ||
+              window.confirm(paidStartMsg(bySlug(slug), step)) ? stageStart(slug, step) : Promise.resolve())
+          : what === "approve" && step === "anchors" && (bySlug(slug) || {}).production_track === "option2" &&
+              !window.confirm("승인하면 영상 한 판(시댄스 2.5 · 15초 · 480p · 약 45cr)을 바로 만듭니다. 크레딧이 나갑니다.") ? Promise.resolve()
           // 답변대로 정한 뒤 다시 뽑기 — 한 번 누름 = 한 판 (되돌림 기록을 남기고 바로 시작)
           // ★ 수정 요청 기록을 남기지 않는다 — 남기면 수정 요청 자동 답변(089)이 검사를 통과한 오더를 또 고치려 든다
           : what === "rerun" ? (window.confirm("다시 뽑습니다. 크레딧이 나갑니다.") ? stageStart(slug, step) : Promise.resolve())
