@@ -60,7 +60,7 @@ li{margin:3px 0}
 </style>
 </head>
 <body>
-<div class="wrap" id="manual" hidden>
+<div class="wrap" id="manual">
   <h1>ONECUE 사용법</h1>
   <p class="lead">광고주가 의뢰를 넣고, 관리자가 단계마다 버튼을 눌러 영상까지 만드는 사이트입니다. 테스트는 실제와 똑같이 돌아가고, 표시된 버튼에서는 실제 크레딧이 나갑니다.</p>
 
@@ -165,30 +165,5 @@ li{margin:3px 0}
   </section>
 </div>
 
-<div class="wrap" id="gate">
-  <h1>ONECUE 사용법</h1>
-  <p class="lead" id="gate-msg">관리자 계정을 확인하는 중입니다…</p>
-  <p id="gate-go" hidden><a href="login.html?next=manual.html" style="color:var(--accent);font-weight:700">관리자 계정으로 로그인</a></p>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
-<script>
-// 관리자 계정으로 로그인한 사람만 본다 — 광고주·비로그인은 안내만(관리자 화면 gate 와 같은 확인)
-(function () {
-  var msg = document.getElementById("gate-msg"), go = document.getElementById("gate-go");
-  function deny(t) { msg.textContent = t; go.hidden = false; }
-  if (!window.supabase || !window.ONECUE) { deny("로그인 서비스를 불러오지 못했습니다. 잠시 후 새로고침해 주세요."); return; }
-  var db = window.supabase.createClient(window.ONECUE.supabaseUrl, window.ONECUE.supabaseAnonKey);
-  db.auth.getUser().then(function (r) {
-    var user = r.data && r.data.user;
-    if (!user) { deny("관리자 계정으로 로그인해야 볼 수 있습니다."); return; }
-    return db.from("profiles").select("is_admin").eq("id", user.id).maybeSingle().then(function (p) {
-      if (!p.data || !p.data.is_admin) { deny("관리자 계정만 볼 수 있는 페이지입니다."); return; }
-      document.getElementById("gate").hidden = true;
-      document.getElementById("manual").hidden = false;
-    });
-  }).catch(function () { deny("계정을 확인하지 못했습니다. 다시 로그인해 주세요."); });
-})();
-</script>
 </body>
 </html>
