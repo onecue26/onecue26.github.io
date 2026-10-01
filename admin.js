@@ -5481,8 +5481,20 @@
     var first = cids.length ? db.from("clients").select("id,owner_id").in("id", cids).then(function (r) {
       (r.data || []).forEach(function (c) { CLIENT_OWNER[c.id] = c.owner_id; });
     }) : Promise.resolve();
-    return first.then(loadPeople2, loadPeople2);
+    // 담당 — 그 건에서 마지막으로 버튼을 누른 관리자(행동 기록에 남은 계정)
+    var pids = ROWS.map(function (p) { return p.id; });
+    var acts = pids.length ? db.from("events").select("project_id,ts,payload").in("project_id", pids)
+      .or("payload->>by_uid.not.is.null,payload->>by.like.human:*").order("ts", { ascending: false }).limit(500)
+      .then(function (r) {
+        (r.data || []).forEach(function (e) {
+          if (ACTOR[e.project_id]) return;
+          var pl = e.payload || {}, u = pl.by_uid || String(pl.by || "").replace(/^human:/, "");
+          if (/^[0-9a-f-]{36}$/.test(u)) ACTOR[e.project_id] = { uid: u, at: e.ts };
+        });
+      }) : Promise.resolve();
+    return Promise.all([first, acts]).then(loadPeople2, loadPeople2);
   }
+  var ACTOR = {};
   /** 담당 — 이 건에서 가장 최근에 단계를 승인한 관리자(따로 지정하는 칸이 없어 실제로 누른 사람 기준) */
   function handler(p) {
     var best = null;
@@ -5490,16 +5502,13 @@
       var r = SE().of(p, st.key);
       if (r && r.approved_by && r.approved_at && (!best || r.approved_at > best.at)) best = { uid: r.approved_by, at: r.approved_at };
     });
-    // 승인 기록이 아직 없으면 광고주에게 보낸 관리자(콘셉트·콘티·납품 보내기)
-    (p.sents || []).forEach(function (e) {
-      var u = e.payload && e.payload.by_uid, at = e.ts || e.created_at || "";
-      if (u && (!best || at > best.at)) best = { uid: u, at: at };
-    });
+    var a = ACTOR[p.id];
+    if (a && (!best || String(a.at) > String(best.at))) best = a;
     return best ? best.uid : null;
   }
   function loadPeople2() {
     var ids = {};
-    ROWS.forEach(function (p) { if (CLIENT_OWNER[p.client_id]) ids[CLIENT_OWNER[p.client_id]] = 1; });
+    ROWS.forEach(function (p) { if (CLIENT_OWNER[p.client_id]) ids[CLIENT_OWNER[p.client_id]] = 1; if (ACTOR[p.id]) ids[ACTOR[p.id].uid] = 1; });
     ROWS.forEach(function (p) {
       (p.approvals || []).forEach(function (a) { if (a.decided_by) ids[a.decided_by] = 1; });
       if (p.closed_by) ids[p.closed_by] = 1;
