@@ -173,38 +173,19 @@ flowchart TD
     <h2>순서도 B · 바꾼 뒤 — 카드가 단계로 들어가고, 결과가 다시 돌아오는 길</h2>
     <p class="muted">왼쪽은 카드를 만드는 쪽(Codex·Head), 오른쪽은 쓰는 쪽(ONECUE 단계)입니다. 단계마다 「카드 고르기」를 거쳐 이 건에 맞는 카드 최대 3장이 들어가고, 한 번 채택한 카드는 다음 단계로 이어집니다.</p>
     <div class="diagram"><pre class="mermaid">
-flowchart LR
-  subgraph MAKE[카드 만드는 쪽]
-    direction TB
-    SRC[("보는 작품<br/>제작사 공개작 169 · TVCF<br/>기존 분석 56 · Dan 작품 34")]
-    CX["Codex<br/>원본 구간 보고 카드 작성"]
-    STG[("_staging<br/>cards_*.jsonl")]
-    HD["Head<br/>근거 장면 원본 대조<br/>구현 가능 표시 확인"]
-    CARDS[("정본 카드<br/>cards.jsonl")]
-    SRC --> CX --> STG --> HD --> CARDS
+flowchart TD
+  subgraph MAKE["❶ 카드 만들기"]
+    direction LR
+    SRC[("보는 작품<br/>제작사 공개작 169 · TVCF<br/>기존 분석 56 · Dan 작품 34")] --> CX["Codex<br/>원본 구간 보고<br/>카드 작성"] --> STG[("_staging<br/>초안 카드")] --> HD["Head<br/>원본 대조 ·<br/>구현 가능 확인"] --> CARDS[("정본 카드<br/>cards.jsonl")]
   end
-
-  PICK{"카드 고르기<br/>lib_link<br/>단계 · 이 건 · 앞 단계 채택<br/>→ 최대 3장"}
-  CARDS --> PICK
-
-  subgraph USE[ONECUE 단계]
-    direction TB
-    U1["① 의뢰 해석"]
-    U2["② 전략 · 콘셉트"]
-    U3["③ 콘티 / 브리프"]
-    U5["⑤ 영상 오더"]
-    U7["⑦ 후반"]
+  CARDS --> PICK{"❷ 카드 고르기 · lib_link<br/>단계 + 이 건 + 앞 단계 채택<br/>→ 단계마다 최대 3장"}
+  subgraph USE["❸ ONECUE 단계 — 채택한 카드가 다음 단계로 이어짐"]
+    direction LR
+    U1["의뢰 해석"] --> U2["전략·콘셉트"] --> U3["콘티 / 브리프"] --> U5["영상 오더"] --> U7["후반"]
     U9["수정 답변"]
-    U1 --> U2 --> U3 --> U5 --> U7
-    U2 -. 채택 카드 이어짐 .-> U3
-    U3 -. 채택 카드 이어짐 .-> U5
-    U5 -. 채택 카드 이어짐 .-> U7
   end
-
-  PICK --> U1 & U2 & U3 & U5 & U7 & U9
-
-  LOG[("사용 기록<br/>usage_log.jsonl<br/>보여 준 카드 · 채택 · 모자란 것 · 검수 결과")]
-  USE --> LOG
+  PICK --> USE
+  USE --> LOG[("❹ 사용 기록 usage_log<br/>보여 준 카드 · 채택 · 모자란 것 · 검수 결과")]
   LOG -->|채택률 · 수정률 · 빈칸 목록| CX
 
   classDef make fill:#e6eff6,stroke:#1f5f8b,color:#123a56;
