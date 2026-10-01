@@ -57,11 +57,17 @@ ol.steps li span{color:var(--muted);font-size:14px}
 ul{margin:0 0 10px;padding-left:20px}
 li{margin:3px 0}
 @media (max-width:560px){.two{grid-template-columns:1fr}h1{font-size:24px}}
+.meta-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 18px}
+.date{font-size:13px;font-weight:700;letter-spacing:.04em;background:var(--ink);color:var(--paper);border-radius:6px;padding:3px 9px;font-variant-numeric:tabular-nums}
+.dl{font-size:13px;font-weight:600;color:var(--accent);text-decoration:none;border:1px solid var(--accent);border-radius:999px;padding:4px 12px}
+.dl:hover,.dl:focus-visible{background:var(--accent-soft);outline:none}
+@media print{nav,.dl{display:none!important}body{background:#fff}section{break-inside:avoid-page}.wrap{padding-block:0}}
 </style>
 </head>
 <body>
 <div class="wrap" id="manual">
   <h1>ONECUE 사용법</h1>
+  <div class="meta-row"><span class="date">기준 261001</span><a class="dl" href="ONECUE_guide_261001.pdf" download>PDF 내려받기</a></div>
   <p class="lead">광고주가 의뢰를 넣고, 관리자가 단계마다 버튼을 눌러 영상까지 만드는 사이트입니다. 테스트는 실제와 똑같이 돌아가고, 표시된 버튼에서는 실제 크레딧이 나갑니다.</p>
 
   <nav aria-label="바로가기">
