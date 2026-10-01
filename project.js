@@ -355,7 +355,23 @@
   // 콘티를 준비하는 일은 광고주가 판단할 자리가 없는 내부 작업이라, 둘을
   // 쪼개 보여 주면 「구성·각본 준비 완료」 같은 내부 진행만 늘어놓게 된다.
   // 볼 것이 생기기 전까지는 상태 한 줄이다.
+  /** 옵션 2(브리프 방식) — 콘티가 없다. 무엇을 만드는지(목표)와 화면에 들어갈 문구를 보여 준다 (10-01 Dan 「적절한 멘트와 안내, 뭔가 채우는 게 필요」) */
+  function secO2Design(done) {
+    var b = (P && P.option2_brief) || {};
+    var ready = b.goal && !b.draft;
+    var lines = String(b.onscreen || "").split(/\s*\/\s*/).filter(function (x) { return x.trim(); });
+    return '<div class="stage-read"><section class="stage-block status"><h4>' +
+      (done ? "고르신 콘셉트로 영상 설계를 마쳤습니다" : "고르신 콘셉트로 영상 설계를 하고 있습니다") + "</h4>" +
+      "<p>이 방식은 콘티를 따로 그리지 않고, 고르신 콘셉트와 아래 목표를 바탕으로 AI가 장면 구성·카메라·편집을 직접 설계해 바로 영상으로 만듭니다. " +
+      "장면은 「영상 제작」에서 완성본으로 확인하실 수 있습니다.</p></section>" +
+      (ready ? '<section class="stage-block"><h4>이 광고가 전할 것</h4><p>' + esc(b.goal) + "</p></section>" : "") +
+      (ready && lines.length ? '<section class="stage-block"><h4>화면에 들어갈 문구 (예정)</h4><ul>' +
+        lines.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + "</ul>" +
+        '<p class="muted">고치실 곳이 있으면 아래 메시지로 알려 주세요. 영상 끝부분 자막과 행동 문구에 쓰입니다.</p></section>' : "") +
+      "</div>";
+  }
   function secDesigning() {
+    if (P && P.production_track === "option2") return '<h2>제작 설계</h2><div class="panel">' + secO2Design(false) + "</div>";
     return '<h2>제작 설계</h2><div class="panel">' +
       '<div class="stage-read development-notice">' +
       '<section class="stage-block status"><h4>제작 설계 진행 중입니다</h4>' +
@@ -482,6 +498,7 @@
       box("design", "제작 설계", now.design ? "진행 중" : "완료",
         // 지난 뒤에도 칸은 남긴다 — 콘티가 뜨자 이 칸이 통째로 사라졌다
         now.design ? secDesigning()
+          : P.production_track === "option2" ? secO2Design(true)
           : (shown("develop") ? '<p class="muted">제작 설계를 마쳤습니다. ' +
             "설계한 컷은 아래 콘티에서 보실 수 있습니다.</p>" : ""), now.design),
       box("board", "콘티 확인", boardFix ? "수정 중" : now.board ? "확인하실 차례" : "완료",
@@ -1156,7 +1173,7 @@
       }
       if (auth.error) throw auth.error;
       LOGGED_IN = true;
-      return db.from("projects").select("id,client_id,slug,brand,product,running_sec,cut_count,aspect,aspects,channels,step,state,ad_type,ad_type_by,closed_at,visual_style,production_track").eq("slug", slug).maybeSingle();
+      return db.from("projects").select("id,client_id,slug,brand,product,running_sec,cut_count,aspect,aspects,channels,step,state,ad_type,ad_type_by,closed_at,visual_style,production_track,option2_brief").eq("slug", slug).maybeSingle();
     })
       .then(function (r) {
         if (!r) return;
