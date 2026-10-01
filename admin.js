@@ -5490,6 +5490,11 @@
       var r = SE().of(p, st.key);
       if (r && r.approved_by && r.approved_at && (!best || r.approved_at > best.at)) best = { uid: r.approved_by, at: r.approved_at };
     });
+    // 승인 기록이 아직 없으면 광고주에게 보낸 관리자(콘셉트·콘티·납품 보내기)
+    (p.sents || []).forEach(function (e) {
+      var u = e.payload && e.payload.by_uid, at = e.ts || e.created_at || "";
+      if (u && (!best || at > best.at)) best = { uid: u, at: at };
+    });
     return best ? best.uid : null;
   }
   function loadPeople2() {
