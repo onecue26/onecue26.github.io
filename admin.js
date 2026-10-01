@@ -3643,7 +3643,8 @@
       '<div class="meta">' + esc(p.slug) + " · " + p.running_sec + "초 · " +
       esc((p.aspects || []).join("/")) +
       (p.created_at ? " · " + ago(p.created_at) : "") + "</div>" + stepBar(p) +
-      '</div><div class="project-summary-side"><span class="project-stage ' + (p.state === "done" ? "closed st-done" : p.state === "ready" ? "st-fix" : "st-run") + '">' +
+      '</div><div class="project-summary-side"><small class="who-line">요청 ' + esc(CLIENT_OWNER[p.client_id] ? personName(CLIENT_OWNER[p.client_id]) : "—") +
+        " · 담당 " + esc(handler(p) ? personName(handler(p)) : "—") + '</small><span class="project-stage ' + (p.state === "done" ? "closed st-done" : p.state === "ready" ? "st-fix" : "st-run") + '">' +
       (p.state === "done" ? "완료 · " + esc(p.closed_at ? new Date(p.closed_at).toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 10).slice(5).replace("-", "/") : "") +
         " · " + spentAll(p) + "cr" + won(spentAll(p)) : esc(STEP_NAME[p.step] || p.step)) + '</span><span class="fold-icon" aria-hidden="true">⌄</span></div></summary>' +
       // ★ 카드 맨 위에는 단계와 무관한 것만 둔다. 「콘티 검수」가 여기 있으면
@@ -5473,9 +5474,27 @@
   }
 
 
-  var PEOPLE = {};
+  var PEOPLE = {}, CLIENT_OWNER = {};
   function loadPeople() {
+    // 10-01 Dan 「요청자 / 관리자 아이디가 카드에 있으면 구분되겠다」 — 의뢰 → 광고주 회사 → 계정
+    var cids = ROWS.map(function (p) { return p.client_id; }).filter(function (x, i, a) { return x && !CLIENT_OWNER[x] && a.indexOf(x) === i; });
+    var first = cids.length ? db.from("clients").select("id,owner_id").in("id", cids).then(function (r) {
+      (r.data || []).forEach(function (c) { CLIENT_OWNER[c.id] = c.owner_id; });
+    }) : Promise.resolve();
+    return first.then(loadPeople2, loadPeople2);
+  }
+  /** 담당 — 이 건에서 가장 최근에 단계를 승인한 관리자(따로 지정하는 칸이 없어 실제로 누른 사람 기준) */
+  function handler(p) {
+    var best = null;
+    FLOW.forEach(function (st) {
+      var r = SE().of(p, st.key);
+      if (r && r.approved_by && r.approved_at && (!best || r.approved_at > best.at)) best = { uid: r.approved_by, at: r.approved_at };
+    });
+    return best ? best.uid : null;
+  }
+  function loadPeople2() {
     var ids = {};
+    ROWS.forEach(function (p) { if (CLIENT_OWNER[p.client_id]) ids[CLIENT_OWNER[p.client_id]] = 1; });
     ROWS.forEach(function (p) {
       (p.approvals || []).forEach(function (a) { if (a.decided_by) ids[a.decided_by] = 1; });
       if (p.closed_by) ids[p.closed_by] = 1;
@@ -5519,7 +5538,7 @@
     el("stamp").textContent = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 16);
 
     return db.from("projects")
-      .select("id,slug,brand,product,step,state,running_sec,cut_count,aspects,created_at,ad_type,ad_type_by,render_mode,render_plan,render_mode_by,render_mode_at,closed_at,closed_by,channels,production_track,production_track_at,option2_brief,option2_brief_at,visual_style,visual_style_by")
+      .select("id,client_id,slug,brand,product,step,state,running_sec,cut_count,aspects,created_at,ad_type,ad_type_by,render_mode,render_plan,render_mode_by,render_mode_at,closed_at,closed_by,channels,production_track,production_track_at,option2_brief,option2_brief_at,visual_style,visual_style_by")
       // ★ render_mode_at 을 안 읽어 오면 「수정사항 적용 완료」가 영원히
       //   안 뜬다 — 계획이 언제 손봐졌는지를 모르니 늘 「아직」이 되고,
       //   다시 뽑기 버튼이 계속 잠긴 채로 남는다. 화면이 쓰는 칸은
