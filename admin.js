@@ -3650,7 +3650,7 @@
       '<div class="meta">' + esc(p.slug) + " · " + p.running_sec + "초 · " +
       esc((p.aspects || []).join("/")) +
       (p.created_at ? " · " + ago(p.created_at) : "") + "</div>" + stepBar(p) +
-      '</div><div class="project-summary-side"><small class="who-line">요청 ' + esc(CLIENT_OWNER[p.client_id] ? personName(CLIENT_OWNER[p.client_id]) : "—") +
+      '</div><div class="project-summary-side">' + (p.test_label ? '<span class="test-label">' + esc(p.test_label) + '</span>' : "") + '<small class="who-line">요청 ' + esc(CLIENT_OWNER[p.client_id] ? personName(CLIENT_OWNER[p.client_id]) : "—") +
         " · 담당 " + esc(handler(p) ? personName(handler(p)) : "—") + '</small><span class="project-stage ' + (p.state === "done" ? "closed st-done" : p.state === "ready" ? "st-fix" : "st-run") + '">' +
       (p.state === "done" ? "완료 · " + esc(p.closed_at ? new Date(p.closed_at).toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 10).slice(5).replace("-", "/") : "") +
         " · " + spentAll(p) + "cr" + won(spentAll(p)) : esc(STEP_NAME[p.step] || p.step)) + '</span><span class="fold-icon" aria-hidden="true">⌄</span></div></summary>' +
@@ -5559,7 +5559,7 @@
     el("stamp").textContent = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 16);
 
     return db.from("projects")
-      .select("id,client_id,slug,brand,product,step,state,running_sec,cut_count,aspects,created_at,ad_type,ad_type_by,render_mode,render_plan,render_mode_by,render_mode_at,closed_at,closed_by,channels,production_track,production_track_at,option2_brief,option2_brief_at,visual_style,visual_style_by")
+      .select("id,client_id,slug,brand,product,step,state,running_sec,cut_count,aspects,created_at,ad_type,ad_type_by,render_mode,render_plan,render_mode_by,render_mode_at,closed_at,closed_by,channels,production_track,production_track_at,option2_brief,option2_brief_at,visual_style,visual_style_by,test_label")
       // ★ render_mode_at 을 안 읽어 오면 「수정사항 적용 완료」가 영원히
       //   안 뜬다 — 계획이 언제 손봐졌는지를 모르니 늘 「아직」이 되고,
       //   다시 뽑기 버튼이 계속 잠긴 채로 남는다. 화면이 쓰는 칸은
