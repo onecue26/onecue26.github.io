@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="style.css?v=client-concept-readable-260921">
-<link rel="stylesheet" href="stage-render.css?v=needs-261002-v299">
+<link rel="stylesheet" href="stage-render.css?v=needs-261002-v300">
 <style>
 .hero{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:22px}
 .hero h1{margin:0;font-size:27px;letter-spacing:-.02em}
@@ -94,14 +94,14 @@ h2 #editBrief{margin-left:auto}
 <script src="config.js?v=d4d97baa"></script>
 <script src="auth.js?v=fa839557"></script>
 <script src="asset-access.js?v=retry260923"></script>
-<script src="ad-type-materials.js?v=needs-261002-v299"></script>
-<script src="material-gaps.js?v=needs-261002-v299"></script>
+<script src="ad-type-materials.js?v=needs-261002-v300"></script>
+<script src="material-gaps.js?v=needs-261002-v300"></script>
 <script src="shared-stage-renderers.js?v=stage-read-260926-v18"></script>
-<script src="project.js?v=needs-261002-v299s2"></script>
+<script src="project.js?v=needs-261002-v300s2"></script>
 <script>
 /* 09-28 — 폰이 예전 화면 코드를 붙들고 있었다(물리는 준비물 6장 · PC 는 4장). 열 때·화면으로 돌아올 때 배포 버전과 비교해 다르면 새 주소로 다시 연다 */
 (function () {
-  var ME = "needs-261002-v299";
+  var ME = "needs-261002-v300";
   function chk() {
     fetch(location.pathname + "?vchk=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.text(); }).then(function (t) {
       var m = t.match(/needs-\d{6}-v\d+/);

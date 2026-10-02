@@ -980,14 +980,17 @@
       body = "자동 검수(규격·제품 대조·연출)가 끝나면 납품 버튼이 열립니다. 보통 2~5분.";
     } else if (m.review === "ok" && !(Number(m.critical) > 0)) {
       st = "납품 가능"; cls = "ok"; open = true;
-      body = "자동 검수 통과" + (m.my_take ? " — " + esc(String(m.my_take).split("\n")[0]) : "");
+      body = "자동 검수 통과" + (m.my_take ? '<details class="dg-take"><summary>검수자 의견 보기</summary>' + fmtTake(m.my_take) + "</details>" : "");
     } else if (m.deliver_override_at) {
       st = "이대로 납품 선택됨"; cls = "warn"; open = true;
       body = "검수에서 걸린 것이 있지만 관리자가 이대로 보내기로 했습니다 — 「" + esc(m.deliver_override_why || "") + "」 · " + esc(when(m.deliver_override_at));
     } else {
       st = "결정 필요"; cls = "bad";
-      body = "검수에서 걸렸습니다" + (Number(m.critical) > 0 ? " · 치명 " + Number(m.critical) + "건" : "") +
-        (m.my_take ? '<div class="dg-take">' + esc(m.my_take) + "</div>" : "") +
+      // 10-02 Dan 「납품하려니 이건 또 뭐야. 좀 보기 쉽게」 — 걸린 것을 한 줄씩 먼저, 검수자 의견은 접어서 한국어 칸으로
+      var hits = String(m.why || "").split(" / ").filter(function (x) { return x.trim(); });
+      body = "<b>걸린 것 " + (hits.length || Number(m.critical) || 0) + "건</b>" +
+        (hits.length ? '<ul class="dg-hits">' + hits.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>" : "") +
+        (m.my_take ? '<details class="dg-take"><summary>검수자 의견 보기</summary>' + fmtTake(m.my_take) + "</details>" : "") +
         "고쳐서 새 완성본을 만들거나, 아래에 이유를 적고 「이대로 납품」을 고릅니다.";
     }
     if (sup && sup.state === "보충 중") { st = "자동 보충 중"; cls = "wait"; open = false; }
@@ -1002,6 +1005,17 @@
         : "") +
       '<div class="lc-row"><button class="btn" type="button" data-final-send="' + esc(p.id) + '"' + (open ? "" : " disabled") +
       ">" + (open ? "승인하고 광고주에게 납품" : "납품 — " + esc(st)) + "</button></div></div>";
+  }
+
+  /** 검수자 의견(my_take) — 영어 꼬리표(KEEP·KILL·TRY)를 한국어 칸으로 나눠 한 줄씩 (10-02) */
+  function fmtTake(t) {
+    var lab = { KEEP: "살릴 것", KILL: "뺄 것", TRY: "다음 판에" };
+    var parts = String(t || "").split(/\s*(KEEP|KILL|TRY)\s*[:：]\s*/);
+    var out = parts[0].trim() ? '<div class="dg-line">' + esc(parts[0].trim()) + "</div>" : "";
+    for (var i = 1; i + 1 < parts.length; i += 2) {
+      out += '<div class="dg-line"><b>' + lab[parts[i]] + "</b> " + esc(parts[i + 1].trim()) + "</div>";
+    }
+    return out;
   }
 
   /** 받침에 맞는 목적격 조사 — 「납품본을」 「콘티를」 */
