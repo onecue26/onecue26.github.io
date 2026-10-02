@@ -582,7 +582,8 @@
         : "<span>제품에 맞게 저희가 정합니다</span>") + "</p></details>";
     }
     return '<details class="style-fold"' + (cur === "auto" ? " open" : "") + ">" + head +
-      '<p class="hint">같은 장면을 다섯 가지로 그려 봤습니다 · 고른 느낌에 맞춰 아이디어를 짭니다</p>' +
+      // 10-02 Dan 「다섯 가지 아니잖아」 — 화풍이 늘었는데 문구는 그대로였다. 개수는 목록에서 센다
+      '<p class="hint">같은 장면을 ' + STYLES.length + '가지로 그려 봤습니다 · 고른 느낌에 맞춰 아이디어를 짭니다</p>' +
       '<div class="styles" role="radiogroup" aria-label="원하는 화면 느낌">' +
       STYLES.map(function (x) {
         return '<label class="style-card"><input type="radio" name="pstyle" value="' + x[0] + '"' + (cur === x[0] ? " checked" : "") +
