@@ -73,6 +73,12 @@
     ooh_screen: "일반 전광판", store_signage: "매장 사이니지",
   };
 
+  // 옵션 2(브리프 방식) — 구성·각본·콘티 단계가 없다
+  var MAIL_O2 = {
+    develop: ["제작에 들어갑니다", "고르신 콘셉트로 제작 준비를 시작했습니다."],
+    storyboard: ["제작에 들어갑니다", "고르신 콘셉트로 제작 준비를 시작했습니다."],
+    anchors: ["제작에 들어갑니다", "고르신 콘셉트로 제작을 시작했습니다. 완성되면 바로 보내드리겠습니다."],
+  };
   // 단계별로 회신 문구가 다르다
   var MAIL = {
     brief: ["의뢰를 받았습니다", "보내주신 내용을 확인했습니다. 전략과 컨셉을 준비해 연락드리겠습니다."],
@@ -1568,6 +1574,8 @@
   // 그래서 문구를 화면에 펼쳐 보여주고 복사할 수 있게 한다 — 메일 앱은 곁들이는 선택지다
   function mailText(p) {
     var m = MAIL[p.step] || ["진행 상황을 알려드립니다", "아래에서 확인하실 수 있습니다."];
+    // 10-03 Dan 「옵션 1, 2 제대로 분리해야지」 — 옵션 2 에는 구성·각본·콘티가 없는데 회신 문구가 「승인해 주신 콘티대로」라고 했다
+    if (p.production_track === "option2" && MAIL_O2[p.step]) m = MAIL_O2[p.step];
     var name = [p.brand, p.product].filter(Boolean).join(" ");
     return {
       subject: "[onecue] " + name + " — " + m[0],
