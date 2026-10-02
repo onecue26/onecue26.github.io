@@ -1353,6 +1353,14 @@
     // 계획이 없으면 무엇을 몇 장 만들지 알 수 없다. 그때 뽑으면 그때그때
     // 달라지고, 달라진 것을 아무도 기록하지 않는다.
     if (!plan || !plan.calls.length) {
+      // 10-03 Dan 「제작 계획이 먼저 필요합니다 떠 있고 버튼이 안 보인다」 — 옵션 2 는 구성·각본이 없는데 그 단계로 가라고 했다.
+      //   브리프를 저장하면 AI가 오더를 쓰는 중이므로 그대로 말한다
+      if (p.production_track === "option2") {
+        return '<div class="lc lc-start"' + tag + ">" +
+          head(p.orderWriting ? "⏳ 영상 오더를 쓰고 있습니다" : "브리프를 저장하면 시작합니다",
+               p.orderWriting ? "AI가 저장된 브리프로 영상 오더를 씁니다 · 끝나면 인물 앵커를 자동으로 만들고, 다 되면 여기에 「승인」 버튼이 뜹니다 · 보통 몇 분"
+                              : "위 브리프 칸을 고쳐 「브리프 저장」을 누르면 AI가 영상 오더 → 인물 앵커를 이어서 만듭니다") + "</div>";
+      }
       return '<div class="lc lc-start"' + tag + ">" +
         head("제작 계획이 먼저 필요합니다",
              "한 판으로 뽑을지 컷별로 뽑을지에 따라 만들 것이 달라집니다") +
@@ -3825,6 +3833,10 @@
   /** 10-02 Dan 「다시 돌리기 눌렀는데 진행 중이라던가 아무 표시가 없다」 — 작업기가 맡은 일이 있으면 카드 맨 위에 「돌고 있음」 */
   function runningLine(p) {
     var j = p.job;
+    if (!j && p.orderWriting && !p.stopped) {
+      return '<div class="client-said worker-run"><b>⏳ 진행 중 — 저장된 브리프로 영상 오더를 쓰고 있습니다</b>' +
+        '<span class="said">끝나면 인물 앵커를 자동으로 만들고, 다 되면 「제작 자료」 칸에 「승인」 버튼이 뜹니다 · 보통 몇 분</span></div>';
+    }
     if (!j || p.stopped) return "";
     var what = { facts: "제품·자료 확인 — AI가 사진과 의뢰를 읽고 있습니다", strategy: "전략 설계를 쓰고 있습니다",
       concepts: "콘셉트 5안을 쓰고 있습니다", develop: "구성·각본을 쓰고 있습니다", storyboard: "콘티를 그리고 있습니다",
@@ -5681,7 +5693,7 @@
           db.from("events").select("project_id,kind,to_step,ts,payload")
             .in("kind", ["production_enroll_requested", "production_enrolled", "astra_draft",
               // 작업기가 멈췄다 / 다시 돌았다 — 화면에 「어디서 왜 멈췄나」를 띄운다 (09-24)
-              "worker_stopped", "worker_retry", "facts_written", "board_made", "order_written", "anchors_skipped",
+              "worker_stopped", "worker_retry", "facts_written", "board_made", "order_written", "anchors_skipped", "brief_saved",
               // 누른 뒤 작업기가 검사에 걸려 되돌렸다 — 이유를 버튼 위에 (09-27 시험 한 바퀴: 이유 없이 버튼만 다시 떴다)
               "stage_paused"])
             .in("project_id", ids).order("ts", { ascending: false }),
@@ -5878,6 +5890,13 @@
                   "order_written", "anchors_skipped", "astra_draft"].indexOf(e.kind) >= 0;
               });
               return mine.length && mine[0].kind === "worker_stopped" ? mine[0] : null;
+            })();
+            // 10-03 — 옵션 2: 브리프 저장 뒤 아직 오더가 안 나왔으면 「오더 쓰는 중」(작업 표에 줄이 없어 진행 중 표시가 안 떴다)
+            p.orderWriting = (function () {
+              var m = enrollEvents.filter(function (e) {
+                return e.project_id === p.id && ["brief_saved", "order_written", "worker_stopped"].indexOf(e.kind) >= 0;
+              });
+              return !!(m.length && m[0].kind === "brief_saved" && p.step === "anchors");
             })();
             p.paused = enrollEvents.filter(function (e) { return e.project_id === p.id && e.kind === "stage_paused"; });
             p.productionEnrolled = enrollEvents.filter(function (e) {
