@@ -3160,6 +3160,22 @@
           verSeq[cc] = (verSeq[cc] || 0) + 1;
           verOf[f.id] = verSeq[cc];
         });
+      // ★ 10-02 Dan 「지난 버전 기준으로 했으면 V1.1 이런 식으로 구분해야」 — 완성본은 어느 영상 판으로 만들었는지(source_asset)를
+      //   앞자리로 센다. 영상 v4 로 만든 완성본은 v4.1·v4.2, 옛 영상 v3 으로 만든 것은 v3.x 라 섞이지 않는다
+      if (step === "post") {
+        var clipVer = {}, cn = 0, fseq = {};
+        (p.files || []).filter(function (f) { return f.kind === "clip"; })
+          .sort(function (x, y) { return String(x.created_at || "") < String(y.created_at || "") ? -1 : 1; })
+          .forEach(function (f) { cn += 1; clipVer[f.id] = cn; });
+        (p.files || []).filter(function (f) { return want.indexOf(f.kind) >= 0; })
+          .sort(function (x, y) { return String(x.created_at || "") < String(y.created_at || "") ? -1 : 1; })
+          .forEach(function (f) {
+            var src = (f.meta || {}).source_asset || "";
+            if (!clipVer[src]) return;
+            fseq[src] = (fseq[src] || 0) + 1;
+            verOf[f.id] = clipVer[src] + "." + fseq[src];
+          });
+      }
       var verLabel = function (f) {
         var cc = (f.meta || {}).covers_call || "";
         return (step === "anchors" && cc ? cc + " " : "") + "v" + (verOf[f.id] || "?");
@@ -3305,7 +3321,7 @@
       }
       if (!mine.length) return oldBox();
       return '<div class="made" data-made-step="' + esc(step) + '"><span class="made-lbl">만든 것 ' + mine.length +
-        " (지금 " + (step === "anchors" ? mine.map(verLabel).join(" · ") : "v" + Math.max.apply(null, mine.map(function (f) { return verOf[f.id] || 0; }))) +
+        " (지금 " + (step === "anchors" || step === "post" ? mine.map(verLabel).join(" · ") : "v" + Math.max.apply(null, mine.map(function (f) { return verOf[f.id] || 0; }))) +
         ") · 눌러서 크게 · 영상은 두 번 누르십시오</span>" +
         mine.map(function (f, i) { return one(f, i, isPast(f)); }).join("") +
         "</div>" + oldBox();
