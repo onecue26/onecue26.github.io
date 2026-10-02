@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>관리자 — onecue</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="style.css?v=1f228d76">
+<link rel="stylesheet" href="stage-render.css?v=needs-261002-v296">
+<style>
+/* 관리자 화면 — 훑고 조작하는 곳이라 정보 밀도를 우선한다 */
+
+/* 새 의뢰 알림 — 목록을 하나로 합쳤으니 여긴 「어디를 보라」만 가리킨다 */
+.newbar{background:var(--cue-soft);border:1px solid var(--cue);border-radius:10px;
+  padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  margin-bottom:18px;font-size:14px}
+.newbar b{color:var(--cue)}
+.newbar a{color:var(--ink);font-weight:500;text-decoration:underline;
+  text-underline-offset:3px}
+
+.wrk{background:var(--panel);border:1px solid var(--rule);border-radius:11px;
+  padding:0;margin-bottom:12px;overflow:hidden}
+.wrk.fresh{border-color:var(--cue);border-left-width:4px}
+.project-fold>summary{list-style:none;cursor:pointer}.project-fold>summary::-webkit-details-marker{display:none}
+.project-summary{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;
+  padding:15px 17px;background:var(--panel)}
+.project-summary:hover{background:var(--sunk)}
+.project-summary-side{display:flex;align-items:center;gap:12px}
+.project-stage{font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;color:var(--cue);
+  border:1px solid var(--rule);background:var(--ground);padding:4px 8px;white-space:nowrap}
+.fold-icon{font-size:22px;color:var(--muted);line-height:1;transform:rotate(0deg);transition:transform .15s}
+.project-fold[open] .fold-icon{transform:rotate(180deg)}
+.project-body{display:grid;gap:12px;padding:0 17px 15px;border-top:1px solid var(--rule)}
+.project-ways{justify-self:end;flex-direction:row!important;flex-wrap:wrap;margin-top:12px}
+.wrk .top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:start}
+.wrk .name{font-weight:700;font-size:16.5px;display:flex;align-items:center;gap:8px}
+.wrk .name .brand-name{display:inline-flex;align-items:center;gap:5px;color:var(--muted);font-size:12px;font-weight:700}
+.wrk .name .brand-name em{font-family:"JetBrains Mono",monospace;font-style:normal;font-size:8.5px;letter-spacing:.07em;color:var(--cue);border:1px solid var(--cue);padding:2px 4px}
+.wrk .name .product-name{font-size:17px;color:var(--ink)}
+.wrk .name .new{font-family:"JetBrains Mono",monospace;font-size:10px;font-weight:700;
+  letter-spacing:.08em;background:var(--cue);color:#fff;padding:3px 7px;border-radius:4px}
+.wrk .meta{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--muted);
+  margin-top:3px}
+.wrk .have{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.wrk .have span{font-family:"JetBrains Mono",monospace;font-size:11px;padding:2px 7px;
+  border-radius:5px;background:var(--sunk);border:1px solid var(--rule);color:var(--faint)}
+.wrk .have span.on{background:var(--live-soft);border-color:transparent;color:var(--live)}
+.wrk .ways{display:flex;flex-direction:column;gap:6px;align-items:stretch}
+@media(max-width:600px){.wrk .ways{flex-direction:row;flex-wrap:wrap}}
+@media(max-width:600px){.wrk .top{grid-template-columns:1fr}.project-summary{grid-template-columns:minmax(0,1fr)}.project-summary-side{justify-content:space-between}}
+
+/* 광고주가 쓴 것 — 제일 먼저 읽어야 하니 카드 안에 그대로 편다 */
+.said{background:var(--sunk);border:1px solid var(--rule);border-radius:9px;
+  padding:12px 14px;font-size:14px;line-height:1.65;white-space:pre-wrap}
+.said .lbl{display:block;font-family:"JetBrains Mono",monospace;font-size:10.5px;
+  letter-spacing:.08em;color:var(--faint);margin-bottom:5px}
+.said .sub{display:block;font-size:12.5px;color:var(--muted);margin-top:6px}
+/* 1차 검수 — 광고주에게 넘기기 전에 우리가 보는 자리 */
+.check{background:var(--hold-soft);border:1px solid var(--hold);border-radius:9px;
+  padding:13px 15px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.check .txt{flex:1;min-width:220px}
+.check b{display:block;font-size:14.5px}
+.check span{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.check.sent{background:var(--live-soft);border-color:var(--live)}
+.check.back{background:var(--cue-soft);border-color:var(--cue)}
+
+.replan-box{margin:14px 0 0;padding:13px 14px;background:var(--sunk);border:1px solid var(--rule);
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 10px;align-items:end}
+.replan-box label,.replan-box b{grid-column:1/-1;font-size:13.5px;font-weight:700}
+.replan-box textarea{width:100%;box-sizing:border-box;resize:vertical;min-height:70px;
+  border:1px solid var(--rule);background:var(--panel);color:var(--ink);padding:10px 11px;
+  font:inherit;line-height:1.5}
+.replan-box small,.replan-box span{grid-column:1/-1;color:var(--muted);font-size:11.5px}
+.replan-box.busy{display:block;border-color:var(--hold)}
+.replan-box.busy span{display:block;margin-top:3px}
+.executor-history{margin:10px 0 14px;padding:10px 12px;border-left:3px solid var(--cue);background:var(--sunk)}
+.executor-history>strong{display:block;margin-bottom:7px;font-size:12px}.executor-history.empty>span{font-size:12px;color:var(--muted)}
+.ai-update{display:inline-flex;align-items:center;margin-right:7px;padding:3px 7px;border-radius:3px;
+  font-size:10px;font-weight:900;letter-spacing:0;vertical-align:middle}
+.ai-update.working{color:#7a4b00;background:#fff1bf;border:1px solid #dcae32}
+.ai-update.done{color:#fff;background:var(--cue);border:1px solid var(--cue)}
+.updatebar{border-color:var(--cue);background:var(--cue-soft)}
+.executor-step{display:grid;grid-template-columns:minmax(110px,.7fr) minmax(0,1.15fr) minmax(0,1.15fr);
+  gap:6px 12px;padding:6px 0;border-top:1px solid var(--rule);align-items:start}
+.executor-step span{font-size:11px;color:var(--muted);font-weight:700}.executor-step b{font-size:12px;overflow-wrap:anywhere}
+@media(max-width:700px){.executor-step{grid-template-columns:1fr}.executor-step span{margin-top:2px}}
+/* 재기획 범위 — 전체인지 고른 것만인지. 고르지 않은 안은 건드리지 않는다 */
+.replan-scope,.replan-keys{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
+.replan-scope label,.replan-pick{display:inline-flex;align-items:center;gap:5px;font-size:13px;cursor:pointer}
+.replan-scope input,.replan-pick input{margin:0}
+.replan-keys[hidden]{display:none}
+.replan-keys-label{font-size:12px;color:var(--muted)}
+.replan-pick span{min-width:14px;font-weight:700;font-variant-numeric:tabular-nums}
+@media(max-width:700px){.replan-box{grid-template-columns:1fr}.replan-box .btn{width:100%}}
+
+/* 「다시 만들어 주세요」 — 지나치면 안 되니 색을 준다.
+   처리하고 나면 색을 뺀다. 계속 빨가면 무엇이 남았는지 알 수 없다 */
+.said.redo{background:var(--cue-soft);border-color:var(--cue)}
+.said.redo .lbl{color:var(--cue)}
+.said.redo.ok{background:var(--sunk);border-color:var(--rule);color:var(--muted)}
+.said.redo.ok .lbl{color:var(--live)}
+
+/* 연락처 */
+.wrk .who{border-top:1px solid var(--rule);padding-top:11px;font-size:13.5px;
+  color:var(--muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.wrk .who b{color:var(--ink)}
+.wrk .who a{color:var(--cue)}
+.wrk .who .mailbtn{margin-left:auto;font-size:12.5px;padding:5px 11px}
+
+/* 회신 문구 — mailto 만 믿지 않는다. 기본 메일 앱이 없으면 아무 일도 안 일어난다 */
+.mailbox{background:var(--sunk);border:1px solid var(--rule);border-radius:9px;
+  padding:14px 16px}
+.mail-h{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.08em;
+  color:var(--faint);margin-top:10px}
+.mail-h:first-child{margin-top:0}
+.mail-v{font-size:14px;margin-top:2px}
+/* 제목·본문은 읽기만 하는 게 아니라 고쳐 쓰는 칸이다 */
+.mail-i,.mail-b{width:100%;box-sizing:border-box;margin:4px 0 0;
+  background:var(--panel);border:1px solid var(--rule);border-radius:7px;
+  padding:11px 13px;font-family:inherit;font-size:13.5px;line-height:1.7;
+  color:var(--ink);display:block}
+.mail-b{resize:vertical;min-height:150px;overflow:hidden}
+.mail-i:focus,.mail-b:focus{outline:2px solid var(--cue);outline-offset:1px;
+  border-color:var(--cue)}
+.mail-act{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.mail-act .msg{font-size:13px}
+.mail-act .msg.ok{color:var(--live)}
+.mail-act .msg.err{color:var(--cue)}
+
+/* 단계 */
+.steps{display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid var(--rule);padding-top:11px}
+.steps button{font-family:"JetBrains Mono",monospace;font-size:11.5px;padding:5px 10px;
+  border-radius:6px;border:1px solid var(--rule);background:var(--sunk);color:var(--muted);
+  cursor:pointer}
+.steps button:hover{border-color:var(--cue);color:var(--ink)}
+.steps button.at{background:var(--cue);border-color:var(--cue);color:#fff;font-weight:700}
+.steps button:disabled{opacity:.45;cursor:default}
+.steps .lbl{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--faint);
+  align-self:center;margin-right:2px}
+.production-progress{align-items:center;gap:10px}
+.production-progress .current-step{font-size:14px;color:var(--ink);margin-right:auto}
+.production-progress .progress-state{font-size:12.5px;color:var(--muted)}
+.production-progress .progress-state.wait{color:#9a6500}
+.production-progress .progress-state.ok{color:var(--live);font-weight:700}
+.production-progress .production-start{margin-left:auto}
+.concept-review{border-top:1px solid var(--rule);padding-top:14px}
+.review-head span{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--cue);font-weight:700}
+.review-head h3{font-size:19px;margin:4px 0 2px;letter-spacing:0}
+.review-head p{font-size:12.5px;color:var(--muted);margin:0 0 12px}
+.review-strategy{background:var(--sunk);border-left:3px solid var(--cue);padding:11px 13px;margin-bottom:8px}
+.review-strategy span,.review-strategy b,.review-strategy small{display:block;letter-spacing:0}
+.review-strategy span{font-size:10px;color:var(--faint)}
+.review-strategy b{font-size:14px;margin-top:3px}
+.review-strategy small{font-size:11.5px;color:var(--muted);margin-top:4px}
+.concept-row{display:grid;grid-template-columns:42px minmax(0,1fr);gap:12px;padding:13px 2px;border-top:1px solid var(--rule)}
+.concept-row.recommended{border-left:3px solid var(--cue);padding-left:10px;background:color-mix(in srgb,var(--cue) 4%,transparent)}
+.concept-key{font-family:"JetBrains Mono",monospace;font-size:22px;font-weight:800;color:var(--muted)}
+.concept-key em{display:block;font-style:normal;font-size:9px;color:var(--cue);margin-top:3px}
+.concept-copy h4{font-size:15px;margin:0 0 4px;letter-spacing:0}
+.concept-copy p{font-size:13px;margin:0 0 8px;color:var(--ink);line-height:1.55}
+.concept-copy dl{display:grid;grid-template-columns:42px minmax(0,1fr);gap:3px 8px;margin:0;font-size:11.5px;line-height:1.5}
+.concept-copy dt{color:var(--faint)}.concept-copy dd{margin:0;color:var(--muted)}
+.concept-copy small{display:block;color:var(--cue);margin-top:7px;line-height:1.5}
+.flow-wrap{border-top:1px solid var(--rule);padding-top:12px}
+.flow-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.flow-head .lbl{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--faint)}
+.now-owner{font-size:12.5px;color:var(--muted)}
+.now-owner b{color:var(--cue)}
+.flow-track{display:grid;grid-template-columns:1fr;gap:6px;padding-bottom:4px}
+/* 카드 머리 진행 막대 (09-25) — 광고주 화면 막대와 같은 규칙: 칸 수는 자식 수를 따라간다 */
+.abar-wrap{margin-top:10px;overflow-x:auto;max-width:980px}
+.track-sw{display:inline-flex;gap:0;margin-bottom:6px;border:1px solid var(--rule,#e2ded6);border-radius:999px;overflow:hidden}
+.track-sw button{font:11px/1.4 inherit;padding:3px 12px;border:0;background:transparent;color:var(--muted);cursor:pointer}
+.track-sw button.on{background:var(--cue,#c0392b);color:#fff;font-weight:700}
+.track-sw.locked{opacity:.6}.track-sw button:disabled{cursor:not-allowed}
+.track-help{display:inline-block;margin-left:6px;vertical-align:top;position:relative}
+.track-help>summary{list-style:none;cursor:pointer;width:20px;height:20px;border-radius:50%;border:1px solid var(--rule,#e2ded6);font-size:11px;line-height:18px;text-align:center;color:var(--muted)}
+.track-help>summary::-webkit-details-marker{display:none}
+.track-help>summary::after{content:none!important;display:none!important}
+.style-thumb{width:22px;height:29px;object-fit:cover;border-radius:4px;margin:0 6px;vertical-align:middle}
+.style-line summary{cursor:pointer}.style-open{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;margin:10px 0 4px}.style-open img{width:min(220px,60vw);aspect-ratio:3/4;height:auto;object-fit:cover;border-radius:8px;border:1px solid var(--rule,#e2ded6)}.style-open p{margin:0 0 8px;font-size:13px}.style-open small{display:block;margin-top:6px;color:var(--muted);font-size:11.5px}
+.style-sel{margin-left:8px;font:inherit;font-size:12.5px;padding:3px 6px;border:1px solid var(--rule,#e2ded6);border-radius:14px;background:var(--paper,#fff);vertical-align:top}.style-sel:disabled{opacity:.6}
+.track-row{margin-top:10px;max-width:980px}.track-row:empty{display:none}
+.track-help[open]{display:block;margin-left:0}.track-help>div{margin:8px 0 4px;max-width:560px;background:var(--paper,#fff);border:1px solid var(--rule,#e2ded6);border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.55}
+.track-help p{margin:0 0 6px}
+.abar,.abar-names{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(58px,1fr);gap:3px;min-width:640px}
+.abar i{height:5px;border-radius:2px;background:var(--rule,#e2ded6);display:block}
+.abar i.done{background:var(--live,#2f7a4b)}.abar i.now{background:var(--cue,#c0392b)}
+.abar-names{margin-top:4px}.abar-names span{font-size:10px;line-height:1.3;color:var(--faint);text-align:center;font-family:"JetBrains Mono",monospace;word-break:keep-all;overflow-wrap:anywhere}
+.abar-names span.now{color:var(--cue);font-weight:700}.abar-names span.done{color:var(--muted)}
+/* 087 · 광고 필수 요소 */
+.ess{margin:0 0 12px;padding:10px 12px;border:1px solid var(--rule,#e2ded6);border-radius:8px;background:#fff}
+.ess-h{font-size:12px;color:var(--faint);margin-bottom:6px;font-weight:700}
+.ess-row{display:grid;grid-template-columns:minmax(80px,170px) 1fr;gap:10px;font-size:13px;padding:3px 0}
+.ess-row b{font-weight:600;color:var(--muted)}.ess-row.miss span{color:var(--cue);font-weight:700}
+/* 088 · 콘티 대조 검사 */
+.pchk{margin:0 0 12px;padding:12px 14px;border-radius:8px;border:1px solid var(--rule,#e2ded6);background:#fff;display:flex;flex-direction:column;gap:6px}
+.pchk.bad{border-color:var(--cue);background:#fdf1f1}.pchk.ok{border-color:#9bc9a8;background:#f2faf4}.pchk.wait{background:#f6f3ec}
+.pchk b{font-size:14px}.pchk span{font-size:12.5px;color:var(--muted)}.pchk .pchk-when{color:var(--faint)}
+.pchk ul{margin:4px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.pchk li{font-size:13px;line-height:1.5}.redo-reply{margin:6px 0 10px;padding:9px 12px;border-left:3px solid #2f7a4b;background:#f2faf4;border-radius:4px;display:flex;flex-direction:column;gap:3px;font-size:13px}.redo-reply.wait{border-color:#8aa2c8;background:#f3f6fb}.redo-reply em{font-style:normal;font-size:12px;color:#2f7a4b}.redo-reply span{line-height:1.55}
+.pchk.ok summary{cursor:pointer;list-style:none}.pchk.ok summary b{font-size:13px;color:#2f7a4b}.used-anchors{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 10px;font-size:12.5px;color:var(--muted)}.used-anchors img{height:54px;border-radius:4px;border:1px solid var(--rule,#e2ded6);cursor:zoom-in}
+.past-talk{margin-top:8px;font-size:12.5px;border-top:1px dashed var(--rule,#ddd);padding-top:6px}.past-talk summary{cursor:pointer;color:var(--muted)}.pt-row{display:grid;gap:2px;margin:6px 0}.pt-row b{font-size:12px;color:var(--muted)}.pt-row span{white-space:pre-wrap;line-height:1.5}
+.dg-state{display:inline-block;margin:4px 0;padding:2px 10px;border-radius:999px;font-size:12.5px;font-weight:700}.dg-state.wait{background:#eef1f6;color:#44506a}.dg-state.ok{background:#e1f0e6;color:#2f7a4b}.dg-state.warn{background:#f7ecd9;color:#8a5a0f}.dg-state.bad{background:#f8e1e1;color:#a12828}.dg-take{white-space:pre-wrap;margin:6px 0;padding:8px;border-radius:6px;background:var(--soft,#f3f3f3);font-size:12.5px}.deliver-gate input[type=text]{flex:1;min-width:0;padding:7px 10px;border:1px solid var(--rule,#ddd);border-radius:6px;font:inherit}
+.delivered-final{display:grid;gap:6px;margin:10px 0;padding:12px;border-radius:10px;border:2px solid #2f7a4b;background:#f1f8f3}.delivered-final b{color:#2f7a4b}.delivered-final video{max-height:420px;max-width:100%;border-radius:6px;background:#000}.delivered-final small{color:var(--muted)}.made-one .gone{color:var(--muted);font-size:12px}
+.look-line{display:block;font-size:12.5px;color:var(--muted);margin-top:3px}.look-line b,.need-list li .look-line b{display:inline;color:var(--ink,#222)}.pchk li.hi b{color:var(--cue)}.pchk li small{display:block;color:var(--muted);font-size:12px}
+.flow-step{min-width:0;border:1px solid var(--rule);background:var(--sunk);position:relative}
+.flow-step summary{cursor:pointer;list-style:none}.flow-step summary::-webkit-details-marker{display:none}
+.client-files{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}.client-files figure{margin:0;width:140px}.client-files img{width:140px;height:140px;object-fit:contain;background:#fff;border:1px solid #ddd;border-radius:6px;cursor:zoom-in}.client-files figcaption{font-size:11px;color:#777;margin-top:3px;word-break:break-all}
+.msg-state{font-size:12px;font-weight:600;padding:2px 8px;border-radius:10px;margin-left:6px}.msg-state.wait{background:#fff4e0;color:#9a6a00}.msg-state.got{background:#e5f2ea;color:#2f6b4f}.msgbox .msg.out.sent{background:#f4f2f0;border-left:3px solid #bbb}.msg-new{margin-top:8px}.msg-new>summary{cursor:pointer;font-size:13px;color:#8a2b1f}
+.msg-digest{margin-top:8px;padding:8px 10px;background:#fff;border:1px solid #cfe3d6;border-radius:6px;font-size:12px;display:flex;flex-direction:column;gap:2px}.msg-digest b{font-size:12px;color:#1f7a4d;margin-top:4px}.msg-digest.wait{border-style:dashed;color:#1d4ed8;border-color:#bcd3fb}.said .sub.added{color:#1f7a4d;font-weight:600}
+.mc-form{margin-top:10px;display:flex;flex-direction:column;gap:10px;max-width:820px}.mc-guide{display:flex;flex-direction:column;gap:2px;font-size:12px;color:#555;background:#fafafa;border:1px solid #eee;border-radius:6px;padding:8px 10px}.mc-one{border:1px solid #e3ddd8;border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:6px}.mc-one input,.mc-one textarea,.mc-msg{padding:7px;font:inherit}.mc-reco{font-size:12px}.mc-form .btn{align-self:flex-start}
+.review-actions{margin-top:14px;padding:12px 14px;border:1px solid #f0d9a8;background:#fbf3e3;border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.review-actions .txt{display:flex;flex-direction:column;gap:2px}.review-actions .txt span{font-size:12px;color:#666}.ra-row{display:flex;gap:8px;flex-wrap:wrap}.ms-field{display:flex;flex-direction:column;gap:4px;font-size:13px}.ms-field span{font-weight:600;color:#333}.mc-form .ms-field input,.mc-form .ms-field textarea,.mc-one input,.mc-one textarea,.mc-msg{width:100%;box-sizing:border-box;font:inherit;padding:8px 10px;border:1px solid #d8d2cc;border-radius:6px;background:#fff}.plan-wrap .mc-form{max-width:none}.fact-list{margin:0;padding-left:18px}.fact-list li{margin:2px 0}dd.pre{white-space:pre-line}
+.plan-wrap{grid-column:1/-1;display:block;flex-basis:100%;width:100%;margin-top:10px}.plan-wrap .plan-start{display:flex}
+.dv-time{display:flex;gap:10px}.dv-time .ms-field{flex:1}.ms-summary.glance{max-width:none;gap:6px;font-size:14px;line-height:1.6}.strategy-full{margin-top:10px}.strategy-full>summary{font-size:13px;color:#666}.board-sheet{grid-column:1/-1;display:flex;flex-direction:column;gap:6px;margin:6px 0 10px}.board-sheet img{width:100%;max-width:980px;border:1px solid #ddd;border-radius:8px;cursor:zoom-in;background:#fff}.board-sheet span{font-size:12px;color:#777}
+.board-old{grid-column:1/-1;margin:6px 0}.board-old>summary{font-size:13px;color:#666}
+.ms-more{font-size:12px;color:#777}.mc-reco{align-self:flex-start}
+.ms-summary{display:flex;flex-direction:column;gap:3px;margin-top:8px;padding:10px 12px;border:1px solid #e3ddd8;border-radius:8px;background:#fffdf9;font-size:13px;max-width:820px}.ms-summary b{margin-right:6px}.ms-by{font-size:12px;color:#1d4ed8;font-weight:600}
+.plan-start{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px;padding:10px 12px;border:1px solid #bcd3fb;background:#f3f7ff;border-radius:8px}.plan-start span{font-size:13px;color:#1d4ed8}
+.msgbox{margin:10px 0;border:1px solid #e6dcd6;border-radius:8px;padding:8px 12px;background:#fff}.msgbox>summary{cursor:pointer;font-weight:600;font-size:14px}.msg{margin:8px 0;padding:8px 10px;border-radius:8px;font-size:13px;max-width:720px}.msg.out{background:#fdf0ec}.msg.in{background:#eef6f0;margin-left:40px}.msg.draft{border:1px dashed #c2352a;background:#fff}.msg-head{font-size:12px;color:#777;margin-bottom:4px}.msg-body{white-space:pre-wrap}.msg .btn{margin-top:6px}.msg-form{display:flex;flex-direction:column;gap:6px;margin-top:8px;max-width:720px}.msg-form select{align-self:flex-start;padding:4px}.msg-form textarea{padding:8px}.msg-form .btn{align-self:flex-start}
+.close-box{border:1px solid #cfe3d6;background:#f3faf5;border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}.close-box span{font-size:12px;color:#555}.close-box p{margin:4px 0;font-size:13px;color:#444}.close-box .btn{align-self:flex-start}.close-box.done b{color:#2f6b4f}.project-stage.closed{background:#e5f2ea;color:#2f6b4f}.closed-head{margin:28px 0 8px;font-size:14px;color:#777;border-top:1px solid #ddd;padding-top:14px}
+.deliver-wrap{grid-column:1/-1;display:flex;flex-direction:column;gap:10px;max-width:760px}.deliver-final{margin:4px 0}.deliver-final video{width:220px;max-height:390px;border-radius:8px;background:#000;display:block}.deliver-final small{color:#666}
+.back-box{margin-top:12px;font-size:13px}.back-box summary{cursor:pointer;color:#8a2b1f}.back-box .lc-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.back-box input{flex:1;min-width:220px;padding:6px}
+.cost-statement{background:#fff;border:1px solid #e6d9d4;border-radius:8px;padding:14px 16px}.cost-statement h4{margin:0 0 8px;font-size:15px}.stmt-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;cursor:pointer;list-style:none}.stmt-head::-webkit-details-marker{display:none}.stmt-head h4::before{content:'▸ ';color:#999}.cost-statement[open] .stmt-head h4::before{content:'▾ '}.cost-statement[open] .stmt-head{margin-bottom:6px}.stmt-sum{font-weight:600;color:#9a3412;font-size:13px;margin-left:6px}.cost-statement h4{margin:0}.stmt-rate{text-align:right;font-size:12px;color:#444;line-height:1.5}.stmt-rate span{color:#999;font-size:11px}
+.stmt{border-collapse:collapse;width:100%;font-size:13px}.stmt th,.stmt td{padding:5px 8px;border-bottom:1px solid #f0e8e5;text-align:left;vertical-align:top}.stmt thead th{font-size:12px;color:#777;border-bottom:1px solid #d8cbc6}
+.stmt .num{text-align:right;white-space:nowrap}.stmt .n{width:24px;color:#999}.stmt .sub{font-size:11px;color:#888}.stmt tr.grp th{background:#faf5f3;font-size:12px;color:#555}
+.stmt tr.subtotal td{font-weight:600;background:#fcfaf9}.stmt tr.discarded td{color:#9a3412}.stmt .st{font-size:11px;padding:1px 6px;border-radius:9px;background:#eee;white-space:nowrap;display:inline-block}.stmt .st.gone{background:#fde8e1;color:#9a3412}.stmt .st.kept{background:#e5f2ea;color:#2f6b4f}
+.stmt.total{margin-top:10px}.stmt.total tr.grand td{font-weight:700;font-size:14px;border-top:2px solid #333;border-bottom:none}.stmt-note{font-size:11px;color:#777;margin:8px 0 0}
+.flow-summary .cost-chip{grid-column:2/-1;color:#9a3412;font-weight:600}.cost-table{border-collapse:collapse;font-size:12px;margin-top:6px;width:100%}.cost-table th,.cost-table td{border-bottom:1px solid #eee;padding:3px 6px;text-align:left}.cost-table tr.discarded td{color:#9a3412}.cost-list em.gone{color:#9a3412;font-style:normal}.cost-list em.kept{color:#2f6b4f;font-style:normal}
+.flow-summary .signoff{grid-column:2/-1;color:#2f6b4f;font-weight:600}
+.flow-summary{display:grid;grid-template-columns:54px minmax(130px,.7fr) auto auto auto minmax(150px,1fr);gap:9px;align-items:center;padding:9px 10px}
+.flow-step strong,.flow-step small{letter-spacing:0}
+.flow-step strong{font-size:12px;color:var(--muted)}
+.flow-step small{font-size:10.5px;line-height:1.35;color:var(--faint)}
+.flow-detail{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 14px;padding:9px 10px 11px 73px;border-top:1px solid var(--rule)}
+/* ★ 자손 전체가 아니라 **직계 자식만** 이다. 자손으로 두면 단계 본문 속
+   장면표·컷의 라벨 <b> 까지 grid-column:1/-1 을 받아 두 열을 다 먹고,
+   짝이 되는 <span> 이 90px 짜리 첫 열로 밀려 글이 서너 글자마다 끊긴다.
+   「글이 한쪽에 몰려 보인다」가 바로 이것이었다. */
+.flow-detail>span,.flow-detail>b{font-size:11px;letter-spacing:0;overflow-wrap:anywhere}
+.flow-detail>b{grid-column:1/-1;color:var(--cue)}
+.stage-version{font-style:normal;font:700 10px/1 "JetBrains Mono",monospace;color:var(--ink);border:1px solid var(--rule);padding:4px 6px;background:var(--panel)}
+.stage-content,.stage-empty,.flow-detail>.concept-review,.flow-detail>.check,
+.flow-detail>.exec-pick,.flow-detail>.deliver-box,.flow-detail>.choice-gate,
+.flow-detail>.choice-note,.flow-detail>.stage-cuts,.flow-detail>.stage-ways,
+/* 아래 셋은 나중에 들어온 것이다. 여기 적히지 않으면 2열 격자의 한 열만 먹어
+   왼쪽에 몰리고 오른쪽이 텅 빈다 — 실측 45%. 단계 본문은 전부 전체폭이다 */
+.flow-detail>.board-state,.flow-detail>.chosen-summary,
+.flow-detail>.other-concepts,.flow-detail>.concepts,
+.flow-detail>.needs,.flow-detail>.made-list{grid-column:1/-1}
+/* ★ 실행 주체 선택 게이트 — 고르기 전에는 작업이 하나도 만들어지지 않는다.
+   그래서 이 블록이 단계 상세의 맨 위에 오고, 가장 먼저 읽히게 둔다 */
+.choice-gate{margin:0 0 10px;padding:13px 14px;background:var(--cue-soft);
+  border:1px solid var(--cue);border-left-width:3px;border-radius:8px;display:grid;gap:8px}
+.choice-gate>b{font-size:13.5px;font-weight:800;color:var(--ink)}
+.choice-gate>small{font-size:11.5px;color:var(--muted);line-height:1.65}
+.choice-actions{display:flex;flex-wrap:wrap;gap:8px}
+.choice-actions .btn{width:auto}
+.choice-actions .btn[disabled]{opacity:.5;cursor:not-allowed}
+.choice-problem{font-size:11.5px;line-height:1.6;color:#9a2222;overflow-wrap:anywhere}
+.choice-note{margin:0 0 10px;padding:10px 12px;background:var(--sunk);
+  border:1px solid var(--rule);border-radius:8px;display:grid;gap:4px}
+.choice-note>b{font-size:12.5px}
+.choice-note>small{font-size:11px;color:var(--muted);line-height:1.6}
+.choice-note.done{border-left:3px solid var(--live)}
+/* 콘티 검수 — 그 단계 본문 안에만 있다. 카드 맨 위에는 두지 않는다 */
+.stage-ways{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px}
+.stage-ways .btn{width:auto}
+@media(max-width:560px){.stage-ways .btn{width:100%}}
+.ai-update.choice{color:#fff;background:#9a2222;border:1px solid #9a2222}
+.production-progress .progress-state.pick{color:#9a2222;font-weight:700}
+@media(max-width:560px){.choice-actions .btn{width:100%}}
+/* 실행 주체 — 단계마다 AI 진행인지 담당자 진행인지 관리자가 고른다 */
+.stage-person{font-style:normal;font:700 10px/1 "JetBrains Mono",monospace;color:#7a4b00;
+  background:#fff1bf;border:1px solid #dcae32;padding:4px 6px;white-space:nowrap}
+.exec-pick,.deliver-box{margin:9px 0 0;padding:11px 12px;background:var(--panel);
+  border:1px solid var(--rule);display:grid;gap:7px}
+.exec-pick>b,.deliver-box>b{font-size:12.5px;font-weight:700}
+.exec-pick>small,.deliver-box>small{font-size:11px;color:var(--muted)}
+.exec-modes{display:flex;flex-wrap:wrap;gap:8px 18px}
+.exec-modes label,.exec-adv{display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer}
+.exec-modes small{display:block;color:var(--muted);font-size:10.5px}
+.exec-field{display:grid;gap:4px;font-size:11.5px;color:var(--muted)}
+.exec-field input,.exec-field textarea{width:100%;box-sizing:border-box;font:inherit;font-size:13px;
+  color:var(--ink);background:var(--ground);border:1px solid var(--rule);border-radius:6px;padding:7px 9px}
+.exec-field textarea{resize:vertical;min-height:52px}
+.exec-pick .btn,.deliver-box .btn{justify-self:start;width:auto}
+.deliver-box{border-color:var(--cue);border-left-width:3px}
+/* 광고주용 설명과 내부 제작 명세는 칸을 나눈다 — 섞어 쓰면 내부 용어가 그대로 나간다 */
+.exec-field>span em{font-style:normal;font-size:10px;font-weight:700;color:var(--cue);
+  border:1px solid var(--cue);padding:1px 5px;margin-left:5px}
+.exec-field.plain textarea{border-color:var(--cue)}
+.jargon-help{display:block;margin-top:4px;font-size:10.5px;line-height:1.55;color:var(--faint);
+  overflow-wrap:anywhere}
+/* 쉬운 말을 앞에, 전문용어는 괄호에. 쓰면 안 되는 말은 한 줄 아래에 따로 세운다 */
+.jargon-help.warn{color:var(--hold);border-top:1px dotted var(--rule);padding-top:4px}
+.plain-check{padding:7px 9px;background:var(--hold-soft);border:1px solid var(--hold);
+  align-items:flex-start}
+.plain-check b{font-weight:800}
+/* 담당자로 돌릴 수 없는 단계 — 고를 수 없다는 것과 왜인지를 같이 보여 준다 */
+.exec-mode-off{opacity:.55;cursor:not-allowed}
+.exec-blocked{display:block;font-size:10.5px;line-height:1.6;color:var(--faint);
+  padding:6px 8px;background:var(--sunk);border:1px dashed var(--rule)}
+/* 이번 범위 아님 — 결과를 받을 칸이 없는 단계에는 등록 폼 대신 이 안내만 뜬다 */
+.deliver-box.out-of-scope{border-color:var(--rule);border-left-color:var(--hold)}
+/* 검토 결과의 모양이 규칙에 없을 때 — 조용히 빈칸이 되지 않고 이 줄이 뜬다 */
+.flow-detail>span.findings-bad{color:var(--hold);font-weight:700}
+/* 구조화 폼 — AI 결과와 같은 칸을 사람이 채운다 */
+.stage-form{display:grid;gap:9px;padding:10px 11px;background:var(--sunk);
+  border:1px solid var(--rule)}
+.stage-form .exec-field>span{font-size:12px;color:var(--ink);font-weight:700}
+.stage-form .exec-field>small{font-size:10.5px;color:var(--faint);line-height:1.5}
+.stage-form .form-hint{font-size:10px;color:var(--faint)}
+.stage-form select{font:inherit;font-size:13px;color:var(--ink);background:var(--ground);
+  border:1px solid var(--rule);border-radius:6px;padding:7px 9px}
+.exec-field>span em.req{color:var(--cue);border-color:var(--cue)}
+.deliver-note-advance{display:block;font-size:10.5px;color:var(--faint);line-height:1.6}
+/* 무엇을 고쳐야 하는지 그 자리에 적는다 — 확인창으로 넘기지 않는다 */
+.deliver-problems{padding:8px 10px;background:var(--cue-soft);border:1px solid var(--cue);
+  font-size:11.5px;line-height:1.6}
+.deliver-problems b{display:block;font-size:12px;margin-bottom:4px}
+.deliver-problems ul{margin:0;padding-left:17px}
+/* 결과가 아직 없는 현재 단계 — 고장인지 대기인지 구분되게 */
+.stage-wait{grid-column:1/-1;margin:8px 0 0;padding:11px 13px;background:var(--sunk);
+  border:1px solid var(--rule);border-left:3px solid var(--hold);display:grid;gap:3px}
+.stage-wait b{font-size:13px}
+.stage-wait span{font-size:11.5px;color:var(--muted);line-height:1.6}
+.stage-wait.alert{border-left-color:var(--cue);background:var(--cue-soft)}
+.delivered-text{margin-top:6px}
+.stage-content{padding-top:8px;border-top:1px solid var(--rule)}
+.stage-empty{margin:6px 0;color:var(--faint);font-size:12px}
+.stage-data{display:grid;grid-template-columns:120px minmax(0,1fr);gap:7px 14px;margin:0;font-size:12px;line-height:1.55}
+.stage-data dt{color:var(--faint)}.stage-data dd{margin:0;color:var(--ink);overflow-wrap:anywhere}
+.flow-detail>.concept-review{margin-top:8px;border-top:1px solid var(--rule);padding-top:12px}
+.flow-detail>.check{display:grid;grid-template-columns:1fr auto;align-items:center;margin-top:12px}
+.flow-detail>.check .txt{grid-column:1/-1;min-width:0}
+.flow-detail>.check .btn{justify-self:end;width:auto;min-width:0}
+.flow-marker{font-family:"JetBrains Mono",monospace;font-size:9.5px;color:var(--faint)}
+.flow-step.done{border-color:color-mix(in srgb,var(--live) 45%,var(--rule));background:color-mix(in srgb,var(--live) 6%,var(--sunk))}
+.flow-step.done .flow-marker,.flow-step.done strong{color:var(--live)}
+.flow-step.current{border:2px solid var(--cue);background:color-mix(in srgb,var(--cue) 7%,var(--panel))}
+.flow-step.current .flow-marker,.flow-step.current strong{color:var(--cue);font-weight:800}
+@media(max-width:760px){.flow-head{align-items:flex-start;flex-direction:column;gap:4px}.flow-summary{grid-template-columns:48px 1fr auto}.flow-summary small{grid-column:2/-1}.flow-summary .ai-update{grid-column:2/-1}.flow-summary .stage-person{grid-column:2/-1;justify-self:start}.flow-detail{grid-template-columns:1fr;padding:10px 12px}.stage-data{grid-template-columns:1fr}.stage-data dt{font-weight:700;margin-top:5px}}
+
+/* 광고주가 올린 파일 — 눌러서 받는다 */
+.files{display:flex;flex-wrap:wrap;gap:9px;align-items:center;
+  border-top:1px solid var(--rule);padding-top:11px}
+.files .lbl{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--faint);
+  width:100%}
+.files a{width:78px;display:block}
+.files img{width:78px;height:78px;object-fit:cover;border-radius:7px;
+  border:1px solid var(--rule);display:block;background:var(--sunk)}
+.files .doc{width:78px;height:78px;border-radius:7px;border:1px solid var(--rule);
+  background:var(--sunk);display:flex;align-items:center;justify-content:center;
+  font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--muted)}
+.files em{display:block;font-style:normal;font-size:10.5px;color:var(--faint);
+  margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.files a:hover img,.files a:hover .doc{border-color:var(--cue)}
+
+.note{font-size:13px;color:var(--muted);background:var(--sunk);border:1px solid var(--rule);
+  border-radius:9px;padding:12px 14px}
+.note b{color:var(--ink)}
+
+/* 광고 종류는 광고주가 고르는 것이 아니라 우리가 판단하고 여기서 확인하는 것이다.
+   그래서 「저장」이 아니라 「이걸로 확정」이고, 짐작일 때만 그 말이 뜬다. */
+.needs.need-admin{margin-top:14px;border-top:1px solid var(--rule);padding-top:12px}
+.need-pick{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.o2-brief{display:flex;flex-direction:column;gap:4px}
+.o2-brief .o2-field{border-top:1px solid var(--rule);padding:12px 0 4px}
+.o2-brief .o2-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin-bottom:6px}
+.o2-brief .o2-l{font-size:14px;font-weight:700;color:var(--ink,#222)}.o2-brief .o2-head small{color:var(--muted);font-size:12px}
+.o2-brief .o2-guide{font-size:12.5px;color:var(--muted)}.o2-brief .o2-guide summary{cursor:pointer;color:var(--cue,#c0392b)}
+.o2-brief .o2-guide p{margin:4px 0}.o2-brief .o2-guide .ex{color:var(--ink,#222);background:var(--sunk,#f3f1ec);padding:4px 8px;border-radius:4px}
+.o2-brief input,.o2-brief textarea,.o2-brief select{font-family:inherit;font-size:14px;line-height:1.6;letter-spacing:normal;padding:8px 10px;border:1px solid var(--rule);border-radius:6px;background:var(--paper,#fff);color:inherit;width:100%;box-sizing:border-box}
+.o2-brief .o2-cond summary{cursor:pointer;margin-bottom:6px}.o2-brief .o2-cond small{color:var(--muted);font-size:12px}
+.o2-brief .o2-plan{width:100%;border-collapse:collapse;font-size:13px}.o2-brief .o2-plan td{padding:6px 8px;border-bottom:1px solid var(--rule);vertical-align:top}
+.o2-brief .o2-plan .why{color:var(--muted);font-size:12px}.o2-brief .tag{font-size:11.5px;padding:1px 7px;border-radius:10px;border:1px solid var(--rule);white-space:nowrap}.o2-brief .tag.new{color:var(--cue,#c0392b);border-color:var(--cue,#c0392b)}
+.o2-brief textarea[data-o2="conditions_text"]{font-family:ui-monospace,Consolas,monospace;font-size:12px}
+.o2-brief .o2-anchors{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.o2-brief .o2-anchors img{height:64px;border-radius:4px;border:1px solid var(--rule)}
+.o2-brief .o2-prev pre{white-space:pre-wrap;font-size:12px;background:rgba(0,0,0,.04);padding:10px;border-radius:6px}
+.o2-brief .need-pick{margin-top:10px}
+.need-pick label{font-size:11px;color:var(--muted)}
+.need-pick select{font:12px inherit;padding:6px 9px;border:1px solid var(--rule);
+  border-radius:4px;background:var(--panel);color:var(--ink)}
+.need-guess{font-size:11px;color:var(--hold);font-style:normal}
+
+/* 광고주가 정한 것 — 우리에게 보낸 유일한 말이라 카드를 열자마자 보인다.
+   승인과 수정 요청은 색으로 가른다: 앞은 지나가도 되는 것, 뒤는 답해야 하는 것. */
+.client-said{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;
+  margin:0 0 14px;padding:11px 14px;border-radius:6px;font-size:12.5px;
+  background:var(--live-soft);border-left:3px solid var(--live)}
+.client-said.revise{background:var(--hold-soft);border-left-color:var(--hold)}
+.client-said b{font-weight:650;color:var(--ink)}
+.client-said .at{font:11.5px/1 ui-monospace,monospace;color:var(--muted)}
+.client-said .said{flex-basis:100%;color:var(--muted);font-size:12px}
+
+/* 돈이 나가는 단계 — 비용과 쓰임새를 누르기 전에 읽는다. */
+.lc-head .cost{color:var(--hold);font-weight:700}
+.lc-head .cost.free{color:var(--live)}
+.need-list{list-style:none;margin:10px 0 12px;padding:0;display:grid;gap:7px}
+.need-list li{font-size:12px;line-height:1.6;padding:9px 12px;border-radius:5px;
+  background:var(--sunk);border-left:3px solid var(--rule)}
+.need-list li b{display:block;color:var(--ink)}
+.need-list .why{display:block;color:var(--muted);font-size:11.5px;margin-top:3px}
+/* 만든 것 — 승인은 보고 하는 것이다. */
+.made-list{grid-column:1/-1;margin-top:12px}
+.made-list .lbl{display:block;font-size:11px;color:var(--muted);margin-bottom:7px}
+.made-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.made-one{margin:0;background:var(--panel);border:1px solid var(--rule);border-radius:5px;
+  overflow:hidden}
+.made-one img,.made-one video{display:block;width:100%;height:auto;cursor:zoom-in}
+.made-one .none{aspect-ratio:4/5;display:grid;place-items:center;background:var(--sunk);
+  color:var(--faint);font-size:11px}
+.made-one figcaption{padding:6px 9px;font-size:11px;color:var(--muted);
+  overflow-wrap:anywhere}
+
+/* 돈 — 쓴 것은 진하게, 예상은 흐리게. 둘을 같은 굵기로 두면 예상을
+   실제로 읽는다. */
+.cost-line,.cost-total{grid-column:1/-1;display:flex;flex-wrap:wrap;
+  align-items:baseline;gap:4px 12px;margin:0 0 12px;padding:9px 13px;
+  border-radius:5px;background:var(--sunk);font-size:12px}
+.cost-line b{color:var(--hold);font-weight:700}
+.cost-line b.est{color:var(--muted);font-weight:500}
+.cost-total{background:var(--cue-soft);border-left:3px solid var(--cue)}
+.cost-total b{color:var(--cue);font-weight:700;font-size:13px}
+.cost-what{color:var(--muted);font-size:11.5px;overflow-wrap:anywhere}
+.cost-note{flex-basis:100%;color:var(--faint);font-size:11px}
+
+/* 제작 자료 — 순서대로, 눌러서 크게, 각각 설명. */
+.made{grid-column:1/-1;margin-top:14px}
+.made-lbl{display:block;font-size:11px;color:var(--muted);margin-bottom:9px}
+.made-one{margin:0 0 12px;background:var(--panel);border:1px solid var(--rule);
+  border-radius:6px;overflow:hidden;position:relative;display:grid;
+  grid-template-columns:minmax(0,180px) minmax(0,1fr);align-items:start}
+.made-one>img,.made-one>video{display:block;width:100%;height:auto;cursor:zoom-in;
+  background:var(--sunk)}
+.made-one .none{padding:26px 12px;text-align:center;color:var(--faint);font-size:11px;
+  background:var(--sunk)}
+.made-n{position:absolute;top:7px;left:7px;z-index:1;width:20px;height:20px;
+  display:grid;place-items:center;border-radius:50%;background:#16241cd9;color:#fff;
+  font:600 11px/1 inherit}
+.made-one figcaption{padding:12px 14px;display:grid;gap:5px;font-size:12px}
+.made-one figcaption b{font-size:12.5px;color:var(--ink)}
+.made-one .why{color:var(--muted);line-height:1.6;overflow-wrap:anywhere}
+.made-one .lock{color:var(--hold);font-size:11.5px;line-height:1.6;
+  overflow-wrap:anywhere}
+.made-one .facts{font:11px/1.5 ui-monospace,monospace;color:var(--faint)}
+.made-one .ok{color:var(--live);font-size:11px;font-weight:600}
+.made-checks{margin:4px 0 0;display:grid;grid-template-columns:auto minmax(0,1fr);
+  gap:2px 10px;font-size:11px}
+.made-checks dt{color:var(--faint);font-family:ui-monospace,monospace}
+.made-checks dd{margin:0;color:var(--muted);overflow-wrap:anywhere}
+.need-list li em.c{font-style:normal;color:var(--hold);font-size:11px;margin-left:6px}
+/* 크게 보기 — 화면 전체를 덮고, 아무 데나 누르거나 ESC 로 닫는다. */
+.bigview{position:fixed;inset:0;z-index:200;background:#0b0f0de8;display:grid;
+  place-items:center;padding:24px;cursor:zoom-out}
+.bigview img{max-width:96vw;max-height:94vh;object-fit:contain;
+  box-shadow:0 8px 40px #0009}
+@media(max-width:760px){
+  .made-one{grid-template-columns:1fr}
+}
+
+/* 검수에서 걸린 것 — 숨기지 않고, 무엇이 걸렸는지 말한다. */
+.blocked-note{grid-column:1/-1;display:grid;gap:5px;margin:0 0 12px;padding:11px 14px;
+  border-radius:6px;background:var(--hold-soft);border-left:3px solid var(--hold);
+  font-size:12px}
+.blocked-note b{color:var(--ink)}
+.blocked-note .n{font:11px/1 ui-monospace,monospace;color:var(--hold)}
+.blocked-note .why{color:var(--muted);line-height:1.6;overflow-wrap:anywhere}
+.blocked-note .who{font-size:11px;color:var(--faint)}
+/* 새로 올라온 것 */
+.fresh-mark{display:inline-block;margin-left:7px;padding:2px 6px;border-radius:3px;
+  background:var(--cue);color:#fff;font:600 9.5px/1.4 inherit;vertical-align:middle}
+
+/* 물어볼 것이 남았다 — 멈춘 이유를 화면에 세운다.
+   ours 는 우리가 정할 것이라 Dan 이 누를 것이 없다. */
+.ask-note{grid-column:1/-1;display:grid;gap:6px;margin:0 0 12px;padding:11px 14px;
+  border-radius:6px;background:var(--cue-soft,#eef2ff);border-left:3px solid var(--cue);
+  font-size:12px}
+.ask-note.ours{background:var(--hold-soft);border-left-color:var(--hold)}
+.ask-note b{color:var(--ink)}
+.ask-note .n{font:11px/1 ui-monospace,monospace;color:var(--cue)}
+.ask-note .why{color:var(--muted);line-height:1.6;overflow-wrap:anywhere}
+.ask-note .who{font-size:11px;color:var(--faint)}
+.ask-form{display:grid;gap:6px;margin-top:4px}
+.ask-form textarea{width:100%;padding:7px 9px;border:1px solid var(--line);
+  border-radius:5px;font:inherit;font-size:12px;resize:vertical}
+.ask-form .btn{justify-self:start}
+
+/* 지나간 유료 단계 — 만든 것은 남고, 언제 승인했는지 한 줄 붙는다. */
+.done-note{grid-column:1/-1;display:flex;gap:10px;align-items:baseline;
+  margin:0 0 10px;padding:8px 13px;border-radius:6px;background:var(--ok-soft,#eefbf2);
+  border-left:3px solid var(--ok,#2f9e5e);font-size:12px}
+.done-note b{color:var(--ink)}
+.done-note .at{font-size:11px;color:var(--faint)}
+
+/* 구성·각본 안의 컷 전문 — 각본의 본문이다. 관리자만 본다. */
+.script-cuts{margin:14px 0 0;padding-top:12px;border-top:1px solid var(--line)}
+.script-cuts .sc-lbl{display:block;margin:0 0 9px;font:600 11px/1.5 inherit;
+  letter-spacing:.04em;color:var(--faint)}
+
+/* 글만 보는 컷 — 그림 자리를 두지 않는다. 번호는 머리에 한 번만 나온다. */
+.script-cuts .cut.text-only{display:block;padding:11px 0;border:0;
+  border-top:1px solid var(--line);background:none}
+.script-cuts .cut.text-only:first-child{border-top:0}
+.script-cuts .cut.text-only > .body{display:grid;gap:7px}
+
+/* 다시 뽑기 자리 — 고쳐 달라고 적으신 말을 그 자리에 둔다. */
+.redo-note{display:grid;gap:4px;margin:0 0 10px;padding:9px 12px;border-radius:6px;
+  background:var(--hold-soft);border-left:3px solid var(--hold);font-size:12.5px}
+.redo-note b{color:var(--ink)}
+.redo-note span{color:var(--muted);line-height:1.6;overflow-wrap:anywhere}
+
+/* 후반 작업 — 뽑은 뒤 보내기 전에 사람이 하는 일 */
+.post-work{display:grid;gap:12px}
+.pw-head{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.pw-head b{font-size:13.5px}
+.pw-head span{font-size:11.5px;color:var(--faint)}
+.pw-open{display:grid;gap:4px;padding:10px 13px;border-radius:6px;
+  background:var(--hold-soft);border-left:3px solid var(--hold);font-size:12.5px}
+.pw-open b{color:var(--ink)}
+.pw-open span{color:var(--muted)}
+.pw-list{margin:0;padding-left:20px;display:grid;gap:11px}
+.pw-list li{color:var(--ink)}
+.pw-list li b{font-size:13px}
+.pw-list .who{display:inline-block;margin-left:7px;padding:1px 6px;border-radius:3px;
+  background:var(--sunk);color:var(--muted);font:600 10.5px/1.6 inherit;font-style:normal}
+.pw-list .how,.pw-list .why,.pw-list .open{display:block;margin-top:3px;font-size:12px;
+  line-height:1.6;overflow-wrap:anywhere}
+.pw-list .how{color:var(--muted)}
+.pw-list .why{color:var(--faint)}
+.pw-list .open{color:var(--hold);font-weight:600}
+/* 다시 뽑기 — 계획이 바뀌었나 그대로인가 */
+.plan-new,.plan-same{display:grid;gap:3px;margin:0 0 10px;padding:9px 12px;
+  border-radius:6px;font-size:12.5px}
+.plan-new{background:var(--ok-soft,#eefbf2);border-left:3px solid var(--ok,#2f9e5e)}
+.plan-same{background:var(--hold-soft);border-left:3px solid var(--hold)}
+.plan-new b,.plan-same b{color:var(--ink)}
+.plan-new span,.plan-same span{color:var(--muted);line-height:1.6}
+
+/* 보기 전용 계정 — 누를 것 대신 왜 없는지 한 줄 */
+.ro-row{grid-column:1/-1;display:grid;gap:3px;margin:0;padding:10px 13px;
+  border-radius:6px;background:var(--sunk);border-left:3px solid var(--faint);
+  font-size:12.5px}
+.ro-row b{color:var(--ink)}
+.ro-row span{color:var(--muted);line-height:1.6}
+
+/* 보기 전용 — 고르는 칸 대신 무엇으로 보고 있는지만 */
+.need-pick.ro b{font-weight:700;color:var(--ink)}
+
+/* 새 소식 막대 — 있다고만 알린다. 화면은 누르셔야 바뀐다. */
+#newsbar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;
+  margin:0 0 14px;padding:11px 15px;border-radius:8px;
+  background:var(--cue-soft,#fdeeea);border:1px solid var(--cue);font-size:13px}
+#newsbar b{color:var(--ink)}
+#newsbar span{font-size:11.5px;color:var(--muted)}
+#newsbar .btn{padding:4px 12px;font-size:12px}
+/* 아직 못 누르는 다시 뽑기 — 사라지지 않고 잠긴 채로 보인다 */
+.lc .btn[disabled]{opacity:.45;cursor:not-allowed}
+
+/* 이전 판 — 지우지 않고 접어 둔다. 견줄 것이 있어야 한다. */
+.made-old{grid-column:1/-1;margin:10px 0 0;padding:9px 12px;border-radius:6px;
+  background:var(--sunk);border:1px solid var(--line)}
+.made-old>summary{cursor:pointer;font:600 12px/1.6 inherit;color:var(--muted);
+  list-style:none}
+.made-old>summary::-webkit-details-marker{display:none}
+.made-old>summary::before{content:"▸ ";color:var(--faint)}
+.made-old[open]>summary::before{content:"▾ "}
+.made-old .made{margin-top:9px;opacity:.72}
+.bigview video{max-width:100%;max-height:92vh;display:block}
+
+/* 검수 판정 — 그림 바로 밑에. 감추지 않고, 무엇이 걸렸는지 적는다. */
+.verdict{display:grid;gap:5px;margin-top:8px;padding:9px 11px;border-radius:6px;font-size:12px}
+.verdict.v-blocked{background:var(--hold-soft);border-left:3px solid var(--hold)}
+.verdict.v-ask{background:var(--cue-soft,#fdeeea);border-left:3px solid var(--cue)}
+.verdict b{color:var(--ink);font-size:12.5px}
+.verdict .what{color:var(--muted);line-height:1.6;overflow-wrap:anywhere}
+.verdict .who{font-size:11px;color:var(--faint)}
+.verdict .call{color:var(--ink);font-size:11.5px}
+.verdict .kept{font-size:11.5px}
+.verdict .kept>summary{cursor:pointer;color:var(--faint);list-style:none}
+.verdict .kept>summary::-webkit-details-marker{display:none}
+.verdict .kept>summary::before{content:"▸ ";}
+.verdict .kept[open]>summary::before{content:"▾ ";}
+.verdict .kept span{display:block;margin-top:4px;color:var(--muted);line-height:1.6;
+  overflow-wrap:anywhere}
+
+/* 제작 쪽 의견 — 판정 다음에 「그래서 어떻게 하는 게 좋겠나」 */
+.mytake{display:grid;gap:3px;margin-top:6px;padding:8px 10px;border-radius:5px;
+  background:var(--panel);border:1px dashed var(--line)}
+.mytake b{font-size:11.5px;color:var(--cue)}
+.mytake span{color:var(--ink);line-height:1.65;font-size:12px;overflow-wrap:anywhere;white-space:pre-line}
+/* 이 판이 왜 있나 */
+.madewhy{display:block;margin-top:4px;font-size:11.5px;color:var(--faint);line-height:1.6}
+.old-why{display:grid;gap:3px;margin:9px 0 0;padding:8px 11px;border-radius:5px;
+  background:var(--panel);border-left:3px solid var(--line);font-size:12px}
+.old-why b{color:var(--muted);font-size:11.5px}
+.old-why span{color:var(--ink);line-height:1.6;overflow-wrap:anywhere}
+
+.made-n{font-variant-numeric:tabular-nums}
+.mytake.dan{border-style:solid;border-color:var(--cue)}
+.mytake.dan b{color:var(--admin,#8a5b0c)}
+
+/* 사장님이 **누르기 전에** 의견을 적는 칸. 보여 주는 칸(.mytake.dan)만 있고
+   쓰는 칸이 없어서 적을 자리가 없었다 (Dan 2026-09-22: 「다시 뽑기 누르기전에
+   의견쓰는부분이 없네」). 저장은 생성과 따로 돌아서 값이 나가지 않는다. */
+.takebox{display:grid;gap:6px;margin-top:8px;padding:9px 10px;border-radius:5px;
+  background:var(--panel);border:1px solid var(--cue)}
+.takebox b{font-size:11.5px;color:var(--admin,#8a5b0c);font-weight:600}
+.takebox b i{font-style:normal;font-weight:400;color:var(--muted)}
+.takebox textarea{width:100%;box-sizing:border-box;resize:vertical;min-height:76px;
+  padding:8px 10px;border:1.5px solid var(--muted);border-radius:5px;
+  background:var(--bg);color:var(--ink);font:inherit;font-size:12.5px;line-height:1.65}
+/* 10-01 Dan 「의견 적는 란이 눌러야 테두리가 보인다」 — 처음부터 또렷한 테두리, 누르면 강조색 + 바깥 띠 */
+.project-summary-side{flex-wrap:wrap;justify-content:flex-end;row-gap:4px}
+.test-label{font-size:11px;font-weight:700;letter-spacing:.04em;color:#fff;background:#6b4fd8;border-radius:4px;padding:2px 7px;align-self:flex-start}
+.who-line{flex-basis:100%;font-size:12px;color:var(--muted);text-align:right;white-space:nowrap}
+.takebox textarea::placeholder{color:var(--muted);opacity:1}
+.takebox textarea:focus{outline:none;border-color:var(--cue);box-shadow:0 0 0 3px rgba(192,57,43,.15)}
+.takebox button{justify-self:start}
+
+/* 의견 → 답변 → 결정. 지금 어디에 와 있는지가 한눈에 보여야 한다 */
+.thread{display:grid;gap:9px;margin-top:8px}
+.thread-step{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;
+  color:var(--faint)}
+.thread-step b{display:inline-flex;align-items:center;justify-content:center;
+  width:16px;height:16px;border-radius:50%;background:var(--sunk);
+  border:1px solid var(--rule);font-size:10px;font-weight:700}
+.thread-step.s-done{color:var(--live)}
+.thread-step.s-done b{background:var(--live-soft);border-color:var(--live);color:var(--live)}
+.thread-step.s-now{color:var(--cue);font-weight:700}
+.thread-step.s-now b{background:var(--cue);border-color:var(--cue);color:#fff}
+.thread-arrow{color:var(--faint);font-size:11px;margin:0 2px}
+.thread>.thread-step,.thread>.thread-arrow{display:inline-flex}
+.thread>.thread-step:first-child{margin-top:2px}
+/* 단계 줄은 한 줄로 흐르게 */
+.thread{grid-template-columns:auto auto auto auto auto 1fr;align-items:center}
+.thread>p,.thread>div,.thread>details,.thread>button{grid-column:1/-1}
+.thread-now,.thread-ok{display:grid;gap:3px;margin:0;padding:9px 11px;
+  border-radius:5px;font-size:12px;line-height:1.65}
+.thread-now{background:var(--cue-soft);border:1px solid var(--cue)}
+.thread-ok{background:var(--live-soft);border:1px solid var(--live)}
+.thread-now b,.thread-ok b{font-size:12.5px}
+.thread-now span,.thread-ok span{color:var(--ink)}
+.mytake.reply{border-style:solid;border-color:var(--rule)}
+.mytake.reply span{white-space:pre-wrap}
+.thread>button{justify-self:start}
+.take-more>summary{cursor:pointer;font-size:11.5px;color:var(--muted);
+  padding:4px 0;list-style:none}
+.take-more>summary::-webkit-details-marker{display:none}
+.take-more>summary::before{content:"▸ ";color:var(--faint)}
+.take-more[open]>summary::before{content:"▾ "}
+
+/* 지난 판 — 기록이지 할 일이 아니다. 정할 것을 주지 않는다 */
+.verdict .call.gone{color:var(--muted);font-style:normal}
+/* 고를 것이 하나뿐일 때 그 이유를 그 자리에서 말한다 */
+.exec-only{display:block;flex-basis:100%;margin-top:4px;
+  font-size:11.5px;color:var(--muted);line-height:1.55}
+
+/* 승인 뒤에 더한 자료 — 「보충」. 되돌리지 않고 더한 것이다. */
+.added{display:block;margin-top:5px;padding:6px 9px;border-radius:5px;
+  background:var(--cue-soft,#fdeeea);color:var(--muted);font-size:11.5px;line-height:1.6}
+.added b{color:var(--cue)}
+.done-note .at.more{color:var(--cue)}
+
+/* 준비물이 나왔다 — 영상 뽑기 전에 보셔야 하는 것 */
+.ready{grid-column:1/-1;display:grid;gap:7px;margin:0 0 13px;padding:13px 15px;
+  border-radius:8px;background:var(--panel);border:2px solid var(--cue);font-size:12.5px}
+.ready>b{font-size:14px;color:var(--cue)}
+.ready .when{font-size:11.5px;color:var(--faint)}
+.ready img{max-width:100%;border-radius:6px;cursor:zoom-in;background:var(--sunk)}
+.ready .what{color:var(--ink);line-height:1.6;overflow-wrap:anywhere}
+.ready .what b{color:var(--ink)}
+.ready .next{color:var(--muted);line-height:1.65}
+.ready .next b{color:var(--ink)}
+.lc-direct{display:inline-block}
+.lc-direct>summary{list-style:none;cursor:pointer}
+.lc-direct>summary::-webkit-details-marker{display:none}
+.lc-direct[open]{display:block;width:100%;margin-top:8px}
+.lc-direct[open]>textarea{width:100%;margin:8px 0}
+.cost-list{display:inline-block;margin-left:10px;font-size:12px;color:var(--muted)}
+.cost-list>summary{cursor:pointer}
+.cost-list ol{margin:6px 0 0 18px;padding:0}
+/* 사람 쪽(요청사항) 칸을 열면 같은 줄의 AI 쪽 버튼은 숨긴다 — 둘이 동시에 떠 있으면
+   어느 쪽으로 가는지 헷갈린다 (Dan 09-23). 「취소」로 닫으면 다시 보인다. */
+.lc-row:has(> details.lc-direct[open]) > [data-lc="start"],
+.lc-row:has(> details.lc-direct[open]) > [data-lc="choose-ai"],
+.lc-row:has(> details.lc-direct[open]) > [data-lc="approve"]{display:none}
+/* 요청사항 칸을 적는 동안에는 AI 계획을 숨긴다 */
+details.flow-step:has(details.lc-direct[open]) .post-work{display:none}
+.o2-ai{background:var(--sunk,#f3f1ec);border-left:3px solid var(--cue,#c0392b);padding:8px 10px;font-size:13px;margin:6px 0 10px}
+.o2-lock{background:#fff4e0;border:1px solid #e0a040;color:#7a4a00;padding:8px 10px;font-size:13px;font-weight:600;margin:6px 0 10px;border-radius:6px}
+.o2-brief :disabled{color:#9a9a9a;background:#f1f1f1;border-color:#dcdcdc;cursor:not-allowed}.o2-brief button:disabled{opacity:.55}
+.o2-redo{margin-top:10px}.o2-redo summary{cursor:pointer;font-size:13px}.o2-redo textarea{width:100%;margin:6px 0}
+</style>
+<link rel="stylesheet" href="studio.css?v=3"><script defer src="studio-shell.js?v=4"></script>
+<link rel="stylesheet" href="brand.css?v=red1"></head>
+<body class="admin-wide">
+
+<div class="topbar"><div class="topbar-in">
+  <a class="mark" href="index.html"><span class="lamp"></span>onecue
+    <span class="sub">관리자</span></a>
+  <div class="spacer"></div>
+  <a class="btn ghost" href="results.html" data-studio-admin hidden>제작 결과물</a>
+  <a class="btn ghost" href="lab.html" data-studio-admin hidden>LAB</a>
+  <span class="pill" id="conn"><span class="dot"></span>연결 확인 중</span>
+  <button class="btn ghost" id="reload" disabled>새로고침</button>
+  <span class="acct" id="acct"></span>
+</div></div>
+
+<main>
+  <!-- 새 소식 — 저절로 다시 그리지 않는다. 있다고 알리기만 하고,
+       다시 그리는 것은 누르실 때다. 화면이 밑에서 움직이면 읽던 자리를 잃는다. -->
+  <div id="newsbar" hidden><b>새로 올라온 것이 있습니다</b>
+    <button class="btn" type="button" id="newsgo">새로 읽기</button>
+    <span>누르셔야 바뀝니다 — 저절로 움직이지 않습니다.</span></div>
+  <div id="alert"></div>
+
+  <h2>들어온 의뢰</h2>
+  <div id="work"><div class="empty">불러오는 중</div></div>
+
+  <h2>이 화면에 대해</h2>
+  <p class="note">광고주가 <b>의뢰하기</b>를 누르면 이메일이 아니라 <b>여기로 들어옵니다.</b>
+    아직 손대지 않은 건에는 <b>NEW</b> 가 붙고, 단계를 옮기면 사라집니다.<br><br>
+    <b>단계 버튼</b>을 누르면 광고주 화면이 바로 바뀝니다.
+    <b>★</b> 가 붙은 세 곳(전략·5안·콘티)은 광고주가 판단할 자리인데,
+    <b>바로 넘어가지 않습니다.</b> 그 단계로 옮기면 먼저 <b>1차 검수</b> 칸이 뜨고,
+    <b>「광고주에게 보내기」</b>를 눌러야 광고주 쪽에 판단 버튼이 생깁니다.
+    그전까지 광고주 화면에는 버튼이 없습니다.<br><br>
+    판단 버튼은 <b>의뢰하신 분 본인에게만</b> 보입니다. 관리자가 광고주 화면을 열어도
+    내용만 보이고 승인은 못 누릅니다.<br><br>
+    <b>회신은 아직 자동이 아닙니다.</b> <b>회신 문구</b>를 누르면 단계에 맞는 초안이 뜨는데,
+    <b>제목과 본문 모두 그 자리에서 고쳐 쓰실 수 있습니다.</b> 고친 내용은 이 브라우저에
+    남아 있다가 다음에 열 때 그대로 나옵니다. 처음 문구로 되돌리려면 <b>기본 문구로</b>를
+    누르시면 됩니다.<br><br>
+    본문 가운데 들어가는 주소는 <b>그 광고주의 진행 페이지</b>입니다. 이 링크로 들어와
+    5안을 고르고 콘티를 승인합니다.<br><br>
+    연락처는 <b>로그인한 관리자에게만</b> 보입니다.<br><br>
+    <b>전체 제작 흐름</b>의 단계를 펼치면 <b>이 단계를 누가 진행합니까</b> 칸이 있습니다.
+    <b>AI 진행</b>은 지금까지와 똑같이 기존 작업 큐로 들어갑니다.
+    <b>담당자 진행</b>을 고르고 이름을 적으면 그 단계는 <b>작업 큐에 올라가지 않고</b>
+    사람이 결과를 등록할 때까지 <b>대기</b>합니다. 이건 화면에서만 막는 것이 아니라
+    <b>데이터베이스에서 막습니다.</b> 아무것도 고르지 않은 단계는 예전 그대로 AI 진행입니다.<br><br>
+    각 단계에는 <b>수행자</b>와 <b>핵심 검토 AI</b>가 함께 표시됩니다.
+    검토 AI 를 적어 두면 담당자 단계처럼 AI 실행 기록이 없는 곳에서도 남습니다.
+    담당자가 끝내면 그 단계에서 <b>담당자 결과 등록</b>을 누르세요 —
+    결과물 자체는 기존 저장 경로로 넣고, 이 버튼은 <b>대기를 푸는 것</b>입니다.</p>
+
+  <footer><span>onecue · 관리자</span><span class="mono" id="stamp"></span></footer>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js?v=d4d97baa"></script>
+<script src="auth.js?v=fa839557"></script>
+<script src="asset-access.js?v=retry260923"></script>
+<!-- 폼 계약은 stage-executor.js 보다 먼저 온다. 계약이 없으면 검사가 닫히는 쪽으로 실패한다 -->
+<script src="stage-form-contract.js?v=contract-260921-v3"></script>
+<script src="stage-executor.js?v=needs-261002-v296"></script>
+<script src="credit-rates.js?v=needs-261002-v296"></script>
+<script src="ad-type-materials.js?v=needs-261002-v296"></script>
+<script src="material-gaps.js?v=needs-261002-v296"></script>
+<script src="shared-stage-renderers.js?v=stage-read-260926-v18"></script>
+<script src="admin.js?v=needs-261002-v296"></script>
+<script>
+/* 09-28 — 폰이 예전 화면 코드를 붙들고 있었다(물리는 준비물 6장 · PC 는 4장). 열 때·화면으로 돌아올 때 배포 버전과 비교해 다르면 새 주소로 다시 연다 */
+(function () {
+  var ME = "needs-261002-v296";
+  function chk() {
+    fetch(location.pathname + "?vchk=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.text(); }).then(function (t) {
+      var m = t.match(/needs-\d{6}-v\d+/);
+      if (!m || m[0] === ME) return;
+      try { if (sessionStorage.getItem("onecue_vr") === m[0]) return; sessionStorage.setItem("onecue_vr", m[0]); } catch (e) {}
+      var u = new URL(location.href); u.searchParams.set("_v", m[0]); location.replace(u.toString());
+    }).catch(function () {});
+  }
+  chk();
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) chk(); });
+})();
+</script>
+</body>
+</html>
