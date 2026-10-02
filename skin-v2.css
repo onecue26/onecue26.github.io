@@ -97,3 +97,106 @@ body.studio-layout *{letter-spacing:normal}
 .studio-layout .direction *,.studio-layout .fix-said *,.studio-layout .board-note *,.studio-layout .script-msg *,.studio-layout .rq-log li *{color:inherit}
 .studio-layout .direction .dir-sub,.studio-layout .direction li>b:first-child,.studio-layout .direction dt{color:var(--muted)!important}
 .studio-layout .board-sheet-client img{background:#1a1a1c!important}
+
+/* ── 관리자 화면(제작 관리·콘티·결과물) — admin.html·board.html <style>·results.css·stage-render.css 의 밝은 바탕·어두운 글자를 코드로 뽑아 덮는다(10-02, 64·42곳) */
+.studio-layout .board-note,
+.studio-layout .close-box,
+.studio-layout .cost-statement,
+.studio-layout .delivered-final,
+.studio-layout .direction,
+.studio-layout .ess,
+.studio-layout .facts,
+.studio-layout .fix-said,
+.studio-layout .heading input,
+.studio-layout .mc-form .ms-field input,
+.studio-layout .mc-form .ms-field textarea,
+.studio-layout .mc-guide,
+.studio-layout .mc-msg,
+.studio-layout .mc-one input,
+.studio-layout .mc-one textarea,
+.studio-layout .ms-summary,
+.studio-layout .msg-digest,
+.studio-layout .msg.draft,
+.studio-layout .msg.in,
+.studio-layout .msg.out,
+.studio-layout .msgbox,
+.studio-layout .msgs,
+.studio-layout .msgs .msg.in,
+.studio-layout .msgs .msg.out,
+.studio-layout .o2-brief :disabled,
+.studio-layout .o2-lock,
+.studio-layout .pchk,
+.studio-layout .plan-start,
+.studio-layout .prose,
+.studio-layout .redo-kind label,
+.studio-layout .redo-reply,
+.studio-layout .review-actions,
+.studio-layout .rq-log li,
+.studio-layout .sc-row,
+.studio-layout .script-msg,
+.studio-layout .script-tbl th,
+.studio-layout .stage-person,
+.studio-layout .stmt .st,
+.studio-layout .stmt tr.grp th,
+.studio-layout .stmt tr.subtotal td,
+.studio-layout .tag,
+.studio-layout .w-kind,
+.studio-layout .work,
+.studio-layout .work-row,
+.studio-layout .work.active,
+.studio-layout header,
+.studio-layout header button,
+.studio-layout select,
+.studio-layout summary{background:var(--sunk)!important;color:var(--ink)!important;border-color:var(--rule)!important}
+.studio-layout .ai-update.working{background:rgba(240,185,85,.14)!important;color:#f5cd84!important;border-color:var(--rule)!important}
+.studio-layout .dg-state.bad{background:rgba(255,110,80,.14)!important;color:#ffab95!important;border-color:var(--rule)!important}
+.studio-layout .dg-state.wait{background:rgba(240,185,85,.14)!important;color:#f5cd84!important;border-color:var(--rule)!important}
+.studio-layout .dg-state.warn{background:rgba(240,185,85,.14)!important;color:#f5cd84!important;border-color:var(--rule)!important}
+.studio-layout .msg-state.wait{background:rgba(240,185,85,.14)!important;color:#f5cd84!important;border-color:var(--rule)!important}
+.studio-layout .msgbox .msg.out.sent{background:rgba(123,217,158,.13)!important;color:#9fe5b8!important;border-color:var(--rule)!important}
+.studio-layout .pchk.bad{background:rgba(255,110,80,.14)!important;color:#ffab95!important;border-color:var(--rule)!important}
+.studio-layout .pchk.ok{background:rgba(123,217,158,.13)!important;color:#9fe5b8!important;border-color:var(--rule)!important}
+.studio-layout .pchk.wait{background:rgba(240,185,85,.14)!important;color:#f5cd84!important;border-color:var(--rule)!important}
+.studio-layout .redo-reply.wait{background:rgba(240,185,85,.14)!important;color:#f5cd84!important;border-color:var(--rule)!important}
+.studio-layout .stmt .st.gone{background:rgba(255,110,80,.14)!important;color:#ffab95!important;border-color:var(--rule)!important}
+.studio-layout .tag.pending{background:rgba(240,185,85,.14)!important;color:#f5cd84!important;border-color:var(--rule)!important}
+.studio-layout .board-sheet img,
+.studio-layout .board-sheet-client img,
+.studio-layout .client-files img{background:#1a1a1c!important}
+.studio-layout .brand,
+.studio-layout .brand span,
+.studio-layout .close-box p,
+.studio-layout .close-box span,
+.studio-layout .cost-list em.kept,
+.studio-layout .deliver-final small,
+.studio-layout .delivered-final b,
+.studio-layout .facts strong,
+.studio-layout .flow-summary .signoff,
+.studio-layout .ms-by,
+.studio-layout .ms-field span,
+.studio-layout .msg-digest b,
+.studio-layout .msg-state.got,
+.studio-layout .msgs .msg-done,
+.studio-layout .plan-start span,
+.studio-layout .project-stage.closed,
+.studio-layout .prose .bullet:before,
+.studio-layout .prose h4,
+.studio-layout .prose p,
+.studio-layout .redo-reply em,
+.studio-layout .results-nav,
+.studio-layout .review-actions .txt span,
+.studio-layout .rq-done,
+.studio-layout .said .sub.added,
+.studio-layout .stmt .st.kept,
+.studio-layout .stmt-rate,
+.studio-layout .w-kind.delivery,
+.studio-layout summary h2{color:#d8d4cc!important}
+
+/* 화면에서 직접 골라낸 밝은 칸(10-02 lightscan) — 프로젝트 접이 판 · 옵션 설명 · 추천 표시 · 완료 기록 줄 */
+.studio-layout details.project-fold{background:var(--panel)!important;color:var(--ink)!important;border-color:var(--rule)!important}
+.studio-layout [track-help]>div,.studio-layout .track-help>div{background:#1e1e20!important;color:var(--ink)!important;border:1px solid var(--rule)!important}
+.studio-layout [track-help]>div *,.studio-layout .track-help>div *{color:inherit!important}
+.studio-layout span.reco{background:var(--brand-soft)!important;color:var(--accent)!important}
+.studio-layout span.why{background:transparent!important;color:var(--muted)!important}
+.studio-layout .done-note{background:var(--sunk)!important;color:var(--ink)!important;border-color:var(--rule)!important}
+.studio-layout .msg-state.got{background:rgba(123,217,158,.13)!important;color:#9fe5b8!important}
