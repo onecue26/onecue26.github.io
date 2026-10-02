@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>로그인 — onecue</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="style.css?v=1f228d76">
+<style>
+.box{max-width:400px;margin:0 auto}
+.tabs{display:flex;gap:0;border:1px solid var(--rule);border-radius:9px;overflow:hidden;
+  margin-bottom:22px}
+.tabs button{flex:1;padding:10px;border:0;background:var(--panel);color:var(--muted);
+  font-family:inherit;font-size:14px;font-weight:500;cursor:pointer}
+.tabs button.on{background:var(--cue);color:#fff;font-weight:700}
+.f{margin-bottom:16px}
+.f label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:5px;
+  font-family:"JetBrains Mono",monospace}
+.f input{width:100%;padding:11px 13px;border:1px solid var(--rule);border-radius:9px;
+  background:var(--panel);color:var(--ink);font-family:inherit;font-size:15px}
+.f input:focus{outline:2px solid var(--cue);outline-offset:1px;border-color:var(--cue)}
+.msg{font-size:13.5px;margin-top:12px;min-height:20px}
+.msg.err{color:var(--cue)}
+.msg.ok{color:var(--live)}
+.who{background:var(--panel);border:1px solid var(--rule);border-radius:11px;
+  padding:18px 20px;display:none}
+.who.on{display:block}
+.who .em{font-weight:700;font-size:16px}
+.who .rl{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--muted);
+  margin-top:2px}
+.who .actions{margin-top:14px}
+.hintbox{font-size:12.5px;color:var(--muted);background:var(--sunk);
+  border:1px solid var(--rule);border-radius:9px;padding:12px 14px;margin-top:18px}
+</style>
+<link rel="stylesheet" href="studio.css?v=2"><script defer src="studio-shell.js?v=4"></script>
+<link rel="stylesheet" href="brand.css?v=red1"></head>
+<body>
+
+<div class="topbar"><div class="topbar-in">
+  <a class="mark" href="index.html"><span class="lamp"></span>onecue
+    <span class="sub">광고 기획 · 제작</span></a>
+  <div class="spacer"></div>
+  <span class="pill" id="conn"><span class="dot"></span>확인 중</span>
+</div></div>
+
+<main>
+  <div class="box">
+
+    <!-- 이미 로그인돼 있으면 이쪽만 보인다 -->
+    <div class="who" id="who">
+      <h2 style="margin-top:0">로그인됨</h2>
+      <div class="em" id="whoNick"></div>
+      <div class="rl" id="whoEmail"></div>
+      <div class="rl" id="whoRole"></div>
+
+      <div class="f" style="margin-top:16px">
+        <label for="nick2">닉네임 바꾸기</label>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="nick2" maxlength="20" style="flex:1">
+          <button class="btn ghost" type="button" id="saveNick">저장</button>
+        </div>
+        <div class="msg" id="nickMsg"></div>
+      </div>
+
+      <div class="actions">
+        <a class="btn" id="goAdmin" href="admin.html" hidden>관리자 화면 →</a>
+        <a class="btn ghost" href="index.html">첫 화면</a>
+        <button class="btn ghost" id="logout">로그아웃</button>
+      </div>
+    </div>
+
+    <form id="form">
+      <h2>로그인</h2>
+      <div class="tabs">
+        <button type="button" id="tabIn" class="on">로그인</button>
+        <button type="button" id="tabUp">처음이신가요</button>
+      </div>
+      <div class="f">
+        <label for="email">이메일 — 이게 아이디입니다</label>
+        <input type="text" id="email" required autocomplete="username" placeholder="아이디 또는 메일 주소">
+      </div>
+      <div class="f" id="nickWrap" hidden>
+        <label for="nick">닉네임 — 선택. 안 정하면 이메일이 표시됩니다</label>
+        <input type="text" id="nick" maxlength="20" placeholder="예 · 김담당">
+      </div>
+      <div class="f">
+        <label for="pw">비밀번호 — 6자 이상</label>
+        <input type="password" id="pw" required minlength="6" autocomplete="current-password">
+      </div>
+      <button class="btn" type="submit" id="go" style="width:100%;justify-content:center">
+        로그인</button>
+      <button class="btn ghost" type="button" id="forgot" style="width:100%;justify-content:center;margin-top:8px">
+        비밀번호를 잊으셨나요?</button>
+      <div class="msg" id="msg" role="status" aria-live="polite"></div>
+
+      <p class="hintbox">의뢰 접수와 진행 확인은 <b>로그인 후 이용할 수 있습니다.</b><br>
+        접수한 계정으로 로그인하면 본인의 프로젝트를 확인할 수 있습니다.</p>
+    </form>
+
+    <form id="resetForm" hidden>
+      <h2>새 비밀번호 설정</h2>
+      <p class="hintbox">메일의 재설정 링크를 확인했습니다. 새 비밀번호를 입력해 주세요.</p>
+      <div class="f">
+        <label for="newPw">새 비밀번호 — 6자 이상</label>
+        <input type="password" id="newPw" required minlength="6" autocomplete="new-password">
+      </div>
+      <div class="f">
+        <label for="newPw2">새 비밀번호 확인</label>
+        <input type="password" id="newPw2" required minlength="6" autocomplete="new-password">
+      </div>
+      <button class="btn" type="submit" id="savePw" style="width:100%;justify-content:center">비밀번호 변경</button>
+      <div class="msg" id="resetMsg" role="status" aria-live="polite"></div>
+    </form>
+  </div>
+
+  <footer><span>onecue</span><span class="mono" id="stamp"></span></footer>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js?v=d4d97baa"></script>
+<script src="login.js?v=kst260923s2"></script>
+</body>
+</html>

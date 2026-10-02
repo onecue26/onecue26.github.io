@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>진행 상황 — onecue</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="style.css?v=client-concept-readable-260921">
+<link rel="stylesheet" href="stage-render.css?v=needs-261002-v295">
+<style>
+.hero{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.hero h1{margin:0;font-size:27px;letter-spacing:-.02em}
+.hero .brand-name{display:flex;align-items:center;gap:7px;margin-bottom:4px;color:var(--muted);font-size:13px;font-weight:700}
+.hero .brand-name span{font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.08em;color:var(--cue);border:1px solid var(--cue);padding:2px 5px}
+.hero .sub{color:var(--muted);font-size:13.5px;margin-top:2px}
+.hero>div{width:100%}
+.progress-scroll{width:100%;overflow-x:auto;padding-bottom:4px}
+/* ★ 칸 수를 숫자로 박지 않는다. repeat(9,…) 로 박혀 있었는데 막대는 여섯 칸이
+   되면서 이름만 아홉 칸으로 나뉘어 둘이 어긋났다. 아래처럼 두면 칸 수가
+   자식 수를 따라가므로, 단계를 더하거나 빼도 다시 어긋나지 않는다.
+   두 줄이 **같은 규칙**을 쓰는 것이 핵심이다 — 한쪽만 고치면 또 갈라진다. */
+.hero .bar,
+.stepnames{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(82px,1fr);gap:3px}
+.hero .bar{margin-top:12px}
+.hero .bar i{width:auto;height:6px}
+.stepnames{margin-top:6px}
+.stepnames span{font-size:10px;color:var(--faint);text-align:center;
+  font-family:"JetBrains Mono",monospace;line-height:1.35;letter-spacing:0}
+/* 지금 칸은 이름도 같이 짚어 준다 — 막대 색만으로는 어느 이름인지 세어야 한다 */
+.stepnames span.now{color:var(--cue);font-weight:700}
+.stepnames span.done{color:var(--muted)}
+.pickbtn{margin-top:10px}
+/* 의뢰 내용 고치기 */
+.ed-l{display:block;font-size:12.5px;color:var(--muted);margin:12px 0 4px;
+  font-family:"JetBrains Mono",monospace}
+.ed-l:first-child{margin-top:0}
+.ed-t,.ed-i{width:100%;padding:10px 12px;border:1px solid var(--rule);border-radius:8px;
+  background:var(--ground);color:var(--ink);font-family:inherit;font-size:14.5px;line-height:1.6}
+.ed-t{min-height:130px;resize:vertical}
+.ed-t:focus,.ed-i:focus{outline:2px solid var(--cue);outline-offset:1px;border-color:var(--cue)}
+h2 #editBrief{margin-left:auto}
+/* 보내주신 자료 */
+.files{display:flex;flex-wrap:wrap;gap:10px}
+.files a{width:96px;display:block}
+.files img{width:96px;height:96px;object-fit:cover;border-radius:8px;
+  border:1px solid var(--rule);display:block;background:var(--sunk)}
+.files .doc{width:96px;height:96px;border-radius:8px;border:1px solid var(--rule);
+  background:var(--sunk);display:flex;align-items:center;justify-content:center;
+  font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--muted)}
+.files em{display:block;font-style:normal;font-size:11px;color:var(--faint);margin-top:4px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.files a:hover img,.files a:hover .doc{border-color:var(--cue)}
+
+.msg-picked{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.msg-picked span{display:inline-flex;align-items:center;gap:4px;font-size:12px;border:1px solid var(--rule);border-radius:14px;padding:2px 4px 2px 10px;max-width:100%}.msg-picked span b{font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}.msg-picked button{border:0;background:none;cursor:pointer;font-size:15px;line-height:1;padding:2px 6px;color:inherit}.msg-picked button:hover,.msg-picked button:focus-visible{color:var(--cue)}
+.styles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:6px}
+@media(max-width:560px){.styles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.style-card{position:relative;display:flex;flex-direction:column;border:1px solid var(--rule);border-radius:10px;overflow:hidden;background:var(--panel);cursor:pointer}
+.style-card input{position:absolute;opacity:0;pointer-events:none}
+.style-card img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;background:var(--sunk)}
+.style-card .q{display:flex;align-items:center;justify-content:center;aspect-ratio:3/4;font-size:40px;color:var(--muted);background:var(--sunk)}
+.styles .style-card{display:flex;flex-direction:column}
+.style-card b{display:block;font-size:13.5px;padding:8px 10px 0}
+.style-card small{display:block;font-size:11.5px;color:var(--muted);padding:2px 10px 10px;line-height:1.35}
+.style-card:has(input:checked){border-color:var(--cue);box-shadow:0 0 0 2px var(--cue)}
+.style-card:has(input:focus-visible){outline:2px solid var(--cue);outline-offset:2px}
+.style-fold{margin:14px 0;border:1px solid var(--rule);border-radius:10px;padding:10px 12px;background:var(--panel)}
+.style-fold summary{cursor:pointer;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px}
+.style-fold .style-cur{color:var(--cue);font-weight:700}.style-fold summary small{color:var(--muted);font-size:11.5px}
+.style-fold .styles{margin-top:10px}
+.style-fold .style-now{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;margin:10px 0 2px}.style-fold .style-now img{width:min(220px,60vw);aspect-ratio:3/4;height:auto;object-fit:cover;border-radius:8px;border:1px solid var(--rule)}.style-fold .style-now span{color:var(--muted);font-size:13px;line-height:1.5}
+</style>
+<link rel="stylesheet" href="studio.css?v=3"><script defer src="studio-shell.js?v=4"></script>
+<link rel="stylesheet" href="brand.css?v=red1"></head>
+<body>
+
+<div class="topbar"><div class="topbar-in">
+  <a class="mark" href="index.html"><span class="lamp"></span>onecue
+    <span class="sub">광고 기획 · 제작</span></a>
+  <div class="spacer"></div>
+  <span class="pill" id="conn"><span class="dot"></span>연결 확인 중</span>
+  <span class="acct" id="acct"></span>
+</div></div>
+
+<main id="main">
+  <div class="empty"><span class="big">불러오는 중</span></div>
+</main>
+
+<div class="zoom" id="zoom"><img id="zoomImg" alt=""></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js?v=d4d97baa"></script>
+<script src="auth.js?v=fa839557"></script>
+<script src="asset-access.js?v=retry260923"></script>
+<script src="ad-type-materials.js?v=needs-261002-v295"></script>
+<script src="material-gaps.js?v=needs-261002-v295"></script>
+<script src="shared-stage-renderers.js?v=stage-read-260926-v18"></script>
+<script src="project.js?v=needs-261002-v295s2"></script>
+<script>
+/* 09-28 — 폰이 예전 화면 코드를 붙들고 있었다(물리는 준비물 6장 · PC 는 4장). 열 때·화면으로 돌아올 때 배포 버전과 비교해 다르면 새 주소로 다시 연다 */
+(function () {
+  var ME = "needs-261002-v295";
+  function chk() {
+    fetch(location.pathname + "?vchk=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.text(); }).then(function (t) {
+      var m = t.match(/needs-\d{6}-v\d+/);
+      if (!m || m[0] === ME) return;
+      try { if (sessionStorage.getItem("onecue_vr") === m[0]) return; sessionStorage.setItem("onecue_vr", m[0]); } catch (e) {}
+      var u = new URL(location.href); u.searchParams.set("_v", m[0]); location.replace(u.toString());
+    }).catch(function () {});
+  }
+  chk();
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) chk(); });
+})();
+</script>
+</body>
+</html>

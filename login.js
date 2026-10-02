@@ -181,7 +181,7 @@
         el('newPw').value = ''; el('newPw2').value = '';
         el('savePw').disabled = true;
         resetSay("ok", "비밀번호를 변경했습니다. 잠시 후 프로젝트 화면으로 이동합니다.");
-        setTimeout(function () { location.replace("index.html"); }, 900);
+        setTimeout(function () { location.replace("studio.html"); }, 900);
       }).catch(function () {
         el('savePw').disabled = false;
         resetSay('err', '변경 결과를 확인하지 못했습니다. 네트워크 연결을 확인해 주세요.');

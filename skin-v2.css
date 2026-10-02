@@ -1,0 +1,99 @@
+/* ONECUE 제작 화면 스킨 v2 (10-02 Dan 「제작 페이지 스킨도 메인 첫 페이지 활용해서 · 로고랑 버튼도 메인에 있는 걸로」)
+   첫 페이지(index.html · 개발킷 v4)와 같은 토큰: 다크 단일 테마 · 라임 강조 · Pretendard + IBM Plex Mono + Anton.
+   brand.css 뒤에 덮어쓴다. 동작·버튼 배치는 그대로 두고 색·글꼴·로고·버튼 모양만 바꾼다.
+   v1(예전 스킨)은 같은 이름에 -v1 을 붙인 페이지로 남아 있다. */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+@import url("https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@500;600&display=swap");
+
+:root,:root[data-theme=light],:root[data-theme=dark]{
+  --bg2:#0d0d0e; --accent:#d7ff3a; --accent-ink:#140b07;
+  --ground:#0d0d0e; --panel:#161617; --sunk:#1e1e20;
+  --ink:#f4f2ef; --muted:#a8a49c; --faint:#7d7a74; --rule:rgba(244,242,239,.13);
+  --brand:#d7ff3a; --brand-strong:#d7ff3a; --brand-soft:rgba(215,255,58,.12);
+  --cue:#d7ff3a; --cue-soft:rgba(215,255,58,.12);
+  --live:#7bd99e; --live-soft:rgba(123,217,158,.12);
+  --hold:#f0b955; --hold-soft:rgba(240,185,85,.13);
+  --sans2:"Pretendard",system-ui,sans-serif; --mono2:"IBM Plex Mono","Pretendard",monospace; --disp2:"Anton","Pretendard",sans-serif;
+  color-scheme:dark;
+}
+::selection{background:var(--accent);color:var(--accent-ink)}
+html,body,body.studio-layout{background:var(--bg2)!important;color:var(--ink)}
+body.studio-layout{font-family:var(--sans2)!important}
+body.studio-layout *{letter-spacing:normal}
+
+/* 왼쪽 레일 — 첫 페이지 로고(ONE/CUE 두 줄 + 라임 점) */
+.studio-rail{background:#111112!important;border-color:var(--rule)!important}
+.studio-brand.v2{display:flex;align-items:flex-start;gap:5px;color:var(--ink)!important;text-decoration:none;margin-bottom:26px}
+.studio-brand.v2 .wm{display:flex;flex-direction:column;font-family:var(--disp2);font-size:27px;line-height:.86;letter-spacing:.02em;font-weight:400}
+.studio-brand.v2 .wm span{color:var(--ink)!important}
+.studio-brand.v2 .dot{width:9px;height:9px;margin-top:1px;border-radius:50%;background:var(--accent);animation:cuepulse 1.6s infinite;flex-shrink:0}
+@keyframes cuepulse{0%,100%{opacity:1}50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.studio-brand.v2 .dot{animation:none}}
+.studio-workspace{color:var(--muted)!important;border-color:var(--rule)!important}
+.studio-workspace>span{background:var(--brand-soft)!important;color:var(--accent)!important}
+.studio-workspace small,.studio-navlabel,.studio-railfoot,.studio-railfoot small{color:var(--faint)!important;font-family:var(--mono2)}
+.studio-rail nav a{color:#c9c5bd!important;font-family:var(--mono2);font-weight:600;font-size:13px;border-radius:999px}
+.studio-rail nav a.on,.studio-rail nav a.on:hover{background:var(--accent)!important;color:var(--accent-ink)!important}
+.studio-rail nav a:hover{background:rgba(255,255,255,.08)!important;color:var(--ink)!important}
+.studio-railfoot a{color:var(--muted)!important}
+
+/* 위 막대·제목 */
+.studio-layout .topbar,body.studio-layout>header{background:rgba(13,13,14,.82)!important;backdrop-filter:blur(14px);border-color:var(--rule)!important}
+.studio-layout .topbar .mark,.studio-layout h1,.studio-layout h2,.studio-layout h3,.studio-layout .sec>h3{color:var(--ink)!important}
+.studio-layout h1{font-weight:800;letter-spacing:-.02em}
+.studio-layout .lede,.studio-heading p,.studio-layout p{color:#cfcbc3}
+.studio-eyebrow,.studio-layout .head-label,.studio-layout .micro,.studio-stats span{color:var(--muted)!important;font-family:var(--mono2)}
+.studio-layout a{color:var(--accent)}
+
+/* 버튼 — 첫 페이지 알약(주 버튼 라임, 보조 유리) */
+.studio-layout .btn,.studio-layout button.btn,.studio-layout a.btn{border-radius:999px!important;font-family:var(--mono2)!important;font-weight:600!important;letter-spacing:.02em;
+  background:var(--accent)!important;color:var(--accent-ink)!important;border:0!important;box-shadow:none!important}
+.studio-layout .btn:hover{filter:brightness(1.08)}
+.studio-layout .btn.ghost,.studio-layout .btn.secondary,.studio-layout .btn.light{background:rgba(255,255,255,.06)!important;color:var(--ink)!important;border:1px solid rgba(255,255,255,.22)!important}
+.studio-layout .btn.ghost:hover{background:rgba(255,255,255,.14)!important}
+.studio-layout .btn:disabled,.studio-layout .btn[disabled]{opacity:.4;filter:none}
+
+/* 판·표·칸 */
+.studio-layout .card,.studio-layout .panel,.studio-layout section.sec,.studio-stats,.studio-stats>div,.studio-tablewrap,.studio-layout .work,
+.studio-layout fieldset,.studio-layout .notice,.studio-retrieve,.studio-signin{background:var(--panel)!important;border-color:var(--rule)!important;color:var(--ink)}
+.studio-table th,.studio-table td,.studio-layout footer,.studio-layout .result-head,.studio-layout .review-tabs,.studio-layout .prose h4{border-color:var(--rule)!important}
+.studio-table th{background:#1b1b1d!important;color:var(--muted)!important;font-family:var(--mono2)}
+.studio-table td{color:var(--ink)}
+.studio-table tbody tr:hover{background:rgba(255,255,255,.04)!important}
+.studio-table th,.studio-table td small,.studio-filters button,.studio-layout .work small,.studio-layout .work span,.studio-layout .empty,
+.studio-layout .facts span,.studio-layout .heading small,.studio-layout .heading p,.studio-signin p,.studio-retrieve p,.studio-layout footer{color:var(--muted)!important}
+.studio-filters .active,.studio-layout .work.active{background:var(--brand-soft)!important;color:var(--accent)!important;border-color:var(--accent)!important}
+.studio-layout .prose p,.studio-layout .facts strong{color:#d8d4cc!important}
+.studio-layout .media{background:#1a1a1c!important}
+.studio-layout .tag:not(.pending):not(.ok):not(.now){background:rgba(255,255,255,.08)!important;color:#d0ccc4!important}
+
+/* 입력칸 */
+.studio-layout input,.studio-layout textarea,.studio-layout select{background:#121213!important;color:var(--ink)!important;border:1px solid rgba(255,255,255,.18)!important;border-radius:10px}
+.studio-layout input::placeholder,.studio-layout textarea::placeholder{color:#6f6c66}
+.studio-layout input:focus-visible,.studio-layout textarea:focus-visible,.studio-layout select:focus-visible{outline:2px solid var(--accent)!important;outline-offset:2px}
+.studio-layout label{color:#d8d4cc}
+.studio-layout input[type=checkbox],.studio-layout input[type=radio]{accent-color:var(--accent)}
+.studio-layout button:focus-visible,.studio-layout a:focus-visible{outline-color:var(--accent)!important}
+
+/* 알림 색 — 의미 색은 남기고 어두운 바탕에 맞춘다 */
+.studio-layout .msg.err,.studio-layout .pill.bad{color:#ff9b8f!important;background:rgba(255,90,70,.12)!important}
+.studio-layout .msg.ok{color:var(--live)!important;background:var(--live-soft)!important}
+.st-act,.studio-layout .tag.st-act,.cstep-s.st-act{background:rgba(255,110,80,.16)!important;color:#ffab95!important;border-color:rgba(255,110,80,.4)!important}
+.st-run,.studio-layout .tag.st-run,.cstep-s.st-run{background:rgba(110,160,255,.15)!important;color:#a9c6ff!important;border-color:rgba(110,160,255,.4)!important}
+.st-done,.studio-layout .tag.st-done,.cstep-s.st-done{background:rgba(123,217,158,.14)!important;color:#9fe5b8!important;border-color:rgba(123,217,158,.4)!important}
+.st-fix,.studio-layout .tag.st-fix,.cstep-s.st-fix{background:rgba(240,185,85,.15)!important;color:#f5cd84!important;border-color:rgba(240,185,85,.4)!important}
+.needs h4{color:#d8d4cc}
+.needs .need-type b{color:var(--ink)}
+
+/* 로그인 상자 — 원래 투명 칸(.box)이라 판 색만 깔면 제목이 끝에 붙었다. 첫 페이지 유리 상자처럼 여백·테두리를 준다 */
+.studio-layout main>.box{background:var(--panel)!important;border:1px solid var(--rule);border-radius:18px;padding:32px 30px}
+
+/* stage-render.css 의 밝은 바탕 12곳(공통 기획 방향 · 메시지 · 수정 요청 기록 · 장면 표 등) — 어두운 판 + 밝은 글자 */
+.studio-layout .direction,.studio-layout .msgs,.studio-layout .msgs .msg.in,.studio-layout .board-note,.studio-layout .redo-kind label,
+.studio-layout .fix-said,.studio-layout .script-msg,.studio-layout .sc-row,.studio-layout .script-tbl th,.studio-layout .rq-log li{
+  background:var(--sunk)!important;color:var(--ink)!important;border-color:var(--rule)!important}
+.studio-layout .msgs .msg.out{background:var(--brand-soft)!important;color:var(--ink)!important;border-color:rgba(215,255,58,.35)!important}
+.studio-layout .direction{border-color:rgba(240,185,85,.35)!important}
+.studio-layout .direction *,.studio-layout .fix-said *,.studio-layout .board-note *,.studio-layout .script-msg *,.studio-layout .rq-log li *{color:inherit}
+.studio-layout .direction .dir-sub,.studio-layout .direction li>b:first-child,.studio-layout .direction dt{color:var(--muted)!important}
+.studio-layout .board-sheet-client img{background:#1a1a1c!important}
