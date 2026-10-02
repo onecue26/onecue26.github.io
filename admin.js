@@ -1603,7 +1603,7 @@
       '<div class="mail-act">' +
       '<button class="btn" type="button" data-copy="' + esc(slug) + '">본문 복사</button>' +
       (p.who && p.who.email
-        ? '<button class="btn ghost" type="button" data-open="' + esc(slug) + '">메일 앱으로 열기</button>'
+        ? '<button class="btn ghost" type="button" data-open="' + esc(slug) + '">메일로 보내기 (메일 앱)</button>'
         : "") +
       '<button class="btn ghost" type="button" data-reset="' + esc(slug) + '">기본 문구로</button>' +
       '<span class="msg" id="mailmsg-' + esc(slug) + '"></span></div>';
@@ -4578,10 +4578,23 @@
         var body = (document.querySelector('[data-msg-body="' + id + '"]').value || "").trim();
         var kind = document.querySelector('[data-msg-kind="' + id + '"]').value;
         if (!body) { window.alert("보낼 말을 적어 주십시오."); return; }
+        var now = !!b.dataset.sendNow;
+        if (now) {
+          var owner = ROWS.filter(function (x) { return x.id === id; })[0];
+          var others = owner ? otherNameHits(owner, [body]) : [];
+          if (others.length) { window.alert("메시지에 다른 건 이름이 있습니다 — " + others.join(", ") + " — 고친 뒤에 보내 주세요."); return; }
+          if (!window.confirm("이 메시지를 광고주에게 보냅니다. 광고주 화면에 바로 뜹니다.")) return;
+        }
         b.disabled = true;
         db.rpc("onecue_message_draft", { p_project_id: id, p_kind: kind, p_body: body })
-          .then(function (r) { if (r.error) throw r.error; return load(); })
-          .catch(function (e) { b.disabled = false; window.alert("저장하지 못했습니다 — " + errKo(e)); });
+          .then(function (r) {
+            if (r.error) throw r.error;
+            if (now && r.data && r.data.id) {
+              return db.rpc("onecue_message_send", { p_message_id: r.data.id }).then(function (r2) { if (r2.error) throw r2.error; });
+            }
+          })
+          .then(function () { return load(); })
+          .catch(function (e) { b.disabled = false; window.alert((now ? "보내지 못했습니다 — " : "저장하지 못했습니다 — ") + errKo(e)); });
       });
     });
     document.querySelectorAll("[data-msg-send]").forEach(function (b) {
@@ -5516,7 +5529,9 @@
         '<option value="explain">질문·설명</option></select>' +
         '<textarea data-msg-body="' + esc(p.id) + '" rows="3" maxlength="4000" ' +
         'placeholder="광고주에게 보낼 말 — 초안으로 먼저 저장됩니다"></textarea>' +
-        '<button class="btn ghost" type="button" data-msg-draft="' + esc(p.id) + '">초안 저장</button></div></details>'
+        // 10-02 친구 「메시지 발송 버튼이 없다」 — 초안 저장을 먼저 해야 보내기가 나왔다. 바로 보내기를 앞에
+        '<button class="btn" type="button" data-msg-draft="' + esc(p.id) + '" data-send-now="1">광고주에게 보내기</button>' +
+        '<button class="btn ghost" type="button" data-msg-draft="' + esc(p.id) + '">초안으로만 저장</button></div></details>'
       : "";
     var drafts = list.filter(function (m) { return m.author === "admin" && !m.sent_at; }).length;
     return '<details class="msgbox"' + (list.length ? " open" : "") + '><summary>광고주 메시지' +
