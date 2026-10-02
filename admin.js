@@ -991,7 +991,7 @@
       body = "<b>걸린 것 " + (hits.length || Number(m.critical) || 0) + "건</b>" +
         (hits.length ? '<ul class="dg-hits">' + hits.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>" : "") +
         (m.my_take ? '<details class="dg-take"><summary>검수자 의견 보기</summary>' + fmtTake(m.my_take) + "</details>" : "") +
-        "그대로 보내려면 이유를 적고 아래 버튼 · 고치려면 맨 아래 「이전 단계로 되돌리기」";
+        "확인하셨으면 그대로 보내셔도 됩니다 · 고치려면 맨 아래 「이전 단계로 되돌리기」";
     }
     if (sup && sup.state === "보충 중") { st = "자동 보충 중"; cls = "wait"; open = false; }
     return '<div class="lc-box deliver-gate"><b>완성본을 광고주에게 보냅니다</b>' +
@@ -1000,9 +1000,10 @@
         (sup.why ? " — " + esc(sup.why) : "") + "</span>" : "") +
       '<span class="lc-msg">보낼 판 · ' + esc(name) + " (" + esc(hhmm(fin.created_at)) + ")<br>" + body + "</span>" +
       // 10-02 Dan 「납품 아래 버튼들 뭐냐 · 왜 복잡하게」 — 버튼은 하나만. 걸렸으면 이유 칸 + 「이유 적고 보내기」(표시와 발송을 한 번에)
+      // 10-02 Dan 「이유를 적고 보내기가 뭐야 · 이런 건 왜 만든 거냐」 — 이유 칸 없앰. 버튼 하나, 누르면 걸린 것을 보여 주고 한 번 묻는다
       (st === "결정 필요"
-        ? '<div class="lc-row"><input type="text" data-override-why="' + esc(fin.id) + '" placeholder="그래도 보내는 이유 (필수)">' +
-          '<button class="btn" type="button" data-override="' + esc(fin.id) + '" data-send-after="' + esc(p.id) + '" disabled>이유 적고 광고주에게 보내기</button></div>'
+        ? '<div class="lc-row"><button class="btn" type="button" data-override="' + esc(fin.id) + '" data-send-after="' + esc(p.id) + '"' +
+          ' data-hits="' + esc(String(m.why || "").split(" / ").join(" · ")) + '">광고주에게 보내기</button></div>'
         : '<div class="lc-row"><button class="btn" type="button" data-final-send="' + esc(p.id) + '"' + (open ? "" : " disabled") +
           ">" + (open ? "광고주에게 보내기" : esc(st) + " — 끝나면 보낼 수 있습니다") + "</button></div>") + "</div>";
   }
@@ -4736,16 +4737,16 @@
     document.querySelectorAll("[data-override]").forEach(function (b) {
       b.addEventListener("click", function () {
         var inp = document.querySelector('[data-override-why="' + b.dataset.override + '"]');
-        var why = inp ? inp.value.trim() : "";
-        if (!why) return;
-        if (b.dataset.sendAfter && !window.confirm("완성본을 광고주에게 보냅니다. 광고주 화면에 바로 뜹니다.")) return;
+        var why = (inp ? inp.value.trim() : "") || "사장님이 걸린 것을 확인하고 그대로 보냄";
+        if (b.dataset.sendAfter && !window.confirm("검수에서 걸린 것: " + (b.dataset.hits || "-") +
+          " — 확인하셨으면 그대로 광고주에게 보냅니다. 광고주 화면에 바로 뜹니다.")) return;
         b.disabled = true; b.textContent = "보내는 중…";
         db.rpc("onecue_final_override", { p_asset_id: b.dataset.override, p_why: why }).then(function (r) {
           if (r.error) throw r.error;
           if (!b.dataset.sendAfter) return;
           return db.rpc("onecue_final_send", { p_project_id: b.dataset.sendAfter }).then(function (r2) { if (r2.error) throw r2.error; });
         }).then(function () { return load(); }).catch(function (e) {
-          b.disabled = false; b.textContent = "이유 적고 광고주에게 보내기";
+          b.disabled = false; b.textContent = "광고주에게 보내기";
           window.alert("보내지 못했습니다 — " + errKo(e));
         });
       });
