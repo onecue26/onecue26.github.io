@@ -1167,7 +1167,7 @@
     function denied() {
       setConn("", "접근 제한");
       el("main").innerHTML = '<div class="empty"><span class="big">볼 수 없는 건입니다</span>' +
-        '<p>의뢰하신 계정으로 로그인했는지 확인해주세요.</p><a class="btn ghost" href="index.html">목록으로</a></div>';
+        '<p>의뢰하신 계정으로 로그인했는지 확인해주세요.</p><a class="btn ghost" href="studio.html">목록으로</a></div>';
     }
     return db.auth.getUser().then(function (auth) {
       user = auth.data && auth.data.user;
@@ -1247,7 +1247,7 @@
               ? '<div class="gate done"><div class="txt"><b>프로젝트가 완료되었습니다</b><small>' +
                 esc(P.closed_at ? new Date(P.closed_at).toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 10) : "") + " · 함께해 주셔서 감사합니다. 완성본은 아래 납품 칸에서 언제든 받으실 수 있습니다.</small></div></div>"
               : secGate(P, x[5].data)) + secMessages(x[6].data) + flow(x) +
-            '<footer><span><a href="index.html">← 목록</a></span>' +
+            '<footer><span><a href="studio.html">← 목록</a></span>' +
             '<span class="mono">' + new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 16) +
             "</span></footer>";
           wire();
