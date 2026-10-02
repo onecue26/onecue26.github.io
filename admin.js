@@ -3703,7 +3703,7 @@
       '" target="_blank" rel="noopener">광고주 화면 ↗</a></div>' +
       // ★ 광고주가 무엇을 언제 정했는지는 **카드를 열자마자** 보여야 한다.
       //   단계 안에 숨겨 두면 흐름을 펼쳐야 보이고, 그때는 이미 늦다.
-      clientSaid + stoppedLine(p) + freshLine(p) + redo + who +
+      clientSaid + stoppedLine(p) + runningLine(p) + freshLine(p) + redo + who +
       '<div class="mailbox" id="mail-' + esc(p.slug) + '" hidden></div>' + messageBox(p) +
       flow(p, stageBodies) + "</div></details>";
   }
@@ -3820,6 +3820,20 @@
           '" data-retry-worker="' + esc(pl.worker || "") + '">다시 돌리기</button>'
         : '<span class="said">' + (pl.worker === "order_writer" ? "비트가 바뀌면 다시 씁니다 — 세 번 실패하면 멈춥니다" : "") + "</span>") +
       "</div>";
+  }
+
+  /** 10-02 Dan 「다시 돌리기 눌렀는데 진행 중이라던가 아무 표시가 없다」 — 작업기가 맡은 일이 있으면 카드 맨 위에 「돌고 있음」 */
+  function runningLine(p) {
+    var j = p.job;
+    if (!j || p.stopped) return "";
+    var what = { facts: "제품·자료 확인 — AI가 사진과 의뢰를 읽고 있습니다", strategy: "전략 설계를 쓰고 있습니다",
+      concepts: "콘셉트 5안을 쓰고 있습니다", develop: "구성·각본을 쓰고 있습니다", storyboard: "콘티를 그리고 있습니다",
+      anchors: "제작 자료를 만들고 있습니다", video: "영상을 뽑고 있습니다", post: "후반 작업을 하고 있습니다" }[j.step] ||
+      ((STEP_NAME[j.step] || j.step) + " 작업 중");
+    var since = j.claimed_at || j.created_at;
+    return '<div class="client-said worker-run"><b>⏳ 진행 중 — ' + esc(what) + "</b>" +
+      '<span class="at">' + (j.state === "claimed" ? "시작 " : "대기 ") + esc(when(since)) + "</span>" +
+      '<span class="said">끝나면 이 카드에 결과와 다음 단계 버튼이 뜹니다 · 보통 몇 분</span></div>';
   }
 
   /** 콘티 그림에 「수정 요청」(그림·완성 콘티)을 한 시각 — 그 전에 그린 시트·조각은 지난 판이다 (09-24) */
@@ -5653,7 +5667,7 @@
             //   값이 늘 undefined 라 링크가 조용히 안 뜬다
             .select("project_id,name,email,phone,title,homepage")
             .in("project_id", ids),
-          db.from("jobs").select("project_id,step,kind,request").in("state", ["queued", "claimed"])   // kind — 콘티 그림(image)이 도는 중인지 화면이 알아야 버튼을 잠근다 (09-24)   // 작업기가 가져간(claimed) 작업도 「쓰는 중」이다
+          db.from("jobs").select("project_id,step,kind,request,state,claimed_at,created_at").in("state", ["queued", "claimed"])   // kind — 콘티 그림(image)이 도는 중인지 화면이 알아야 버튼을 잠근다 (09-24)   // 작업기가 가져간(claimed) 작업도 「쓰는 중」이다
             .in("project_id", ids),
           db.from("briefs").select("project_id,raw,goal,target,format").in("project_id", ids),
           // 승인하면서 남긴 말도 놓치면 안 된다. 반려만 보면 반쪽이다

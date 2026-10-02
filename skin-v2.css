@@ -236,3 +236,5 @@ body.studio-layout *{letter-spacing:normal}
 /* 10-02 Dan 「이건 뭐야 글씨도 안 보이고」 — v2 에서 --cue 가 연두(#d7ff3a)가 되며, 옛 화면의 「연두 바탕 + 흰 글자」 칸이 안 읽혔다.
    (NEW 표시 · 지금 단계 버튼 · 새로 들어온 표시 · 대화 지금 단계) 글자를 짙게 */
 .wrk .name .new,.steps button.at,.fresh-mark,.thread-step.s-now b{color:#111 !important}
+/* 10-02 진행 중 줄 */
+.client-said.worker-run{border-left:3px solid var(--cue,#d7ff3a);background:rgba(215,255,58,.08)}
