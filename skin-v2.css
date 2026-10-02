@@ -200,3 +200,35 @@ body.studio-layout *{letter-spacing:normal}
 .studio-layout span.why{background:transparent!important;color:var(--muted)!important}
 .studio-layout .done-note{background:var(--sunk)!important;color:var(--ink)!important;border-color:var(--rule)!important}
 .studio-layout .msg-state.got{background:rgba(123,217,158,.13)!important;color:#9fe5b8!important}
+
+/* ── 가독성(10-02 Dan 「글씨 잘 안 보이는 게 있어」) — 화면에서 글자·바탕 대비를 재서 4.5:1(큰 글자 3:1) 못 미치는 것만 */
+:root,:root[data-theme=light],:root[data-theme=dark]{--faint:#9d9991}
+.studio-layout .studio-workspace small,.studio-layout .studio-navlabel,.studio-layout .studio-railfoot,.studio-layout .studio-railfoot small{color:#9d9991!important}
+/* 라임 바탕 위 글자는 첫 페이지처럼 검게 */
+.studio-layout button.on,.studio-layout .tabs button.on,.studio-layout .track-sw button.on,.studio-layout [aria-pressed=true],.studio-layout [aria-selected=true]{color:#140b07!important}
+/* 예전 밝은 화면용 진한 색(진한 주황·초록·갈색·회색) → 같은 색 계열 밝은 색 */
+.studio-layout .close-box b{color:#94dab9!important}
+.studio-layout .board-sheet span,
+.studio-layout .heading label,
+.studio-layout .ms-summary span.ms-more,
+.studio-layout .msg div.msg-head,
+.studio-layout .msg-head b,
+.studio-layout .plan-same span,
+.studio-layout figcaption,
+.studio-layout th,
+.studio-layout th.num{color:#c9c5bd!important}
+.studio-layout .discarded td,
+.studio-layout .discarded td.n,
+.studio-layout .discarded td.num,
+.studio-layout .flow-summary small.cost-chip,
+.studio-layout tr.discarded b,
+.studio-layout em.gone,
+.studio-layout span.stmt-sum{color:#f79778!important}
+.studio-layout .mytake b{color:#fac874!important}
+/* LAB 목차의 선택 항목은 바탕 없이 라임 글자 */
+.studio-layout .lab-index button.on{color:var(--accent)!important}
+/* 「수정사항 적용 완료」 칸(.plan-new) — 밝은 연두 바탕이라 글자가 안 보였다 */
+.studio-layout .plan-new{background:rgba(123,217,158,.13)!important;color:var(--ink)!important;border-color:rgba(123,217,158,.35)!important}
+.studio-layout .plan-new span{color:#c9c5bd!important}
+/* 기본값이 박힌 채 스킨에 없던 토큰 6개 — 화면에 안 나온 상태 칸도 밝게 나오지 않게 */
+:root,:root[data-theme=light],:root[data-theme=dark]{--admin:#f0b955;--line:rgba(244,242,239,.13);--ok:#7bd99e;--ok-soft:rgba(123,217,158,.13);--paper:#161617;--soft:#1e1e20}
