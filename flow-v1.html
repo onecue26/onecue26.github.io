@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="ONECUE 제작 아홉 단계와 그 사이의 관문 일곱 개 — 내부용">
+<title>ONECUE 제작 관문</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  --ground:#F7F5F1; --panel:#FFFFFF; --sunk:#EFEBE4; --rule:#DFD9CF;
+  --ink:#191712; --muted:#5A5449; --faint:#8E877A;
+  --cue:#B8341C; --cue-soft:#FAEBE7;
+  --client:#1F5F96; --client-soft:#E6EFF7;
+  --admin:#8A5B0C; --admin-soft:#F6EEDC;
+  --ai:#5B46A0; --ai-soft:#ECE8F7;
+  --hand:#256B4A; --hand-soft:#E4F0EA;
+  --stop:#A8201A; --stop-soft:#F8E7E5;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#100F0D; --panel:#181714; --sunk:#201E1B; --rule:#2C2924;
+    --ink:#EFEBE3; --muted:#A8A195; --faint:#6D675D;
+    --cue:#F2704F; --cue-soft:#2A1712;
+    --client:#74AEE6; --client-soft:#131E28;
+    --admin:#D9A241; --admin-soft:#241D12;
+    --ai:#A895E8; --ai-soft:#1B1729;
+    --hand:#5FC08F; --hand-soft:#12231A;
+    --stop:#F2685F; --stop-soft:#2A1413;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#100F0D; --panel:#181714; --sunk:#201E1B; --rule:#2C2924;
+  --ink:#EFEBE3; --muted:#A8A195; --faint:#6D675D;
+  --cue:#F2704F; --cue-soft:#2A1712;
+  --client:#74AEE6; --client-soft:#131E28;
+  --admin:#D9A241; --admin-soft:#241D12;
+  --ai:#A895E8; --ai-soft:#1B1729;
+  --hand:#5FC08F; --hand-soft:#12231A;
+  --stop:#F2685F; --stop-soft:#2A1413;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:"Gothic A1","Malgun Gothic",system-ui,sans-serif;
+  font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased}
+main{max-width:880px;margin:0 auto;padding-block:38px 96px;padding-left:20px;padding-right:20px}
+code,.num,.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-variant-numeric:tabular-nums}
+
+/* 머리 */
+.brand{display:flex;align-items:baseline;gap:9px;margin-bottom:6px}
+.brand b{font:800 15px/1 inherit;letter-spacing:.14em;color:var(--cue)}
+.brand span{font-size:11.5px;color:var(--faint);letter-spacing:.06em}
+h1{margin:0 0 12px;font:800 clamp(27px,5.2vw,38px)/1.25 inherit;text-wrap:balance}
+.lede{max-width:62ch;margin:0 0 4px;color:var(--muted)}
+.lede b{color:var(--ink)}
+.asof{margin:18px 0 0;font:500 11.5px/1.6 "IBM Plex Mono",monospace;color:var(--faint)}
+
+/* 담당 색 */
+.who{display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border-radius:3px;
+  font:700 10.5px/1.7 inherit;letter-spacing:.03em;white-space:nowrap}
+.w-client{background:var(--client-soft);color:var(--client)}
+.w-admin{background:var(--admin-soft);color:var(--admin)}
+.w-ai{background:var(--ai-soft);color:var(--ai)}
+.w-hand{background:var(--hand-soft);color:var(--hand)}
+.w-paid{background:var(--cue-soft);color:var(--cue)}
+
+/* 한눈에 */
+.map{margin:26px 0 42px;padding:16px 18px;background:var(--panel);
+  border:1px solid var(--rule);border-radius:9px}
+.map h2{margin:0 0 12px;font:700 11.5px/1 inherit;letter-spacing:.1em;color:var(--faint)}
+.mrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.mrow a{display:inline-flex;align-items:baseline;gap:5px;padding:4px 9px;border-radius:5px;
+  background:var(--sunk);color:var(--ink);text-decoration:none;font-size:12.5px;
+  border:1px solid transparent}
+.mrow a:hover,.mrow a:focus-visible{border-color:var(--cue);color:var(--cue)}
+.mrow a i{font:600 10.5px/1 "IBM Plex Mono",monospace;color:var(--faint);font-style:normal}
+.mrow a.paid{background:var(--cue-soft);color:var(--cue)}
+.mrow a.paid i{color:var(--cue)}
+.mlegend{display:flex;flex-wrap:wrap;gap:12px;margin-top:13px;padding-top:12px;
+  border-top:1px solid var(--rule);font-size:11.5px;color:var(--muted)}
+
+/* 국면 */
+.phase{margin:44px 0 20px;padding-bottom:9px;border-bottom:2px solid var(--ink)}
+.phase h2{margin:0;font:800 19px/1.3 inherit}
+.phase p{margin:3px 0 0;font-size:13px;color:var(--muted)}
+
+/* 단계 카드 */
+.step{margin:0 0 14px;background:var(--panel);border:1px solid var(--rule);
+  border-radius:9px;overflow:hidden;scroll-margin-top:16px}
+.step>header{display:flex;flex-wrap:wrap;gap:8px 11px;align-items:baseline;
+  padding:13px 18px;border-bottom:1px solid var(--rule);background:var(--sunk)}
+.step>header .n{font:600 12px/1 "IBM Plex Mono",monospace;color:var(--faint)}
+.step>header h3{margin:0;font:700 16.5px/1.3 inherit;flex:1 1 auto}
+.step>header .key{font:500 11px/1 "IBM Plex Mono",monospace;color:var(--faint)}
+.step .in{padding:15px 18px 17px}
+.step .say{margin:0 0 13px;max-width:60ch}
+.step .say b{color:var(--ink)}
+
+.blk{margin:0 0 12px}
+.blk:last-child{margin-bottom:0}
+.blk>h4{margin:0 0 5px;font:700 11px/1.6 inherit;letter-spacing:.08em;color:var(--faint)}
+.blk ul{margin:0;padding-left:17px;display:grid;gap:3px}
+.blk li{color:var(--muted)}
+.blk li b{color:var(--ink);font-weight:700}
+.blk.warn>h4{color:var(--stop)}
+.blk.warn ul{padding-left:0;list-style:none;display:grid;gap:5px}
+.blk.warn li{padding-left:15px;position:relative}
+.blk.warn li::before{content:"—";position:absolute;left:0;color:var(--stop)}
+.blk.real{padding:11px 13px;background:var(--sunk);border-radius:6px;
+  border-left:3px solid var(--cue)}
+.blk.real>h4{color:var(--cue)}
+.blk.real p{margin:0 0 5px;font-size:13.5px;color:var(--muted)}
+.blk.real p:last-child{margin-bottom:0}
+.blk.real p b{color:var(--ink)}
+
+/* 관문 */
+.gate{margin:0 0 14px;padding:15px 18px;border-radius:9px;
+  background:var(--stop-soft);border:1px solid var(--rule);border-left:4px solid var(--stop)}
+.gate>header{display:flex;flex-wrap:wrap;gap:7px 10px;align-items:baseline;margin-bottom:9px}
+.gate>header .lb{font:700 10.5px/1.7 inherit;letter-spacing:.09em;color:var(--stop)}
+.gate>header h3{margin:0;font:700 15.5px/1.35 inherit;flex:1 1 100%}
+.gate .say{margin:0 0 11px;max-width:60ch;color:var(--muted)}
+.gate .say b{color:var(--ink)}
+.gate ol{margin:0;padding-left:19px;display:grid;gap:5px}
+.gate ol li{color:var(--muted)}
+.gate ol li b{color:var(--ink)}
+.gate .fn{margin:10px 0 0;font:500 11.5px/1.6 "IBM Plex Mono",monospace;color:var(--faint);
+  overflow-wrap:anywhere}
+
+/* 값 표 */
+.tbl{margin:0;overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:390px}
+th,td{padding:7px 11px;text-align:left;border-bottom:1px solid var(--rule)}
+th{font:700 11px/1.6 inherit;letter-spacing:.06em;color:var(--faint);
+  border-bottom:1.5px solid var(--rule)}
+td.n{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
+  text-align:right;white-space:nowrap}
+tr.hi td{background:var(--cue-soft);color:var(--ink);font-weight:700}
+tr.out td{color:var(--faint);text-decoration:line-through}
+
+footer{margin-top:52px;padding-top:18px;border-top:1px solid var(--rule);
+  font-size:12.5px;color:var(--faint)}
+footer b{color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <div class="brand"><b>ONECUE</b><span>제작 관문 · 2026-09-22</span></div>
+  <h1>의뢰에서 납품까지, 어디서 멈추는가</h1>
+  <p class="lede">아홉 단계가 있고, 그 사이에 <b>관문 일곱 개</b>가 있습니다.
+  관문은 일을 느리게 하려고 있는 것이 아니라, <b>틀린 것이 돈을 쓰고 광고주에게
+  나가는 것</b>을 막으려고 있습니다. 아래의 모든 숫자와 실례는 실제로 일어난
+  것입니다 — 지어낸 예시가 없습니다.</p>
+  <p class="lede">사장님이 눌러야 하는 것은 <b>두 가지뿐</b>입니다:
+  <span class="who w-paid">유료 생성</span> 과
+  <span class="who w-client">광고주 발송</span>. 나머지 제작 판단은 제작 쪽이 정합니다.</p>
+
+  <section class="map">
+    <h2>한눈에</h2>
+    <div class="mrow">
+      <a href="#s1"><i>01</i>의뢰 접수</a>
+      <a href="#s2"><i>02</i>제품 팩트</a>
+      <a href="#s3"><i>03</i>전략</a>
+      <a href="#s4"><i>04</i>컨셉</a>
+      <a href="#s5"><i>05</i>구성·각본</a>
+      <a href="#s6"><i>06</i>콘티</a>
+      <a class="paid" href="#s7"><i>07</i>제작 자료</a>
+      <a class="paid" href="#s8"><i>08</i>영상</a>
+      <a href="#s9"><i>09</i>납품</a>
+    </div>
+    <div class="mlegend">
+      <span><span class="who w-client">광고주</span> 올리고 고르고 승인</span>
+      <span><span class="who w-admin">관리자</span> 사장님이 누름</span>
+      <span><span class="who w-ai">AI</span> 만들고 판정</span>
+      <span><span class="who w-hand">손</span> 사람이 직접</span>
+      <span><span class="who w-paid">유료</span> 크레딧이 나감</span>
+    </div>
+  </section>
+
+  <!-- ── 기획 ───────────────────────────────────────────────────────────── -->
+  <div class="phase">
+    <h2>기획</h2>
+    <p>무엇을 누구에게 왜 — 여기서 틀리면 뒤가 전부 틀립니다</p>
+  </div>
+
+  <article class="step" id="s1">
+    <header><span class="n">01</span><h3>의뢰 접수</h3>
+      <span class="who w-client">광고주</span><span class="key">brief</span></header>
+    <div class="in">
+      <p class="say">광고주가 제품과 원하는 것을 적고 <b>제품 사진을 올립니다.</b></p>
+      <div class="blk"><h4>받는 것</h4><ul>
+        <li>제품 설명 · 목표 · 대상</li>
+        <li>길이 · 화면비 · 올릴 채널</li>
+        <li><b>제품 사진</b> — 없으면 팩트를 못 뽑습니다</li>
+      </ul></div>
+      <div class="blk warn"><h4>주의</h4><ul>
+        <li>빈칸은 추측하지 않습니다. 컷 수를 안 적으면 <b>우리가 정하고 그 사실을 기록</b>합니다</li>
+      </ul></div>
+      <div class="blk real"><h4>실례 · RUSH</h4>
+        <p>「무광 실버 캔에 붉은 그래픽이 들어간 탄산음료」 · <b>15초 · 9:16</b> ·
+        유튜브 쇼츠 / 릴스 / 틱톡. 컷 수는 안 적혀 있었습니다.</p>
+        <p>접수 기본값이 <b>12컷</b>으로 남아 있었고 실제 설계는 <b>6컷</b>이었습니다.
+        광고주 화면 머리에 「12컷」이 떠 있던 것을 09-22 에 6컷으로 맞췄습니다 —
+        광고주가 세어 보면 어긋나는 숫자였습니다.</p>
+      </div>
+    </div>
+  </article>
+
+  <article class="step" id="s2">
+    <header><span class="n">02</span><h3>제품 팩트</h3>
+      <span class="who w-ai">AI</span><span class="key">facts</span></header>
+    <div class="in">
+      <p class="say">사진에서 제품이 <b>실제로 어떻게 생겼고 무엇이 적혀 있는지</b> 읽어냅니다.</p>
+      <div class="blk"><h4>뽑는 것</h4><ul>
+        <li>모양 · 색 · 로고 · 질감</li>
+        <li>인쇄된 문구 <b>원문 그대로</b> — 광고에서 말해도 되는 근거</li>
+        <li><b>제품 고정 문장(product_lock)</b> — 이후 모든 생성 지시에 그대로 붙습니다</li>
+      </ul></div>
+      <div class="blk warn"><h4>주의</h4><ul>
+        <li>사진에 없는 사실은 <b>광고주에게 묻습니다.</b> 지어내면 광고주 제품이 아닌 것이 나갑니다</li>
+      </ul></div>
+      <div class="blk real"><h4>실례 · RUSH</h4>
+        <p><b>「캔에는 짙은 붉은 사선이 하나」</b> — 이 한 줄이 나중에 앵커 판정의
+        근거가 됐습니다. 사선이 둘로 보이면 광고주 제품이 아닙니다.</p>
+      </div>
+    </div>
+  </article>
+
+  <article class="step" id="s3">
+    <header><span class="n">03</span><h3>전략</h3>
+      <span class="who w-ai">AI</span><span class="who w-client">광고주 검토</span>
+      <span class="key">strategy</span></header>
+    <div class="in">
+      <p class="say">누구에게 무엇을 <b>한 문장으로</b> 말할지 정합니다.</p>
+      <div class="blk"><h4>정하는 것</h4><ul>
+        <li>대상 · 인사이트 — <b>뒤집어도 말이 되는지</b> 시험합니다</li>
+        <li>강점 — <b>제품 팩트에 근거</b>해야 합니다</li>
+        <li>한 줄 메시지 · 톤</li>
+      </ul></div>
+      <div class="blk warn"><h4>왜 여기서 광고주를 보게 하나</h4><ul>
+        <li>전략이 틀린 채 컨셉만 다시 뽑으면 <b>같은 지적이 반복</b>됩니다</li>
+      </ul></div>
+    </div>
+  </article>
+
+  <article class="step" id="s4">
+    <header><span class="n">04</span><h3>컨셉</h3>
+      <span class="who w-ai">AI</span><span class="who w-client">광고주 선택</span>
+      <span class="key">concepts</span></header>
+    <div class="in">
+      <p class="say">서로 다른 방향 몇 개를 만들고 <b>광고주가 고릅니다.</b></p>
+      <div class="blk warn"><h4>주의</h4><ul>
+        <li>광고주에게 나가는 글에는 <b>내부 용어를 쓰지 않습니다.</b> 「omni_reference」
+        「start_image」 같은 말은 판단할 자리가 아닙니다</li>
+      </ul></div>
+      <div class="blk real"><h4>실례 · RUSH</h4>
+        <p>고른 것: <b>사물 코미디</b> — 자몽 조각과 블러드오렌지 단면이 가운데
+        자리를 다투는데, 그 자리가 사실 <b>제품 자리</b>였다는 반전.</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- ── 각본 ───────────────────────────────────────────────────────────── -->
+  <div class="phase">
+    <h2>각본</h2>
+    <p>글로 다 정합니다. 그림보다 글이 먼저 끝나야 합니다</p>
+  </div>
+
+  <article class="step" id="s5">
+    <header><span class="n">05</span><h3>구성·각본</h3>
+      <span class="who w-ai">AI</span><span class="key">develop</span></header>
+    <div class="in">
+      <p class="say">시간 흐름과 컷을 <b>글로</b> 씁니다. 여기가 각본의 본문입니다 —
+      뒤의 그림·영상은 전부 이 글에서 나옵니다.</p>
+      <div class="blk"><h4>쓰는 것</h4><ul>
+        <li><b>시간 흐름</b> — 구간마다 블록 이름과 한 줄. 빈틈이 없어야 합니다</li>
+        <li><b>컷마다</b> 행동 · 대사 · 의도 · 등장 요소 · 소품 시작/끝 상태</li>
+        <li>카메라(크기·각도·움직임·렌즈) — <b>관리자만 봅니다</b></li>
+        <li>화면에 뜨는 글자 · 슬로건 · 음악 방침</li>
+      </ul></div>
+      <div class="blk warn"><h4>주의</h4><ul>
+        <li>컷의 <b>끝 상태</b>가 다음 컷의 시작이어야 합니다. 안 이어지면 영상에서 끊깁니다</li>
+        <li>제품명·카피 글자는 <b>생성에 맡기지 않습니다</b> — 비슷하지만 틀린 글자가 나옵니다</li>
+      </ul></div>
+      <div class="blk real"><h4>실례 · RUSH 6컷</h4>
+        <p><b>훅</b> 0~1.6초 · <b>침범</b> 1.6~3.6 · <b>되밀기</b> 3.6~6.1 ·
+        <b>정지와 길 열기</b> 6.1~8.5 · <b>반전과 반응</b> 8.5~11.5 ·
+        <b>제품 화면</b> 11.5~15.0</p>
+        <p>엔딩을 <b>3.5초로 가장 길게</b> 뒀습니다 — 제품명과 카피가 읽힐 시간입니다.
+        15초를 12컷으로 자르면 컷당 1.25초라 이 설계가 성립하지 않습니다.</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- ── 연출 ───────────────────────────────────────────────────────────── -->
+  <div class="phase">
+    <h2>콘티</h2>
+    <p>글을 그림으로. 광고주가 처음으로 승인하는 자리입니다</p>
+  </div>
+
+  <article class="step" id="s6">
+    <header><span class="n">06</span><h3>콘티</h3>
+      <span class="who w-ai">AI</span><span class="who w-admin">관리자 검수</span>
+      <span class="who w-client">광고주 승인</span><span class="key">storyboard</span></header>
+    <div class="in">
+      <p class="say">컷 글을 <b>선화</b>로 그립니다. 한 판에 여러 칸을 뽑아 자릅니다.</p>
+      <div class="blk"><h4>왜 한 판인가</h4><ul>
+        <li>값이 <b>한 장이든 여섯 칸이든 같습니다</b> — 따로 뽑을 이유가 없습니다</li>
+        <li>한 판에서 나온 칸끼리는 <b>화풍이 저절로 맞습니다</b></li>
+      </ul></div>
+      <div class="blk warn"><h4>주의</h4><ul>
+        <li>콘티는 콘티입니다. <b>영상을 선화와 똑같이 만들지 않습니다</b> —
+        닮음을 검수 기준으로 세우면 제대로 된 작품이 안 나옵니다</li>
+      </ul></div>
+      <div class="blk real"><h4>실례 · 어느 엔진을 썼나</h4>
+        <div class="tbl"><table>
+          <tr><th>엔진</th><th>결과</th><th>값</th></tr>
+          <tr class="hi"><td>gpt_image_2_5 · 2k</td><td>6칸 정확</td><td class="n">3 cr</td></tr>
+          <tr class="out"><td>nano_banana_2</td><td>6칸 시켰는데 8칸 · 번호 겹침</td><td class="n">2 cr</td></tr>
+        </table></div>
+        <p style="margin-top:8px">1크레딧 더 주고 <b>칸을 제대로 세는 쪽</b>을 씁니다.</p>
+      </div>
+    </div>
+  </article>
+
+  <section class="gate">
+    <header><span class="lb">관문 A</span><h3>승인하지 않은 것은 광고주가 볼 수 없다</h3></header>
+    <p class="say">전에는 화면이 콘티 자산이 <b>있기만 하면</b> 열었고, 그 판단이
+    <b>브라우저에만</b> 있었습니다. 그래서 승인도 전송도 안 한 콘티가 광고주 화면에
+    떴습니다.</p>
+    <ol>
+      <li>이제 <b>DB 가</b> 막습니다 — 완성본·콘티·제작 자료는 <b>승인된 것만</b> 내줍니다</li>
+      <li>전송은 별도 버튼이고, <b>마지막 검수가 통과하고 열린 수정 요청이 없을 때만</b> 눌립니다</li>
+    </ol>
+    <p class="fn">migrate_026 · onecue_board_send / onecue_board_unsend</p>
+  </section>
+
+  <section class="gate">
+    <header><span class="lb">관문 B</span><h3>앞이 바뀌면 뒤 승인이 풀린다</h3></header>
+    <p class="say">각본을 고쳤는데 그 뒤 단계 승인이 그대로 남아 있으면,
+    <b>바뀐 각본을 아무도 다시 안 본 채</b> 영상이 나갑니다.</p>
+    <ol>
+      <li>어느 단계를 수정 요청하면 <b>그보다 뒤인 모든 단계의 승인이 풀립니다</b></li>
+      <li>광고주에게 나가 있던 것은 <b>내려옵니다</b></li>
+      <li><b>만들어 둔 것은 지우지 않습니다</b> — 승인만 풉니다. 다시 볼지 버릴지는 사람이 정합니다</li>
+    </ol>
+    <p class="fn">migrate_027 · onecue_invalidate_downstream</p>
+  </section>
+
+  <!-- ── 제작 ───────────────────────────────────────────────────────────── -->
+  <div class="phase">
+    <h2>제작 — 여기서부터 돈이 나갑니다</h2>
+    <p>사장님이 누르는 자리. 누르면 작업기가 확인·한도를 거쳐 스스로 뽑습니다</p>
+  </div>
+
+  <section class="gate">
+    <header><span class="lb">관문 C</span><h3>뽑기 전에 묻는다</h3></header>
+    <p class="say">「제품 기준 이미지가 승인돼야 제품 나오는 칸을 뽑는다」가 정본인데,
+    그 검사가 <b>사이트 버튼에만</b> 있었습니다. 도구를 직접 부르면 그대로 지나갔습니다 —
+    실제로 <b>선화를 09-21 23:43 에 뽑고 기준 이미지를 09-22 09:32 에 승인</b>했습니다.
+    열 시간이 거꾸로 갔습니다.</p>
+    <ol>
+      <li><b>승인된 제품 사진</b>이 있는가 — 없으면 생성이 제품을 지어냅니다</li>
+      <li><b>컷 설계</b>가 있는가 — 없으면 무엇을 그릴지가 없습니다</li>
+      <li><b>제작 계획</b>이 있는가 — 해상도·소리가 계획에 박혀 있어야 합니다</li>
+      <li><b>정해야 할 것(ASK)이 남아 있지 않은가</b> — 남은 채로 쓰면 그 결정이
+      결과물에 이미 박힌 뒤에 묻게 됩니다</li>
+    </ol>
+    <p class="fn">migrate_034 · onecue_may_generate</p>
+  </section>
+
+  <section class="gate">
+    <header><span class="lb">관문 D</span><h3>확인 없이 뽑은 것은 등록을 안 받는다</h3></header>
+    <p class="say">관문 C 는 <b>부르지 않으면 소용이 없습니다.</b> 그래서 한 겹 더 뒀습니다 —
+    확인 기록이 없는 생성물은 <b>시스템에 들어오지 못합니다.</b> 돈은 이미 나갔으니
+    그것이 벌칙이 되고, 벌칙이 있으면 다음엔 먼저 묻습니다.</p>
+    <ol>
+      <li><b>예외를 두지 않습니다.</b> 처음엔 「사람이 올린 것은 빼자」로 썼다가 지웠습니다 —
+      자산 46개 중 표시를 적어 둔 것이 <b>8개뿐</b>이었습니다. 빼 주는 조건을 두면
+      <b>적기를 잊은 것이 전부 예외</b>가 됩니다</li>
+      <li>한 번 확인은 <b>한 장</b>입니다. 쓰면 소진됩니다</li>
+    </ol>
+    <p class="fn">migrate_034 · assets 등록 방아쇠</p>
+  </section>
+
+  <section class="gate">
+    <header><span class="lb">관문 E</span><h3>한 번 부른 것을 두 번 부르지 않는다</h3></header>
+    <p class="say">뽑는 중에 죽으면(네트워크·재시작) 확인이 <b>열린 채로</b> 남아
+    다음 바퀴가 <b>또 뽑습니다.</b> 시댄스 한 판이 36 크레딧이라 조용히 두 배가 됩니다.</p>
+    <ol>
+      <li>도구를 부르기 <b>직전에</b> 「불렀다」를 찍고, 찍혀 있으면 <b>안 부르고 멈춥니다</b></li>
+      <li>멈춘 것은 보이고, <b>나간 돈은 안 보입니다</b> — 그래서 멈추는 쪽을 골랐습니다</li>
+    </ol>
+    <p class="fn">migrate_036 · onecue_gate_launch</p>
+  </section>
+
+  <section class="gate">
+    <header><span class="lb">관문 F</span><h3>한도 — 사람이 안 볼 때는 틀린 것이 빠르게 반복된다</h3></header>
+    <p class="say">해상도를 한 번 잘못 넣으면 <b>같은 12초가 2.33배</b>가 됩니다.
+    기억해서 막는 일은 언젠가 잊힙니다.</p>
+    <div class="tbl"><table>
+      <tr><th>무엇</th><th>설정</th><th>값</th></tr>
+      <tr><td>이미지 · gpt_image_2_5</td><td>2k</td><td class="n">3 cr</td></tr>
+      <tr><td>이미지 · nano_banana_2</td><td>—</td><td class="n">2 cr</td></tr>
+      <tr class="hi"><td>영상 · seedance 2.5 · 12초</td><td><b>480p</b> · 소리 끔</td><td class="n">36 cr</td></tr>
+      <tr class="out"><td>영상 · seedance 2.5 · 12초</td><td>720p</td><td class="n">84 cr</td></tr>
+      <tr><td><b>한 번 한도</b></td><td>480p 한 판은 통과 · 720p 는 막힘</td><td class="n">60 cr</td></tr>
+      <tr><td><b>하루 한도</b></td><td>한국 날짜로 셉니다</td><td class="n">300 cr</td></tr>
+    </table></div>
+    <p class="fn">migrate_032 · migrate_035 · onecue_credit_allow · credit_budget</p>
+  </section>
+
+  <article class="step" id="s7">
+    <header><span class="n">07</span><h3>제작 자료</h3>
+      <span class="who w-paid">유료</span><span class="who w-admin">관리자가 누름</span>
+      <span class="who w-ai">AI 생성·판정</span><span class="key">anchors</span></header>
+    <div class="in">
+      <p class="say">12초를 한 판으로 뽑으려면 <b>출발점을 고정</b>해야 합니다.
+      바닥·빛·선·제품이 12초 내내 흔들리지 않게 하는 시작 프레임입니다.</p>
+      <div class="blk"><h4>계획에 미리 박아 두는 것</h4><ul>
+        <li>엔진 · 해상도 · 비율 · <b>예상 값</b></li>
+        <li><b>프롬프트 전문</b> — 작업기는 이것을 그대로 실행합니다. 지어낼 자리가 없습니다</li>
+        <li>레퍼런스는 <b>경로</b>로 적습니다 — 주소는 쓰는 순간에 만듭니다</li>
+      </ul></div>
+      <div class="blk warn"><h4>주의</h4><ul>
+        <li>캔의 근거는 <b>광고주가 준 사진</b>이어야 합니다. 우리가 생성한 그림을
+        근거로 삼으면 <b>생성이 생성을 베껴</b> 세대마다 멀어집니다</li>
+      </ul></div>
+      <div class="blk real"><h4>실례 · RUSH 앵커 1장 · 3 크레딧</h4>
+        <p>앵커는 <b>start_image 가 아니라 레퍼런스</b>로 물립니다 — 첫 프레임을
+        고정하지 않고 세트·빛·바닥 선만 넘깁니다. 승인된 팩샷을 <b>두 번째</b>로 같이
+        물려 캔의 근거를 사진 쪽에 둡니다.</p>
+      </div>
+    </div>
+  </article>
+
+  <section class="gate">
+    <header><span class="lb">관문 G</span><h3>판정 — 만든 쪽이 먼저 선언하고, 검수 쪽이 찾는다</h3></header>
+    <p class="say">검수자에게 <b>비교 대상을 주면 비교를 합니다.</b> 그러면 콘티 선화와
+    똑같은지를 보게 되고, 그건 하지 않기로 한 것입니다. 그래서 비교표 대신
+    <b>만든 쪽이 일곱 줄을 넘깁니다.</b></p>
+    <ol>
+      <li><b>무엇을 만들었나</b> / <b>어디에 물리나</b> / <b>어느 컷을 덮나</b> /
+      <b>무엇을 이어받았나</b></li>
+      <li>★ <b>못 박은 것(locked)</b> — 프롬프트가 정해서 모델에게 재량이 없던 것</li>
+      <li>★ <b>새로 정한 것(decided)</b> — 프롬프트가 안 정해서 <b>모델이 우리 대신 정한 것</b></li>
+      <li><b>다음에 돈이 나가는 곳</b></li>
+    </ol>
+    <p class="say" style="margin:11px 0 0">검수 쪽의 일은 <b>그림 안에 있는데 위 두 줄
+    어디에도 없는 선택을 찾는 것</b>입니다. 출구는 넷입니다 —
+    <b>ok</b> / <b>치명</b>(① 거짓이 된다 ② 못 만든다 ③ 못 되돌린다) /
+    <b>ASK</b>(누군가 정해야 하는데 아무도 안 정했다) / 참고(적지 않습니다).</p>
+    <p class="say" style="margin:9px 0 0"><b>ASK 는 기본이 제작 쪽 몫입니다.</b>
+    전부 사장님께 보내면 반자동을 만들면서 오히려 누를 것을 늘리는 것이 됩니다.
+    사장님께 가는 것은 <b>광고주의 사실 관계</b>(제품 진실 · 의무 표기 · 브랜드 · 값)뿐이고,
+    <b>안 적으면 제작 쪽으로 떨어집니다.</b> 열린 ASK 는 다음 유료 생성과 단계 승인을
+    <b>둘 다</b> 막습니다.</p>
+    <p class="fn">migrate_037 · migrate_038 · asset_reviews · onecue_open_asks</p>
+  </section>
+
+  <section class="gate" style="background:var(--cue-soft);border-left-color:var(--cue)">
+    <header><span class="lb" style="color:var(--cue)">판례</span>
+      <h3>판정은 되돌릴 수 있어야 한다 — 실제로 되돌렸습니다</h3></header>
+    <p class="say">RUSH 앵커 한 장에 판정이 <b>세 번</b> 있었습니다. 셋 다 남아 있고,
+    <b>버린 이유까지</b> 남아 있습니다. 버린 이유가 판례입니다.</p>
+    <ol>
+      <li><b>blocked</b> — 치명 1건 「캔 우측에 붉은 세로 띠가 있다」</li>
+      <li><b>ask</b> — 치명 철회. <b>그 띠는 팩샷에도 있는 림 반사</b>였습니다.
+      대신 물어볼 것 2건(캔 결로 · 자몽 자세)이 올라왔습니다</li>
+      <li><b>ok</b> — 물어본 두 건 다 <b>프롬프트가 이미 못 박아 둔 것</b>이었습니다.
+      검수자가 틀린 게 아니라 <b>인계에 「못 박은 것」 줄이 없었습니다.</b>
+      그 줄을 필수로 만들었습니다</li>
+    </ol>
+    <p class="say" style="margin:11px 0 0">고치는 값 <b>0 크레딧</b>. 다시 뽑지 않았습니다.
+    답으로 막는 게 아니라 <b>구조로 막는 것</b>이 맞습니다.</p>
+  </section>
+
+  <article class="step" id="s8">
+    <header><span class="n">08</span><h3>영상</h3>
+      <span class="who w-paid">유료</span><span class="who w-admin">관리자가 누름</span>
+      <span class="who w-ai">AI 생성·판정</span><span class="key">video</span></header>
+    <div class="in">
+      <p class="say">계획에 적힌 방식대로 뽑습니다. <b>한 바퀴에 하나만</b> 뽑습니다 —
+      여러 개를 돌리면 첫 번째가 잘못 나왔을 때 나머지도 이미 나가 있습니다.</p>
+      <div class="blk"><h4>계획이 정하는 것</h4><ul>
+        <li><b>한 판</b>인가 <b>컷별</b>인가 <b>섞는가</b> — 계획이 <b>모든 컷을 덮어야</b>
+        저장됩니다. 한 컷이라도 빠지면 그 컷은 아무도 만들지 않고, 그 사실은 영상이
+        나온 뒤에야 보입니다</li>
+        <li>해상도는 <b>480p</b>가 기본입니다. 따로 주문하지 않으면 바뀌지 않습니다</li>
+        <li>소리는 <b>끕니다</b> — 엔진 기본값이 켜짐이라 명시해야 합니다.
+        안 끄면 아무도 승인하지 않은 소리가 붙습니다</li>
+      </ul></div>
+      <div class="blk warn"><h4>주의</h4><ul>
+        <li>영상의 <b>수정 요청은 다시 뽑기</b>입니다 — 같은 값이 또 나갑니다.
+        화면이 그 사실을 먼저 말합니다</li>
+        <li>읽을 글자가 있는 컷은 <b>생성에 맡기지 않고</b> 승인된 팩샷에 합성합니다</li>
+      </ul></div>
+      <div class="blk real"><h4>실례 · RUSH 제작 계획</h4>
+        <p><b>C1</b> 컷1~5 → 시댄스 2.5 · 12초 · 480p · 소리 끔 · <b>36 크레딧</b>.
+        한 장소·한 세트·하드컷 없음이라 한 판으로 덮입니다.</p>
+        <p><b>C2</b> 컷6 → <b>합성 · 0 크레딧</b>. 제품명·슬로건이 읽히는 컷이라
+        생성에 맡기면 비슷하지만 틀린 글자가 나옵니다.</p>
+        <p>컷5는 11.5초에 끝나지만 <b>12초로</b> 뽑습니다 — 마지막 0.5초는 편집에서
+        잘라 낼 손잡이입니다.</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- ── 납품 ───────────────────────────────────────────────────────────── -->
+  <div class="phase">
+    <h2>납품</h2>
+    <p>광고주에게 실제로 나가는 자리 — 사장님 승인이 필요한 두 번째 지점</p>
+  </div>
+
+  <article class="step" id="s9">
+    <header><span class="n">09</span><h3>납품</h3>
+      <span class="who w-hand">손</span><span class="who w-admin">관리자 승인</span>
+      <span class="who w-client">광고주 발송</span><span class="key">deliver</span></header>
+    <div class="in">
+      <p class="say">편집으로 이어붙이고, 글자를 얹고, 완성본을 검수한 뒤
+      <b>사장님이 누르면</b> 광고주에게 나갑니다.</p>
+      <div class="blk"><h4>사람 손으로 하는 것</h4><ul>
+        <li>컷 이어붙이기 · 마지막 0.5초 다듬기</li>
+        <li><b>제품명 · 슬로건 · 의무 표기</b> 합성 — 글자는 생성에 맡기지 않습니다</li>
+        <li>음악 — 검증되지 않은 소리는 쓰지 않습니다</li>
+      </ul></div>
+      <div class="blk warn"><h4>여기서 반드시 멈춥니다</h4><ul>
+        <li><b>광고주에게 실제로 나가는 것</b>은 사장님이 누르셔야 합니다.
+        한 번 나간 것은 되돌릴 수 없습니다</li>
+      </ul></div>
+      <div class="blk real"><h4>이 건 원가</h4>
+        <div class="tbl"><table>
+          <tr><th>단계</th><th>무엇</th><th>값</th></tr>
+          <tr><td>콘티</td><td>선화 6칸 한 판</td><td class="n">3 cr</td></tr>
+          <tr><td>콘티</td><td>탈락한 판</td><td class="n">2 cr</td></tr>
+          <tr><td>제작 자료</td><td>앵커 1장</td><td class="n">3 cr</td></tr>
+          <tr class="hi"><td>영상</td><td>12초 480p</td><td class="n">36 cr</td></tr>
+          <tr><td>컷6</td><td>합성</td><td class="n">0 cr</td></tr>
+          <tr class="hi"><td colspan="2"><b>광고 한 편</b></td><td class="n"><b>44 cr</b></td></tr>
+        </table></div>
+        <p style="margin-top:8px">원 단위로 보여드리려면 <b>요금제 월 결제액</b>이
+        필요합니다 — 그것만 정해지면 화면에 원으로 뜹니다. 모르는 값은 지어내지 않습니다.</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- ── 신호 ───────────────────────────────────────────────────────────── -->
+  <div class="phase">
+    <h2>눌렀는데 아무 일도 안 일어나면</h2>
+    <p>그건 사장님 잘못이 아니라 잘못 만들어진 것입니다</p>
+  </div>
+
+  <section class="gate" style="background:var(--sunk);border-left-color:var(--hand)">
+    <header><span class="lb" style="color:var(--hand)">신호</span>
+      <h3>버튼 → 작업기 → 화면, 세 군데가 다 말해야 한다</h3></header>
+    <ol>
+      <li><b>버튼</b>이 눌린 것은 DB 에 기록됩니다. 이미 만들어 둔 작업을 쓸 때도
+      「눌렀다」가 남습니다 — 전에는 조용히 지나가서 <b>아무 기록도 없었습니다</b></li>
+      <li><b>작업기</b>가 20초마다 보고 있다가 잡아서 뽑습니다. 막히거나 실패하면
+      <b>그 이유를 적습니다.</b> 조용히 죽는 것이 제일 나쁩니다</li>
+      <li><b>화면</b>이 지금 어느 자리인지 말합니다. 머리의 표시와 본문이 다른 말을
+      하면 둘 다 못 믿게 됩니다</li>
+    </ol>
+    <p class="say" style="margin:11px 0 0">그리고 화면은 <b>보시던 자리를 지킵니다.</b>
+    다시 읽을 때 바뀐 것이 없으면 아예 손대지 않고, 접어 두신 것은 접힌 채로 둡니다 —
+    손으로 정한 것이 계산보다 셉니다.</p>
+  </section>
+
+  <footer>
+    <p><b>이 페이지의 모든 숫자는 실측입니다.</b> 크레딧은 실제로 나간 값이고,
+    실례는 실제로 일어난 일이며, 되돌린 판정도 되돌린 채로 적혀 있습니다.
+    모르는 값(원 단위 환산)은 빈칸으로 두었습니다.</p>
+    <p style="margin-bottom:0">ONECUE · 2026-09-22 기준 · RUSH 한 바퀴 진행 중</p>
+  </footer>
+</main>
+</body>
+</html>
