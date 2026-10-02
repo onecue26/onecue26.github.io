@@ -649,9 +649,17 @@
     function card(c) {
       // 「이걸로 하겠습니다」는 데이터가 아니라 이 화면의 버튼이다.
       // 공용 렌더에는 actions 로 넘긴다 — 기록에서 온 글은 여기로 들어가지 않는다
+      // 10-02 친구 「모바일에 선택 버튼이 없다」 — 의뢰한 계정이 아니면(관리자·다른 계정·로그인 전) 버튼이 말없이 사라졌다.
+      //   고를 차례인데 못 고르는 계정이면 잠긴 버튼과 이유를 보여 준다
+      var turn = P && P.step === "concepts" && P.state === "ready" && !c.is_chosen;
       var pick = (canPick && !c.is_chosen)
         ? '<button class="btn ghost pickbtn" data-pick="' + esc(c.key) + '">이걸로 하겠습니다</button>'
-        : "";
+        : (turn && !canPick
+          ? '<button class="btn ghost pickbtn" type="button" disabled>이걸로 하겠습니다</button>' +
+            '<small class="pick-why">' + (ADMIN_VIEW ? "관리자 계정으로 보는 중입니다 — 의뢰하신 계정으로 로그인하면 고를 수 있습니다"
+              : LOGGED_IN ? "이 의뢰를 하신 계정이 아닙니다 — 의뢰하신 계정으로 로그인해 주세요"
+              : "고르시려면 로그인해 주세요") + "</small>"
+          : "");
       return R().concept(c, { role: "client", actions: pick });
     }
     var added = list.filter(function (c) { return c.batch > 1; });
