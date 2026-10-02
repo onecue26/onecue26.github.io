@@ -1011,7 +1011,12 @@
   function fmtTake(t) {
     var lab = { KEEP: "살릴 것", KILL: "뺄 것", TRY: "다음 판에" };
     var parts = String(t || "").split(/\s*(KEEP|KILL|TRY)\s*[:：]\s*/);
-    var out = parts[0].trim() ? '<div class="dg-line">' + esc(parts[0].trim()) + "</div>" : "";
+    // 10-02 새 형식 — 「결론: …」「좋은 점: …」「고칠 점: …」 세 줄. 줄마다 앞 이름만 굵게
+    var line = function (x) {
+      var m2 = /^(결론|좋은 점|고칠 점)\s*[:：]\s*(.*)$/.exec(x.trim());
+      return '<div class="dg-line">' + (m2 ? "<b>" + m2[1] + "</b> " + esc(m2[2]) : esc(x.trim())) + "</div>";
+    };
+    var out = parts[0].trim() ? parts[0].split(/\n+/).filter(function (x) { return x.trim(); }).map(line).join("") : "";
     for (var i = 1; i + 1 < parts.length; i += 2) {
       out += '<div class="dg-line"><b>' + lab[parts[i]] + "</b> " + esc(parts[i + 1].trim()) + "</div>";
     }
@@ -3404,7 +3409,7 @@
         if (!rows.length) return "";
         return '<details class="past-talk" open><summary>이 판에서 오간 기록 ' + rows.length + '건</summary>' +
           rows.map(function (r) {
-            return '<div class="pt-row"><b>' + esc(r[0]) + '</b><span>' + esc(r[1]) + "</span></div>";
+            return '<div class="pt-row"><b>' + esc(r[0]) + '</b><span>' + (/^검수 의견/.test(r[0]) ? fmtTake(r[1]) : esc(r[1])) + "</span></div>";
           }).join("") + "</details>";
       }
 
@@ -3447,7 +3452,8 @@
         var why = m.why || m.review_summary || "";
         return '<div class="verdict v-' + esc(v || "pending") + '">' +
           "<b>" + head + "</b>" +
-          (why ? '<span class="what">' + esc(why) + "</span>" : "") +
+          (why ? '<ul class="dg-hits">' + String(why).split(" / ").filter(function (x) { return x.trim(); })
+            .map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>" : "") +
           (m.dropped ? '<details class="kept"><summary>안 잡은 것과 그 이유</summary>' +
             "<span>" + esc(m.dropped) + "</span></details>" : "") +
           '<span class="who">검토 · ' + esc(m.reviewer || "독립 검토") + "</span>" +
@@ -3457,7 +3463,7 @@
           //   혼자 값을 저울질하시게 된다.
           (m.my_take
             ? '<div class="mytake"><b>제작 쪽 의견</b><span>' +
-              esc(m.my_take) + "</span></div>"
+              fmtTake(m.my_take) + "</span></div>"
             : "") +
           // 사장님이 보시고 적어 주신 것도 같은 자리에 남긴다 — 다음 판을
           // 만들 때 이 말이 근거가 된다
