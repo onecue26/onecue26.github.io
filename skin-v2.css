@@ -232,3 +232,7 @@ body.studio-layout *{letter-spacing:normal}
 .studio-layout .plan-new span{color:#c9c5bd!important}
 /* 기본값이 박힌 채 스킨에 없던 토큰 6개 — 화면에 안 나온 상태 칸도 밝게 나오지 않게 */
 :root,:root[data-theme=light],:root[data-theme=dark]{--admin:#f0b955;--line:rgba(244,242,239,.13);--ok:#7bd99e;--ok-soft:rgba(123,217,158,.13);--paper:#161617;--soft:#1e1e20}
+
+/* 10-02 Dan 「이건 뭐야 글씨도 안 보이고」 — v2 에서 --cue 가 연두(#d7ff3a)가 되며, 옛 화면의 「연두 바탕 + 흰 글자」 칸이 안 읽혔다.
+   (NEW 표시 · 지금 단계 버튼 · 새로 들어온 표시 · 대화 지금 단계) 글자를 짙게 */
+.wrk .name .new,.steps button.at,.fresh-mark,.thread-step.s-now b{color:#111 !important}
