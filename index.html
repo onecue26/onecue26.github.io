@@ -1,22 +1,393 @@
 <!doctype html>
-<html lang="ko"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="ONECUE. 브랜드의 이야기를 영상으로. AI 광고와 브랜드 필름을 만드는 크리에이티브 스튜디오."><meta name="theme-color" content="#141615">
-<title>ONECUE | AI Creative Studio</title>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>ONECUE — 광고, 이제 쉬워집니다</title>
+<meta name="description" content="AI가 기획하고 직접 제작하는 광고. 제작비 10만원부터, 제작 기간 1일부터.">
+<meta property="og:title" content="ONECUE — 광고, 이제 쉬워집니다.">
+<meta property="og:description" content="AI가 기획하고 직접 제작하는 광고. 제작비 10만원부터 · 제작 기간 1일부터">
+<meta property="og:image" content="https://onecue26.github.io/media/01-hero.jpg">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 rx=%223%22 fill=%22%230d0d0e%22/%3E%3Ccircle cx=%2211%22 cy=%2211%22 r=%223%22 fill=%22%23d7ff3a%22/%3E%3C/svg%3E">
 <script>if(/(?:^|&)type=recovery(?:&|$)/.test(location.hash.slice(1)))location.replace('login.html?mode=recovery'+location.hash);</script>
-<link rel="stylesheet" href="home.css?v=4"><script defer src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script><script defer src="home.js?v=1"></script><script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script defer src="config.js"></script><script defer src="home-auth.js?v=2"></script>
-<link rel="stylesheet" href="brand.css?v=red1"></head><body>
-<a class="skip" href="#work">작품으로 바로 가기</a>
-<header class="site-header"><a class="wordmark" href="index.html" aria-label="ONECUE 홈"><b aria-hidden="true">o</b>ONECUE<span>.</span></a><nav aria-label="주 메뉴"><a href="#work">작품</a><a href="#studio">스튜디오</a></nav><div class="header-right" id="hdr"><a class="header-cta" href="new.html">제작 의뢰 <i data-lucide="arrow-up-right" aria-hidden="true"></i></a></div></header>
-<main>
-<section class="hero" aria-labelledby="hero-title">
-<video id="hero-video" muted loop playsinline preload="metadata" poster="portfolio-media/summer-memory.jpg" aria-label="어느 여름날 하루의 기억"></video><div class="hero-shade"></div>
-<div class="hero-topline"><span>INDEPENDENT CREATIVE STUDIO</span><span>AI FILMS / BRAND STORIES</span></div>
-<div class="hero-copy"><h1 id="hero-title">ONECUE<span>.</span></h1><p>브랜드의 한 장면,<br>오래 남는 이야기로.</p><a href="#work" class="text-link">작품 살펴보기 <i data-lucide="arrow-down-right" aria-hidden="true"></i></a></div>
-<div class="hero-bottom"><button id="hero-open" class="hero-credit" type="button"><i data-lucide="play" aria-hidden="true"></i><span><b>어느 여름날 하루의 기억</b><small>SHORT FILM · 2026</small></span></button><button id="hero-toggle" class="icon-button" type="button" aria-label="배경 영상 재생" title="배경 영상 재생"><i data-lucide="play" aria-hidden="true"></i></button></div></section>
-<section class="work section" id="work" aria-labelledby="work-title"><div class="section-top"><span class="eyebrow">01 / SELECTED WORK</span><span class="micro">IDEA → FRAME → FILM</span></div><div class="work-heading"><h2 id="work-title">생각이 장면이 되는 순간.</h2><div class="filters" aria-label="작품 분류"><button type="button" data-category="all" aria-pressed="true">전체</button><button type="button" data-category="brand" aria-pressed="false">브랜드 필름</button><button type="button" data-category="story" aria-pressed="false">단편</button><button type="button" data-category="experiment" aria-pressed="false">비주얼 실험</button></div></div><div id="works" class="works" aria-live="polite"><p class="loading">작품을 불러오고 있습니다.</p></div><noscript><p>선별 작품을 보려면 JavaScript를 켜주세요.</p></noscript></section>
-<section class="studio section" id="studio" aria-labelledby="studio-title"><div class="section-top"><span class="eyebrow">02 / THE STUDIO</span><span class="micro">HUMAN DIRECTION. AI PRODUCTION.</span></div><div class="studio-intro"><h2 id="studio-title">좋은 이야기를 찾고.<br>새로운 장면을 만듭니다.</h2><p>제품의 특징에서 출발해, 사람들이 기억할 이야기를 찾습니다. 기획과 연출, AI 제작을 하나의 흐름으로 연결합니다.</p></div><div class="capabilities"><article><span>01</span><h3>Brand films</h3><p>제품의 매력을 담은 광고와 브랜드 필름.</p></article><article><span>02</span><h3>Visual experiments</h3><p>현실의 경계를 넓히는 이미지와 움직임.</p></article><article><span>03 / IN DEVELOPMENT</span><h3>Stories & drama</h3><p>인물과 세계를 쌓아가는 서사. 다음 이야기를 준비합니다.</p></article></div></section>
-<section class="contact section" id="contact"><span class="eyebrow">03 / YOUR NEXT STORY</span><h2>어떤 이야기를<br>시작할까요?</h2><a href="new.html" class="contact-link">프로젝트 시작하기 <i data-lucide="arrow-up-right" aria-hidden="true"></i></a><a class="return-link" href="studio.html">진행 중인 프로젝트 확인 <i data-lucide="arrow-right" aria-hidden="true"></i></a></section>
-</main><footer class="site-footer"><a class="wordmark" href="index.html" aria-label="ONECUE 홈"><b aria-hidden="true">o</b>ONECUE<span>.</span></a><span>AI CREATIVE STUDIO © 2026</span><a id="ftLogin" href="login.html?next=studio.html">고객 로그인 <i data-lucide="arrow-up-right" aria-hidden="true"></i></a></footer>
-<dialog id="film-dialog" aria-labelledby="film-title"><div class="film-heading"><div><p id="film-type" class="eyebrow"></p><h2 id="film-title"></h2></div><button type="button" id="close-film" class="icon-button" aria-label="영상 닫기" title="닫기"><i data-lucide="x" aria-hidden="true"></i></button></div><video id="film-player" controls playsinline preload="none"></video><p id="film-description"></p><p id="film-error" role="status" hidden>영상을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</p></dialog>
-</body></html>
+
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0d0e;--ink:#f4f2ef;--accent:#d7ff3a;--padL:clamp(150px,19vw,280px);--padR:clamp(24px,5vw,80px);color-scheme:dark;
+  --sans:'Pretendard',system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --mono:'IBM Plex Mono','Pretendard',ui-monospace,monospace;--disp:'Anton','Pretendard',Impact,sans-serif}
+html,body{margin:0;height:100%;background:var(--bg);overflow:hidden;overscroll-behavior:none}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+a{color:var(--ink);text-decoration:none}
+a:hover{color:var(--accent)}
+@keyframes cuepulse{0%,100%{opacity:1}50%{opacity:.35}}
+.stage{position:fixed;inset:0;overflow:hidden;background:var(--bg);color:var(--ink);font-family:var(--sans);touch-action:none;word-break:keep-all;overflow-wrap:break-word}
+.scene{position:absolute;inset:0;overflow:hidden;transform-origin:20% 100%;will-change:transform;background:#111}
+.scene video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.shade{position:absolute;inset:0;pointer-events:none}
+.wrap{position:absolute;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;text-align:left;padding:110px var(--padR) 40px var(--padL)}
+.content{display:flex;flex-direction:column;align-items:flex-start}
+.eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:cuepulse 1.6s infinite;flex-shrink:0}
+.kicker{font-weight:800;font-size:clamp(22px,2.4vw,36px);letter-spacing:-.03em}
+.h-ko{margin:0;font-weight:900;letter-spacing:-.045em;text-wrap:balance}
+.h-en{margin:0;font-family:var(--disp);font-weight:400;font-size:clamp(68px,10.5vw,176px);line-height:.88;text-transform:uppercase;letter-spacing:-.005em}
+.lead{margin:0;font-family:var(--mono);font-size:clamp(14px,1.15vw,17px);font-weight:500;line-height:1.7;text-wrap:pretty}
+.ctas{display:flex;gap:28px;align-items:center;pointer-events:auto;flex-wrap:wrap;justify-content:flex-start}
+.pill{display:flex;align-items:center;gap:14px;height:60px;padding:0 16px 0 28px;border-radius:999px;background:rgba(30,28,27,.38);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.22);font-family:var(--mono);font-weight:600;font-size:13px;letter-spacing:.02em;white-space:nowrap;flex-shrink:0;transition:background .2s}
+.pill:hover{background:rgba(255,255,255,.14);color:var(--ink)}
+.pill.hot{background:var(--accent);color:#140b07;border:0}
+.pill.hot:hover{filter:brightness(1.08);color:#140b07;background:var(--accent)}
+.ico{display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:5px;background:rgba(255,255,255,.14)}
+.ico svg{width:7px;height:8px;fill:currentColor}
+.pill.hot .ico{background:rgba(0,0,0,.16)}
+.tlink{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-weight:600;font-size:13px;letter-spacing:.02em;white-space:nowrap;flex-shrink:0}
+.tlink .ico{width:18px;height:18px;border-radius:4px}
+header{position:absolute;left:0;right:0;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:26px clamp(20px,3.4vw,48px);pointer-events:none}
+.logo{pointer-events:auto;display:flex;align-items:flex-start;gap:5px;color:var(--ink)}
+.logo:hover{color:var(--ink)}
+.logo .wm{display:flex;flex-direction:column;font-family:var(--disp);font-size:27px;line-height:.86;letter-spacing:.02em}
+.logo .dot{width:9px;height:9px;margin-top:1px}
+.glass{background:rgba(24,23,22,.32);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.2)}
+nav.top{pointer-events:auto;position:absolute;left:var(--padL);top:26px;display:flex;align-items:center;gap:6px;height:54px;padding:0 10px;border-radius:999px;font-family:var(--mono);font-weight:600;font-size:12px;letter-spacing:.08em}
+nav.top button{all:unset;cursor:pointer;padding:9px 12px;border-radius:999px;color:var(--ink);transition:background .2s,color .3s}
+nav.top button:hover{background:rgba(255,255,255,.1)}
+nav.top button.on{color:var(--accent)}
+.ask{pointer-events:auto;display:flex;align-items:center;gap:14px;height:54px;padding:0 14px 0 22px;border-radius:999px;font-family:var(--mono);font-weight:600;font-size:12px;letter-spacing:.02em;white-space:nowrap;flex-shrink:0}
+.ask:hover{background:rgba(255,255,255,.14);color:var(--ink)}
+.ask .ico{width:20px;height:20px}
+.menubtn{all:unset;cursor:pointer;pointer-events:auto;display:none;align-items:center;gap:12px;height:44px;padding:0 10px 0 16px;border-radius:999px;background:rgba(24,23,22,.4);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.22);font-family:var(--mono);font-weight:600;font-size:12px;letter-spacing:.08em;color:var(--ink)}
+.burger{display:flex;flex-direction:column;justify-content:center;gap:3px;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.14);padding:0 7px}
+.burger i{height:1px;background:var(--ink)}
+.rail{position:absolute;z-index:90;left:clamp(20px,3.4vw,48px);top:calc(50% + 34px);transform:translateY(-50%);display:flex;flex-direction:column;gap:8px}
+.rail button{all:unset;cursor:pointer;position:relative;width:84px;height:42px;border-radius:7px;overflow:hidden;outline:2px solid transparent;outline-offset:2px;opacity:.55;transition:opacity .3s,outline-color .3s;display:flex;flex-direction:column;justify-content:space-between;padding:5px 8px;font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:var(--ink);background-color:#222;background-size:cover;background-position:center}
+.rail button::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,11,.15),rgba(10,10,11,.7))}
+.rail button span{position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rail button:hover{opacity:1}
+.rail button.on{outline-color:var(--accent);opacity:1}
+.counter{position:absolute;z-index:90;right:clamp(20px,3.4vw,48px);bottom:28px;display:flex;align-items:center;gap:14px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;pointer-events:none;font-variant-numeric:tabular-nums}
+.bar{width:72px;height:1px;background:rgba(255,255,255,.25);position:relative;overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;width:20%;background:var(--accent);transition:width .6s}
+.menu{position:absolute;inset:0;z-index:95;background:rgba(10,10,11,.86);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);display:flex;flex-direction:column;justify-content:center;gap:6px;padding:0 28px}
+.menu button{all:unset;cursor:pointer;display:flex;align-items:baseline;gap:14px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.12)}
+.menu button b{font-family:var(--mono);font-weight:500;font-size:12px;color:var(--accent)}
+.menu button span{font-family:var(--disp);font-size:44px;line-height:1;text-transform:uppercase;color:var(--ink)}
+.menu button.on span{color:var(--accent)}
+.menu .pill{margin-top:28px;justify-content:center;height:56px;padding:0 28px}
+@media (max-width:819px){
+  :root{--padL:24px;--padR:24px}
+  .wrap{align-items:center;text-align:center}
+  .content{align-items:center}
+  .ctas{justify-content:center}
+  nav.top,.ask,.rail{display:none}
+  .menubtn{display:flex}
+  .scene video.d{display:none}
+  .scene video.m{display:block}
+  .scene .shade{background:linear-gradient(180deg,rgba(10,10,11,.45) 0%,rgba(10,10,11,.7) 50%,rgba(10,10,11,.88) 100%)!important}
+  .stats,.how,.cmp{text-align:left}
+}
+
+
+.scene video.m{display:none}
+.h2{margin:0;font-weight:900;letter-spacing:-.045em;text-wrap:balance}
+.body{margin:0;font-family:var(--mono);font-weight:500;font-size:clamp(15px,1.25vw,18px);line-height:1.75;max-width:560px;text-wrap:pretty}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;max-width:560px;width:100%;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.18);border-radius:14px;overflow:hidden;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.stats div{background:rgba(16,15,15,.55);padding:16px 20px 18px;display:flex;flex-direction:column;gap:6px}
+.stats small,.how b{font-family:var(--mono);font-weight:500;font-size:12px;letter-spacing:.08em;opacity:.7}
+.stats strong{font-weight:900;font-size:clamp(28px,2.8vw,40px);letter-spacing:-.04em;color:var(--accent);line-height:1.05}
+.strike{display:flex;flex-direction:column}
+.strike span{position:relative;align-self:flex-start}
+.strike span::after{content:"";position:absolute;left:-.04em;right:-.04em;top:54%;height:.08em;background:var(--accent);transform:scaleX(0);transform-origin:0 50%;transition:transform .6s cubic-bezier(.7,0,.2,1)}
+.scene.on .strike span::after{transform:scaleX(1);transition-delay:1.4s}
+.scene.on .strike span:nth-child(2)::after{transition-delay:1.55s}
+.how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;max-width:680px;width:100%;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.18);border-radius:14px;overflow:hidden;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.how div{background:rgba(16,15,15,.55);padding:18px 18px 20px;display:flex;flex-direction:column;gap:10px}
+.how b{color:var(--accent);opacity:1}
+.how span{font-weight:700;font-size:17px}
+.big{display:flex;align-items:baseline;gap:.12em;margin:0;line-height:.9;letter-spacing:-.05em;font-weight:900;flex-wrap:wrap}
+.big .n{font-size:clamp(96px,15vw,250px);color:var(--accent)}
+.big .u{font-size:clamp(32px,4.2vw,68px);letter-spacing:-.04em}
+.sub{margin:0;font-weight:800;font-size:clamp(24px,2.8vw,42px);line-height:1.2;letter-spacing:-.035em}
+.range{width:100%;max-width:560px;display:flex;flex-direction:column;gap:10px;font-family:var(--mono);font-weight:600;font-size:13px}
+.range .tr{height:4px;border-radius:2px;background:rgba(255,255,255,.2);overflow:hidden}
+.range .tr i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),rgba(255,255,255,.35));transform:scaleX(0);transform-origin:0 50%;transition:transform 1.2s cubic-bezier(.7,0,.2,1)}
+.scene.on .range .tr i{transform:scaleX(1);transition-delay:1.1s}
+.range .ends{display:flex;justify-content:space-between}
+.range .ends span:first-child{color:var(--accent)}
+.cmp{display:flex;flex-direction:column;gap:14px;width:100%;max-width:560px;font-family:var(--mono);font-weight:600;font-size:13px}
+.cmp .row{display:grid;grid-template-columns:110px minmax(0,1fr) 72px;align-items:center;gap:14px}
+.cmp .row em{font-style:normal;text-align:right;font-variant-numeric:tabular-nums}
+.cmp .tr{height:10px}
+.cmp .tr i{display:block;height:10px;border-radius:5px;background:rgba(255,255,255,.28);width:100%;transform:scaleX(0);transform-origin:0 50%;transition:transform 2.4s cubic-bezier(.4,0,.2,1)}
+.cmp .row.us{color:var(--accent)}
+.cmp .row.us .tr i{background:var(--accent);width:12%;transition-duration:.35s}
+.scene.on .cmp .tr i{transform:scaleX(1);transition-delay:1.1s}
+.scene.on .cmp .row.us .tr i{transition-delay:1.15s}
+@media (max-width:819px){
+  .scene video.d{display:none}
+  .scene video.m{display:block}
+  .stats strong{font-size:26px}
+  .how span{font-size:15px}
+  .how div{padding:14px 12px 16px}
+  .cmp .row{grid-template-columns:84px minmax(0,1fr) 56px;gap:10px}
+}
+@media (max-width:819px) and (max-height:760px){.body{display:none}}
+
+/* 카피 가독성: 영상 위 헤드라인·본문에 은은한 그림자 */
+.scene .h-ko,.scene .h2,.scene .big{text-shadow:0 2px 28px rgba(0,0,0,.5)}
+.scene p{text-shadow:0 1px 12px rgba(0,0,0,.55)}
+
+/* v5 스크롤 연동 엔진: 장면 박스는 잘라내기만, 회전·확대는 안쪽 .inner 에서 */
+.scene{transform-origin:50% 50%;background:#000}
+.scene .inner{position:absolute;inset:0;transform-origin:50% 50%;will-change:transform,opacity;backface-visibility:hidden}
+</style>
+
+</head>
+<body>
+<div class="stage" id="stage">
+
+  <section class="scene" data-label="Home" data-thumb="media/01-hero-thumb.jpg">
+    <video class="d" src="media/01-hero.mp4" poster="media/01-hero.jpg" muted loop playsinline preload="auto" autoplay></video>
+    <video class="m" data-only="m" src="media/01-hero-m.mp4" poster="media/01-hero-m.jpg" muted loop playsinline preload="auto"></video>
+    <div class="shade" style="background:linear-gradient(90deg,rgba(10,10,11,.85) 0%,rgba(10,10,11,.5) 55%,rgba(10,10,11,.2) 100%),linear-gradient(0deg,rgba(10,10,11,.6),rgba(10,10,11,0) 40%)"></div>
+    <div class="wrap"><div class="content" style="gap:28px">
+      <div class="eyebrow"><span class="dot"></span><span>AI Ad Production Platform</span></div>
+      <h1 class="h-ko" style="font-size:clamp(50px,8vw,132px);line-height:1">광고,<br>이제 쉬워집니다.</h1>
+      <div class="stats"><div><small>제작비</small><strong>10만원부터</strong></div><div><small>제작 기간</small><strong>1일부터</strong></div></div>
+      <div class="ctas"><a href="new.html" class="pill hot">10만원으로 시작하기 <span class="ico"><svg viewBox="0 0 7 8"><path d="M0 0l7 4-7 4z"/></svg></span></a><a href="https://onecue26.github.io/works.html" target="_blank" rel="noopener" class="tlink">제작 사례 보기 <span class="ico"><svg viewBox="0 0 7 8"><path d="M0 0l7 4-7 4z"/></svg></span></a></div>
+    </div></div>
+  </section>
+
+  <section class="scene" data-label="Problem" data-thumb="media/02-problem-thumb.jpg">
+    <video class="d" src="media/02-problem.mp4" poster="media/02-problem.jpg" muted loop playsinline preload="none"></video>
+    <video class="m" data-only="m" src="media/02-problem-m.mp4" poster="media/02-problem-m.jpg" muted loop playsinline preload="none"></video>
+    <div class="shade" style="background:linear-gradient(90deg,rgba(10,10,11,.88) 0%,rgba(10,10,11,.6) 60%,rgba(10,10,11,.4) 100%)"></div>
+    <div class="wrap"><div class="content" style="gap:26px">
+      <div class="eyebrow"><span>01 — 그동안의 광고</span></div>
+      <h2 class="h2 strike" style="font-size:clamp(46px,7.2vw,120px);line-height:1.04"><span>비싸고.</span><span>오래 걸리고.</span></h2>
+      <p class="body">촬영팀, 장비, 수정, 또 수정.<br>그래서 광고는 늘 다음으로 미뤄졌습니다.</p>
+    </div></div>
+  </section>
+
+  <section class="scene" data-label="Solution" data-thumb="media/03-solution-thumb.jpg">
+    <video class="d" src="media/03-solution.mp4" poster="media/03-solution.jpg" muted loop playsinline preload="none"></video>
+    <video class="m" data-only="m" src="media/03-solution-m.mp4" poster="media/03-solution-m.jpg" muted loop playsinline preload="none"></video>
+    <div class="shade" style="background:linear-gradient(90deg,rgba(10,10,11,.85) 0%,rgba(10,10,11,.5) 60%,rgba(10,10,11,.25) 100%)"></div>
+    <div class="wrap"><div class="content" style="gap:26px">
+      <div class="eyebrow"><span>02 — ONECUE의 방식</span></div>
+      <h2 class="h2" style="font-size:clamp(46px,7vw,116px);line-height:1.04">AI가 기획하고,<br>직접 제작합니다.</h2>
+      <div class="how"><div><b>01</b><span>브리프 한 장</span></div><div><b>02</b><span>AI 직접 제작</span></div><div><b>03</b><span>광고 완성</span></div></div>
+      <p class="body">촬영팀·장비·세트 없이 만드니, 가격은 내려가고 속도는 빨라집니다.<br>제작을 위한 사람의 개입은 최소화합니다.</p>
+    </div></div>
+  </section>
+
+  <section class="scene" data-label="Price" data-thumb="media/04-price-thumb.jpg">
+    <video class="d" src="media/04-price.mp4" poster="media/04-price.jpg" muted loop playsinline preload="none"></video>
+    <video class="m" data-only="m" src="media/04-price-m.mp4" poster="media/04-price-m.jpg" muted loop playsinline preload="none"></video>
+    <div class="shade" style="background:linear-gradient(90deg,rgba(10,10,11,.85) 0%,rgba(10,10,11,.5) 60%,rgba(10,10,11,.25) 100%)"></div>
+    <div class="wrap"><div class="content" style="gap:24px">
+      <div class="eyebrow"><span>03 — 가격</span></div>
+      <h2 class="big"><span class="n">10만원</span><span class="u">부터.</span></h2>
+      <p class="sub">가격은 낮게, 퀄리티는 그대로.</p>
+      <div class="range"><div class="tr"><i></i></div><div class="ends"><span>10만원</span><span>100만원</span></div></div>
+      <p class="body">예산에 맞춰 고르세요. 어떤 가격대든 완성도 기준은 같습니다.</p>
+    </div></div>
+  </section>
+
+  <section class="scene" data-label="Speed" data-thumb="media/05-speed-thumb.jpg">
+    <video class="d" src="media/05-speed.mp4" poster="media/05-speed.jpg" muted loop playsinline preload="none"></video>
+    <video class="m" data-only="m" src="media/05-speed-m.mp4" poster="media/05-speed-m.jpg" muted loop playsinline preload="none"></video>
+    <div class="shade" style="background:linear-gradient(90deg,rgba(10,10,11,.85) 0%,rgba(10,10,11,.5) 60%,rgba(10,10,11,.25) 100%)"></div>
+    <div class="wrap"><div class="content" style="gap:24px">
+      <div class="eyebrow"><span>04 — 속도</span></div>
+      <h2 class="big"><span class="n">1일</span><span class="u">이면 충분합니다.</span></h2>
+      <p class="sub">길어도 3일. 기다림은 끝났습니다.</p>
+      <div class="cmp"><div class="row"><span>기존 광고</span><span class="tr"><i></i></span><em>수 주</em></div><div class="row us"><span>ONECUE</span><span class="tr"><i></i></span><em>1–3일</em></div></div>
+    </div></div>
+  </section>
+
+  <section class="scene" data-label="Start" data-thumb="media/06-start-thumb.jpg">
+    <video class="d" src="media/06-start.mp4" poster="media/06-start.jpg" muted loop playsinline preload="none"></video>
+    <video class="m" data-only="m" src="media/06-start-m.mp4" poster="media/06-start-m.jpg" muted loop playsinline preload="none"></video>
+    <div class="shade" style="background:linear-gradient(90deg,rgba(10,10,11,.82) 0%,rgba(10,10,11,.45) 60%,rgba(10,10,11,.25) 100%)"></div>
+    <div class="wrap"><div class="content" style="gap:26px">
+      <div class="eyebrow"><span class="dot"></span><span>10만원 · 1일</span></div>
+      <h2 class="h2" style="font-size:clamp(46px,7.4vw,122px);line-height:1.02">미뤄둔 광고,<br>오늘 시작하세요.</h2>
+      <div class="ctas" style="margin-top:6px"><a href="new.html" class="pill hot">광고 제작 의뢰하기 <span class="ico"><svg viewBox="0 0 7 8"><path d="M0 0l7 4-7 4z"/></svg></span></a><a href="price.html" class="tlink">가격표 보기 <span class="ico"><svg viewBox="0 0 7 8"><path d="M0 0l7 4-7 4z"/></svg></span></a><a href="login.html?next=studio.html" class="tlink">진행 중인 프로젝트 확인 <span class="ico"><svg viewBox="0 0 7 8"><path d="M0 0l7 4-7 4z"/></svg></span></a></div>
+    </div></div>
+  </section>
+
+  <header>
+    <a href="#" class="logo" id="logo" aria-label="ONECUE"><span class="wm"><span>ONE</span><span>CUE</span></span><span class="dot"></span></a>
+    <nav class="top glass" id="nav"></nav>
+    <a href="new.html" class="ask glass">10만원부터 의뢰 <span class="ico"><svg viewBox="0 0 7 8"><path d="M0 0l7 4-7 4z"/></svg></span></a>
+    <button class="menubtn" id="menubtn" aria-expanded="false"><span id="menulabel">MENU</span> <span class="burger"><i></i><i></i><i></i></span></button>
+  </header>
+
+  <div class="rail" id="rail"></div>
+
+  <div class="counter"><span id="count">01 / 06</span><span class="bar"><i id="prog"></i></span><span>SCROLL</span></div>
+
+  <div class="menu" id="menu" hidden>
+    <div id="menulist" style="display:flex;flex-direction:column;gap:6px"></div>
+    <a href="new.html" class="pill hot">10만원으로 시작하기 <span class="ico"><svg viewBox="0 0 7 8"><path d="M0 0l7 4-7 4z"/></svg></span></a>
+  </div>
+</div>
+
+<script>
+(() => {
+  // 스크롤 연동 엔진: 휠·터치 입력량만큼 패널이 실제로 밀려 올라가고, 손을 떼면 가까운 장면으로 스냅.
+  // 나가는 패널은 위로 빠지며 커지고(1.29) -7도 기울고 어두워짐, 들어오는 패널은 +7도·1.29에서 바로 섬.
+  const S = [...document.querySelectorAll('.scene')], N = S.length;
+  const V = S.map(s => [...s.querySelectorAll('video')]);
+  const I = S.map(s => { const d = document.createElement('div'); d.className = 'inner'; while (s.firstChild) d.appendChild(s.firstChild); s.appendChild(d); return d; });
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const mq = matchMedia('(max-width: 819px)');
+  const stage = document.querySelector('.stage');
+  const SC = 0.29, ROT = 7, LAG = 180, DIM = 0.5;
+  let pos = 0, target = 0, base = 0, a = 0, lastDir = 1, idleT, touching = false, ty0 = 0, tp0 = 0, tt0 = 0, menuOpen = false, raf = 0, last = 0, lastWheel = 0, spent = false, peak = 0, prevAb = 0;
+  const H = () => stage.clientHeight || innerHeight;
+  const wrap = o => { o = ((o % N) + N) % N; return o > N / 2 ? o - N : o; };
+
+  function render() {
+    const h = H();
+    S.forEach((s, i) => {
+      const o = wrap(i - pos), vis = Math.abs(o) < 1;
+      s.style.visibility = vis ? 'visible' : 'hidden';
+      if (!vis) return;
+      const p = Math.max(-1, Math.min(1, o)), q = Math.abs(p);
+      if (reduce) { s.style.transform = 'none'; s.style.opacity = 1 - q; I[i].style.transform = 'none'; I[i].style.opacity = 1; return; }
+      s.style.opacity = 1;
+      s.style.transform = `translate3d(0,${(o * h).toFixed(2)}px,0)`;
+      I[i].style.transform = `translate3d(0,${(-LAG * p * h / 900).toFixed(2)}px,0) rotate(${(ROT * p).toFixed(3)}deg) scale(${(1 + SC * q).toFixed(4)})`;
+      I[i].style.opacity = (1 - DIM * q).toFixed(3);
+    });
+    const n = ((Math.round(pos) % N) + N) % N;
+    if (n !== a) { a = n; ui(); media(); }
+  }
+
+  function tick(t) {
+    const dt = Math.min(0.05, (t - (last || t)) / 1000); last = t;
+    const k = touching ? 1 - Math.exp(-dt / 0.045) : 1 - Math.exp(-dt / 0.22);
+    pos += (target - pos) * k;
+    if (Math.abs(target - pos) < 0.0005 && !touching) { pos = target; render(); raf = 0; last = 0; settle(); return; }
+    render(); raf = requestAnimationFrame(tick);
+  }
+  const run = () => { if (!raf) raf = requestAnimationFrame(tick); };
+  function settle() {
+    // 정수 위치로 정착하면 숫자 범위를 0..N-1 로 되돌림(무한 루프)
+    const r = ((Math.round(pos) % N) + N) % N; pos = target = base = r; render();
+  }
+
+  // 한 번의 제스처는 최대 한 장면. 손을 떼면 진행 방향으로 12% 이상 밀었으면 다음, 아니면 제자리
+  function snap(th = 0.12) {
+    const d = target - base;
+    target = Math.abs(d) > th ? base + Math.sign(d) : base;
+    run();
+  }
+
+  function go(n) {
+    setMenu(false);
+    const d = wrap(n - pos);
+    if (Math.abs(d) < 0.001) return;
+    base = Math.round(pos + d); target = base; lastDir = Math.sign(d); run();
+  }
+  const step = d => { base = Math.round(target); go(((base + d) % N + N) % N); };
+
+  const fits = v => (v.dataset.only === 'm') === mq.matches;
+  function media() {
+    V.forEach((vs, i) => {
+      const d = Math.min((i - a + N) % N, (a - i + N) % N);
+      vs.forEach(v => {
+        if (d <= 1 && fits(v)) {
+          if (v.preload !== 'auto') v.preload = 'auto';
+          if (v.paused && !document.hidden) { const p = v.play(); if (p) p.catch(() => {}); }
+        } else if (!v.paused) v.pause();
+      });
+    });
+  }
+
+  const pad = n => String(n).padStart(2, '0');
+  const labels = S.map(s => s.dataset.label);
+  const navMap = [['Why', 1], ['How', 2], ['Price', 3], ['Speed', 4], ['Start', 5]];
+  const rail = document.getElementById('rail'), nav = document.getElementById('nav'), list = document.getElementById('menulist');
+  const railB = labels.map((l, i) => {
+    const b = document.createElement('button');
+    b.title = l; b.style.backgroundImage = `url("${S[i].dataset.thumb}")`;
+    b.innerHTML = `<span>${pad(i + 1)}</span><span>${l}</span>`;
+    b.onclick = () => go(i); rail.appendChild(b); return b;
+  });
+  const navB = navMap.map(([l, i]) => { const b = document.createElement('button'); b.textContent = l; b.onclick = () => go(i); nav.appendChild(b); return [b, i]; });
+  const menuB = navMap.map(([l, i], k) => { const b = document.createElement('button'); b.innerHTML = `<b>${pad(k + 1)}</b><span>${l}</span>`; b.onclick = () => go(i); list.appendChild(b); return [b, i]; });
+
+  function ui() {
+    S.forEach((s, i) => s.classList.toggle('on', i === a));
+    document.getElementById('count').textContent = `${pad(a + 1)} / ${pad(N)}`;
+    document.getElementById('prog').style.width = `${((a + 1) / N) * 100}%`;
+    railB.forEach((b, i) => b.classList.toggle('on', i === a));
+    navB.concat(menuB).forEach(([b, i]) => b.classList.toggle('on', i === a));
+  }
+
+  function setMenu(open) {
+    menuOpen = open;
+    document.getElementById('menu').hidden = !open;
+    document.getElementById('menulabel').textContent = open ? 'CLOSE' : 'MENU';
+    document.getElementById('menubtn').setAttribute('aria-expanded', open);
+  }
+
+  window.addEventListener('wheel', e => {
+    if (menuOpen) return;
+    e.preventDefault();
+    const dy = e.deltaMode === 1 ? e.deltaY * 40 : e.deltaMode === 2 ? e.deltaY * H() : e.deltaY;
+    const now = performance.now(), gap = now - lastWheel, ab = Math.abs(dy); lastWheel = now;
+    // 관성 스트림(점점 약해지는 신호)으로는 한 장면만. 장면이 거의 자리잡은 뒤
+    // 입력이 끊겼다 오거나(150ms+) 신호가 다시 세지면(새로 쓸어 올림) 새 제스처로 보고 다음 장면 허용
+    const fresh = gap > 150 || ab > peak * 1.15 + 2 || (ab >= 40 && ab >= prevAb && gap > 30);
+    if (spent && fresh && Math.abs(pos - target) < 0.2) { spent = false; base = Math.round(target); peak = 0; }
+    else if (!spent && gap > 150 && Math.abs(pos - target) < 0.2) base = Math.round(target);
+    peak = spent ? Math.max(peak * 0.96, ab) : Math.max(peak, ab); prevAb = ab;
+    if (spent) return;
+    target = Math.max(base - 1, Math.min(base + 1, target + dy / H() * 0.9));
+    if (Math.abs(target - base) >= 0.999) spent = true;
+    run(); clearTimeout(idleT); idleT = setTimeout(() => snap(0.05), 140);
+  }, { passive: false });
+  window.addEventListener('keydown', e => {
+    if (['ArrowDown', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); step(1); }
+    if (['ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); step(-1); }
+    if (e.key === 'Escape' && menuOpen) setMenu(false);
+  });
+  window.addEventListener('touchstart', e => {
+    if (menuOpen) return;
+    touching = true; ty0 = e.touches[0].clientY; tt0 = performance.now(); base = Math.round(pos); tp0 = pos; clearTimeout(idleT);
+  }, { passive: true });
+  window.addEventListener('touchmove', e => {
+    if (!touching) return;
+    if (e.cancelable) e.preventDefault();
+    const d = (ty0 - e.touches[0].clientY) / H();
+    target = Math.max(base - 1, Math.min(base + 1, tp0 + d)); run();
+  }, { passive: false });
+  window.addEventListener('touchend', e => {
+    if (!touching) return;
+    touching = false;
+    const dy = ty0 - e.changedTouches[0].clientY, v = dy / Math.max(1, performance.now() - tt0);
+    if (Math.abs(v) > 0.35 && Math.abs(dy) > 20) target = base + Math.sign(dy); else snap();
+    run();
+  }, { passive: true });
+  addEventListener('resize', render);
+  document.getElementById('logo').onclick = e => { e.preventDefault(); go(0); };
+  document.getElementById('menubtn').onclick = () => setMenu(!menuOpen);
+  document.querySelectorAll('a[href="#"]').forEach(x => x.addEventListener('click', e => e.preventDefault()));
+  document.addEventListener('visibilitychange', () => document.hidden ? V.flat().forEach(v => v.pause()) : media());
+  if (mq.addEventListener) mq.addEventListener('change', media); else mq.addListener(media);
+
+  a = -1; render(); if (a < 0) { a = 0; ui(); media(); }
+})();
+</script>
+
+</body>
+</html>
