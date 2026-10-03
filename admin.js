@@ -25,7 +25,7 @@
 
   var STEP_NAME = {
     brief: "의뢰 접수", facts: "제품·자료 확인", strategy: "전략 설계",
-    concepts: "콘셉트 5안", develop: "구성·각본", storyboard: "콘티 승인",
+    concepts: "콘셉트", develop: "구성·각본", storyboard: "콘티 승인",
     anchors: "제작 자료", video: "영상 제작", post: "후반 작업", deliver: "납품",
   };
   var FLOW = [
@@ -84,7 +84,7 @@
     brief: ["의뢰를 받았습니다", "보내주신 내용을 확인했습니다. 전략과 컨셉을 준비해 연락드리겠습니다."],
     facts: ["의뢰를 받았습니다", "보내주신 내용을 확인했습니다. 전략과 컨셉을 준비해 연락드리겠습니다."],
     strategy: ["전략 방향을 보내드립니다", "정리한 전략을 아래에서 확인해 주세요."],
-    concepts: ["콘셉트 5안이 준비됐습니다", "다섯 가지 방향을 준비했습니다. 아래에서 보시고 하나를 골라 주세요."],
+    concepts: ["콘셉트가 준비됐습니다", "준비한 방향을 아래에서 보시고 골라 주세요."],
     develop: ["선택하신 방향으로 전개 중입니다", "고르신 콘셉트로 카피와 구성을 만들고 있습니다."],
     storyboard: ["콘티가 준비됐습니다", "컷 구성을 아래에서 확인하시고 승인해 주세요."],
     anchors: ["제작에 들어갑니다", "승인해 주신 콘티대로 제작을 시작했습니다."],
@@ -2194,10 +2194,10 @@
       productionAction = '<span class="progress-state working st-run">' + (p.job.step === "develop"
         ? "AI가 구성·각본을 쓰는 중 — 고른 콘셉트 그대로 · 골·필수·비트 · 끝나면 콘티 확인 단계로 넘어갑니다"
         : rq.strategy_only
-        ? "AI가 전략 설계를 쓰는 중 — 끝나면 콘셉트 5안을 누가 쓸지 고릅니다"
+        ? "AI가 전략 설계를 쓰는 중 — 끝나면 콘셉트를 누가 쓸지 고릅니다"
         : rq.keep_strategy
-          ? "AI가 콘셉트 5안을 쓰는 중 — 정해진 전략 그대로 · 끝나면 콘셉트 검토로 넘어갑니다"
-          : "AI가 전략 + 콘셉트 5안을 쓰는 중 — 끝나면 콘셉트 검토로 넘어갑니다") + "</span>";
+          ? "AI가 콘셉트를 쓰는 중 — 정해진 전략 그대로 · 끝나면 콘셉트 검토로 넘어갑니다"
+          : "AI가 전략 + 콘셉트를 쓰는 중 — 끝나면 콘셉트 검토로 넘어갑니다") + "</span>";
     } else if ((p.step === "brief" || p.step === "facts") && p.productionEnrolled && p.n_facts) {
       // 의뢰 확정 → 전략 설계 (074). 전략·콘셉트 각각 AI / 사람을 고른다 (Dan 09-24 두 갈래)
       productionAction = canWrite
@@ -2210,17 +2210,17 @@
         ? '<div class="plan-start"><b>전략 설계 — 누가 맡습니까</b>' +
           '<div class="lc-row"><button class="btn" type="button" data-plan-start="' + esc(p.id) + '" data-plan-what="strategy">AI에게 맡기기</button>' +
           '<button class="btn ghost" type="button" data-toggle-form="ms-' + esc(p.id) + '">사람이 직접 쓰기</button></div>' +
-          '<span>AI: 광고주 답 조건을 반영해 전략만 씁니다 · 사람: 아래 양식 — 어느 쪽이든 다음 칸에서 콘셉트 5안을 누가 쓸지 다시 고릅니다</span></div>' +
+          '<span>AI: 광고주 답 조건을 반영해 전략만 씁니다 · 사람: 아래 양식 — 어느 쪽이든 다음 칸에서 콘셉트를 누가 쓸지 다시 고릅니다</span></div>' +
           manualStrategyForm(p)
         : '<span class="progress-state wait">전략 설계 담당 선택 대기</span>';
     } else if (p.step === "concepts" && !(p.concepts && p.concepts.length)) {
       productionAction = canWrite
         ? strategySummary(p) +
-          '<div class="plan-start"><b>콘셉트 5안 — 누가 맡습니까</b>' +
+          '<div class="plan-start"><b>콘셉트 — 누가 맡습니까</b>' +
           '<div class="lc-row"><button class="btn" type="button" data-plan-start="' + esc(p.id) + '" data-plan-what="concepts">AI에게 맡기기</button>' +
           '<button class="btn ghost" type="button" data-toggle-form="mc-' + esc(p.id) + '">사람이 직접 쓰기</button>' +
           '<button class="btn ghost" type="button" data-back-strategy="' + esc(p.id) + '">전략부터 다시</button></div>' +
-          '<span>AI: 위 전략을 그대로 받아 5안을 씁니다 · 사람: 아래 양식으로 씁니다</span></div>' +
+          '<span>AI: 위 전략을 그대로 받아 콘셉트를 씁니다 · 사람: 아래 양식으로 씁니다</span></div>' +
           manualConceptForm(p)
         : '<span class="progress-state wait">콘셉트 담당 선택 대기</span>';
     } else if (p.step === "develop" && !(p.development && ((p.development.arc || []).length || (p.development.copies || []).length))) {
@@ -2315,7 +2315,7 @@
       }).join("") + '</div>';
 
     var AI_STAGE = {
-      facts: "제품·자료 확인", strategy: "전략 설계", concepts: "콘셉트 5안",
+      facts: "제품·자료 확인", strategy: "전략 설계", concepts: "콘셉트",
       develop: "구성·각본·연출", storyboard: "콘티", asset: "제작 자료",
       prompt: "프롬프트", render: "영상 제작", review: "영상 검수", post: "후처리"
     };
@@ -2389,7 +2389,7 @@
             '<b>다시 만들 범위</b>' +
             '<div class="replan-scope">' +
             '<label><input type="radio" name="replan-scope-' + esc(p.slug) + '" data-replan-scope="' +
-            esc(p.slug) + '" value="all" checked><span>전체 5안 다시 만들기</span></label>' +
+            esc(p.slug) + '" value="all" checked><span>콘셉트 전체 다시 만들기</span></label>' +
             '<label><input type="radio" name="replan-scope-' + esc(p.slug) + '" data-replan-scope="' +
             esc(p.slug) + '" value="selected"><span>선택한 안만 다시 만들기</span></label>' +
             '</div>' +
@@ -2398,9 +2398,9 @@
             '<small>선택하지 않은 안은 그대로 둡니다.</small></div>' +
             '<label for="replan-' + esc(p.slug) + '">어떤 점이 아쉬운지 (선택)</label>' +
             '<textarea id="replan-' + esc(p.slug) + '" data-replan-note="' + esc(p.slug) +
-            '" rows="3" placeholder="비워 두면 지금 5안과 겹치지 않는 새 발상으로 다시 씁니다. 예: 인물 없는 방향을 늘려 주세요."></textarea>' +
+            '" rows="3" placeholder="비워 두면 지금 안과 겹치지 않는 새 발상으로 다시 씁니다. 예: 인물 없는 방향을 늘려 주세요."></textarea>' +
             '<button class="btn ghost" type="button" data-replan="' + esc(p.slug) +
-            '">5안 전체 다시 만들기</button><small>지금 5안은 관리자용 백업으로 남기고 새 안으로 바꿉니다. 전략은 그대로 둡니다.</small></div>')
+            '">콘셉트 전체 다시 만들기</button><small>지금 안은 관리자용 백업으로 남기고 새 안으로 바꿉니다. 전략은 그대로 둡니다.</small></div>')
         : "";
       // ★ 콘셉트 카드는 광고주 화면과 **같은 공용 렌더**가 그린다.
       // 예전에는 본문 한 문단이 통째로 <p> 하나였고 후킹·화면·위험이 한 줄씩
@@ -2410,11 +2410,11 @@
       conceptReview = '<section class="concept-review"><div class="review-head"><span>' +
         (atConceptStage ? "관리자 검토" : "선택 완료 · 보관본") + '</span>' +
         "<h3>콘셉트 " + ((p.concepts || []).some(function (c) { return c.batch > 1; })
-          ? "5안 + 추가 " + (p.concepts || []).filter(function (c) { return c.batch > 1; }).length + "안" : "5안") +
+          ? "콘셉트 + 추가 " + (p.concepts || []).filter(function (c) { return c.batch > 1; }).length + "안" : "콘셉트") +
         "</h3><p>" + (atConceptStage && p.state === "ready"
           ? "광고주에게 보냈습니다 — 광고주가 고르면 다음 단계로 넘어갑니다."
           : atConceptStage
-          ? "추천은 참고값입니다. 다섯 방향의 차이와 위험을 확인한 뒤 광고주에게 보내세요."
+          ? "추천은 참고값입니다. 방향과 위험을 확인한 뒤 광고주에게 보내세요."
           : "이 프로젝트에서 실제로 제안하고 선택한 콘셉트 기록입니다.") + '</p></div>' +
         strategyLine + conceptList(p.concepts) + reviewActions(p, atConceptStage, replanBusy) + replanBox + '</section>';
     }
@@ -2431,10 +2431,10 @@
           : back ? "광고주가 추가 요청을 했습니다 — 새 안이 올라오면 보고 보내세요" : "검토 후 할 일") + "</b>" +
         (back && p.redo.note ? "<span>광고주가 남긴 말 · " + esc(p.redo.note) + "</span>" : "") +
         "<span>광고주에게 보내기 전까지 광고주 쪽에는 버튼이 없습니다." +
-        (addedN ? " 「5안 다시 만들기」는 처음 안과 추가 안을 모두 새로 씁니다." : "") + "</span></div>" +
+        (addedN ? " 「콘셉트 다시 만들기」는 처음 안과 추가 안을 모두 새로 씁니다." : "") + "</span></div>" +
         '<div class="ra-row">' +
         (chosen ? "" : '<button class="btn ghost" type="button" data-back-strategy="' + esc(p.id) + '">① 전략부터 다시</button>') +
-        '<button class="btn ghost" type="button" data-toggle-form="rp-' + esc(p.slug) + '">② 5안 다시 만들기</button>' +
+        '<button class="btn ghost" type="button" data-toggle-form="rp-' + esc(p.slug) + '">② 콘셉트 다시 만들기</button>' +
         '<button class="btn" type="button" data-send="' + esc(p.slug) + '">③ 광고주에게 보내기</button>' +
         "</div></div>";
     }
@@ -2456,7 +2456,7 @@
         (back ? "아래 남긴 말을 보고 고친 뒤에 다시 넘기세요."
               : "광고주에게 보이는 화면에서 내용을 확인하신 뒤 넘기세요.") +
         " 지금은 광고주 쪽에 버튼이 없습니다.</span></div>" +
-        // 콘티 검수 링크는 여기 없다. 이 블록은 콘셉트 5안 아래에 그려지므로
+        // 콘티 검수 링크는 여기 없다. 이 블록은 콘셉트 아래에 그려지므로
         // 그 자리에 두면 「콘티 승인」이 콘셉트 단계의 일처럼 읽힌다.
         // 링크는 콘티 승인 단계 본문 안에만 있다(boardLink 참고).
         '<button class="btn ghost" type="button" data-send="' + esc(p.slug) +
@@ -2468,7 +2468,7 @@
     }
 
     // 「다시 만들어 주세요」 — 제일 위에 둔다. 못 보고 지나가면 안 되는 것이다
-    var GNAME = { strategy: "전략 설계", concepts: "콘셉트 5안", storyboard: "콘티 승인", video: "영상", deliver: "납품본", post: "완성본" };
+    var GNAME = { strategy: "전략 설계", concepts: "콘셉트", storyboard: "콘티 승인", video: "영상", deliver: "납품본", post: "완성본" };
     var redo = p.redo
       ? '<div class="said redo' + (p.redoDone ? " ok" : "") + '"><span class="lbl">' +
         esc(GNAME[p.redo.gate] || STEP_NAME[p.redo.gate] || "진행 단계") + " — 광고주가 남긴 말 · " +
@@ -2712,7 +2712,7 @@
       };
       return '<div class="mc-form" id="ms-' + esc(p.id) + '" hidden>' +
         '<div class="mc-guide"><b>쓰는 법</b>' +
-        "<span>· 콘셉트 5안이 이걸 그대로 받아 씁니다 — AI가 쓰든 사람이 쓰든</span>" +
+        "<span>· 콘셉트가 이걸 그대로 받아 씁니다 — AI가 쓰든 사람이 쓰든</span>" +
         "<span>· 핵심 메시지·인사이트·그 외 필요한 사항 중 하나는 꼭. 나머지는 비워도 됩니다</span>" +
         "<span>· 가진 자료 안에서 — 광고주에게 새 자료를 요구하는 방향은 쓰지 않습니다</span></div>" +
         f("one_message", "핵심 메시지", "이 광고가 남길 한마디", 2) +
@@ -2720,12 +2720,12 @@
         f("usp", "강점(USP)", "이 제품만 줄 수 있는 것", 2) +
         f("tone", "톤", "예: 유쾌하고 시원한, 과장된 코믹", 2) +
         f("direction", "그 외 필요한 사항", "꼭 넣을 것, 피할 것, 참고할 결", 3) +
-        '<div class="mc-guide"><b>광고주에게 보이는 「공통 기획 방향」</b><span>· 콘셉트 5안 위에 뜹니다. 항목마다 한두 문장, 쉬운 말로 — 인사이트·USP 같은 우리 말 없이</span></div>' +
+        '<div class="mc-guide"><b>광고주에게 보이는 「공통 기획 방향」</b><span>· 콘셉트 위에 뜹니다. 항목마다 한두 문장, 쉬운 말로 — 인사이트·USP 같은 우리 말 없이</span></div>' +
         f("client_who", "누구에게", "예: 20~50대 남성 — 어떤 순간에 있는 사람인지까지", 2) +
         f("client_what", "무슨 말을", "예: 밋밋한 순간, 한 모금으로 톡 깨어난다 — 무엇을 약속하는지까지", 2) +
         f("client_why", "왜 이 방향인가", "예: 이 제품의 가장 큰 무기가 무엇이라 이 방향인지", 2) +
         f("client_feel", "어떤 느낌으로", "예: 밝고 시원하게, 유쾌한 과장으로 — 어떤 장면이 먼저 오는지까지", 2) +
-        '<button class="btn" type="button" data-ms-save="' + esc(p.id) + '">전략 올리기 → 콘셉트 5안</button></div>';
+        '<button class="btn" type="button" data-ms-save="' + esc(p.id) + '">전략 올리기 → 콘셉트</button></div>';
     }
 
     /** 사람이 구성·각본을 쓰는 양식 (077) — AI 와 같은 칸: 골 · 필수 · 흐름 · 카피 · 비트 */
@@ -3712,7 +3712,7 @@
       (p.state === "done" ? "완료 · " + esc(p.closed_at ? new Date(p.closed_at).toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 10).slice(5).replace("-", "/") : "") +
         " · " + spentAll(p) + "cr" + won(spentAll(p)) : esc(STEP_NAME[p.step] || p.step)) + '</span><span class="fold-icon" aria-hidden="true">⌄</span></div></summary>' +
       // ★ 카드 맨 위에는 단계와 무관한 것만 둔다. 「콘티 검수」가 여기 있으면
-      //   어느 단계의 일인지 알 수 없고, 바로 아래에 콘셉트 5안이 오므로 그
+      //   어느 단계의 일인지 알 수 없고, 바로 아래에 콘셉트가 오므로 그
       //   단계의 버튼처럼 읽혔다. 링크는 콘티 승인 단계 본문 안으로 옮겼다.
       '<div class="project-body"><div class="ways project-ways">' +
       '<a class="btn ghost" href="' + esc(siteUrl(p.slug)) +
@@ -3847,7 +3847,7 @@
     }
     if (!j || p.stopped) return "";
     var what = { facts: "제품·자료 확인 — AI가 사진과 의뢰를 읽고 있습니다", strategy: "전략 설계를 쓰고 있습니다",
-      concepts: "콘셉트 5안을 쓰고 있습니다", develop: "구성·각본을 쓰고 있습니다", storyboard: "콘티를 그리고 있습니다",
+      concepts: "콘셉트를 쓰고 있습니다", develop: "구성·각본을 쓰고 있습니다", storyboard: "콘티를 그리고 있습니다",
       anchors: "제작 자료를 만들고 있습니다", video: "영상을 뽑고 있습니다", post: "후반 작업을 하고 있습니다" }[j.step] ||
       ((STEP_NAME[j.step] || j.step) + " 작업 중");
     var since = j.claimed_at || j.created_at;
@@ -4669,7 +4669,7 @@
     document.querySelectorAll("[data-plan-start]").forEach(function (b) {
       b.addEventListener("click", function () {
         var what = b.dataset.planWhat === "develop" ? "고른 콘셉트 그대로 구성·각본(골·필수·비트)을"
-          : b.dataset.planWhat === "concepts" ? "위 전략을 그대로 받아 콘셉트 5안을" : "전략 설계를";
+          : b.dataset.planWhat === "concepts" ? "위 전략을 그대로 받아 콘셉트를" : "전략 설계를";
         if (!window.confirm("AI가 " + what + " 씁니다. 광고주 답에서 정리한 조건이 함께 넘어갑니다.")) return;
         b.disabled = true; b.textContent = "시작하는 중…";
         db.rpc("onecue_plan_start", { p_project_id: b.dataset.planStart })
@@ -4740,7 +4740,7 @@
           p_client_who: v.client_who || "", p_client_what: v.client_what || "", p_client_feel: v.client_feel || "",
           p_client_why: v.client_why || "" })
           .then(function (r) { if (r.error) throw r.error; return load(); })
-          .catch(function (e) { b.disabled = false; b.textContent = "전략 올리기 → 콘셉트 5안"; window.alert("올리지 못했습니다 — " + errKo(e)); });
+          .catch(function (e) { b.disabled = false; b.textContent = "전략 올리기 → 콘셉트"; window.alert("올리지 못했습니다 — " + errKo(e)); });
       });
     });
     document.querySelectorAll("[data-mc-save]").forEach(function (b) {
@@ -5337,7 +5337,7 @@
     if (!btn || btn.disabled) return;
     btn.textContent = scope === "selected"
       ? (keys.length ? "선택한 " + keys.length + "개 다시 만들기" : "다시 만들 안을 고르세요")
-      : "5안 전체 다시 만들기";
+      : "콘셉트 전체 다시 만들기";
   }
 
   function requestReplan(slug, note, scope, keys) {
@@ -5416,7 +5416,7 @@
     if (!p) return Promise.reject(new Error("건을 찾지 못했습니다"));
     // ★ 순서 — 콘셉트는 5안이 올라오고 AI 작업이 끝난 뒤에만 보낸다 (Dan 09-24). DB(075)도 같은 것을 막는다
     if (p.step === "concepts" && !(p.concepts && p.concepts.length)) {
-      return Promise.reject(new Error("콘셉트가 아직 없습니다 — 5안이 올라온 뒤에 보낼 수 있습니다"));
+      return Promise.reject(new Error("콘셉트가 아직 없습니다 — 콘셉트가 올라온 뒤에 보낼 수 있습니다"));
     }
     if (p.job && p.job.request && p.job.request.plan) {
       return Promise.reject(new Error("AI가 쓰는 중입니다 — 끝난 뒤에 보낼 수 있습니다"));

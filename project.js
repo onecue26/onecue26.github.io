@@ -21,7 +21,7 @@
   // 데만 쓴다(IDX). 광고주가 보는 이름과 칸은 아래 CLIENT_FLOW 가 정한다.
   var STEPS = [
     ["brief", "의뢰 접수"], ["facts", "제품·자료 확인"], ["strategy", "전략 설계"],
-    ["concepts", "콘셉트 5안"], ["develop", "구성·각본"], ["storyboard", "콘티 승인"],
+    ["concepts", "콘셉트"], ["develop", "구성·각본"], ["storyboard", "콘티 승인"],
     ["anchors", "제작 자료"], ["video", "영상 제작"], ["post", "후반 작업"],
     ["deliver", "납품"],
   ];
@@ -490,7 +490,7 @@
           : addWaiting(concepts, strat) ? addWaiting(concepts, strat)
           : (P.step === "concepts" || P.step === "strategy" || P.step === "facts"
             ? '<div class="stage-read development-notice"><section class="stage-block status"><h4>콘셉트를 준비하고 있습니다</h4>' +
-              "<p>보내 주신 내용과 답을 반영해 다섯 가지 안을 만들고 있습니다. 준비되면 여기서 고르실 수 있습니다.</p></section></div>"
+              "<p>보내 주신 내용과 답을 반영해 콘셉트를 만들고 있습니다. 준비되면 여기서 고르실 수 있습니다.</p></section></div>"
             : ""),
         now.pick),
       // ★ 상태 글자를 박아 두지 않는다. 「진행 중」으로 고정돼 있어서 영상
@@ -624,11 +624,11 @@
     if (prev && (prev.client_who || prev.client_what)) {
       return '<div class="direction"><h3>공통 기획 방향 — 다시 잡은 방향</h3>' +
         '<p class="dir-sub">추가 요청에 따라 방향을 다시 잡았습니다. 추가로 드린 두 가지 안이 이 방향 위에서 나왔습니다.</p>' + rows(s) +
-        '<details class="dir-prev"><summary>처음 방향 보기 — 처음 다섯 가지 안은 이 방향 위에서 나왔습니다</summary>' + rows(prev) + "</details>" +
+        '<details class="dir-prev"><summary>처음 방향 보기 — 처음 안은 이 방향 위에서 나왔습니다</summary>' + rows(prev) + "</details>" +
         "</div>";
     }
     return '<div class="direction"><h3>공통 기획 방향</h3><p class="dir-sub">' +
-      (s._added ? "모든 안이 이 방향 위에서 나왔습니다." : "다섯 가지 안 모두 이 방향 위에서 만들었습니다.") + "</p>" + rows(s) +
+      (s._added ? "모든 안이 이 방향 위에서 나왔습니다." : "모든 안이 이 방향 위에서 나왔습니다.") + "</p>" + rows(s) +
       "</div>";
   }
 
@@ -946,7 +946,7 @@
       return '<div class="gate"><div class="txt"><b>컨셉을 골라주세요</b>' +
         "<small>" + ((approvals || []).some(function (a) { return a.gate === "concepts" && a.decision === "revise"; })
           ? "요청하신 두 가지 안을 더 준비했습니다. 처음 안까지 모두 중에서 하나를 고르시면 그 방향으로 콘티를 만듭니다."
-          : "다섯 가지 방향을 준비했습니다. 하나를 고르시면 그 방향으로 콘티를 만듭니다.") + "</small>" +
+          : "준비한 방향을 보시고 고르시면 그 방향으로 제작을 이어 갑니다.") + "</small>" +
         "</div></div>";
     }
     // 콘티에 「고쳐주세요」만 있고 무엇을 고칠지 적을 데가 없었다.
