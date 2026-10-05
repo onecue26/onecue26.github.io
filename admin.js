@@ -870,6 +870,40 @@
     var r = window.ONECUE_CREDIT_RATES, v = r && r.krw_per_credit_estimate;
     return (typeof v === "number" && v > 0) ? v : null;
   }
+  // 10-05 단가가 바뀌었다 — 지출마다 쓴 시각(spent_at)에 걸린 단가로 셈한다. 옛 지출은 옛 단가 그대로 (Dan)
+  function rateAt(t) {
+    var r = window.ONECUE_CREDIT_RATES || {}, list = r.rates || [], v = krwPerCredit();
+    if (!list.length || !t) return v;
+    var at = new Date(t).getTime();
+    list.forEach(function (x) { if (!x.from || new Date(x.from).getTime() <= at) v = x.krw_per_credit; });
+    return v;
+  }
+  function krwRows(rows) {
+    return (rows || []).reduce(function (a, x) { return a + (Number(x.credits) || 0) * (rateAt(x.spent_at) || 0); }, 0);
+  }
+  /** 이미 쓴 지출 묶음의 원화 — 시각별 단가. 단가가 없으면 won() 처럼 추정으로 */
+  function wonRows(rows) {
+    var c = (rows || []).reduce(function (a, x) { return a + (Number(x.credits) || 0); }, 0);
+    if (!c) return "";
+    return krwPerCredit() ? " · ₩" + Math.round(krwRows(rows)).toLocaleString() : won(c);
+  }
+  // 이 건에 걸린 단가들 — 「63.2 · 73.107 (10-05부터)」
+  function usedRates(rows) {
+    var list = (window.ONECUE_CREDIT_RATES || {}).rates || [], seen = [];
+    (rows || []).forEach(function (x) {
+      var v = rateAt(x.spent_at), e = list.filter(function (r) { return r.krw_per_credit === v; })[0] || { krw_per_credit: v };
+      if (seen.indexOf(e) < 0) seen.push(e);
+    });
+    return seen.length ? seen : [{ krw_per_credit: krwPerCredit() }];
+  }
+  function rateList(rows) {
+    return usedRates(rows).map(function (e) {
+      return e.krw_per_credit + (e.from ? " <span>(" + esc(String(e.from).slice(5, 10)) + "부터)</span>" : "");
+    }).join(" · ");
+  }
+  function rateNotes(rows) {
+    return usedRates(rows).map(function (e) { return "₩" + e.krw_per_credit + " = " + esc(e.basis || ""); }).join(" / ");
+  }
   function won(credits) {
     if (!credits) return "";
     var rate = krwPerCredit();
@@ -920,7 +954,7 @@
     }
     return '<div class="cost-line">' +
       (used
-        ? '<b>' + used + " 크레딧" + won(used) + "</b>" +
+        ? '<b>' + used + " 크레딧" + wonRows(rows) + "</b>" +
           '<span class="cost-what">생성 ' + rows.length + "번</span>" +
           '<details class="cost-list"><summary>내역</summary><ol>' + rows.map(function (x) {
             return "<li>" + esc(hhmm(x.spent_at)) + " · " + esc(tidy(x)) + " · <b>" +
@@ -2644,7 +2678,7 @@
       if (p.state === "done") {
         return '<div class="close-box done"><b>프로젝트 완료</b>' +
           '<span>' + esc(personName(p.closed_by)) + " · " + esc(when(p.closed_at)) + " · 총 원가 " + spentAll(p) +
-          "cr" + won(spentAll(p)) + "</span></div>" + deliveredFinal(p, last);
+          "cr" + wonRows(p.spends) + "</span></div>" + deliveredFinal(p, last);
       }
       if (p.state === "idle" && last && last.decision === "ok") {
         // ★ 광고주 승인으로 끝나지 않는다 — 관리자가 닫아야 한 건이 끝난다 (068 · Dan 09-23)
@@ -2835,7 +2869,8 @@
       });
       var est = !krwPerCredit() && krwEstimate();
       var basis = (window.ONECUE_CREDIT_RATES || {}).estimate_basis || {};
-      function krw(c) { return esc(won(c).replace(/^ · /, "")) || "—"; }
+      function krw(rs) { return esc(wonRows(rs).replace(/^ · /, "")) || "—"; }
+      function pick(f) { return rows.filter(f); }
       function item(x) {
         // ★ 건 이름(slug)에 한글이 섞여 옛 정규식이 못 지웠다 — 「slug · 영어 단계 · 」 앞부분을 통째로 뗀다 (09-26 버튼 순회 로봇)
         var w = String(x.what || "").split("★")[0]
@@ -2856,35 +2891,32 @@
               return /seedance|kling|veo|hailuo|wan/i.test(y.engine || ""); }).length : 0;
             return '<tr class="' + (x.outcome || "") + '"><td class="n">' + (i + 1) + "</td><td>" +
               (vid ? "<b>영상 " + nth + "판</b> · " : "") + esc(item(x)) + '<div class="sub">' + esc(x.engine || "") + " · " + esc(when(x.spent_at)) +
-              "</div></td><td>" + mark(x) + '</td><td class="num">' + c + '</td><td class="num">' + krw(c) +
+              "</div></td><td>" + mark(x) + '</td><td class="num">' + c + '</td><td class="num">' + krw([x]) +
               "</td></tr>";
           }).join("") +
           '<tr class="subtotal"><td></td><td>' + esc(STEP_NAME[g.key] || g.key) + " 소계" +
           (g.gone ? ' <span class="sub">(채택 ' + g.used + " · 버린 판 " + g.gone + ")</span>" : "") +
-          '</td><td></td><td class="num">' + g.all + '</td><td class="num">' + krw(g.all) + "</td></tr>";
+          '</td><td></td><td class="num">' + g.all + '</td><td class="num">' + krw(g.rows) + "</td></tr>";
       }).join("");
       var rb = (window.ONECUE_CREDIT_RATES || {}).rate_basis || {};
       // 오른쪽 위 — 환율과 1크레딧 단가 (Dan 09-23 「명세서 맨위 오른쪽에 환율이랑 credit당 얼마인지」)
       var head = krwPerCredit()
-        ? '<div class="stmt-rate"><div>환율 $1 = ₩' + Number(rb.krw_per_usd || 0).toLocaleString() +
-          ' <span>(' + esc(String(rb.krw_source || "").slice(0, 16)) + ")</span></div>" +
-          "<div><b>1크레딧 ≈ ₩" + krwPerCredit() + "</b> <span>(" + esc(rb.plan || "") + " 정가 $" +
-          esc(String(rb.usd_list || "")) + " + VAT 10% ÷ " + Number(rb.credits || 0).toLocaleString() + "cr)</span></div></div>"
+        ? '<div class="stmt-rate"><div><b>1크레딧 ≈ ₩' + rateList(rows) + "</b></div></div>"
         : "";
       // 기본은 접어 둔다 — 제목 줄에 총 원가만, 누르면 명세가 펼쳐진다 (Dan 09-23)
       return '<details class="cost-statement"><summary class="stmt-head"><h4>제작 원가 명세 <span class="stmt-sum">총 ' +
-        all + "cr" + won(all) + (gone ? " · 버린 판 " + gone + "cr" : "") + "</span></h4>" + head + "</summary>" +
+        all + "cr" + wonRows(rows) + (gone ? " · 버린 판 " + gone + "cr" : "") + "</span></h4>" + head + "</summary>" +
         '<table class="stmt"><thead><tr><th class="n">#</th><th>항목 · 엔진 · 시각</th><th>결과</th>' +
         '<th class="num">크레딧</th><th class="num">원화</th></tr></thead><tbody>' + body + "</tbody></table>" +
         '<table class="stmt total"><tbody>' +
-        '<tr><td>채택 (완성본에 들어간 것)</td><td class="num">' + used + '</td><td class="num">' + krw(used) + "</td></tr>" +
+        '<tr><td>채택 (완성본에 들어간 것)</td><td class="num">' + used + '</td><td class="num">' + krw(pick(function (x) { return x.outcome === "used"; })) + "</td></tr>" +
         '<tr class="discarded"><td>버린 판 (만들었지만 쓰지 않은 것 — 돈은 나갔다)</td><td class="num">' + gone +
-        '</td><td class="num">' + krw(gone) + "</td></tr>" +
-        (open ? '<tr><td>아직 안 가름</td><td class="num">' + open + '</td><td class="num">' + krw(open) + "</td></tr>" : "") +
+        '</td><td class="num">' + krw(pick(function (x) { return x.outcome === "discarded"; })) + "</td></tr>" +
+        (open ? '<tr><td>아직 안 가름</td><td class="num">' + open + '</td><td class="num">' + krw(pick(function (x) { return x.outcome !== "used" && x.outcome !== "discarded"; })) + "</td></tr>" : "") +
         '<tr class="grand"><td>총 원가 · 결제 ' + rows.length + '건</td><td class="num">' + all +
-        ' cr</td><td class="num">' + krw(all) + "</td></tr></tbody></table>" +
+        ' cr</td><td class="num">' + krw(rows) + "</td></tr></tbody></table>" +
         '<p class="stmt-note">' +
-        (krwPerCredit() ? "원화 = 크레딧 × ₩" + krwPerCredit() + " · " + esc(rb.calc || "") + " · 근거: " + esc(rb.krw_source || "") + "."
+        (krwPerCredit() ? "원화 = 크레딧 × 쓴 시각의 단가 · " + rateNotes(rows) + "."
           : (est ? "원화는 추정 — 1크레딧 ≈ ₩" + est + "." : "원화 단가가 없습니다 — db/credit_rates.json")) +
         " 영상 생성 외 비용(그록 구독 · AI 사용료)은 포함하지 않았습니다.</p></details>";
     }
@@ -3710,7 +3742,7 @@
       '</div><div class="project-summary-side">' + (p.test_label ? '<span class="test-label">' + esc(p.test_label) + '</span>' : "") + '<small class="who-line">요청 ' + esc(CLIENT_OWNER[p.client_id] ? personName(CLIENT_OWNER[p.client_id]) : "—") +
         " · 담당 " + esc(handler(p) ? personName(handler(p)) : "—") + '</small><span class="project-stage ' + (p.state === "done" ? "closed st-done" : p.state === "ready" ? "st-fix" : "st-run") + '">' +
       (p.state === "done" ? "완료 · " + esc(p.closed_at ? new Date(p.closed_at).toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 10).slice(5).replace("-", "/") : "") +
-        " · " + spentAll(p) + "cr" + won(spentAll(p)) : esc(STEP_NAME[p.step] || p.step)) + '</span><span class="fold-icon" aria-hidden="true">⌄</span></div></summary>' +
+        " · " + spentAll(p) + "cr" + wonRows(p.spends) : esc(STEP_NAME[p.step] || p.step)) + '</span><span class="fold-icon" aria-hidden="true">⌄</span></div></summary>' +
       // ★ 카드 맨 위에는 단계와 무관한 것만 둔다. 「콘티 검수」가 여기 있으면
       //   어느 단계의 일인지 알 수 없고, 바로 아래에 콘셉트가 오므로 그
       //   단계의 버튼처럼 읽혔다. 링크는 콘티 승인 단계 본문 안으로 옮겼다.
