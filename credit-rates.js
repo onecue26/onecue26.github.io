@@ -8,7 +8,7 @@
   root.ONECUE_CREDIT_RATES =
 {
   "how_to_fill": "예: 월 39,000원에 6,000 크레딧이면 6.5 를 넣는다",
-  "krw_per_credit": 63.2,
+  "krw_per_credit": 73.107,
   "measured": {
     "gpt_image_2_5": {
       "2k_high": 3,
@@ -67,6 +67,19 @@
     "why": "할인 전 정가 + 부가세로 잡는다 — 보수적으로 잡아야 손해가 없다 (Dan 09-23). 실제 결제는 $176+VAT(할인가)",
     "calc": "$250 × 1.1 = $275 × ₩1,379.94 = ₩379,484 ÷ 6,000cr = ₩63.2/cr",
     "invoice_file": "C:/Users/sado4/Downloads/Invoice-2ZIW3EG2-0004.pdf"
-  }
+  },
+  "rates": [
+    {
+      "from": null,
+      "krw_per_credit": 63.2,
+      "basis": "Ultra 정가 $250 + VAT ÷ 6,000cr (09-17 인보이스 환율) — 이전 구매분, 10-05에 다 씀"
+    },
+    {
+      "from": "2026-10-05T19:00:00+09:00",
+      "krw_per_credit": 73.107,
+      "basis": "추가 구매 292,428원 ÷ 4,000cr (Dan 10-05)"
+    }
+  ],
+  "rates_note": "각 지출은 쓴 시각(spent_at)에 걸린 단가로 원화를 셈한다 — 옛 지출은 옛 단가 그대로. 단가가 또 바뀌면 rates 끝에 한 줄 더하고 krw_per_credit도 그 값으로 (Dan 10-05 「예전 거는 그대로, 이제부터 쓰는 건 새 단가」)"
 };
 })(typeof window !== "undefined" ? window : this);
