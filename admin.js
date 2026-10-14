@@ -674,9 +674,11 @@
     // 09-30 — 처음(의뢰 접수)부터 고르고, 컨셉을 고른 뒤(구성·각본 이후)에는 잠근다 — 중간에 바꾸면 만든 것과 단계가 섞인다(Dan)
     var locked = ["develop", "storyboard", "anchors", "video", "post", "deliver"].indexOf(p.step) >= 0;
     var dis = locked ? " disabled" : "";
+    // 10-14 — 옵션 3(새 의뢰 6단계)은 접수 화면이 다르다. 옵션 1·2 전환을 띄우지 않고 표시와 입력 화면 링크만
+    if (p.production_track === "option3") return '<div class="track-row"><span class="track-sw"><button type="button" class="on" disabled>옵션 3 · 새 의뢰 시험</button></span> <a href="new3.html?p=' + encodeURIComponent(p.slug) + '" target="_blank" rel="noopener">광고주 입력 내용 보기 ↗</a></div>';
     var sw = canWrite ? '<span class="track-sw' + (locked ? " locked" : "") + '"' + (locked ? ' title="컨셉을 고른 뒤라 바꿀 수 없습니다"' : "") + '>' +
-      '<button type="button" data-track-sw="option1" data-slug="' + esc(p.slug) + '"' + (t2 ? "" : ' class="on"') + dis + '>옵션 1</button>' +
-      '<button type="button" data-track-sw="option2" data-slug="' + esc(p.slug) + '"' + (t2 ? ' class="on"' : "") + dis + '>옵션 2</button></span>' +
+      '<button type="button" data-track-sw="option1" data-slug="' + esc(p.slug) + '"' + (t2 ? "" : ' class="on"') + dis + '>옵션 1 · old</button>' +
+      '<button type="button" data-track-sw="option2" data-slug="' + esc(p.slug) + '"' + (t2 ? ' class="on"' : "") + dis + '>옵션 2 · old</button></span>' +
       // 09-30 — 화풍은 카드 머리가 아니라 「의뢰 접수」 칸 안에(Dan 「실수로 바꾸면 문제가 생길 거 아냐」)
       '<details class="track-help"><summary>?</summary><div>' +
       '<p><b>옵션 1 · 지금 방식</b> — 콘티를 그려 광고주와 맞춘 뒤 그대로 영상으로. 10단계(구성·각본 → 콘티 → 제작 자료 → 영상). 광고주가 장면을 미리 보고 확정하지만, 콘티에 끌려가 밋밋해지기 쉽습니다.</p>' +
