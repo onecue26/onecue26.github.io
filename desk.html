@@ -63,6 +63,30 @@
 .links{display:flex;gap:8px;flex-wrap:wrap}
 .msg{font-size:12.5px;color:var(--muted);min-height:16px}
 .empty{border:1px dashed var(--rule);border-radius:14px;padding:30px;text-align:center;color:var(--muted)}
+/* Head 분석·작업 기록 — 항목마다 접었다 편다 */
+.rep{border-top:1px solid var(--rule);padding-top:14px;display:grid;gap:8px}
+.rep-h{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rep-h h3{margin:0;font-size:15px;margin-right:auto}
+.rsec{border:1px solid var(--rule);border-radius:11px;background:var(--sunk)}
+.rsec>summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.rsec>summary::-webkit-details-marker{display:none}
+.rsec>summary::before{content:"▸";color:var(--accent);font-size:12px}
+.rsec[open]>summary::before{content:"▾"}
+.rsec>summary b{font-size:14.5px}
+.rsec>summary span{font-size:12.5px;color:var(--muted)}
+.rbody{padding:0 14px 14px;font-size:14px;line-height:1.65;display:grid;gap:10px;min-width:0}
+.rbody p,.rbody ul{margin:0}
+.rbody ul{padding-left:18px}
+.tbw{overflow-x:auto}
+.tbw table{border-collapse:collapse;font-size:13px;min-width:100%}
+.tbw th,.tbw td{border:1px solid var(--rule);padding:6px 9px;text-align:left;vertical-align:top}
+.tbw th{color:var(--muted);font-weight:600;white-space:nowrap}
+.rbody pre{white-space:pre-wrap;word-break:break-word;background:var(--panel);border:1px solid var(--rule);border-radius:9px;padding:10px 12px;font-family:var(--mono2);font-size:12.5px;margin:0}
+.rmedia{display:flex;gap:8px;flex-wrap:wrap}
+.rmedia img{width:140px;height:140px;object-fit:cover;border-radius:8px;border:1px solid var(--rule)}
+.rmedia video{width:220px;max-width:100%;border-radius:8px;background:#000}
+.rsrc{font-size:12.5px;color:var(--muted)}
+.rsrc ul{padding-left:18px;margin:4px 0 0}
 </style>
 </head>
 <body>
@@ -96,6 +120,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js?v=o3b"></script>
 <script src="auth.js?v=o3b"></script>
-<script src="desk.js?v=o3c"></script>
+<script src="desk.js?v=o3d"></script>
 </body>
 </html>
