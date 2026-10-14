@@ -12,7 +12,7 @@
 /* 옵션 3 새 의뢰 — 6단계 (Dan 10-14 · 옵션 3 UI 기획 V2)
    휴대폰 먼저: 카드는 위아래로 쌓이고, 넓은 화면에서 옆으로 선다.
    이전·임시 저장·다음 버튼은 모든 단계에서 같은 자리(아래 막대)에 있다. */
-.w3{max-width:760px;margin:0 auto;display:grid;gap:22px;padding-bottom:110px;word-break:keep-all;overflow-wrap:anywhere}   /* 한국어는 낱말 중간에서 끊지 않는다(「광/고는」) */
+.w3{max-width:760px;margin:0 auto;display:grid;gap:22px;padding-bottom:150px;word-break:keep-all;overflow-wrap:anywhere}   /* 한국어는 낱말 중간에서 끊지 않는다(「광/고는」) */
 .w3-head{display:grid;gap:6px}
 .w3-eyebrow{font-family:var(--mono2);font-size:12px;letter-spacing:.14em;color:var(--accent)}
 .w3-head h1{margin:0;font-size:clamp(24px,5.4vw,34px);line-height:1.2;text-wrap:balance}
@@ -40,6 +40,7 @@
 .f3 label .req{color:var(--accent);font-size:12px;font-family:var(--mono2)}
 .f3 label .opt{color:var(--faint);font-size:12px;font-family:var(--mono2)}
 .f3 .tip{font-size:13px;color:var(--accent)}
+.f3 .ex{font-size:12.5px;color:var(--faint);line-height:1.5}
 .f3 input[type=text],.f3 input[type=url],.f3 textarea{
   width:100%;box-sizing:border-box;padding:13px 14px;border:1px solid var(--rule);border-radius:11px;
   background:var(--panel);color:var(--ink);font:inherit;font-size:16px;line-height:1.5}
@@ -143,16 +144,16 @@
 
 /* 아래 버튼 막대 — 모든 단계 같은 자리 */
 .w3-bar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(13,13,14,.94);backdrop-filter:blur(12px);
-  border-top:1px solid var(--rule);padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px))}
+  border-top:1px solid var(--rule);padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px))}   /* 본문 좌우 여백(20px)과 같게 */
 .w3-bar-in{max-width:760px;margin:0 auto;display:flex;gap:8px;align-items:center}   /* 이전·임시 저장 왼쪽, 다음 오른쪽 — 단계가 바뀌어도 자리가 그대로 */
 @media(min-width:761px){.w3-bar{left:195px}}
 @media(min-width:1101px){.w3-bar{left:232px}}   /* 왼쪽 메뉴 폭(studio.css)만큼 비킨다 */
 .w3-bar button{font:inherit;font-weight:700;font-size:15px;border-radius:999px;padding:13px 18px;cursor:pointer;border:1px solid var(--rule);background:var(--panel);color:var(--ink);white-space:nowrap}
-.w3-bar .next{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);min-width:112px}
+.w3-bar .next{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);min-width:120px}
 .w3-bar button:disabled{background:#2c2c2f;color:#77746e;border-color:transparent;cursor:default}
 .w3-bar .prev.off{visibility:hidden}
 .w3-bar .saved{flex:1;font-size:12px;color:var(--faint);text-align:right;font-family:var(--mono2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-@media(max-width:420px){.w3-bar button{padding:12px 13px;font-size:14px}.w3-bar .next{min-width:92px}.w3-bar .saved{color:transparent}}
+@media(max-width:420px){.w3-bar button{padding:12px 12px;font-size:14px}.w3-bar .next{min-width:96px}.w3-bar .saved{color:transparent}}
 .toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:var(--ink);color:var(--ground);padding:10px 16px;border-radius:999px;font-size:14px;font-weight:600;z-index:40;opacity:0;transition:opacity .2s;pointer-events:none;max-width:calc(100% - 32px);text-align:center}
 .toast.on{opacity:1}
 .loading3{color:var(--muted);text-align:center;padding:40px 0}
@@ -183,15 +184,18 @@
 
   <!-- 1단계 -->
   <section class="w3-step" data-step="1">
-    <div class="w3-q"><span class="n">STEP 1 / 5</span><h2>우리 제품을 소개해 주세요</h2></div>
+    <div class="w3-q"><span class="n">1단계 · 기본 정보 입력</span><h2>우리 제품을 소개해 주세요</h2></div>
     <div class="f3-grid two">
       <div class="f3"><label for="brand">상호 / 브랜드명 <span class="req">필수</span></label>
-        <input type="text" id="brand" maxlength="60" placeholder="예 · 맛있는 가공소, 럭키푸드, 테크원" autocomplete="organization"></div>
+        <span class="ex">예 · 맛있는 가공소, 럭키푸드, 테크원</span>
+        <input type="text" id="brand" maxlength="60" placeholder="상호 또는 브랜드명" autocomplete="organization"></div>
       <div class="f3"><label for="kind">제품 종류 <span class="req">필수</span></label>
-        <input type="text" id="kind" maxlength="40" placeholder="예 · 식품, 의류, 잡화, 리빙, 뷰티"></div>
+        <span class="ex">예 · 식품, 의류, 잡화, 리빙, 뷰티, 패션</span>
+        <input type="text" id="kind" maxlength="40" placeholder="제품 종류"></div>
     </div>
     <div class="f3"><label for="product">제품 이름 <span class="req">필수</span></label>
-      <input type="text" id="product" maxlength="80" placeholder="예 · 롱웨어 스모키 아이라이너, 디온리 저소음 가습기"></div>
+      <span class="ex">예 · 롱웨어 스모키 아이라이너, 디온리 저소음 가습기, 남다른 감자탕, 글레이즈 틴테이션</span>
+      <input type="text" id="product" maxlength="80" placeholder="제품 이름"></div>
     <div class="f3"><label for="point">가장 자랑하고 싶은 제품 특장점 <span class="req">필수</span></label>
       <span class="tip">딱 1가지 핵심만 담을 때 영상 효과가 가장 높아요</span>
       <textarea id="point" maxlength="200" placeholder="예 · 30년 전통 비법 양념으로 만든 캡사이신 없는 건강한 매운맛"></textarea>
@@ -200,7 +204,7 @@
 
   <!-- 2단계 -->
   <section class="w3-step" data-step="2">
-    <div class="w3-q"><span class="n">STEP 2 / 5</span><h2>제품을 어떤 분위기의 영상에 담을까요?</h2><p>하나만 골라 주세요.</p></div>
+    <div class="w3-q"><span class="n">2단계 · 영상 분위기 선택</span><h2>제품을 어떤 컨셉의 영상에 담을까요?</h2><p>하나만 골라 주세요.</p></div>
     <div class="pick" id="moods">
       <label class="pc"><input type="radio" name="mood" value="bgrade"><span class="chk"></span>
         <span class="mood-ico">B!</span><span class="t">재밌는 B급 · 병맛</span>
@@ -219,7 +223,7 @@
 
   <!-- 3단계 -->
   <section class="w3-step" data-step="3">
-    <div class="w3-q"><span class="n">STEP 3 / 5</span><h2>제품 사진과 참고 링크를 등록해 주세요</h2></div>
+    <div class="w3-q"><span class="n">3단계 · 사진 등록 &amp; 비즈니스 링크</span><h2>제품 사진과 참고 링크를 등록해 주세요</h2></div>
     <div class="f3"><label>제품 사진 <span class="req">필수</span></label>
       <span class="tip">제품이 확실하게 보이는 사진을 올려 주세요</span>
       <label class="drop" id="drop"><input type="file" id="files" accept="image/jpeg,image/png,image/webp" multiple>
@@ -238,7 +242,7 @@
 
   <!-- 4단계 -->
   <section class="w3-step" data-step="4">
-    <div class="w3-q"><span class="n">STEP 4 / 5</span><h2>영상을 올릴 채널(비율)을 골라 주세요</h2>
+    <div class="w3-q"><span class="n">4단계 · 영상 화면 비율 선택</span><h2>영상을 올릴 채널(비율)을 골라 주세요</h2>
       <p>그림은 실제 화면 모양입니다. 앱 버튼·글씨에 가리는 자리를 피해 문구와 로고를 넣습니다.</p></div>
     <div class="pick" id="aspects"></div>
     <div class="ar-legend"><span><i class="l1"></i>문구·로고가 들어가는 자리</span><span><i class="l2"></i>앱 버튼·글씨에 가리거나 잘릴 수 있는 자리</span></div>
@@ -246,7 +250,7 @@
 
   <!-- 5단계 -->
   <section class="w3-step" data-step="5">
-    <div class="w3-q"><span class="n">STEP 5 / 5</span><h2>요청 내용을 확인해 주세요</h2></div>
+    <div class="w3-q"><span class="n">5단계 · 입력 내용 확인 &amp; 영상 생성</span><h2>영상을 생성합니다. 요청 내용을 확인해 주세요.</h2></div>
     <dl class="sum" id="sum"></dl>
     <p class="ask">입력 내용이 맞나요? <b>[영상 생성 시작]</b> 버튼을 눌러 주세요.</p>
     <button type="button" class="go3" id="go" disabled>영상 생성 시작</button>
@@ -258,7 +262,7 @@
     <div class="done3">
       <div class="pulse"><i></i></div>
       <span class="busy">영상 제작 진행 중</span>
-      <h2>효과를 극대화한 영상을 만들고 있어요</h2>
+      <h2>효과를 극대화한 영상을 생성하고 있어요</h2>
       <p>완성되면 입력하신 연락처(문자 · 알림톡)로 알려 드려요.</p>
       <div class="card3">
         <h3>예상 소요 시간</h3>
@@ -266,7 +270,7 @@
         <div class="stages" id="stages"></div>
       </div>
       <div class="card3">
-        <h3>가입하실 때 입력하신 연락처</h3>
+        <h3>가입 시 입력된 연락처</h3>
         <div class="kv"><span>이메일</span><b id="cEmail">—</b><span>전화</span><b id="cPhone">—</b></div>
         <a class="b3" href="login.html" style="padding:11px">연락처 수정하기</a>
       </div>
@@ -280,10 +284,10 @@
 </main>
 
 <div class="w3-bar" id="bar"><div class="w3-bar-in">
-  <button type="button" class="prev" id="prev">이전</button>
+  <button type="button" class="prev" id="prev">이전 단계</button>
   <button type="button" class="save" id="save">임시 저장</button>
   <span class="saved" id="saved"></span>
-  <button type="button" class="next" id="next" disabled>다음</button>
+  <button type="button" class="next" id="next" disabled>다음 단계</button>
 </div></div>
 <div class="toast" id="toast"></div>
 
