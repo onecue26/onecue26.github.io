@@ -14,7 +14,7 @@
   function el(id) { return document.getElementById(id); }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function when(t) { return t ? new Date(t).toLocaleString("ko-KR", { timeZone: "Asia/Seoul", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }) : ""; }
-  function hideTest() { try { return localStorage.getItem("desk_hide_test") === "1"; } catch (e) { return false; } }
+  function hideTest() { try { return localStorage.getItem("desk_hide_test") !== "0"; } catch (e) { return true; } }   // 시험 건은 기본으로 숨김(10-14 Dan 「실험 11개나 올려놓은 이유」)
 
   function status(r) { var o = r.o3 || {}; return o.status === "submitted" ? (+o.stage >= 5 ? "done" : "submitted") : "draft"; }
 
