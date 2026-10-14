@@ -18,6 +18,42 @@
 
   function status(r) { var o = r.o3 || {}; return o.status === "submitted" ? (+o.stage >= 5 ? "done" : "submitted") : "draft"; }
 
+
+  // ── 480p 드래프트 규칙 (Dan 10-14 「480p 드래프트로 만들고, 만든 시점 기준 5일 안에 확정해 주면 1080p로 업그레이드」) ──
+  var DRAFT_DAYS = 5;
+  function draftBox(o) {
+    var at = o.draft_at ? new Date(o.draft_at) : null, line = "아직 만들지 않았습니다";
+    if (at) {
+      var due = new Date(at.getTime() + DRAFT_DAYS * 864e5), left = due - Date.now();
+      line = "만든 때 " + when(at) + " · 확정 기한 " + when(due) + " · " +
+        (o.confirmed_at ? "확정됨(" + when(o.confirmed_at) + ") → 1080p 업그레이드" : left > 0 ? "남은 시간 " + Math.floor(left / 864e5) + "일 " + Math.floor(left % 864e5 / 36e5) + "시간" : "기한 지남 — 480p로 남습니다");
+    }
+    return '<div class="box"><h4>영상 생성 방식</h4><div style="font-size:13.5px;line-height:1.6"><b>480p 드래프트</b>로 만듭니다. 만든 시점부터 <b>5일 안에 확정</b>되면 <b>1080p로 업그레이드</b>합니다.</div><div class="msg">' + line + "</div></div>";
+  }
+
+  // ── Head 가 백단에서 한 것 전부 (option3_reports · 관리자 전용) — 항목마다 접었다 편다 ──
+  function secHtml(x, i) {
+    var pts = (x.points || []).map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("");
+    var tb = x.table && x.table.rows ? '<div class="tbw"><table><thead><tr>' + (x.table.head || []).map(function (h) { return "<th>" + esc(h) + "</th>"; }).join("") + "</tr></thead><tbody>" +
+      x.table.rows.map(function (r) { return "<tr>" + r.map(function (c) { return "<td>" + esc(c) + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody></table></div>" : "";
+    var code = x.code ? "<pre>" + esc(x.code) + "</pre>" : "";
+    var src = (x.sources || []).map(function (u) { return '<li><a href="' + esc(u.u) + '" target="_blank" rel="noopener">' + esc(u.t || u.u) + "</a></li>"; }).join("");
+    var media = (x.media || []).map(function (m) { return /\.mp4|\.webm/i.test(m.u) ? '<video src="' + esc(m.u) + '" controls preload="none"></video>' : '<a href="' + esc(m.u) + '" target="_blank" rel="noopener"><img loading="lazy" src="' + esc(m.u) + '" alt=""></a>'; }).join("");
+    return '<details class="rsec"' + (i === 0 ? " open" : "") + "><summary><b>" + esc(x.title) + "</b>" + (x.summary ? "<span>" + esc(x.summary) + "</span>" : "") + "</summary><div class=\"rbody\">" +
+      (x.body ? "<p>" + esc(x.body).replace(/\n/g, "<br>") + "</p>" : "") + (pts ? "<ul>" + pts + "</ul>" : "") + tb + code +
+      (media ? '<div class="rmedia">' + media + "</div>" : "") + (src ? '<div class="rsrc"><b>출처</b><ul>' + src + "</ul></div>" : "") + "</div></details>";
+  }
+  function reportHtml(r) {
+    var o = r.o3 || {}, rp = r.report;
+    if (o.status !== "submitted") return "";
+    if (!rp || !(rp.sections || []).length) return '<div class="rep"><div class="rep-h"><h3>Head 분석·작업 기록</h3></div><div class="msg">생성 요청을 받았습니다 — Head가 시장 조사부터 시작합니다. 준비되는 대로 여기에 올라옵니다.</div></div>';
+    var log = (rp.log || []).map(function (l) { return "<tr><td>" + esc(when(l.at)) + "</td><td>" + esc(l.by || "Head") + "</td><td>" + esc(l.what) + "</td></tr>"; }).join("");
+    var secs = rp.sections.slice();
+    if (log) secs.push({ title: "작업 기록", summary: (rp.log || []).length + "건", _log: log });
+    return '<div class="rep"><div class="rep-h"><h3>Head 분석·작업 기록</h3><span class="msg">' + (rp.made_at ? "갱신 " + esc(when(rp.made_at)) : "") + '</span><button type="button" class="btn3" data-allopen>모두 펼치기</button><button type="button" class="btn3" data-allclose>모두 접기</button></div>' +
+      secs.map(function (x, i) { return x._log ? '<details class="rsec"><summary><b>작업 기록</b><span>' + esc(x.summary) + '</span></summary><div class="rbody tbw"><table><thead><tr><th>언제</th><th>누가</th><th>무엇을</th></tr></thead><tbody>' + x._log + "</tbody></table></div></details>" : secHtml(x, i); }).join("") + "</div>";
+  }
+
   function card(r) {
     var o = r.o3 || {}, st = status(r), stage = Math.max(0, +o.stage || 0);
     var badge = st === "draft" ? '<span class="bd draft">작성 중 · ' + (o.step || 1) + "단계</span>"
@@ -29,7 +65,7 @@
     var stg = STAGES.map(function (s, i) {
       return '<button type="button" data-stage="' + i + '" data-pid="' + r.id + '" class="' + (st === "draft" ? "" : i < stage ? "done" : i === stage ? "now" : "") + '"' + (CAN && st !== "draft" ? "" : " disabled") + ">" + s + "</button>";
     }).join("");
-    return '<details class="card' + (st === "submitted" ? " sub" : "") + '"' + (st === "submitted" ? " open" : "") + "><summary>" +
+    return '<details class="card' + (st === "submitted" ? " sub" : "") + '" data-slug="' + esc(r.slug) + '"><summary>' +
       '<div class="nm"><b>' + esc(o.brand || r.brand) + "</b> · " + esc(o.product || r.product) + "<small>" + esc(r.slug) + " · 만든 때 " + when(r.created_at) + (o.submitted_at ? " · 요청 " + when(o.submitted_at) : "") + "</small></div>" +
       '<div class="badges">' + badge + (r.test_label ? '<span class="bd test">' + esc(r.test_label) + "</span>" : "") + "</div></summary>" +
       '<div class="body"><div class="grid2"><dl class="kv">' +
@@ -40,11 +76,9 @@
       '</dl><div style="display:grid;gap:12px;align-content:start">' +
       '<div class="box"><h4>진행 단계 — 누르면 광고주 화면의 예상 시간이 바뀝니다</h4><div class="stg">' + stg + "</div>" +
       (o.stage_at ? '<div class="msg">' + when(o.stage_at) + " 변경</div>" : "") + "</div>" +
-      '<div class="box"><h4>Head 조사·기획 보고 페이지</h4><div class="row"><input type="url" data-report="' + r.id + '" value="' + esc(o.report_url || "") + '" placeholder="보고 페이지 주소"' + (CAN ? "" : " disabled") + '><button type="button" class="btn3" data-save-report="' + r.id + '"' + (CAN ? "" : " disabled") + ">저장</button></div>" +
-      (o.report_url ? '<a class="btn3 hot" href="' + esc(o.report_url) + '" target="_blank" rel="noopener">보고 열기 ↗</a>' : '<div class="msg">생성 요청이 오면 Head 가 시장 조사·기획·프롬프트 초안을 만들어 여기에 붙입니다.</div>') +
-      '<div class="msg" data-msg="' + r.id + '"></div></div>' +
+      draftBox(o) +
       '<div class="links"><a class="btn3" href="new3.html?p=' + encodeURIComponent(r.slug) + '" target="_blank" rel="noopener">광고주 화면 보기 ↗</a></div>' +
-      "</div></div></div></details>";
+      "</div></div>" + reportHtml(r) + "</div></details>";
   }
 
   function render() {
@@ -94,10 +128,23 @@
         return db.from("briefs").select("project_id,option3").in("project_id", rows.map(function (x) { return x.id; })).then(function (b) {
           var m = {}; (b.data || []).forEach(function (x) { m[x.project_id] = x.option3 || {}; });
           rows.forEach(function (x) { x.o3 = m[x.id] || {}; });
+          return db.from("option3_reports").select("project_id,report").in("project_id", rows.map(function (x) { return x.id; }));
+        }).then(function (rr) {
+          var m2 = {}; ((rr && rr.data) || []).forEach(function (x) { m2[x.project_id] = x.report; });
+          rows.forEach(function (x) { x.report = m2[x.id] || null; });
           rows.sort(function (a, b) { return (b.o3.submitted_at || b.created_at) > (a.o3.submitted_at || a.created_at) ? 1 : -1; });
           return photos(rows);
         });
-      }).then(render);
+      }).then(function () {
+        render();
+        // 텔레그램 링크(desk.html?p=건) — 그 건만 펼치고 그 자리로
+        var want = new URLSearchParams(location.search).get("p");
+        if (want) {
+          var c = el("list").querySelector('[data-slug="' + want.replace(/"/g, "") + '"]');
+          if (!c && rows.some(function (x) { return x.slug === want && x.test_label; })) { el("hideTest").checked = false; try { localStorage.setItem("desk_hide_test", "0"); } catch (e) {} render(); c = el("list").querySelector('[data-slug="' + want.replace(/"/g, "") + '"]'); }
+          if (c) { c.open = true; c.scrollIntoView({ block: "start" }); }
+        }
+      });
   }
 
   function wire() {
@@ -110,6 +157,8 @@
     el("hideTest").checked = hideTest();
     el("hideTest").addEventListener("change", function () { try { localStorage.setItem("desk_hide_test", el("hideTest").checked ? "1" : "0"); } catch (e) {} render(); });
     el("list").addEventListener("click", function (e) {
+      var ao = e.target.closest("[data-allopen],[data-allclose]");
+      if (ao) { var open = ao.hasAttribute("data-allopen"); ao.closest(".rep").querySelectorAll(".rsec").forEach(function (d) { d.open = open; }); return; }
       var s = e.target.closest("[data-stage]");
       if (s && !s.disabled) { e.preventDefault(); patch(s.dataset.pid, { stage: +s.dataset.stage, stage_at: new Date().toISOString() }).catch(function (x) { alert(x.message || x); }); return; }
       var v = e.target.closest("[data-save-report]");
