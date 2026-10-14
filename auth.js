@@ -33,16 +33,16 @@
     slot.innerHTML =
       '<a class="acct-em" href="login.html" title="' + esc(user.email) + '">' +
       esc(label) + "</a>" +
-      (isAdmin ? '<a class="btn ghost" href="admin.html">관리자</a>' : "") +
+      (isAdmin ? '<a class="btn ghost" href="desk.html">관리자</a>' : "") +
       '<button class="btn ghost" type="button" id="acctOut">로그아웃</button>';
 
     document.getElementById("acctOut").addEventListener("click", function () {
       db.auth.signOut().then(function () {
         // 로그인해야만 볼 수 있는 화면에 있었다면 첫 화면으로 보낸다
         var here = location.pathname.split("/").pop();
-        location.href = (here === "admin.html" || here === "new.html")
+        location.href = (["admin.html", "new.html", "new3.html", "desk.html"].indexOf(here) >= 0)
           ? "index.html" : location.href;
-        if (here !== "admin.html" && here !== "new.html") location.reload();
+        if (["admin.html", "new.html", "new3.html", "desk.html"].indexOf(here) < 0) location.reload();
       });
     });
   }

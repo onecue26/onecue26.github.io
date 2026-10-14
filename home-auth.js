@@ -20,14 +20,14 @@
   function loggedIn(user, prof) {
     var admin = !!(prof && prof.is_admin);
     var name = (prof && prof.name) || String(user.email || "").split("@")[0];
-    var work = admin ? { href: "admin.html", label: "제작 관리" } : { href: "studio.html", label: "내 프로젝트" };
+    var work = admin ? { href: "desk.html", label: "제작 관리" } : { href: "studio.html", label: "내 프로젝트" };
     slot.innerHTML =
       '<a class="header-cta" href="' + work.href + '">' + work.label + ' <i data-lucide="arrow-right" aria-hidden="true"></i></a>' +
       '<details class="acct-menu"><summary aria-label="계정 메뉴"><span class="acct-dot" aria-hidden="true">' +
       esc(name.slice(0, 1).toUpperCase()) + '</span><span class="acct-name">' + esc(name) + "</span></summary>" +
       '<div class="acct-pop" role="menu"><div class="acct-who"><b>' + esc(name) + "</b><small>" + esc(user.email) + "</small></div>" +
       (admin ? '<a role="menuitem" href="studio.html">광고주 화면 목록</a>' : "") +
-      '<a role="menuitem" href="new.html">새 제작 의뢰</a>' +
+      '<a role="menuitem" href="new3.html">새 제작 의뢰</a>' +
       '<button role="menuitem" type="button" id="hdrOut">로그아웃</button></div></details>';
     // 메뉴 밖을 누르면 닫는다
     document.addEventListener("click", function (e) {
