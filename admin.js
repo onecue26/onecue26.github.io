@@ -5690,6 +5690,7 @@
       //   안 뜬다 — 계획이 언제 손봐졌는지를 모르니 늘 「아직」이 되고,
       //   다시 뽑기 버튼이 계속 잠긴 채로 남는다. 화면이 쓰는 칸은
       //   반드시 조회에 있어야 한다.
+      .or("production_track.is.null,production_track.neq.option3")   // 10-14 Dan 「예전 것과 아예 분리」 — 옵션 3 건은 새 제작 관리(desk.html)에서만
       .order("created_at", { ascending: false })
       .then(function (r) {
         if (r.error) { setConn("bad", "불러오기 실패"); return; }

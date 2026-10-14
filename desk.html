@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>제작 관리 — ONECUE</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="style.css?v=1f228d76">
+<link rel="stylesheet" href="studio.css?v=3"><script defer src="studio-shell.js?v=6"></script>
+<link rel="stylesheet" href="brand.css?v=red1"><link rel="stylesheet" href="skin-v2.css?v=13">
+<style>
+/* 제작 관리 — 옵션 3 새 의뢰만 (Dan 10-14 「예전 것과 아예 분리」). 옛 건은 제작 관리 · old(admin.html) */
+.dk{max-width:1100px;display:grid;gap:18px;word-break:keep-all;overflow-wrap:anywhere}
+.dk-head{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap}
+.dk-head .eb{font-family:var(--mono2);font-size:12px;letter-spacing:.14em;color:var(--accent)}
+.dk-head h1{margin:4px 0 0;font-size:30px}
+.dk-head p{margin:4px 0 0;color:var(--muted);font-size:14px}
+.dk-flow{display:flex;gap:6px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.dk-flow span{border:1px solid var(--rule);border-radius:999px;padding:4px 10px}
+.dk-flow span b{color:var(--accent);font-family:var(--mono2);margin-right:4px}
+.dk-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.dk-tools button{font:inherit;font-size:13.5px;font-weight:700;border:1px solid var(--rule);background:var(--panel);color:var(--muted);border-radius:999px;padding:8px 14px;cursor:pointer}
+.dk-tools button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.dk-tools label{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center;margin-left:auto}
+.dk-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.dk-stats div{border:1px solid var(--rule);border-radius:12px;background:var(--panel);padding:12px 14px}
+.dk-stats span{font-size:12px;color:var(--muted)}
+.dk-stats b{display:block;font-size:26px;font-variant-numeric:tabular-nums}
+@media(max-width:600px){.dk-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.card{border:1px solid var(--rule);border-radius:14px;background:var(--panel);overflow:hidden}
+.card.sub{border-left:4px solid var(--accent)}
+.card summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:14px 16px;align-items:center}
+.card summary::-webkit-details-marker{display:none}
+.card .nm b{font-size:16px}
+.card .nm small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.badges{display:flex;gap:6px;flex-wrap:wrap;justify-content:end}
+.bd{font-size:12px;font-weight:700;border-radius:999px;padding:4px 10px;border:1px solid var(--rule);color:var(--muted);white-space:nowrap}
+.bd.sub{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.bd.draft{color:var(--hold);border-color:var(--hold)}
+.bd.test{color:var(--faint);border-style:dashed}
+.body{border-top:1px solid var(--rule);padding:16px;display:grid;gap:16px}
+.grid2{display:grid;gap:16px}
+@media(min-width:900px){.grid2{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}}
+.kv{display:grid;grid-template-columns:96px minmax(0,1fr);gap:8px 12px;font-size:14px;align-content:start}
+.kv dt{color:var(--muted);font-size:13px;letter-spacing:normal;font-family:var(--sans2);text-transform:none}
+.kv dd{margin:0}
+.kv dd.miss{color:var(--faint)}
+.ph{display:flex;gap:8px;flex-wrap:wrap}
+.ph a{display:block;width:92px;height:92px;border-radius:9px;overflow:hidden;border:1px solid var(--rule);background:var(--sunk);position:relative}
+.ph img{width:100%;height:100%;object-fit:cover}
+.ph span{position:absolute;left:4px;bottom:4px;font-size:10px;font-family:var(--mono2);background:rgba(13,13,14,.8);padding:1px 5px;border-radius:5px}
+.box{border:1px solid var(--rule);border-radius:12px;padding:14px;display:grid;gap:10px;background:var(--sunk)}
+.box h4{margin:0;font-size:13px;color:var(--muted)}
+.stg{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px}
+.stg button{font:inherit;font-size:12px;border:1px solid var(--rule);background:var(--panel);color:var(--muted);border-radius:8px;padding:8px 2px;cursor:pointer}
+.stg button.done{color:var(--ink);border-color:rgba(215,255,58,.45)}
+.stg button.now{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+.stg button:disabled{cursor:default}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.row input{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--rule);border-radius:9px;background:var(--panel);color:var(--ink);font:inherit;font-size:14px}
+.btn3{font:inherit;font-size:13.5px;font-weight:700;border-radius:999px;padding:9px 14px;border:1px solid var(--rule);background:var(--panel);color:var(--ink);cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn3.hot{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.links{display:flex;gap:8px;flex-wrap:wrap}
+.msg{font-size:12.5px;color:var(--muted);min-height:16px}
+.empty{border:1px dashed var(--rule);border-radius:14px;padding:30px;text-align:center;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="topbar-in">
+  <a class="mark" href="index.html"><span class="lamp"></span>onecue</a>
+  <div class="spacer"></div>
+  <span class="acct" id="acct"></span>
+</div></div>
+<main>
+<div class="dk">
+  <div class="dk-head">
+    <div><div class="eb">PRODUCTION DESK · 옵션 3</div><h1>제작 관리</h1>
+      <p>옵션 3 새 의뢰만 모았습니다. 옛 의뢰(옵션 1·2)는 왼쪽 「제작 관리 · old」에 있습니다.</p></div>
+    <div class="dk-flow"><span><b>1</b>광고주 입력·생성 요청</span><span><b>2</b>Head 조사·기획 보고</span><span><b>3</b>Dan 확인</span><span><b>4</b>생성·검수·완성</span></div>
+  </div>
+  <div class="dk-stats">
+    <div><span>전체</span><b id="sAll">—</b></div>
+    <div><span>생성 요청</span><b id="sSub">—</b></div>
+    <div><span>작성 중</span><b id="sDraft">—</b></div>
+    <div><span>완성</span><b id="sDone">—</b></div>
+  </div>
+  <div class="dk-tools" id="tools">
+    <button type="button" data-f="all" class="on">전체</button>
+    <button type="button" data-f="submitted">생성 요청</button>
+    <button type="button" data-f="draft">작성 중</button>
+    <label><input type="checkbox" id="hideTest"> 시험 건 숨기기</label>
+  </div>
+  <div id="list"><div class="empty">불러오는 중…</div></div>
+</div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js?v=o3b"></script>
+<script src="auth.js?v=o3b"></script>
+<script src="desk.js?v=o3b"></script>
+</body>
+</html>

@@ -17,5 +17,5 @@ window.ONECUE = {
   //   "old"     = 옛 의뢰(new.html) — 지금 광고주가 쓰는 화면
   //   "option3" = 옵션 3 새 의뢰(new3.html) — Dan 확인 뒤 바꾼다
   //   관리자는 값과 상관없이 둘 다 본다(옛 것은 「old」 표시). 옛 화면·데이터는 지우지 않는다 — 이 값만 되돌리면 복구된다.
-  flags: { clientNewFlow: "old" },
+  flags: { clientNewFlow: "option3" },   // 10-14 Dan 「새 프로젝트를 옵션 3로 · 예전 것과 아예 분리」
 };
