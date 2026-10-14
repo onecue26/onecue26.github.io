@@ -13,4 +13,9 @@ window.ONECUE = {
     "eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJreWhqZHp4c2hmdGd5dHl6dXRxIiwicm9sZSI6" +
     "ImFub24iLCJpYXQiOjE3ODg0MTU3MTksImV4cCI6MjEwMzk5MTcxOX0." +
     "4HW45rvLv5G5cTYcVssAXYmyP8qQTv-9bsI0WkwZnhI",
+  // 10-14 — 광고주 「새 프로젝트」가 어느 의뢰 화면으로 가나 (Dan 「숨겨만 놓고 내가 요구하면 활성화」)
+  //   "old"     = 옛 의뢰(new.html) — 지금 광고주가 쓰는 화면
+  //   "option3" = 옵션 3 새 의뢰(new3.html) — Dan 확인 뒤 바꾼다
+  //   관리자는 값과 상관없이 둘 다 본다(옛 것은 「old」 표시). 옛 화면·데이터는 지우지 않는다 — 이 값만 되돌리면 복구된다.
+  flags: { clientNewFlow: "old" },
 };
