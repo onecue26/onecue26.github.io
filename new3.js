@@ -281,7 +281,6 @@
     if (st === STAGES.length - 1) remMin = 0;
     var dd = Math.floor(remMin / 1440), hh = Math.floor(remMin % 1440 / 60), mm = Math.floor(remMin % 60);
     el("eta").textContent = remMin ? "약 " + (dd ? dd + "일 " : "") + hh + "시간 " + mm + "분" : "완성됐습니다";
-    el("stages").innerHTML = STAGES.map(function (s, i) { return '<span class="' + (i < st ? "done" : i === st ? "now" : "") + '">' + s[0] + "</span>"; }).join("");
     el("cEmail").textContent = ME.email || "—";
     db.from("contacts").select("phone").eq("project_id", S.pid).not("phone", "is", null).limit(1).then(function (r) {
       var ph = (r.data && r.data[0] && r.data[0].phone) || (ME.user_metadata || {}).phone;
