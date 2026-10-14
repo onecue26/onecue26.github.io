@@ -89,6 +89,17 @@
     el("sDraft").textContent = base.filter(function (r) { return status(r) === "draft"; }).length;
     el("sDone").textContent = base.filter(function (r) { return status(r) === "done"; }).length;
     var show = base.filter(function (r) { return filter === "all" || status(r) === filter; });
+    // 10-15 Dan 「새로고침 꼭 해야 해?」 — 30초마다 다시 그려도 펼쳐 둔 카드·항목은 그대로
+    var openCards = {}, openSecs = {};
+    el("list").querySelectorAll("details.card[open]").forEach(function (d) { openCards[d.dataset.slug] = 1; });
+    el("list").querySelectorAll("details.card .rsec").forEach(function (d) { var c = d.closest("details.card"); openSecs[c.dataset.slug + "|" + d.querySelector("summary b").textContent] = d.open; });
+    var restore = function () {
+      el("list").querySelectorAll("details.card").forEach(function (d) {
+        if (openCards[d.dataset.slug]) d.open = true;
+        d.querySelectorAll(".rsec").forEach(function (x) { var k = d.dataset.slug + "|" + x.querySelector("summary b").textContent; if (k in openSecs) x.open = openSecs[k]; });
+      });
+    };
+    setTimeout(restore, 0);
     el("list").innerHTML = show.length ? '<div style="display:grid;gap:10px">' + show.map(card).join("") + "</div>"
       : '<div class="empty">표시할 의뢰가 없습니다.</div>';
   }
@@ -103,23 +114,25 @@
   }
 
   // 사진 — 서명 주소는 한 번 받아 쓴다(전송량 · 09-29)
+  var PH = {};   // 사진 id → {url,w,h} — 한 번 받은 서명 주소는 다시 받지 않는다(30초 갱신 · 전송량)
   function photos(list) {
     var ids = [], byId = {};
-    list.forEach(function (r) { ((r.o3 || {}).photos || []).forEach(function (id) { ids.push(id); }); });
-    if (!ids.length) return Promise.resolve();
+    var put = function () { list.forEach(function (r) { r.photos = ((r.o3 || {}).photos || []).map(function (id) { return PH[id] || null; }).filter(Boolean); }); };
+    list.forEach(function (r) { ((r.o3 || {}).photos || []).forEach(function (id) { if (!PH[id]) ids.push(id); }); });
+    if (!ids.length) { put(); return Promise.resolve(); }
     return db.from("assets").select("id,storage_path,meta").in("id", ids).then(function (a) {
       var rs = a.data || [];
       rs.forEach(function (x) { byId[x.id] = x; });
       return db.storage.from("uploads").createSignedUrls(rs.map(function (x) { return x.storage_path; }), 6 * 3600);
     }).then(function (s) {
       var u = {}; ((s && s.data) || []).forEach(function (x) { u[x.path] = x.signedUrl; });
-      list.forEach(function (r) {
-        r.photos = ((r.o3 || {}).photos || []).map(function (id) { var x = byId[id]; return x ? { url: u[x.storage_path], w: (x.meta || {}).w, h: (x.meta || {}).h } : null; }).filter(Boolean);
-      });
+      Object.keys(byId).forEach(function (id) { var x = byId[id]; PH[id] = { url: u[x.storage_path], w: (x.meta || {}).w, h: (x.meta || {}).h }; });
+      put();
     });
   }
 
-  function load() {
+  var SIG = "";
+  function load(first) {
     return db.from("projects").select("id,slug,brand,product,created_at,updated_at,test_label").eq("production_track", "option3").order("created_at", { ascending: false })
       .then(function (r) {
         if (r.error) throw r.error;
@@ -136,7 +149,11 @@
           return photos(rows);
         });
       }).then(function () {
+        var sig = JSON.stringify(rows.map(function (x) { return [x.id, x.test_label, x.o3, x.report]; }));
+        if (sig === SIG) return;
+        SIG = sig;
         render();
+        if (!first) return;
         // 텔레그램 링크(desk.html?p=건) — 그 건만 펼치고 그 자리로
         var want = new URLSearchParams(location.search).get("p");
         if (want) {
@@ -180,7 +197,10 @@
         if (!p.data || !p.data.is_admin) { el("list").innerHTML = '<div class="empty">관리자만 볼 수 있습니다.</div>'; return; }
         CAN = !!p.data.admin_can_write;
         wire();
-        return load();
+        // 화면에 보이는 동안 30초마다 새 의뢰·분석을 다시 불러온다
+        setInterval(function () { if (document.visibilityState === "visible") load(false).catch(function () {}); }, 30000);
+        document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") load(false).catch(function () {}); });
+        return load(true);
       });
     }).catch(function (e) { el("list").innerHTML = '<div class="empty">불러오지 못했습니다 — ' + esc(e.message || e) + "</div>"; });
   }
