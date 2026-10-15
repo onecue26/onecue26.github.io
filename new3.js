@@ -279,8 +279,11 @@
     var nextRem = st + 1 < STAGES.length ? STAGES[st + 1][1] : 0;
     var remMin = Math.max(STAGES[st][1] * 60 - (Date.now() - since) / 60000, nextRem * 60 + 30);
     if (st === STAGES.length - 1) remMin = 0;
+    // 검수 단계에서 예상 시간이 지나면 「30분」에 멈춰 있지 않게 — 실제 상태를 쓴다(10-15)
+    var over = STAGES[st][1] * 60 - (Date.now() - since) / 60000 <= nextRem * 60 + 30;
     var dd = Math.floor(remMin / 1440), hh = Math.floor(remMin % 1440 / 60), mm = Math.floor(remMin % 60);
-    el("eta").textContent = remMin ? "약 " + (dd ? dd + "일 " : "") + hh + "시간 " + mm + "분" : "완성됐습니다";
+    el("eta").textContent = !remMin ? "완성됐습니다" : (over && st >= 4) ? "마지막 확인 중입니다. 끝나면 바로 알려 드립니다"
+      : "약 " + (dd ? dd + "일 " : "") + hh + "시간 " + mm + "분";
     el("cEmail").textContent = ME.email || "—";
     db.from("contacts").select("phone").eq("project_id", S.pid).not("phone", "is", null).limit(1).then(function (r) {
       var ph = (r.data && r.data[0] && r.data[0].phone) || (ME.user_metadata || {}).phone;
