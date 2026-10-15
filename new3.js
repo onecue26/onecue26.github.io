@@ -284,6 +284,20 @@
     var dd = Math.floor(remMin / 1440), hh = Math.floor(remMin % 1440 / 60), mm = Math.floor(remMin % 60);
     el("eta").textContent = !remMin ? "완성됐습니다" : (over && st >= 4) ? "마지막 확인 중입니다. 끝나면 바로 알려 드립니다"
       : "약 " + (dd ? dd + "일 " : "") + hh + "시간 " + mm + "분";
+    // 완성본(관리자가 승인해 올린 final) — 있으면 영상·내려받기를 보여 준다(10-15 옵션 3 납품 경로)
+    db.from("assets").select("storage_path,created_at").eq("project_id", S.pid).eq("kind", "final").eq("approved", true)
+      .order("created_at", { ascending: false }).limit(1).then(function (r) {
+        var a = r.data && r.data[0];
+        if (!a) return;
+        Promise.all([db.storage.from("uploads").createSignedUrl(a.storage_path, 3600),
+                     db.storage.from("uploads").createSignedUrl(a.storage_path, 3600, { download: true })]).then(function (u) {
+          if (!u[0].data) return;
+          el("finalVid").src = u[0].data.signedUrl;
+          el("finalDl").href = (u[1].data || u[0].data).signedUrl;
+          el("finalBox").hidden = false; el("etaBox").hidden = true;
+          el("doneBusy").textContent = "완성"; el("doneTitle").textContent = "영상이 완성됐어요";
+        });
+      });
     el("cEmail").textContent = ME.email || "—";
     db.from("contacts").select("phone").eq("project_id", S.pid).not("phone", "is", null).limit(1).then(function (r) {
       var ph = (r.data && r.data[0] && r.data[0].phone) || (ME.user_metadata || {}).phone;
