@@ -261,10 +261,15 @@
   <section class="w3-step" data-step="6">
     <div class="done3">
       <div class="pulse"><i></i></div>
-      <span class="busy">영상 제작 진행 중</span>
-      <h2>효과를 극대화한 영상을 생성하고 있어요</h2>
+      <span class="busy" id="doneBusy">영상 제작 진행 중</span>
+      <h2 id="doneTitle">효과를 극대화한 영상을 생성하고 있어요</h2>
       <p>완성되면 입력하신 연락처(문자 · 알림톡)로 알려 드려요.</p>
-      <div class="card3">
+      <div class="card3" id="finalBox" hidden>
+        <h3>완성 영상</h3>
+        <video id="finalVid" controls playsinline preload="metadata" style="width:100%;max-height:70vh;border-radius:10px;background:#000"></video>
+        <a class="b3" id="finalDl" href="#" style="padding:11px">영상 내려받기</a>
+      </div>
+      <div class="card3" id="etaBox">
         <h3>예상 소요 시간</h3>
         <div class="eta" id="eta">—</div>
       </div>
