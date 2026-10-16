@@ -52,15 +52,15 @@
       var vid = (v.media || []).filter(function (m) { return /\.mp4|\.webm/i.test(m.u); })[0];
       var ins = (v.inputs || []).map(function (m) { return '<a href="' + esc(m.u) + '" target="_blank" rel="noopener" title="' + esc(m.t || "") + '"><img loading="lazy" src="' + esc(m.u) + '" alt="' + esc(m.t || "") + '" style="width:64px;height:64px;object-fit:cover;border-radius:6px"></a>'; }).join(" ");
       var blk = (v.blocks || []).map(function (b) { return "<li>" + esc(b) + "</li>"; }).join("");
-      return '<div style="border:1px solid #d9dedb;border-radius:10px;padding:12px;min-width:0;background:#fff">' +
+      return '<div style="border:1px solid #d9dedb;border-radius:10px;padding:12px;min-width:0;background:#fff;color:#1d2321">' +
         '<div style="display:flex;gap:8px;align-items:baseline;flex-wrap:wrap"><b style="font-size:16px">' + esc(v.v) + '</b><span class="bd' + (v.status === "done" ? "" : " sub") + '">' + esc(VST[v.status] || v.status || "") + "</span>" +
-        '<span class="msg">' + esc(v.aspect || "") + (v.credits != null ? " · " + esc(v.credits) + "cr" : "") + "</span></div>" +
+        '<span style="color:#5f6a66;font-size:13px">' + esc(v.aspect || "") + (v.credits != null ? " · " + esc(v.credits) + "cr" : "") + "</span></div>" +
         '<div style="font-size:13.5px;margin:6px 0">' + esc(v.method || "") + "</div>" +
-        (vid ? '<video src="' + esc(vid.u) + '" controls preload="none" style="width:100%;border-radius:8px;background:#000"></video>' : '<div class="msg">영상 없음</div>') +
-        (ins ? '<div style="margin-top:8px"><div class="msg">넣은 그림</div>' + ins + "</div>" : "") +
+        (vid ? '<video src="' + esc(vid.u) + '" controls preload="none" style="width:100%;border-radius:8px;background:#000"></video>' : '<div style="color:#5f6a66">영상 없음</div>') +
+        (ins ? '<div style="margin-top:8px"><div style="color:#5f6a66;font-size:12.5px">넣은 그림</div>' + ins + "</div>" : "") +
         (v.note ? '<div style="font-size:13px;margin-top:8px;line-height:1.5">' + esc(v.note) + "</div>" : "") +
-        (blk ? '<div style="margin-top:6px"><div class="msg">꼭 막을 것 5개</div><ul style="margin:2px 0 0 16px;font-size:12.5px">' + blk + "</ul></div>" : "") +
-        (v.prompt ? '<details style="margin-top:8px"><summary style="cursor:pointer;font-size:13px">프롬프트 원문</summary><pre style="white-space:pre-wrap;font-size:12px">' + esc(v.prompt) + "</pre></details>" : "") +
+        (blk ? '<div style="margin-top:6px"><div style="color:#5f6a66;font-size:12.5px">꼭 막을 것 5개</div><ul style="margin:2px 0 0 16px;padding:0;font-size:12.5px">' + blk + "</ul></div>" : "") +
+        (v.prompt ? '<details style="margin-top:8px"><summary style="cursor:pointer;font-size:13px;color:#1f6f5c">프롬프트 원문</summary><pre style="white-space:pre-wrap;font-size:12px;background:#f3f4f2;color:#1d2321;padding:8px;border-radius:6px">' + esc(v.prompt) + "</pre></details>" : "") +
         "</div>";
     }).join("");
     return '<div class="rep"><div class="rep-h"><h3>버전 비교</h3><span class="msg">같은 제품 · 방식별 실험</span></div>' +
