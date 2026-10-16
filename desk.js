@@ -43,9 +43,39 @@
       (x.body ? "<p>" + esc(x.body).replace(/\n/g, "<br>") + "</p>" : "") + (pts ? "<ul>" + pts + "</ul>" : "") + tb + code +
       (media ? '<div class="rmedia">' + media + "</div>" : "") + (src ? '<div class="rsrc"><b>출처</b><ul>' + src + "</ul></div>" : "") + "</div></details>";
   }
+  // ── 버전 비교 (Dan 10-16 「v1·v2·v3 진행 상황과 결과를 관리자 화면에서」) — report.variants 를 판마다 나란히 ──
+  var VST = { prep: "준비 중", wait: "Dan 확인 대기", gen: "생성 중", done: "완료", fail: "실패" };
+  function variantsHtml(rp) {
+    var vs = (rp && rp.variants) || [];
+    if (!vs.length) return "";
+    var cells = vs.map(function (v) {
+      var vid = (v.media || []).filter(function (m) { return /\.mp4|\.webm/i.test(m.u); })[0];
+      var ins = (v.inputs || []).map(function (m) { return '<a href="' + esc(m.u) + '" target="_blank" rel="noopener" title="' + esc(m.t || "") + '"><img loading="lazy" src="' + esc(m.u) + '" alt="' + esc(m.t || "") + '" style="width:64px;height:64px;object-fit:cover;border-radius:6px"></a>'; }).join(" ");
+      var blk = (v.blocks || []).map(function (b) { return "<li>" + esc(b) + "</li>"; }).join("");
+      return '<div style="border:1px solid #d9dedb;border-radius:10px;padding:12px;min-width:0;background:#fff">' +
+        '<div style="display:flex;gap:8px;align-items:baseline;flex-wrap:wrap"><b style="font-size:16px">' + esc(v.v) + '</b><span class="bd' + (v.status === "done" ? "" : " sub") + '">' + esc(VST[v.status] || v.status || "") + "</span>" +
+        '<span class="msg">' + esc(v.aspect || "") + (v.credits != null ? " · " + esc(v.credits) + "cr" : "") + "</span></div>" +
+        '<div style="font-size:13.5px;margin:6px 0">' + esc(v.method || "") + "</div>" +
+        (vid ? '<video src="' + esc(vid.u) + '" controls preload="none" style="width:100%;border-radius:8px;background:#000"></video>' : '<div class="msg">영상 없음</div>') +
+        (ins ? '<div style="margin-top:8px"><div class="msg">넣은 그림</div>' + ins + "</div>" : "") +
+        (v.note ? '<div style="font-size:13px;margin-top:8px;line-height:1.5">' + esc(v.note) + "</div>" : "") +
+        (blk ? '<div style="margin-top:6px"><div class="msg">꼭 막을 것 5개</div><ul style="margin:2px 0 0 16px;font-size:12.5px">' + blk + "</ul></div>" : "") +
+        (v.prompt ? '<details style="margin-top:8px"><summary style="cursor:pointer;font-size:13px">프롬프트 원문</summary><pre style="white-space:pre-wrap;font-size:12px">' + esc(v.prompt) + "</pre></details>" : "") +
+        "</div>";
+    }).join("");
+    return '<div class="rep"><div class="rep-h"><h3>버전 비교</h3><span class="msg">같은 제품 · 방식별 실험</span></div>' +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px">' + cells + "</div>" +
+      (rp.variants_verdict ? '<div class="msg" style="margin-top:10px">' + esc(rp.variants_verdict) + "</div>" : "") + "</div>";
+  }
   function reportHtml(r) {
     var o = r.o3 || {}, rp = r.report;
     if (o.status !== "submitted") return "";
+    var vh = variantsHtml(rp);
+    if (vh) return vh + reportHtmlInner(r);
+    return reportHtmlInner(r);
+  }
+  function reportHtmlInner(r) {
+    var o = r.o3 || {}, rp = r.report;
     if (!rp || !(rp.sections || []).length) return '<div class="rep"><div class="rep-h"><h3>Head 분석·작업 기록</h3></div><div class="msg">생성 요청을 받았습니다 — Head가 시장 조사부터 시작합니다. 준비되는 대로 여기에 올라옵니다.</div></div>';
     var log = (rp.log || []).map(function (l) { return "<tr><td>" + esc(when(l.at)) + "</td><td>" + esc(l.by || "Head") + "</td><td>" + esc(l.what) + "</td></tr>"; }).join("");
     var secs = rp.sections.slice();
