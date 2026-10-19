@@ -84,6 +84,20 @@
       secs.map(function (x, i) { return x._log ? '<details class="rsec"><summary><b>작업 기록</b><span>' + esc(x.summary) + '</span></summary><div class="rbody tbw"><table><thead><tr><th>언제</th><th>누가</th><th>무엇을</th></tr></thead><tbody>' + x._log + "</tbody></table></div></details>" : secHtml(x, i); }).join("") + "</div>";
   }
 
+  // 10-19 Dan 「펼쳤을 때 납품 전에 검수받는 영상이 뜨면 맨 위로 — 내려서 메뉴 찾아 보기 힘들게 하지 말고」
+  //   report.review_request {video, note, at} 가 있으면 그것, 없으면 분석 항목 중 가장 최근 영상(mp4)을 카드 맨 위에
+  function reviewTop(r) {
+    var rp = r.report || {}, rq = rp.review_request, v = rq && rq.video, note = rq && rq.note;
+    if (!v) {
+      (rp.sections || []).forEach(function (x) { (x.media || []).forEach(function (m) { if (/\.mp4|\.webm/i.test(m.u)) v = m.u; }); });
+      if (!v) return "";
+      note = "분석 기록에 올라온 가장 최근 영상";
+    }
+    return '<div class="box" style="border:2px solid #d4ff3a;margin-bottom:12px"><h4>납품 전 확인 요청' + (rq && rq.at ? " · " + esc(when(rq.at)) : "") + '</h4>' +
+      '<video src="' + esc(v) + '" controls playsinline preload="metadata" style="width:100%;max-height:70vh;background:#000;border-radius:8px"></video>' +
+      (note ? '<div class="msg" style="margin-top:6px">' + esc(note) + "</div>" : "") + "</div>";
+  }
+
   function card(r) {
     var o = r.o3 || {}, st = status(r), stage = Math.max(0, +o.stage || 0);
     var badge = st === "draft" ? '<span class="bd draft">작성 중 · ' + (o.step || 1) + "단계</span>"
@@ -98,7 +112,7 @@
     return '<details class="card' + (st === "submitted" ? " sub" : "") + '" data-slug="' + esc(r.slug) + '"><summary>' +
       '<div class="nm"><b>' + esc(o.brand || r.brand) + "</b> · " + esc(o.product || r.product) + "<small>" + (r.who ? "의뢰인 " + esc(r.who.name || "") + (r.who.email ? " (" + esc(r.who.email) + ")" : "") + " · " : "") + esc(r.slug) + " · 만든 때 " + when(r.created_at) + (o.submitted_at ? " · 요청 " + when(o.submitted_at) : "") + "</small></div>" +
       '<div class="badges">' + badge + (r.test_label ? '<span class="bd test">' + esc(r.test_label) + "</span>" : "") + "</div></summary>" +
-      '<div class="body"><div class="grid2"><dl class="kv">' +
+      '<div class="body">' + reviewTop(r) + '<div class="grid2"><dl class="kv">' +
       kv("상호·브랜드", esc(o.brand)) + kv("제품 종류", esc(o.kind)) + kv("제품 이름", esc(o.product)) + kv("특장점", esc(o.point)) +
       kv("영상 분위기", esc(MOODS[o.mood] || "")) + kv("화면 비율", esc(ASPECT[o.aspect] || "")) + kv("영상 길이", "15초 · 1편") +
       kv("추가 정보", o.url ? '<a href="' + esc(o.url) + '" target="_blank" rel="noopener">' + esc(o.url) + "</a>" + (o.url_ok ? " ✓" : " (확인 안 됨)") : "") +
