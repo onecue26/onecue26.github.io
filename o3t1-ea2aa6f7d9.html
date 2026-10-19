@@ -65,14 +65,17 @@ video{width:100%;border-radius:6px;background:#000;display:block}
 
 <section class="case">
  <h2>나디아 · 플라워 3단 우양산</h2>
- <p class="st bad">영상 나옴(17:47) · 실패 — 다른 우산으로 만듦 · 후반 안 함</p>
+ <p class="st bad">실패 — 다른 우산으로 만듦 · 원인 확인·엔진 고침(18:40)</p>
  <div class="grid">
-  <div class="v2"><video src="media/o3t1/nadia_r2_raw.mp4" poster="media/o3t1/nadia_r2_raw.jpg" controls playsinline preload="none"></video><p class="cap">생성 원본 · 4:5 · 엔진이 만든 제품 시트 ↓(실물과 다름)</p><img src="media/o3t1/nadia_r2_sheet.jpg" alt="" style="width:100%;border-radius:6px"></div>
+  <div class="v2"><video src="media/o3t1/nadia_r2_raw.mp4" poster="media/o3t1/nadia_r2_raw.jpg" controls playsinline preload="none"></video><p class="cap">생성 원본 · 4:5</p>
+   <p class="cap">판매 페이지 실물 ↓</p><img src="media/o3t1/nadia_truth.jpg" alt="판매 페이지 실물" style="width:100%;border-radius:6px">
+   <p class="cap">광고주 사진(엔진이 참조로 쓴 것) ↓</p><img src="media/o3t1/nadia_client_p3.jpg" alt="광고주 사진" style="width:100%;border-radius:6px">
+   <p class="cap">엔진이 만든 제품 시트 ↓</p><img src="media/o3t1/nadia_r2_sheet.jpg" alt="제품 시트" style="width:100%;border-radius:6px"></div>
   <div class="four">
-   <div class="box p"><b>문제</b><ul><li>제품 시트부터 다른 우산(하늘색 데이지·나무 손잡이) — 실물은 아이보리·짙은 모란·검정 손잡이</li><li>조사 단계가 판매 페이지 사진을 안 받아 광고주 AI 그림으로 시트를 만듦</li><li>펼치는 동작·안쪽 검정은 잘 나옴</li></ul></div>
-   <div class="box t"><b>고칠 것</b><ul><li>실물 사진으로 시트 다시 → 영상 다시</li></ul></div>
-   <div class="box d"><b>고친 것</b><ul><li>코드 확인 3곳: 조사 뒤 실물 사진 없으면 받고 없으면 멈춤 · 그림 뒤 시트를 실물과 대조 · 영상 뒤 제품 망가짐 확인(후반 전)</li></ul></div>
-   <div class="box c"><b>Codex에 시킨 것</b><ul><li>89 흔들림 깨는 방법</li></ul></div>
+   <div class="box p"><b>문제</b><ul><li>참조는 넣었음 — 그런데 광고주 사진 4장만 넣음. 이 사진들이 판매 상품과 다른 우산(AI 그림)</li><li>판매 페이지 사진 36장을 받아 놓고 안 씀 · 조사가 「광고주 사진 = 판매 페이지와 일치」라고 잘못 적음</li><li>시트 문장에 「하늘색·나무 손잡이」를 글로 씀</li></ul></div>
+   <div class="box t"><b>처음엔 왜 괜찮았나</b><ul><li>10-15·10-18 판은 Head 세션에서 손으로 「광고주 사진 = Gemini 그림」을 잡고 판매 페이지 사진으로 정리함</li><li>그 확인이 실행기에는 코드로 없었음</li></ul></div>
+   <div class="box d"><b>고친 것</b><ul><li>조사 뒤: 광고주 사진 ↔ 판매 페이지 대조 코드(이번 건 시험 → 4장 모두 「다름」 판정)</li><li>설계 뒤: 제품 시트 참조에 판매 페이지 사진 필수 · 걸린 광고주 사진 금지 · 색 글 금지(지난 설계 넣으면 셋 다 걸려 멈춤)</li><li>정답 사진 찾기가 page_capture 폴더를 못 보던 버그</li></ul></div>
+   <div class="box c"><b>Codex에 시킨 것</b><ul><li>없음(코드 일)</li></ul></div>
   </div>
  </div>
 </section>
