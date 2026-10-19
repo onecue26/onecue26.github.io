@@ -35,6 +35,9 @@
   }
 
   function el(id) { return document.getElementById(id); }
+  // 휴대폰 번호 — 숫자만 남겨 010·011·016~019 로 시작하는 10~11자리만 받는다(서버 onecue_norm_phone 과 같은 규칙)
+  function normPhone(v) { var d = String(v || "").replace(/\D/g, ""); return /^01[016789]\d{7,8}$/.test(d) ? d : ""; }
+  function showPhone(d) { return d.length === 11 ? d.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3") : d.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3"); }
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
@@ -72,6 +75,7 @@
     el("pw").setAttribute("autocomplete", m === "in" ? "current-password" : "new-password");
     // 닉네임은 선택이다. 안 정하면 이메일이 그대로 뜬다
     el("nickWrap").hidden = (m !== "up");
+    el("phoneWrap").hidden = (m !== "up");   // 10-19 Dan 「가입할 때 연락처 필수로」
     say("", "");
   }
 
@@ -92,10 +96,17 @@
     el("who").classList.add("on");
     el("whoEmail").textContent = user.email;
 
-    db.from("profiles").select("is_admin,name").eq("id", user.id).maybeSingle()
+    db.from("profiles").select("is_admin,name,phone").eq("id", user.id).maybeSingle()
       .then(function (r) {
         var admin = r.data && r.data.is_admin;
         var nick = (r.data && r.data.name) || "";
+        var ph = (r.data && r.data.phone) || normPhone((user.user_metadata || {}).phone);
+        el("phone2").value = ph ? showPhone(ph) : "";
+        if (!ph) {   // 연락처 없는 기존 회원 — 눈에 띄게
+          el("phone2").classList.add("need");
+          el("phoneMsg").className = "msg err"; el("phoneMsg").textContent = "연락처가 없습니다. 휴대폰 번호를 입력하고 저장해 주세요.";
+        }
+        if (new URLSearchParams(location.search).get("focus") === "phone") { el("phone2").focus(); el("phoneBox").scrollIntoView({ block: "center" }); }
         el("whoNick").textContent = nick || user.email;
         el("nick2").value = nick;
         el("whoRole").textContent = admin ? "관리자" : "광고주";
@@ -103,6 +114,21 @@
         var n = nextUrl();
         if (n && (admin || new URL(n, location.href).pathname.toLowerCase() !== "/admin.html")) location.replace(n);
       });
+
+    el("savePhone").addEventListener("click", function () {
+      var v = normPhone(el("phone2").value);
+      if (!v) { el("phoneMsg").className = "msg err"; el("phoneMsg").textContent = "휴대폰 번호 형식이 아닙니다(예 · 010-1234-5678)"; return; }
+      el("phoneMsg").className = "msg"; el("phoneMsg").textContent = "저장 중…";
+      db.rpc("onecue_set_my_phone", { p_phone: v }).then(function (r) {
+        if (r.error || !(r.data || {}).ok) {
+          el("phoneMsg").className = "msg err";
+          el("phoneMsg").textContent = "저장하지 못했습니다 — " + ((r.error && r.error.message) || (r.data || {}).error || "");
+          return;
+        }
+        el("phone2").value = showPhone(v); el("phone2").classList.remove("need");
+        el("phoneMsg").className = "msg ok"; el("phoneMsg").textContent = "연락처를 저장했습니다";
+      });
+    });
 
     el("saveNick").addEventListener("click", function () {
       var v = el("nick2").value.trim();
@@ -218,12 +244,14 @@
       e.preventDefault();
       var email = asEmail(el("email").value), pw = el("pw").value;
       var nick = el("nick").value.trim();
+      var phone = normPhone(el("phone").value);
+      if (mode === "up" && !phone) { say("err", "연락처(휴대폰 번호)를 입력해 주세요 — 예 · 010-1234-5678"); el("phone").focus(); return; }
       el("go").disabled = true;
       say("", mode === "in" ? "확인 중…" : "만드는 중…");
 
       var p = mode === "in"
         ? db.auth.signInWithPassword({ email: email, password: pw })
-        : db.auth.signUp({ email: email, password: pw });
+        : db.auth.signUp({ email: email, password: pw, options: { data: { phone: phone } } });   // 트리거가 profiles.phone 으로 옮김
 
       p.then(function (r) {
         el("go").disabled = false;

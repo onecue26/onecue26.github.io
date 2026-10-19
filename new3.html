@@ -192,7 +192,11 @@
 .done3 .pulse i{width:18px;height:18px;border-radius:50%;background:var(--accent);animation:cuepulse 1.6s infinite}
 .done3 h2{margin:0;font-size:24px;text-wrap:balance}
 .done3 p{margin:0;color:var(--muted);font-size:14.5px}
-.busy{display:inline-block;padding:12px 22px;border-radius:999px;background:#3a3a3d;color:#c9c5bd;font-weight:700;font-size:15px}
+.busy{display:inline-flex;align-items:center;gap:10px;padding:12px 22px;border-radius:999px;background:var(--brand-soft);border:1px solid rgba(215,255,58,.35);color:var(--accent);font-weight:800;font-size:16px}
+.busy .rec{width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 0 rgba(215,255,58,.6);animation:recblink 1.2s ease-in-out infinite}
+@keyframes recblink{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(215,255,58,.55)}50%{opacity:.25;box-shadow:0 0 0 7px rgba(215,255,58,0)}}
+@media (prefers-reduced-motion:reduce){.busy .rec{animation:none}}
+.done3 .done-note{margin:0;font-size:24px;font-weight:800;color:var(--ink);line-height:1.4;text-wrap:balance}
 .card3{width:100%;box-sizing:border-box;border:1px solid var(--rule);border-radius:14px;background:var(--panel);padding:16px;display:grid;gap:12px;text-align:left}
 .card3 h3{margin:0;font-size:14px;color:var(--muted);font-weight:700}
 .kv{display:grid;grid-template-columns:70px minmax(0,1fr);gap:8px 12px;font-size:15px}
@@ -342,10 +346,9 @@
   <!-- 6단계 -->
   <section class="w3-step" data-step="6">
     <div class="done3">
-      <div class="pulse"><i></i></div>
-      <span class="busy" id="doneBusy">영상 제작 진행 중</span>
-      <h2 id="doneTitle">효과를 극대화한 영상을 생성하고 있어요</h2>
-      <p>완성되면 입력하신 연락처(문자 · 알림톡)로 알려 드려요.</p>
+      <!-- 10-19 Dan — 반짝이는 점은 글씨 왼쪽(녹화 표시처럼) · 우리 색·굵게 · 큰 제목 문장은 빼고 알림 문장을 그 크기·흰색으로 -->
+      <span class="busy" id="doneBusy"><i class="rec" aria-hidden="true"></i><b id="doneBusyText">영상 제작 진행 중</b></span>
+      <p class="done-note" id="doneNote">완성되면 입력하신 연락처(문자 · 알림톡)로 알려 드려요.</p>
       <div class="card3" id="finalBox" hidden>
         <h3>완성 영상</h3>
         <video id="finalVid" controls playsinline preload="metadata" style="width:100%;max-height:70vh;border-radius:10px;background:#000"></video>
@@ -364,7 +367,7 @@
       <div class="card3">
         <h3>가입 시 입력된 연락처</h3>
         <div class="kv"><span>이메일</span><b id="cEmail">—</b><span>전화</span><b id="cPhone">—</b></div>
-        <a class="b3" href="login.html" style="padding:11px">연락처 수정하기</a>
+        <a class="b3" href="login.html?focus=phone" style="padding:11px">연락처 수정하기</a>
       </div>
       <div class="btn-row">
         <a class="b3" href="studio.html">처음으로</a>
@@ -386,6 +389,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js?v=o3a"></script>
 <script src="auth.js?v=fa839557"></script>
-<script src="new3.js?v=o3c"></script>
+<script src="new3.js?v=o3e"></script>
 </body>
 </html>

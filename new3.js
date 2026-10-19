@@ -107,7 +107,7 @@
           S.pid = pid; S.slug = slug; S.clientId = client.id;
           return Promise.all([
             db.from("briefs").insert({ project_id: pid, raw: trim(S.o3.point), format: "15초", option3: S.o3 }),
-            db.from("contacts").insert({ client_id: client.id, project_id: pid, name: (ME.user_metadata || {}).name || ME.email, email: ME.email, phone: (ME.user_metadata || {}).phone || null }),
+            db.from("contacts").insert({ client_id: client.id, project_id: pid, name: (ME.user_metadata || {}).name || ME.email, email: ME.email, phone: S.myPhone || (ME.user_metadata || {}).phone || null }),   // 10-19 계정 연락처(profiles.phone) 먼저
           ]).then(function (res) {
             var bad = res.filter(function (x) { return x.error; })[0];
             if (bad) throw bad.error;
@@ -347,13 +347,13 @@
           el("finalVid").src = u[0].data.signedUrl;
           el("finalDl").href = (u[1].data || u[0].data).signedUrl;
           el("finalBox").hidden = false; el("etaBox").hidden = true;
-          el("doneBusy").textContent = "완성"; el("doneTitle").textContent = "영상이 완성됐어요";
+          el("doneBusyText").textContent = "완성"; el("doneNote").textContent = "영상이 완성됐어요";
         });
       });
     el("cEmail").textContent = ME.email || "—";
     db.from("contacts").select("phone").eq("project_id", S.pid).not("phone", "is", null).limit(1).then(function (r) {
-      var ph = (r.data && r.data[0] && r.data[0].phone) || (ME.user_metadata || {}).phone;
-      el("cPhone").textContent = ph || "가입 정보에 없습니다";
+      var ph = S.myPhone || (r.data && r.data[0] && r.data[0].phone) || (ME.user_metadata || {}).phone;
+      el("cPhone").textContent = ph ? String(ph).replace(/^(\d{3})(\d{3,4})(\d{4})$/, "$1-$2-$3") : "아직 없습니다 — 아래 「연락처 수정하기」에서 넣어 주세요";
     });
   }
 
@@ -450,6 +450,7 @@
     db.auth.getUser().then(function (r) {
       ME = r.data && r.data.user;
       if (!ME) { location.replace("login.html?next=" + encodeURIComponent("new3.html" + location.search)); return; }
+      db.from("profiles").select("phone").eq("id", ME.id).maybeSingle().then(function (p) { S.myPhone = (p.data && p.data.phone) || null; });
       return (slug ? load(slug) : Promise.resolve().then(function () { S.o3 = blank(); })).then(function () {
         fill();
         if (S.o3.status === "submitted") return go(6);
