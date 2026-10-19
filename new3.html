@@ -19,20 +19,57 @@
 .w3-head p{margin:0;color:var(--muted);font-size:15px}
 
 /* 진행 막대 — 5칸(6단계는 완료 화면이라 막대 밖) */
-.w3-prog{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
-.w3-prog i{display:block;height:5px;border-radius:9px;background:var(--sunk)}
-.w3-prog i.done{background:rgba(215,255,58,.45)}
-.w3-prog i.now{background:var(--accent)}
+/* 10-18 Dan 「ONE CUE 로고의 당구공이 굴러가는 모양으로(사람 냄새)」 — 가는 트랙 위를 공이 굴러 현재 단계 칸 가운데에 선다 */
+.w3-prog{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;height:24px;align-items:center}
+.w3-prog i{display:block;height:3px;background:var(--sunk)}
+.w3-prog i:first-child{border-radius:3px 0 0 3px}.w3-prog i:nth-child(5){border-radius:0 3px 3px 0}
+/* 지나온 구간 칠은 칸 단위로 먼저 칠하지 않고 공을 따라간다(같은 시간·같은 감속) */
+.w3-prog::before{content:"";position:absolute;left:0;top:50%;height:3px;margin-top:-1.5px;border-radius:3px;background:rgba(215,255,58,.5);
+  width:calc((var(--n,1) - .5) * 20%);transition:width 1.25s cubic-bezier(.12,.62,.28,1)}
+.w3-prog.shoot::before{transition-delay:.37s}
+/* 10-18 Dan 「너무 AI 틱 — 실제 당구공 굴러가듯」: 빛(하이라이트)·바닥 그림자는 고정, 번호 원만 굴러 돈다 · 튕김 없이 마찰 감속
+   회전량 = 이동 거리 / 공 둘레(22px 공 ≈ 69px) — 한 칸(트랙 1/5) 마다 약 1.5바퀴 */
+.w3-ball{position:absolute;top:50%;left:calc((var(--n,1) - .5) * 20%);width:24px;height:24px;margin:-12px 0 0 -12px;
+  transition:left 1.25s cubic-bezier(.12,.62,.28,1)}
+.w3-ball::before{content:"";position:absolute;left:1px;right:1px;bottom:-5px;height:6px;border-radius:50%;background:rgba(0,0,0,.55);filter:blur(2.5px)}   /* 천 위 그림자 — 돌지 않음 */
+/* 10-18 Dan 「동그란 게 이동하는 느낌 — 하얀 공에 우리 색 점을 찍어 그 점이 자리를 바꾸며 구르게」
+   공 표면의 점 = 적도 위 각도 --rot. 화면 x = 반지름·sin, 납작함 = cos, 뒤로 넘어가면 숨김(cos<0). --rot 를 @property 로 등록해 부드럽게 바뀐다 */
+@property --rot{syntax:"<angle>";inherits:true;initial-value:0deg}
+.w3-ball{--rot:calc(var(--n,1) * 720deg + 28deg)}   /* 멈추면 점이 늘 앞쪽(오른쪽 위)에 보이게 — 한 칸마다 두 바퀴 */
+.w3-ball .spin{position:absolute;inset:0;border-radius:50%;overflow:hidden;
+  background:radial-gradient(circle at 50% 50%,#fbfaf4 0 50%,#e6e3d6 76%,#b9b5a3 100%)}   /* 하얀 큐볼 */
+/* 10-18 Dan 「실제 당구공은 동그란 것에 작은 점이 딱 하나」 — 점 1개, 지름의 약 1/6.
+   위에서 본 공이 오른쪽으로 구르면(가로축 회전) 점은 같은 줄(약간 위)을 따라 오른쪽으로 가며 납작해지고, 뒷면에 있는 동안은 안 보였다가 왼쪽에서 다시 나온다 */
+.w3-ball .spin::before{content:"";position:absolute;width:5px;height:5px;left:50%;top:50%;margin:-2.5px 0 0 -2.5px;border-radius:50%;
+  background:var(--accent);box-shadow:0 0 0 .8px #2f4200,0 0 3px rgba(215,255,58,.9);   /* 10-18 Dan 「점은 시그니처 색으로 눈에 띄게」 */
+  transform:translate(calc(sin(var(--rot)) * 10px), -3px) scaleX(max(.12, cos(var(--rot))));
+  opacity:clamp(0, calc(cos(var(--rot)) * 8), 1)}
+.w3-ball::after{content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle at 33% 28%,rgba(255,255,255,.85) 0 7%,rgba(255,255,255,.18) 18%,transparent 36%),
+             radial-gradient(circle at 70% 82%,transparent 40%,rgba(0,0,0,.28) 72%)}   /* 고정된 빛 반사·아래쪽 그늘 */
+/* 10-18 Dan 「단계 넘어갈 때 큐가 공을 때리는 모션 — 원큐라는 이름에 맞게」: 겨누기(뒤로 당김) → 짧게 침 → 공 출발 → 큐 따라 나갔다 사라짐 */
+.w3-cue{position:absolute;top:50%;left:calc((var(--from,1) - .5) * 20%);width:min(170px,30vw);height:6px;margin:-3px 0 0 calc(-1 * min(170px,30vw) - 14px);
+  border-radius:3px 1px 1px 3px;opacity:0;pointer-events:none;
+  background:linear-gradient(90deg,#3b2414 0 18%,#7a5130 18% 22%,#c99a64 22% 88%,#efe6d2 88% 95%,#4d6fa8 95%);   /* 손잡이 · 나무 · 흰 페룰 · 초크 묻은 팁 */
+  box-shadow:0 3px 6px rgba(0,0,0,.45)}
+.w3-prog.shoot .w3-cue{animation:cueShot .95s cubic-bezier(.3,.1,.3,1) both}
+@keyframes cueShot{0%{opacity:0;transform:translateX(-26px)}14%{opacity:1;transform:translateX(-8px)}34%{opacity:1;transform:translateX(-24px)}   /* 겨누며 당김 */
+  40%{transform:translateX(3px)}52%{opacity:1;transform:translateX(9px)}100%{opacity:0;transform:translateX(12px)}}   /* 침 → 따라 나감 → 사라짐 */
+.w3-prog.shoot .w3-ball,.w3-prog.shoot .w3-ball .spin{transition-delay:.37s}
+.w3-ball{transition:left 1.25s cubic-bezier(.12,.62,.28,1),--rot 1.25s cubic-bezier(.12,.62,.28,1)}   /* 큐가 맞는 순간 공 출발 */
+@media (prefers-reduced-motion:reduce){.w3-ball,.w3-ball .spin{transition:none}.w3-prog.shoot .w3-cue{animation:none}}
 .w3-prog-names{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:7px}
 .w3-prog-names span{font-size:11.5px;color:var(--faint);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .w3-prog-names span.now{color:var(--ink);font-weight:700}
 .w3-prog-names span.done{color:var(--muted)}
 
 .w3-step{display:none;gap:20px}
+.w3-step[data-step="1"]{gap:34px}   /* 10-18 Dan 「1페이지 입력 항목 간격을 넓히되 일정하게」 */
 .w3-step.on{display:grid}
 .w3-q{display:grid;gap:4px}
-.w3-q .n{font-family:var(--mono2);font-size:12px;color:var(--faint);letter-spacing:.1em}
-.w3-q h2{margin:0;font-size:21px;line-height:1.35}
+/* 10-18 Dan: 「n단계」 줄과 질문 줄의 크기·색(·굵기) 맞바꿈 — 공통 skin 의 h2 색을 이기려고 #w3 로 */
+#w3 .w3-q .n{font-family:var(--mono2);font-size:21px;line-height:1.35;font-weight:700;color:var(--ink,inherit);letter-spacing:.1em}
+#w3 .w3-q h2{margin:0;font-size:12px;line-height:1.5;font-weight:400;color:var(--faint)!important}   /* skin-v2.css 가 .studio-layout h2 를 !important 로 흰색 강제 */
 .w3-q p{margin:0;color:var(--muted);font-size:14px}
 
 .f3{display:grid;gap:7px}
@@ -52,7 +89,15 @@
 
 /* 고르는 카드 — 분위기·비율 */
 .pick{display:grid;gap:12px}
-@media(min-width:720px){.pick{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:720px){.pick{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pick .pc-auto,.pick .pick-or{grid-column:1/-1}
+.mini-ball{position:relative;width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 50% 50%,#fbfaf4 0 50%,#e6e3d6 76%,#b9b5a3 100%);box-shadow:0 5px 10px rgba(0,0,0,.45)}
+.mini-ball::before{content:"";position:absolute;width:6px;height:6px;left:17px;top:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 .9px #2f4200}
+.mini-ball::after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 33% 28%,rgba(255,255,255,.85) 0 7%,rgba(255,255,255,.18) 18%,transparent 36%),radial-gradient(circle at 70% 82%,transparent 40%,rgba(0,0,0,.28) 72%)}   /* 10-18 Dan 「1Q·B!·꽃은 AI 틱」 → 큐볼로 */
+.pc .pc-reco{font-size:11px;font-weight:700;color:var(--accent-ink,#140b07);background:var(--accent);border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:2px}
+.pick-or{margin-top:8px;font-size:14px;font-weight:700;color:var(--muted)}
+.pick-or .opt{color:var(--faint);font-size:12px;font-family:var(--mono2);font-weight:400;margin-left:4px}
+.w3-step[data-step="2"]{gap:28px}
 .pc{position:relative;display:grid;gap:10px;align-content:start;border:1px solid var(--rule);background:var(--panel);
   border-radius:14px;padding:16px;cursor:pointer;transition:border-color .15s,background .15s}
 .pc input{position:absolute;opacity:0;pointer-events:none}
@@ -74,6 +119,10 @@
 .ar-frame .ui{position:absolute;background:repeating-linear-gradient(135deg,rgba(244,242,239,.16) 0 4px,rgba(244,242,239,.05) 4px 8px)}
 .ar-frame .safe{position:absolute;border:1.5px dashed var(--accent);border-radius:3px;display:flex;align-items:center;justify-content:center}
 .ar-frame .safe b{font-size:10px;font-family:var(--mono2);color:var(--accent);font-weight:600;text-align:center;line-height:1.3}
+.ar-stage.art{height:auto;background:none;padding:0}
+.ar-art{position:relative;display:block;width:min(100%,250px);aspect-ratio:1/1;background:center/cover no-repeat var(--sunk);border-radius:10px;overflow:hidden}
+.ar-screen{position:absolute;display:flex;align-items:center;justify-content:center;background:#141416;border-radius:7%}
+.ar-art .ar-frame{border-radius:4px;box-shadow:none;background:#2a2a2d}
 .ar-meta{display:grid;gap:3px}   /* 세 카드 모두 이름 → 규격 줄 순서로 같게 */
 .ar-meta .px{font-family:var(--mono2);font-size:12px;color:var(--faint)}
 .ar-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
@@ -105,15 +154,33 @@
 
 /* 확인 표 */
 .sum{border:1px solid var(--rule);border-radius:14px;overflow:hidden;background:var(--panel)}
-.sum-row{display:grid;grid-template-columns:118px minmax(0,1fr) auto;gap:12px;padding:14px 16px;border-top:1px solid var(--rule);align-items:start}
+.sum-row{display:grid;grid-template-columns:26px 118px minmax(0,1fr) auto;gap:12px;padding:14px 16px;border-top:1px solid var(--rule);align-items:start}
 .sum-row:first-child{border-top:0}
-.sum-row dt{font-size:13px;color:var(--muted);font-weight:600}
-.sum-row dd{margin:0;font-size:15px;line-height:1.5;word-break:break-word;min-width:0}
+.sum-row.ok{background:rgba(215,255,58,.04)}
+/* 10-18 Dan — 항목 이름(회색)을 더 잘 보이게 · 고객이 직접 쓴 글은 굵게·강조색 */
+.sum-row dt{font-size:14px;color:var(--ink);font-weight:700;opacity:.82}
+.sum-row dd{margin:0;font-size:15px;line-height:1.5;word-break:break-word;min-width:0;font-weight:600}
+.sum-row dd.typed{color:var(--accent);font-weight:800;font-size:15.5px}
 .sum-row dd.miss{color:#ff8f7a}
+.sum-row .okmark{color:var(--live);font-weight:600}
+.sum-row .none{color:var(--faint);font-weight:500}
+.sum-chk,.ask-chk{position:relative;display:inline-grid;cursor:pointer}
+.sum-chk input,.ask-chk input{position:absolute;opacity:0;width:1px;height:1px}
+.sum-chk i,.ask-chk i{width:20px;height:20px;border-radius:6px;border:1.5px solid rgba(244,242,239,.45);display:block;margin-top:1px;position:relative}
+.sum-chk input:checked+i,.ask-chk input:checked+i{background:var(--accent);border-color:var(--accent)}
+.sum-chk input:checked+i::after,.ask-chk input:checked+i::after{content:"";position:absolute;left:6px;top:2px;width:5px;height:10px;border:solid var(--accent-ink);border-width:0 2px 2px 0;transform:rotate(45deg)}
+.sum-chk input:disabled+i{opacity:.3}
+.sum-chk input:focus-visible+i,.ask-chk input:focus-visible+i{outline:2px solid var(--accent);outline-offset:2px}
+.ask-chk{grid-template-columns:20px minmax(0,1fr);gap:10px;align-items:start;justify-self:center;font-size:14.5px;color:var(--ink);max-width:560px}
+.sum-edit{display:grid;gap:8px}
+.sum-edit input,.sum-edit textarea{font:inherit;font-size:15px;color:var(--ink);background:var(--sunk);border:1px solid var(--accent);border-radius:8px;padding:9px 11px;width:100%;box-sizing:border-box}
+.sum-edit textarea{min-height:76px;resize:vertical}
+.sum-edit-btns{display:flex;gap:8px}
+.sum-edit-btns .b3{padding:8px 16px;font-size:13.5px}
 .sum-row .ed{font-size:12.5px;color:var(--accent);background:none;border:0;cursor:pointer;padding:0;font-family:var(--mono2)}
 .sum-thumbs{display:flex;gap:6px;flex-wrap:wrap}
 .sum-thumbs img{width:54px;height:54px;object-fit:cover;border-radius:7px;border:1px solid var(--rule)}
-@media(max-width:480px){.sum-row{grid-template-columns:minmax(0,1fr) auto}.sum-row dt{grid-column:1}.sum-row dd{grid-column:1 / -1;grid-row:2}}
+@media(max-width:480px){.sum-row{grid-template-columns:26px minmax(0,1fr) auto}.sum-row dt{grid-column:2}.sum-row dd{grid-column:2 / -1;grid-row:2}}
 .ask{font-size:14.5px;color:var(--muted);text-align:center}
 .go3{width:100%;padding:17px;border-radius:999px;border:0;background:var(--accent);color:var(--accent-ink);font:inherit;font-weight:800;font-size:17px;cursor:pointer}
 .go3:disabled{background:#3a3a3d;color:#8e8b85;cursor:default}
@@ -131,7 +198,16 @@
 .kv{display:grid;grid-template-columns:70px minmax(0,1fr);gap:8px 12px;font-size:15px}
 .kv span{color:var(--faint);font-size:13px}
 .kv b{word-break:break-all;font-weight:600}
-.eta{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.eta-max{float:right;font-weight:600;color:var(--faint);font-size:12px;font-family:var(--mono2)}
+/* 10-18 Dan 「24시간부터 거꾸로 · 초보다 낮은 단위까지 초시계처럼 빨리」 */
+.clock{display:flex;align-items:flex-start;justify-content:center;gap:4px;font-variant-numeric:tabular-nums;padding:6px 0 2px}
+.clock .u{display:grid;justify-items:center;gap:4px}
+.clock .u b{font-family:var(--mono2);font-size:clamp(34px,9vw,52px);font-weight:700;line-height:1;color:var(--ink);background:var(--sunk);border-radius:10px;padding:10px 10px 8px;min-width:1.9em;text-align:center;letter-spacing:.02em}
+.clock .u i{font-style:normal;font-size:11.5px;color:var(--faint)}
+.clock .u.cs b{font-size:clamp(22px,5.5vw,32px);color:var(--accent);min-width:1.7em;padding:8px 8px 6px}
+.clock .sep{font-family:var(--mono2);font-size:clamp(30px,8vw,46px);color:var(--faint);line-height:1.15}
+.clock .sep.dot{color:var(--accent)}
+.eta-note{margin:0;text-align:center;font-size:13px;color:var(--muted)}
 .stages{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px}
 .stages span{font-size:11px;text-align:center;color:var(--faint);padding-top:8px;border-top:3px solid var(--sunk)}
 .stages span.done{color:var(--muted);border-color:rgba(215,255,58,.45)}
@@ -170,13 +246,11 @@
 <main>
 <div class="w3" id="w3">
   <div class="w3-head" id="head">
-    <div class="w3-eyebrow">NEW PROJECT · 15초 광고</div>
-    <h1>제품만 알려 주시면, 광고는 저희가 만듭니다</h1>
-    <p>다섯 단계, 3분이면 끝납니다.</p>
+    <div class="w3-eyebrow">NEW PROJECT</div>
   </div>
 
   <div id="progWrap">
-    <div class="w3-prog" id="prog"><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="w3-prog" id="prog"><i></i><i></i><i></i><i></i><i></i><b class="w3-cue" aria-hidden="true"></b><b class="w3-ball" aria-hidden="true"><b class="spin"></b></b></div>
     <div class="w3-prog-names" id="progNames"><span>제품 정보</span><span>분위기</span><span>사진·링크</span><span>화면 비율</span><span>확인</span></div>
   </div>
 
@@ -204,31 +278,39 @@
 
   <!-- 2단계 -->
   <section class="w3-step" data-step="2">
-    <div class="w3-q"><span class="n">2단계 · 영상 분위기 선택</span><h2>제품을 어떤 컨셉의 영상에 담을까요?</h2><p>하나만 골라 주세요.</p></div>
+    <div class="w3-q"><span class="n">2단계 · 영상 분위기</span><h2>분위기는 원큐에 맡기셔도 됩니다</h2></div>
     <div class="pick" id="moods">
+      <!-- 10-18 Dan: 셋 중 하나 강제 → 「원큐에 맡기기」 기본 + 원하면 직접 고르기 · 「깔끔한 정보」는 15초에 맞지 않아 뺌 -->
+      <label class="pc pc-auto"><input type="radio" name="mood" value="auto" checked><span class="chk"></span>
+        <span class="mini-ball" aria-hidden="true"></span><span class="t">원큐에 맡기기 <span class="pc-reco">추천</span></span>
+        <span class="d">제품·시장·경쟁 광고를 조사해, 이 제품에 가장 잘 맞는 분위기와 아이디어를 찾아 드립니다.</span>
+        <span class="tags"><span>시장 조사</span><span>아이디어 발상</span><span>맞춤 연출</span></span></label>
+      <div class="pick-or">원하는 분위기가 있다면 <span class="opt">선택</span></div>
       <label class="pc"><input type="radio" name="mood" value="bgrade"><span class="chk"></span>
-        <span class="mood-ico">B!</span><span class="t">재밌는 B급 · 병맛</span>
+        <span class="t">재밌는 B급 · 병맛</span>
         <span class="d">한 번 보면 잊히지 않는 엉뚱한 상황과 반전으로 웃기며 기억에 남깁니다.</span>
         <span class="tags"><span>반전</span><span>과장</span><span>밈</span></span></label>
       <label class="pc"><input type="radio" name="mood" value="pretty"><span class="chk"></span>
-        <span class="mood-ico">✿</span><span class="t">예쁜 감성</span>
+        <span class="t">예쁜 감성</span>
         <span class="d">빛·색감·질감을 살린 장면으로 제품을 갖고 싶게 보여 줍니다.</span>
         <span class="tags"><span>무드</span><span>클로즈업</span><span>감성 음악</span></span></label>
-      <label class="pc"><input type="radio" name="mood" value="clean"><span class="chk"></span>
-        <span class="mood-ico">i</span><span class="t">깔끔한 정보</span>
-        <span class="d">무엇이 좋은지 한눈에 — 핵심 장점을 또렷한 화면과 문구로 전합니다.</span>
-        <span class="tags"><span>핵심 문구</span><span>비교</span><span>설명</span></span></label>
     </div>
+    <div class="f3"><label for="avoid">피하고 싶은 느낌 <span class="opt">선택</span></label>
+      <span class="ex">예 · 가벼워 보이면 안 돼요, 너무 진지한 건 싫어요</span>
+      <input type="text" id="avoid" maxlength="80" placeholder="비워 두셔도 됩니다"></div>
+    <div class="f3"><label for="refurl">참고하고 싶은 영상 <span class="opt">선택</span></label>
+      <span class="ex">느낌(속도·색감·카메라·구성)만 참고합니다 — 영상 속 사람·장면을 그대로 따라 하지 않아요</span>
+      <input type="url" id="refurl" inputmode="url" placeholder="https://… (유튜브·인스타그램 등 영상 주소)"></div>
   </section>
 
   <!-- 3단계 -->
   <section class="w3-step" data-step="3">
     <div class="w3-q"><span class="n">3단계 · 사진 등록 &amp; 비즈니스 링크</span><h2>제품 사진과 참고 링크를 등록해 주세요</h2></div>
     <div class="f3"><label>제품 사진 <span class="req">필수</span></label>
-      <span class="tip">제품이 확실하게 보이는 사진을 올려 주세요</span>
+      <span class="tip">같은 제품 모양에 같은 색상에 한정해서 3장까지 올릴 수 있으며, 한 장만 올리셔도 됩니다</span>
       <label class="drop" id="drop"><input type="file" id="files" accept="image/jpeg,image/png,image/webp" multiple>
         <b>＋ 사진 등록하기</b>
-        <small>JPG · PNG · WEBP · 한 장 20MB까지 · 최대 6장<br>긴 쪽 1000px · 짧은 쪽 600px 이상인 선명한 사진만 받습니다</small></label>
+        <small>JPG · PNG · WEBP · 한 장 20MB까지 · 최대 3장<br>이미지가 흔들리거나 글자가 뭉개진 사진은 활용하기 어려워요</small></label>
       <div class="bad" id="bad" hidden></div>
       <div class="thumbs" id="thumbs"></div>
     </div>
@@ -252,7 +334,7 @@
   <section class="w3-step" data-step="5">
     <div class="w3-q"><span class="n">5단계 · 입력 내용 확인 &amp; 영상 생성</span><h2>영상을 생성합니다. 요청 내용을 확인해 주세요.</h2></div>
     <dl class="sum" id="sum"></dl>
-    <p class="ask">입력 내용이 맞나요? <b>[영상 생성 시작]</b> 버튼을 눌러 주세요.</p>
+    <label class="ask-chk"><input type="checkbox" id="checkAll"><i></i><span>입력 내용이 맞나요? 모두 확인했으면 체크하고 <b>[영상 생성 시작]</b> 버튼을 눌러 주세요</span></label>
     <button type="button" class="go3" id="go" disabled>영상 생성 시작</button>
     <div class="miss-list" id="missList"></div>
   </section>
@@ -270,8 +352,14 @@
         <a class="b3" id="finalDl" href="#" style="padding:11px">영상 내려받기</a>
       </div>
       <div class="card3" id="etaBox">
-        <h3>예상 소요 시간</h3>
-        <div class="eta" id="eta">—</div>
+        <h3>예상 소요 시간 <span class="eta-max">최대 24시간</span></h3>
+        <div class="clock" aria-label="남은 예상 시간">
+          <span class="u"><b id="etH">24</b><i>시간</i></span><span class="sep">:</span>
+          <span class="u"><b id="etM">00</b><i>분</i></span><span class="sep">:</span>
+          <span class="u"><b id="etS">00</b><i>초</i></span><span class="sep dot">.</span>
+          <span class="u cs"><b id="etC">00</b><i>&nbsp;</i></span>
+        </div>
+        <p class="eta-note" id="etaNote">대부분 이보다 일찍 완성됩니다</p>
       </div>
       <div class="card3">
         <h3>가입 시 입력된 연락처</h3>
@@ -298,6 +386,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js?v=o3a"></script>
 <script src="auth.js?v=fa839557"></script>
-<script src="new3.js?v=o3b"></script>
+<script src="new3.js?v=o3c"></script>
 </body>
 </html>

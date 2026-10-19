@@ -10,7 +10,9 @@
 
   var db = null, ME = null;
   var S = { pid: null, slug: null, clientId: null, step: 1, o3: null, photos: [] };
-  var MIN_LONG = 1000, MIN_SHORT = 600, MAX_PHOTOS = 6, MAX_BYTES = 20 * 1024 * 1024;
+  // 10-18 Dan — 가로·세로 둘 중 하나라도 480px 미만이면 더 좋은 사진을 요청 · 480px 이상은 받고 엔진이 1000×600 최소로 업스케일(meta.upscale)
+  //   같은 제품 모양·같은 색상만 최대 3장
+  var MIN_SIDE = 480, UP_LONG = 1000, UP_SHORT = 600, MAX_PHOTOS = 3, MAX_BYTES = 20 * 1024 * 1024;
 
   // 화면 비율 카드 — 값은 정본 reference_library/ad_specs/ad_formats/ad_formats.json 에서 그대로 옮겼다(손으로 셈하지 않는다)
   //   유튜브 = YT_INSTREAM · 세로 = UNI_9x16(쇼츠·릴스·틱톡 교집합) · 피드 = META_FEED_4x5
@@ -19,7 +21,7 @@
     { v: "9:16", t: "쇼츠 · 릴스 · 틱톡", d: "세로 영상 · 휴대폰 전체 화면", spec: "UNI_9x16", w: 1080, h: 1920, top: 288, bottom: 672, left: 120, right: 192 },
     { v: "4:5", t: "인스타그램 피드", d: "피드에서 가장 크게 보이는 세로형", spec: "META_FEED_4x5", w: 1080, h: 1350, top: 135, bottom: 135, left: 108, right: 108 },
   ];
-  var MOODS = { bgrade: "재밌는 B급 · 병맛", pretty: "예쁜 감성", clean: "깔끔한 정보" };
+  var MOODS = { auto: "원큐에 맡기기", bgrade: "재밌는 B급 · 병맛", pretty: "예쁜 감성", clean: "깔끔한 정보" };   // clean 은 예전 저장본 표시용(화면에서는 뺌 10-18)
   // 진행 칸 — Head 가 briefs.option3.stage 를 올린다. 남은 시간은 넉넉하게 잡고 단계가 끝날수록 줄인다
   var STAGES = [["접수", 48], ["시장 조사", 42], ["기획", 34], ["영상 생성", 20], ["검수", 6], ["완성", 0]];
 
@@ -37,7 +39,7 @@
     return stamp + "_" + (brand + "_" + product).trim().replace(/\s+/g, "_").slice(0, 40) + "_" + Math.random().toString(36).slice(2, 5);
   }
   function withScheme(s) { var v = trim(s); if (!v) return ""; return /^https?:\/\//i.test(v) ? v : "https://" + v.replace(/^\/+/, ""); }
-  function blank() { return { status: "draft", step: 1, brand: "", kind: "", product: "", point: "", mood: "", photos: [], url: "", url_ok: false, aspect: "" }; }
+  function blank() { return { status: "draft", step: 1, brand: "", kind: "", product: "", point: "", mood: "auto", avoid: "", ref_url: "", photos: [], url: "", url_ok: false, aspect: "" }; }
 
   // ── 단계별 「다 찼나」 — 다음 버튼과 5단계 생성 버튼이 같은 검사를 쓴다 ──
   function okStep(n) {
@@ -62,6 +64,13 @@
     el("loading").hidden = true;
     var done = n === 6;
     el("progWrap").hidden = done; el("bar").hidden = done; el("head").hidden = done;
+    var pg = el("prog"), was = paint.was || 0;   // 당구공 위치·회전 + 앞으로 넘어갈 때만 큐가 침(10-18)
+    if (was && n > was && n <= 5) {
+      pg.style.setProperty("--from", was);
+      pg.classList.remove("shoot"); void pg.offsetWidth; pg.classList.add("shoot");
+    } else if (n < was) { pg.classList.remove("shoot"); }
+    paint.was = n;
+    pg.style.setProperty("--n", Math.min(n, 5));
     var bars = el("prog").children, names = el("progNames").children;
     for (var i = 0; i < 5; i++) {
       var c = i + 1 < n ? "done" : i + 1 === n ? "now" : "";
@@ -148,10 +157,11 @@
           return measure(f).then(function (m) {
             if (!m) { bad.push(f.name + " — 사진을 열 수 없습니다"); return; }
             var lo = Math.min(m.w, m.h), hi = Math.max(m.w, m.h);
-            if (hi < MIN_LONG || lo < MIN_SHORT) {
-              bad.push(f.name + " — " + m.w + "×" + m.h + "px 로 작습니다. 긴 쪽 " + MIN_LONG + "px · 짧은 쪽 " + MIN_SHORT + "px 이상 원본 사진을 올려 주세요");
+            if (lo < MIN_SIDE) {
+              bad.push(f.name + " — " + m.w + "×" + m.h + "px로 너무 작습니다. 화질이 좋은 사진으로 바꾸어 주세요");
               URL.revokeObjectURL(m.src); return;
             }
+            m.upscale = hi < UP_LONG || lo < UP_SHORT;   // 엔진이 생성 전에 1000×600 최소로 키운다(광고주 화면에는 안 보임)
             var item = { id: null, src: m.src, w: m.w, h: m.h, name: f.name };
             S.photos.push(item); paintThumbs();
             return upload(f, m).then(function (id) { item.id = id; paintThumbs(); },
@@ -176,7 +186,7 @@
       var id = newId();
       return db.from("assets").insert({
         id: id, project_id: S.pid, kind: "product_ref", role: file.name, storage_path: key, url: url,
-        mime: file.type, bytes: file.size, meta: { by: "client", option3: true, w: m.w, h: m.h },
+        mime: file.type, bytes: file.size, meta: { by: "client", option3: true, w: m.w, h: m.h, upscale: !!m.upscale },
       }).then(function (x) { if (x.error) throw x.error; return id; });
     });
   }
@@ -209,16 +219,25 @@
   }
 
   // ── 4단계 비율 카드 ──
+  // 10-18 Dan — 그림을 만화풍으로: 손에 든 스마트폰만 또렷하고 뒤는 흐림(구독 GPT · aspect_art/) · 휴대폰 화면 자리(box %)에
+  //   지금까지 쓰던 안전구역 그림(문구·로고 자리)을 그대로 얹는다 — 화면 비율에 맞춰 화면 안에 꽉 차게(contain)
+  var ART = {"16:9": {"img": "aspect_art/art_169.webp", "box": [12.44, 30.14, 87.32, 65.08], "r": 2.231}, "9:16": {"img": "aspect_art/art_916.webp", "box": [31.26, 6.46, 68.9, 88.2], "r": 0.444}, "4:5": {"img": "aspect_art/art_45.webp", "box": [30.94, 18.82, 69.14, 65.95], "r": 0.8}};
   function frameHtml(a) {
-    // 칸 폭에 맞춰 줄어들도록 비율(aspect-ratio)과 백분율로 그린다 — 여백 값은 정본 네 변 그대로
-    var H = 168, W = Math.round(H * a.w / a.h);
-    if (W > 230) { W = 230; H = Math.round(W * a.h / a.w); }
     var T = a.top / a.h * 100, B = a.bottom / a.h * 100, L = a.left / a.w * 100, R = a.right / a.w * 100;
     var band = function (st) { return '<span class="ui" style="' + st + '"></span>'; };
     var ui = band("left:0;right:0;top:0;height:" + T + "%") + band("left:0;right:0;bottom:0;height:" + B + "%") +
       (L ? band("left:0;top:" + T + "%;bottom:" + B + "%;width:" + L + "%") : "") + (R ? band("right:0;top:" + T + "%;bottom:" + B + "%;width:" + R + "%") : "");
-    return '<span class="ar-stage"><span class="ar-frame" style="width:min(' + W + 'px,86%);aspect-ratio:' + a.w + "/" + a.h + '">' + ui +
-      '<span class="safe" style="left:' + L + "%;top:" + T + "%;right:" + R + "%;bottom:" + B + '%"><b>문구·로고<br>자리</b></span></span></span>';
+    var safe = '<span class="safe" style="left:' + L + "%;top:" + T + "%;right:" + R + "%;bottom:" + B + '%"><b>문구·로고<br>자리</b></span>';
+    var art = ART[a.v];
+    if (art) {
+      var bx = art.box, wide = a.w / a.h > art.r;   // 화면보다 납작하면 폭에, 길쭉하면 높이에 맞춘다
+      return '<span class="ar-stage art"><span class="ar-art" style="background-image:url(' + art.img + ')">' +
+        '<span class="ar-screen" style="left:' + bx[0] + "%;top:" + bx[1] + "%;right:" + (100 - bx[2]) + "%;bottom:" + (100 - bx[3]) + '%">' +
+        '<span class="ar-frame" style="aspect-ratio:' + a.w + "/" + a.h + ";" + (wide ? "width:100%" : "height:100%") + '">' + ui + safe + "</span></span></span></span>";
+    }
+    var H = 168, W = Math.round(H * a.w / a.h);
+    if (W > 230) { W = 230; H = Math.round(W * a.h / a.w); }
+    return '<span class="ar-stage"><span class="ar-frame" style="width:min(' + W + 'px,86%);aspect-ratio:' + a.w + "/" + a.h + '">' + ui + safe + "</span></span>";
   }
   function paintAspects() {
     el("aspects").innerHTML = ASPECTS.map(function (a) {
@@ -228,26 +247,57 @@
     }).join("");
   }
 
-  // ── 5단계 확인 표 ──
+  // ── 5단계 확인 표 ── 10-18 Dan
+  //   위 네 줄(직접 쓴 칸)은 여기서 바로 고친다 · 아래(고른 칸)는 고치기 없이 이전 단계로 가서 고른다
+  //   줄마다 확인 체크 — 다 체크해야 「영상 생성 시작」이 켜진다 · 고객이 쓴 글은 굵게·강조색
+  var INLINE = { brand: ["브랜드명", 60], kind: ["제품 종류", 40], product: ["제품 이름", 80], point: ["제품 특장점", 200] };
+  S.checked = {};
   function paintSummary() {
     var o = S.o3, a = ASPECTS.filter(function (x) { return x.v === o.aspect; })[0];
-    function row(k, v, step, ok) {
-      return '<div class="sum-row"><dt>' + k + "</dt><dd" + (ok ? "" : ' class="miss"') + ">" + (ok ? v : "입력되지 않았습니다") + "</dd>" +
-        (step ? '<button type="button" class="ed" data-go="' + step + '">고치기</button>' : "<span></span>") + "</div>";
+    function row(key, k, v, ok, opt) {
+      opt = opt || {};
+      var on = !!S.checked[key];
+      var val = !ok ? "입력되지 않았습니다" : v;
+      var body = S.editing === key
+        ? '<span class="sum-edit">' + (key === "point"
+            ? '<textarea id="ed_' + key + '" maxlength="' + INLINE[key][1] + '">' + esc(o[key] || "") + "</textarea>"
+            : '<input type="text" id="ed_' + key + '" maxlength="' + INLINE[key][1] + '" value="' + esc(o[key] || "") + '">') +
+          '<span class="sum-edit-btns"><button type="button" class="b3 hot" data-save="' + key + '">저장</button>' +
+          '<button type="button" class="b3" data-cancel="1">취소</button></span></span>'
+        : val;
+      return '<div class="sum-row' + (on ? " ok" : "") + '">' +
+        '<label class="sum-chk"><input type="checkbox" data-chk="' + key + '"' + (on ? " checked" : "") + (ok ? "" : " disabled") + ' aria-label="' + k + ' 확인"><i></i></label>' +
+        "<dt>" + k + '</dt><dd class="' + (!ok ? "miss" : opt.typed ? "typed" : "") + '">' + body + "</dd>" +
+        (INLINE[key] && S.editing !== key ? '<button type="button" class="ed" data-edit="' + key + '">고치기</button>' : "<span></span>") + "</div>";
     }
     var ph = S.photos.filter(function (p) { return p.id; });
-    el("sum").innerHTML =
-      row("브랜드명", esc(trim(o.brand)), 1, !!trim(o.brand)) +
-      row("제품 종류", esc(trim(o.kind)), 1, !!trim(o.kind)) +
-      row("제품 이름", esc(trim(o.product)), 1, !!trim(o.product)) +
-      row("제품 특장점", esc(trim(o.point)), 1, trim(o.point).length >= 5) +
-      row("영상 분위기", esc(MOODS[o.mood] || ""), 2, !!MOODS[o.mood]) +
-      row("등록 사진", '<span class="sum-thumbs">' + ph.map(function (p) { return '<img src="' + esc(p.src) + '" alt="">'; }).join("") + "</span>", 3, ph.length > 0) +
-      row("추가 정보", trim(o.url) ? (o.url_ok ? esc(o.url) + ' <span style="color:var(--live)">✓ 확인됨</span>' : esc(o.url) + " (주소 확인 필요)") : '<span style="color:var(--faint)">입력 안 함</span>', 3, !trim(o.url) || o.url_ok) +
-      row("화면 비율", a ? esc(a.t) + " · " + a.v : "", 4, !!a) +
-      row("영상 길이", "15초 · 1편", 0, true);
-    el("go").disabled = !okStep(5);
-    el("missList").textContent = "";
+    var rows = [
+      ["brand", "브랜드명", esc(trim(o.brand)), !!trim(o.brand), { typed: 1 }],
+      ["kind", "제품 종류", esc(trim(o.kind)), !!trim(o.kind), { typed: 1 }],
+      ["product", "제품 이름", esc(trim(o.product)), !!trim(o.product), { typed: 1 }],
+      ["point", "제품 특장점", esc(trim(o.point)), trim(o.point).length >= 5, { typed: 1 }],
+      ["mood", "영상 분위기", esc(MOODS[o.mood] || ""), !!MOODS[o.mood]],
+    ];
+    if (trim(o.avoid)) rows.push(["avoid", "피하고 싶은 느낌", esc(trim(o.avoid)), true, { typed: 1 }]);
+    if (trim(o.ref_url)) rows.push(["ref_url", "참고 영상", esc(trim(o.ref_url)), true, { typed: 1 }]);
+    rows.push(["photos", "등록 사진", '<span class="sum-thumbs">' + ph.map(function (p) { return '<img src="' + esc(p.src) + '" alt="">'; }).join("") + "</span>", ph.length > 0]);
+    rows.push(["url", "추가 정보", trim(o.url) ? (o.url_ok ? esc(o.url) + ' <span class="okmark">✓ 확인됨</span>' : esc(o.url) + " (주소 확인 필요)") : '<span class="none">입력 안 함</span>', !trim(o.url) || o.url_ok, { typed: !!trim(o.url) }]);
+    rows.push(["aspect", "화면 비율", a ? esc(a.t) + " · " + a.v : "", !!a]);
+    rows.push(["len", "영상 길이", "15초 · 1편", true]);
+    S.sumKeys = rows.map(function (r) { return r[0]; });
+    el("sum").innerHTML = rows.map(function (r) { return row(r[0], r[1], r[2], r[3], r[4]); }).join("");
+    var all = S.sumKeys.every(function (k) { return S.checked[k]; });
+    el("checkAll").checked = all;
+    el("go").disabled = !(okStep(5) && all) || !!S.editing;
+    el("missList").textContent = okStep(5) && !all ? "모든 항목을 확인해 체크해 주세요" : "";
+    if (S.editing) { var f = el("ed_" + S.editing); if (f) { f.focus(); if (f.setSelectionRange) f.setSelectionRange(f.value.length, f.value.length); } }
+  }
+  function saveInline(key) {
+    var v = el("ed_" + key).value;
+    if (!trim(v) || (key === "point" && trim(v).length < 5)) { toast(key === "point" ? "특장점은 5자 이상 써 주세요" : "비워 둘 수 없습니다"); return; }
+    S.o3[key] = v; el(key).value = v; readStep1();
+    S.editing = null; S.checked[key] = false;   // 고친 줄은 다시 확인
+    save(true).then(function () { paintSummary(); toast("고쳤습니다 · 자동 저장됨"); });
   }
 
   function submit() {
@@ -273,17 +323,19 @@
   }
 
   // ── 6단계 ──
+  // 10-18 Dan — 「영상 생성 시작」을 누른 때부터 24시간이 초시계처럼 거꾸로 흐른다(시·분·초·1/100초) · 신뢰를 위해 24시간
+  var ETA_MS = 24 * 3600 * 1000;
+  function tick() {
+    var since = new Date(S.o3.submitted_at || Date.now()).getTime();
+    var left = Math.max(0, since + ETA_MS - Date.now());
+    var p2 = function (n) { return String(n).padStart(2, "0"); };
+    var h = Math.floor(left / 3600000), m = Math.floor(left % 3600000 / 60000), sec = Math.floor(left % 60000 / 1000), cs = Math.floor(left % 1000 / 10);
+    el("etH").textContent = p2(h); el("etM").textContent = p2(m); el("etS").textContent = p2(sec); el("etC").textContent = p2(cs);
+    if (!left) { el("etaNote").textContent = "마무리 확인 중입니다. 끝나는 대로 바로 알려 드려요"; return; }
+    if (S.step === 6 && !el("etaBox").hidden) tick.raf = requestAnimationFrame(tick);
+  }
   function paintDone() {
-    var o = S.o3, st = Math.min(Math.max(+o.stage || 0, 0), STAGES.length - 1);
-    var since = new Date(o.stage_at || o.submitted_at || Date.now()).getTime();
-    var nextRem = st + 1 < STAGES.length ? STAGES[st + 1][1] : 0;
-    var remMin = Math.max(STAGES[st][1] * 60 - (Date.now() - since) / 60000, nextRem * 60 + 30);
-    if (st === STAGES.length - 1) remMin = 0;
-    // 검수 단계에서 예상 시간이 지나면 「30분」에 멈춰 있지 않게 — 실제 상태를 쓴다(10-15)
-    var over = STAGES[st][1] * 60 - (Date.now() - since) / 60000 <= nextRem * 60 + 30;
-    var dd = Math.floor(remMin / 1440), hh = Math.floor(remMin % 1440 / 60), mm = Math.floor(remMin % 60);
-    el("eta").textContent = !remMin ? "완성됐습니다" : (over && st >= 4) ? "마지막 확인 중입니다. 끝나면 바로 알려 드립니다"
-      : "약 " + (dd ? dd + "일 " : "") + hh + "시간 " + mm + "분";
+    cancelAnimationFrame(tick.raf); tick();
     // 완성본(관리자가 승인해 올린 final) — 있으면 영상·내려받기를 보여 준다(10-15 옵션 3 납품 경로)
     db.from("assets").select("storage_path,created_at").eq("project_id", S.pid).eq("kind", "final").eq("approved", true)
       .order("created_at", { ascending: false }).limit(1).then(function (r) {
@@ -333,7 +385,9 @@
     var o = S.o3;
     el("brand").value = o.brand || ""; el("kind").value = o.kind || ""; el("product").value = o.product || ""; el("point").value = o.point || "";
     el("pointCount").textContent = trim(o.point).length + " / 200";
+    if (!o.mood) o.mood = "auto";   // 예전 임시 저장본은 빈 값 — 맡기기로
     var m = document.querySelector('input[name="mood"][value="' + o.mood + '"]'); if (m) m.checked = true;
+    el("avoid").value = o.avoid || ""; el("refurl").value = o.ref_url || "";
     var a = document.querySelector('input[name="aspect"][value="' + o.aspect + '"]'); if (a) a.checked = true;
     el("url").value = o.url || "";
     if (o.url) { el("urlMsg").className = "urlmsg " + (o.url_ok ? "ok" : "no"); el("urlMsg").textContent = o.url_ok ? "✓ 페이지를 확인했어요" : "주소 확인을 눌러 주세요"; }
@@ -343,6 +397,8 @@
   function wire() {
     ["brand", "kind", "product", "point"].forEach(function (id) { el(id).addEventListener("input", function () { readStep1(); paint(); }); });
     el("moods").addEventListener("change", function (e) { S.o3.mood = e.target.value; paint(); });
+    el("avoid").addEventListener("input", function (e) { S.o3.avoid = e.target.value; });
+    el("refurl").addEventListener("input", function (e) { S.o3.ref_url = e.target.value; });
     el("aspects").addEventListener("change", function (e) { S.o3.aspect = e.target.value; paint(); });
     el("files").addEventListener("change", function (e) { addFiles(e.target.files); });
     var drop = el("drop");
@@ -359,14 +415,30 @@
     });
     el("url").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); checkUrl(); } });
     el("urlCheck").addEventListener("click", checkUrl);
-    el("prev").addEventListener("click", function () { if (S.step > 1) go(S.step - 1); });
+    el("prev").addEventListener("click", function () { if (S.step > 1) { if (okStep(1)) save(true); go(S.step - 1); } });   // 단계가 바뀌면 자동 저장(10-18)
     el("next").addEventListener("click", function () {
       if (!okStep(S.step)) return;
       var b = el("next"); b.disabled = true;
       save(true).then(function (ok) { if (ok) go(S.step + 1); else paint(); });
     });
     el("save").addEventListener("click", function () { save(false); });
-    el("sum").addEventListener("click", function (e) { var b = e.target.closest("[data-go]"); if (b) go(+b.dataset.go); });
+    el("sum").addEventListener("click", function (e) {
+      var b = e.target.closest("[data-edit]"); if (b) { S.editing = b.dataset.edit; paintSummary(); return; }
+      b = e.target.closest("[data-save]"); if (b) { saveInline(b.dataset.save); return; }
+      if (e.target.closest("[data-cancel]")) { S.editing = null; paintSummary(); }
+    });
+    el("sum").addEventListener("change", function (e) {
+      var c = e.target.closest("[data-chk]"); if (!c) return;
+      S.checked[c.dataset.chk] = c.checked; paintSummary();
+    });
+    el("sum").addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && e.target.id && e.target.id.indexOf("ed_") === 0 && e.target.tagName === "INPUT") { e.preventDefault(); saveInline(e.target.id.slice(3)); }
+      if (e.key === "Escape" && S.editing) { S.editing = null; paintSummary(); }
+    });
+    el("checkAll").addEventListener("change", function (e) {
+      (S.sumKeys || []).forEach(function (k) { var c = document.querySelector('[data-chk="' + k + '"]'); if (c && !c.disabled) S.checked[k] = e.target.checked; });
+      paintSummary();
+    });
     el("go").addEventListener("click", submit);
   }
 
