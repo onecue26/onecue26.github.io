@@ -4,298 +4,85 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<title>옵션 3 시험 1</title>
+<title>옵션 3 엔진 시험</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=Gothic+A1:wght@800;900&display=swap">
 <style>
-:root{--bg:#f3f4f2;--paper:#fff;--ink:#1d2321;--mute:#5f6a66;--line:#d9dedb;--acc:#1f6f5c;--soft:#e6efeb;--bad:#b3402f;--good:#2e7d4f;--wait:#a06a12;
+:root{--bg:#f3f4f2;--paper:#fff;--ink:#1d2321;--mute:#5f6a66;--line:#d9dedb;--acc:#1f6f5c;--bad:#b3402f;--good:#2e7d4f;--warn:#a06a12;
  --fd:"Gothic A1","IBM Plex Sans KR",system-ui,sans-serif;--fb:"IBM Plex Sans KR",system-ui,sans-serif;color-scheme:light}
-@media (prefers-color-scheme:dark){:root{--bg:#141817;--paper:#1c2220;--ink:#e6ebe8;--mute:#9aa6a1;--line:#2f3734;--acc:#5fc2a6;--soft:#21302b;--bad:#ef8a78;--good:#6fcf97;--wait:#e3b35c;color-scheme:dark}}
+@media (prefers-color-scheme:dark){:root{--bg:#141817;--paper:#1c2220;--ink:#e6ebe8;--mute:#9aa6a1;--line:#2f3734;--acc:#5fc2a6;--bad:#ef8a78;--good:#6fcf97;--warn:#e3b35c;color-scheme:dark}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.65 var(--fb)}
-.wrap{max-width:1040px;margin:0 auto;padding-inline:18px;padding-block:28px 80px}
-h1{font:900 clamp(26px,4.4vw,36px)/1.2 var(--fd);margin:0}
-h2{font:900 21px/1.3 var(--fd);margin:38px 0 12px}
-h3{font:800 18px/1.3 var(--fd);margin:0}
-.upd{color:var(--mute);font-size:13px;margin:4px 0 14px;font-variant-numeric:tabular-nums}
-.lede{max-width:70ch;margin:0}
-.now{margin-top:16px;background:var(--paper);border:2px solid var(--acc);border-radius:10px;padding:12px 16px;font-weight:700}
-.now span{color:var(--wait)}
-/* 단계 */
-.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px}
-.steps li{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px;font-size:13px;line-height:1.4;min-width:0}
-.steps b{display:block;font-size:14px;margin-bottom:3px}
-.steps .st{display:inline-block;font-size:12px;font-weight:700;margin-top:6px}
-.ok .st{color:var(--good)} .wt .st{color:var(--wait)} .no .st{color:var(--mute)}
-.steps li.ok{border-color:var(--good)} .steps li.wt{border-color:var(--wait);border-width:2px}
-/* 바뀐 것 */
-.tbl{overflow-x:auto} table{border-collapse:collapse;width:100%;min-width:620px;background:var(--paper);border:1px solid var(--line)}
-th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;font-size:14px}
-th{background:var(--soft)}
-td.o{color:var(--mute)}
-/* 건 */
-.case{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:22px}
-.case .meta{color:var(--mute);font-size:13px;margin:2px 0 14px}
-.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:20px}
-@media (max-width:760px){.cols{grid-template-columns:1fr}}
-.lab{font:800 13px/1 var(--fb);letter-spacing:.04em;color:var(--mute);margin:0 0 8px}
-.lab.new{color:var(--acc)}
-video{width:100%;max-width:280px;background:#000;border-radius:6px;display:block}
-.prev p{font-size:14px;margin:8px 0 0}
-.pos{background:var(--soft);border-radius:8px;padding:10px 12px;font-size:14px;margin-bottom:12px}
-.pos div{margin:2px 0}
-.win{list-style:none;margin:0 0 12px;padding:0;border-left:3px solid var(--line)}
-.win li{padding:4px 0 4px 12px;font-size:14px;position:relative}
-.win .t{font-variant-numeric:tabular-nums;color:var(--mute);font-weight:700;margin-right:6px}
-.win li.pk{border-left:3px solid var(--acc);margin-left:-3px;background:var(--soft);border-radius:0 6px 6px 0}
-.win li.pk .t{color:var(--acc)}
-.refs{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
-.ref{border:1px dashed var(--line);border-radius:8px;padding:10px;font-size:13px;line-height:1.4;min-height:92px}
-.ref b{display:block;color:var(--acc);font-size:12px}
-.ref .s{display:block;margin-top:6px;font-weight:700;color:var(--wait)}
-.ref.have{border-style:solid}
-.ref.have .s{color:var(--good)}
-.ref img{display:block;width:100%;border-radius:6px;margin-top:6px}
-.result{margin-top:14px;border:1px dashed var(--line);border-radius:8px;padding:14px;color:var(--mute);font-size:14px;text-align:center}
-.cost td,.cost th{font-variant-numeric:tabular-nums}
-.g{color:var(--good);font-weight:700}.b{color:var(--bad);font-weight:700}
-.foot{color:var(--mute);font-size:13px;margin-top:30px}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 var(--fb)}
+.wrap{max-width:980px;margin:0 auto;padding-inline:16px;padding-block:24px 70px}
+h1{font:900 clamp(24px,4vw,32px)/1.2 var(--fd);margin:0 0 4px}
+.sub{color:var(--mute);font-size:13px;margin:0 0 18px}
+.case{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:18px}
+.case h2{font:900 19px/1.3 var(--fd);margin:0 0 2px}
+.st{font-size:13px;font-weight:700;margin:0 0 12px}
+.st.ok{color:var(--good)} .st.run{color:var(--warn)} .st.bad{color:var(--bad)}
+.grid{display:grid;grid-template-columns:minmax(0,280px) minmax(0,1fr);gap:18px}
+@media (max-width:700px){.grid{grid-template-columns:1fr}}
+video{width:100%;border-radius:6px;background:#000;display:block}
+.v2{display:grid;gap:8px}
+.cap{font-size:12px;color:var(--mute);margin:2px 0 0}
+.four{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.box{border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-width:0}
+.box b{display:block;font:800 13px/1.3 var(--fb);margin-bottom:4px}
+.box.p b{color:var(--bad)} .box.t b{color:var(--warn)} .box.d b{color:var(--good)} .box.c b{color:var(--acc)}
+.box ul{margin:0;padding-left:16px;font-size:14px} .box li{margin:2px 0}
 </style>
 </head>
 <body><div class="wrap">
-<h1>옵션 3 · 시험 1</h1>
-<p class="upd">마지막 갱신 2026-10-19 오후 · 투썸 · 오아 · 나디아</p>
-<p class="lede">같은 의뢰서 세 건을 <b>지금 엔진</b>으로 처음부터 다시 만들어, 예전 방식으로 만든 판과 나란히 비교합니다. 납품이 아니라 엔진이 실제로 나아졌는지 재는 시험입니다. 통과하면 이 상태를 라이브러리 R2로 얼립니다.</p>
-<div class="now">지금 단계 · <span>투썸 완료(53.25cr) — 생성 후 검토 6개 중 4개 통과 · Dan 판정 대기 · 오아·나디아는 대기</span></div>
-
-
-
-<h2>오아 — 엔진 실행기 첫 자동 실행(의뢰서부터 · Head 손 없음)</h2>
-<section class="case">
- <div class="cols">
-  <div><p class="lab new">후반 완성본(14:35) · 생성 후 검토 1/6</p>
-   <video src="media/o3t1/oa_auto_post.mp4" poster="media/o3t1/oa_auto_post.jpg" controls playsinline preload="none" style="max-width:100%"></video>
-   <p class="m">생성 원본(글자 없음): <a href="media/o3t1/oa_auto_raw.mp4">oa_auto_raw.mp4</a></p></div>
-  <div><p class="lab">엔진이 혼자 정한 것</p>
-   <div class="pos"><div><b>아이디어</b> 「이 작은 게 되겠어?」 → 대는 순간 시원함으로 반전(크기 역전)</div><div><b>연출 결</b> 빠른 B급 컷 · 따뜻한 실내광 · 제품 매크로</div><div><b>정점</b> 5~10초 — 작은 본체가 목에 닿자 표정이 녹고 잔머리·셔츠가 진동에 떨림</div><div><b>시간</b> 설계 25분(13:40~14:06) · 그림 14:11 · 영상 14:19</div></div></div>
- </div>
- <div class="refs">
-  <div class="ref have"><b>제품 여러 방향 시트</b><img src="media/o3t1/oa_sheet.jpg" alt="" loading="lazy"></div>
-  <div class="ref have"><b>인물 3면도</b><img src="media/o3t1/oa_person.jpg" alt="" loading="lazy"></div>
-  <div class="ref have"><b>장소 사진</b><img src="media/o3t1/oa_place.jpg" alt="" loading="lazy"></div>
- </div>
- <div class="tbl" style="margin-top:14px"><table>
-<tr><th>생성 후 검토</th><th>판정</th><th>내용</th></tr>
-<tr><td>의도·훅·제품·몰입·흠</td><td class="b">✕ 5개</td><td>첫 2초에 크기 대비가 안 섬(서랍 꺼내기) · 정점에서 폼 볼이 하트·꽃봉오리 모양으로 변하고 목에 닿지 않음 · 진동 떨림 없음 · 어깨 옮기기 동작 없음 · B급 에너지 없이 잔잔한 집 광고 톤</td></tr>
-<tr><td>끝 로고 · 후반</td><td class="b">✕</td><td>시댄스가 이미 제품 로고와 흰 「oa」 심벌을 넣었는데, 엔진이 대조 없이 웹 캡처에서 오려 낸 로고를 덧씌워 로고 세 개가 겹침 · 자막이 손 위 — 엔진 관문이 「파일 있음」만 보고 통과시킴(R3 고칠 목록 5·10) · 음량 -14.7 LUFS 는 정상</td></tr>
-</table></div>
-<p class="m">크레딧 53.25cr(그림 3장 8.25 + 영상 45) · 시간: 설계 25분 + 생성·후반·검토 40분 = 약 67분 · 다시 뽑지 않고 멈춤(한 판)</p>
-</section>
-
-<h2>투썸 결과 — 시험 1 첫 완성(v2)</h2>
-<section class="case">
- <div class="cols">
-  <div class="prev"><p class="lab">이전 판 · 예전 방식 v5(10-15 납품)</p>
-   <video src="media/o3t1/prev_twosome.mp4" poster="media/o3t1/prev_twosome.jpg" controls playsinline preload="none"></video></div>
-  <div><p class="lab new">새 판 · v2 r2 · 후작업 완료</p>
-   <video src="media/o3t1/twosome_v2_post.mp4" poster="media/o3t1/twosome_v2_post.jpg" controls playsinline preload="none"></video>
-   <p class="m">생성 원본(글자 없음): <a href="media/o3t1/twosome_v2_raw.mp4">twosome_v2_raw.mp4</a> · 시댄스 2.5 480p 드래프트 15초 · 한 판</p></div>
- </div>
- <p class="lab" style="margin-top:14px">생성에 넣은 참조 3장(GPT Image 2.5 Sunburst 2k)</p>
- <div class="refs">
-  <div class="ref have"><b>Image 1 · 제품 여러 방향 시트</b><img src="media/o3t1/t_sheet.jpg" alt="제품 시트" loading="lazy"><span class="s">실물과 블라인드 대조 — 사용 가능</span></div>
-  <div class="ref have"><b>Image 2 · 인물 3면도(스튜디오)</b><img src="media/o3t1/t_person.jpg" alt="인물 3면도" loading="lazy"></div>
-  <div class="ref have"><b>Image 3 · 장소 사진</b><img src="media/o3t1/t_place.jpg" alt="장소" loading="lazy"></div>
- </div>
- <div class="tbl" style="margin-top:14px"><table>
-<tr><th>생성 후 검토(지시문 모르는 에이전트)</th><th>판정</th><th>내용</th></tr>
-<tr><td>제품 충실도</td><td class="g">○</td><td>잔 3층·무늬 없는 유리가 처음부터 끝까지 실물과 같음 — 제품 여러 방향 시트 효과</td></tr>
-<tr><td>훅</td><td class="g">○</td><td>멈칫한 스푼 접사 → 2초에 돌풍으로 넘어가는 낙차 · 첫 2초 안 움직임은 작음</td></tr>
-<tr><td>몰입</td><td class="g">△</td><td>정점 돌풍이 가장 길고 셈 · 9.5~11.5초 구도·자세가 그대로라 밋밋</td></tr>
-<tr><td>브랜드</td><td class="g">○</td><td>로고·표기·고유색 공식과 같음 · 검수자가 문구 색(공식은 노랑·흰)을 걸었으나 Dan 기준(자막 색·서체는 우리가)으로 유지 — 밝은 창턱이라 짙은 글자</td></tr>
-<tr><td>의도</td><td class="b">✕</td><td>9~12초 「케이크↔폼 왕복」이 안 나옴(크림 한 점만, 케이크 그대로) · 마지막 컷 손이 잔을 쥔 듯</td></tr>
-<tr><td>흠</td><td class="b">✕</td><td>정점 와이드에서 방이 다시 지어짐(선반·의자·창 바뀜) · 마지막 컷 창밖 단풍나무가 사라짐(장소 바뀜) · 큰 잎이 스티커처럼 납작 · 11.85초 손가락 뭉침</td></tr>
-</table></div>
-<p class="m">크레딧: 그림 3장 8.25cr + 영상 45cr = 53.25cr · 후반 관문 통과(음량 -14.3 LUFS) · 다시 뽑지 않고 Dan 판정 대기(버튼 한 번 = 생성 한 번) · 교훈은 OPTION3_LESSONS.md 10-19 투썸 시험 1</p>
-</section>
-
-<h2>진행 단계</h2>
-<ol class="steps">
- <li class="ok"><b>① 조사·포지셔닝</b>특장점 1순위 · 장단점 가름<span class="st">통과 3/3</span></li>
- <li class="ok"><b>② 아이디어·구간 표</b>사건 하나 · 정점 하나<span class="st">통과 3/3</span></li>
- <li class="ok"><b>③ 프롬프트</b>네 덩어리 · 연출은 엔진<span class="st">통과 3/3</span></li>
- <li class="wt"><b>④ 생성 전 검토</b>5관점 · 지시문 모르는 에이전트<span class="st">r2 통과 3/3</span></li>
- <li class="wt"><b>⑤ 그림 10장</b>제품 시트 3·3면도 4·장소 3<span class="st">승인 대기</span></li>
- <li class="no"><b>⑥ 그림 확인</b>실물 블라인드 대조 · Dan 확인<span class="st">대기</span></li>
- <li class="no"><b>⑦ 영상 3편</b>시댄스 480p 드래프트<span class="st">대기</span></li>
- <li class="no"><b>⑧ 검수·비교</b>튐 검사 · 이전 판과 블라인드<span class="st">대기</span></li>
-</ol>
-
-<h2>엔진에서 바뀐 것</h2>
-<div class="tbl"><table>
-<tr><th style="width:18%">칸</th><th>예전(이전 판)</th><th>지금(시험 1)</th></tr>
-<tr><td>포지셔닝</td><td class="o">조사표에서 바로 아이디어</td><td>광고주 특장점을 1순위로 · 판매 페이지는 장점, 나머지는 조사로 장단점 · 이길 수 없는 비교는 피하고 다시 정의(reframe) · 관문이 막음</td></tr>
-<tr><td>연출</td><td class="o">컷마다 카메라·초를 우리가 지정</td><td>v2 · 우리는 구간마다 일어나는 일·꼭 보일 것·느낌·소리만 · 컷·카메라·전환·연기는 시댄스</td></tr>
-<tr><td>참조 그림</td><td class="o">제품 사진 한 장 (+첫 장면 그림)</td><td>인물 3면도 + 장소 사진 + <b>제품 여러 방향 시트</b> · 첫 장면 그림 없음</td></tr>
-<tr><td>연출 결</td><td class="o">없음(컷마다 지정하거나 전부 비움)</td><td>우리가 라이브러리 근거로 결(여러 컷 몰입 / 적은 컷 고급 등)을 한두 문장으로 주문 · 컷별 카메라는 시댄스 · 관문이 근거 확인</td></tr>
-<tr><td>이미지 엔진</td><td class="o">구독 GPT</td><td>힉스필드 GPT Image 2.5 Sunburst 2k</td></tr>
-<tr><td>라이브러리</td><td class="o">R1(10-10) 카드만</td><td>R1 카드 + 이후 자료(포지셔닝 틀·끝까지 보게 하는 원리·AI 광고 장치) — 통과 뒤 R2로 묶음</td></tr>
-</table></div>
-
-
-<h2>생성 전 검토 r1 (15개 · 지시문 모르는 에이전트)</h2>
-<div class="tbl"><table>
-<tr><th>건</th><th>의도</th><th>구현 가능성</th><th>훅</th><th>몰입</th><th>브랜드</th><th>핵심 지적</th></tr>
-<tr><td>투썸</td><td class="b">✕</td><td class="b">✕</td><td class="b">✕</td><td class="b">✕</td><td class="g">○</td><td>「잔을 케이크로 착각」 자체가 약함 — 투명 잔이 음료로 먼저 읽힘 · 훅이 「띵」 소리 하나 · 정점 뒤 설명 동작·정지 3초</td></tr>
-<tr><td>오아</td><td class="b">✕</td><td class="b">✕</td><td class="b">✕</td><td class="b">✕</td><td class="b">✕</td><td>「쪼끄만 걸로?」 전에 제품이 안 보임 · 「얼굴 녹음」 정점은 1판에서 약했던 유형 · 로고가 손에 가려짐 · 타격음이 저소음 메시지와 어긋남 · 끝 2초 과밀</td></tr>
-<tr><td>나디아</td><td class="b">✕</td><td class="b">✕</td><td class="b">✕</td><td class="b">✕</td><td class="g">○</td><td>첫 2초 약함 · 비→햇빛 전환을 한 장면에 몰아넣음 · 정점 뒤 3초 조용 · 끝 장면 각도·누가 드는지 없음</td></tr>
-</table></div>
-<p class="m">검토 쪽 문제도 둘 찾아 고쳤습니다 — ① 카메라를 일부러 비운 것을 흠으로 셈 → 연출 결 칸으로 주문하고 검토에 「비운 것은 흠 아님」 명시 ② 근거 카드 칸이 비어 있었음. 지적 칸만 고치지 않고 세 건 모두 아이디어부터 다시 씁니다(r2).</p>
-
-<h2>r2 계획 — 생성 전 검토 통과 (의도 전달 · 알려진 실패 · 브랜드)</h2>
-<section class="case"><h3>투썸 · 블랙 치즈폼 라떼</h3>
-<div class="pos"><div><b>아이디어</b> 아까워 못 깨던 매끈한 폼 캡을 결국 톡 깬 첫 한 숟갈 — 입에 닿는 순간 창이 활짝 열린 듯 가을 돌풍이 카페로 쏟아져 붉은 단풍잎이 온 공간을 휘감고, 그녀만 눈을 감고 고요히 음미한 뒤 같은 스푼으로 케이크와 폼을 오간다. 잎이 내려앉은 테이블에 잔과 케이크가 나란히</div><div><b>연출 결</b> 여러 컷 몰입 — <i>Get to the first spoonful fast and give the autumn gust the most time, the most scale and the most camera energy, then let it settle softly into a calm, pretty finish; warm golden maple backlight, creamy foam and glossy chocolate in crisp focus.</i></div></div>
-<ul class="win">
-<li><span class="t">0–2초</span>단풍 창가 테이블에서 그녀의 스푼이 매끈한 하얀 폼 캡 바로 위에서 멈칫하다 결국 톡 하고 캡을 깬다</li>
-<li class="pk"><span class="t">2–9초 ★</span>스푼이 두꺼운 폼을 한가득 떠 올려 입에 넣는 순간 창이 활짝 열린 듯한 가을 돌풍이 카페로 쏟아져 붉고 노란 단풍잎이 온 공간을 휘감는다 — 그녀만 눈을 감고 고요히 음미한다</li>
-<li><span class="t">9–12초</span>공중에 멈춘 듯 떠 있는 단풍잎 사이에서 눈을 뜬 그녀가 같은 스푼으로 케이크를 한 입 뜨고 곧바로 다시 잔의 폼으로 스푼을 가져간다</li>
-<li><span class="t">12–15초</span>잎이 사르르 테이블에 내려앉고 그녀가 스푼을 케이크 접시에 살짝 내려놓는다 — 스푼 자국 난 잔과 한 입 빈 케이크가 나란히 남는다</li>
-</ul><div class="refs">
-<div class="ref"><b>Image 1 · 제품 여러 방향 시트</b>제품 여러 방향 시트 — 블랙 치즈폼 라떼 잔(정면·사선 위·측면·바로 위, 같은 축척 한 장)<span class="s">만들 그림</span></div>
-<div class="ref"><b>Image 2 · 인물 3면도</b>인물 3면도 — 20대 한국 여성(얼굴·머리·옷만)<span class="s">만들 그림</span></div>
-<div class="ref"><b>Image 3 · 장소 사진</b>장소 사진 — 단풍나무가 보이는 창가 원목 카페 테이블(공간·빛만 · 커튼·냅킨·펜던트 등 같은 바람에 반응할 것이 있는 자<span class="s">만들 그림</span></div>
-</div><div class="result">새 영상 · 승인 대기</div></section>
-<section class="case"><h3>오아 · 바디건</h3>
-<div class="pos"><div><b>아이디어</b> 「시~원하다」를 문자 그대로 — 밝은 흰 사무실, 자리에 앉은 거구가 두 팔로 거대한 회색 마사지건을 어깨에 얹은 채 옆에 선 작은 직장인 손의 바디건을 보고 「그 쪼끄만 걸로?」 비웃는다 → 그녀가 무표정하게 검은 폼 볼을 그의 반대쪽 어깨에 댄다 → 그 어깨에서 시원한 산바람 돌풍이 터져 사무실 서류가 눈보라처럼 날리고 그는 머리칼과 넥타이가 뒤로 날린 굳은 극락 얼굴로 「시~원하다…」(정점) → 돌풍이 가라앉자 머리가 다 넘어간 그가 다른 쪽 어깨를 내밀며</div><div><b>연출 결</b> 여러 컷 몰입 — <i>Get to the taunt fast, hold one still beat on the touch, and give the cool gale the most time, the most scale and the most camera energy; bright high-key daylight and a crisp, clean commercial texture.</i></div></div>
-<ul class="win">
-<li><span class="t">0–3초</span>자리에 앉은 거구가 두 팔로 거대한 회색 마사지건을 자기 어깨에 얹은 채 옆에 선 작은 직장인 손의 작은 바디건을 내려다보며 「그 쪼끄만 걸로?」 하고 비웃는다</li>
-<li><span class="t">3–5초</span>작은 직장인이 무표정하게 바디건의 검은 폼 볼을 그의 반대쪽 어깨 위에 댄다</li>
-<li class="pk"><span class="t">5–11초 ★</span>닿은 어깨에서 꽁꽁 언 산골 폭포 앞 창문을 확 열어젖힌 듯한 차가운 산바람이 터져 사무실 전체를 휩쓸고 거구는 굳은 극락 얼굴로 「시~원하다…」 하고 내뱉는다</li>
-<li><span class="t">11–13초</span>돌풍이 가라앉아 서류가 천천히 내려앉는 가운데 머리가 다 뒤로 넘어간 거구가 다른 쪽 어깨를 그녀에게 내밀며 「…이쪽도.」</li>
-<li><span class="t">13–15초</span>그녀가 펼친 오른손 손바닥 위에 바디건을 세워 보이고 내레이션이 「오아 바디건.」</li>
-</ul><div class="refs">
-<div class="ref"><b>Image 1 · 제품 여러 방향 시트</b>제품 여러 방향 시트 — 바디건 본체를 같은 축척으로 로고 면 옆(헤드 왼쪽)·로고 면 쪽 사선·정면(볼 정면)·윗면·바닥 버<span class="s">만들 그림</span></div>
-<div class="ref"><b>Image 2 · 인물 3면도</b>작은 직장인 3면도 — 얼굴·머리·안경·옷만<span class="s">만들 그림</span></div>
-<div class="ref"><b>Image 3 · 인물 3면도</b>거구 남자 3면도 — 얼굴·머리·턱수염·옷만<span class="s">만들 그림</span></div>
-<div class="ref"><b>Image 4 · 장소 사진</b>장소 사진 — 밝은 흰 오픈 사무실(창 낮빛·책상 위 서류 더미·화분·오아 레드 포인트 벽 하나 · 사람 없음) · 공간·빛만<span class="s">만들 그림</span></div>
-</div><div class="result">새 영상 · 승인 대기</div></section>
-<section class="case"><h3>나디아 · 플라워 암막 우양산</h3>
-<div class="pos"><div><b>아이디어</b> 땡볕에 다들 손으로 눈을 가리는데 그녀만 꽃무늬 우산 그늘 속에서 정색하고 하늘을 본다 — 장대비가 쏟아지고 흠뻑 젖은 직장인이 그녀 우산 밑으로 뛰어든다 — 다시 해가 쨍하자 그는 젖은 신문지를 든 채 눈부셔 멈추고, 그녀는 한 번도 접지 않은 같은 우산으로 그대로 걸어간다</div><div><b>연출 결</b> 적은 컷 고급 — <i>Get to the downpour fast, give the shared-umbrella moment under the printed canopy the most time and the closest, slow-motion camera, and keep everything else unhurried, elegant and few-cut; the weather changes only on hard cuts between shots; natural daylight, fine fabric and rain texture.</i></div></div>
-<ul class="win">
-<li><span class="t">0–2초</span>한낮 땡볕 횡단보도에서 주변 사람들은 손으로 눈 위를 가리고 서 있는데 그녀만 머리 위로 평평히 든 우산 그늘(검정 안쪽과 꽃무늬 가장자리) 속에서 정색한 얼굴로 하늘을 올려다본다</li>
-<li><span class="t">2–4초</span>다음 순간 맑던 하늘이 한여름 스콜처럼 터져 굵은 빗방울이 아스팔트에서 무릎 높이로 튀어 오르고 사람들은 가방과 신문지로 머리를 가리며 흩어지는데 그녀는 같은 자세 그대로 서 있다</li>
-<li class="pk"><span class="t">4–10초 ★</span>흠뻑 젖은 직장인이 신문지를 머리에 인 채 그녀의 우산 밑으로 뛰어들어 바짝 붙고, 그녀는 정색한 채 우산을 그쪽으로 살짝 기울여 나눠 준다</li>
-<li><span class="t">10–13초</span>다음 순간 해를 가리던 구름이 걷힌 한여름 오후처럼 다시 쨍한 햇빛이 나고 젖은 아스팔트에서 옅은 김이 오르는 가운데 그는 젖은 신문지를 든 채 눈부셔 찡그리며 멈춰 서고 그녀는 같은 우산을 편 채 그대로 걸어 나간다(뒤에서 본 꽃무늬 겉면)</li>
-<li><span class="t">13–15초</span>그녀가 햇빛 속 횡단보도를 걸어가는 뒷모습, 어깨 뒤로 젖혀 든 우산의 겉면 전체가 보는 쪽을 향한다</li>
-</ul><div class="refs">
-<div class="ref"><b>Image 1 · 제품 여러 방향 시트</b>제품 여러 방향 시트 — 우양산(펼친 정면 겉면·사선 겉면·옆 겉면·위 겉면 육각·아래에서 본 안쪽 검정·옆 안쪽 보더·대와 <span class="s">만들 그림</span></div>
-<div class="ref have"><b>Image 2 · 인물 3면도</b>인물 3면도(그녀) — 얼굴·머리·옷만<span class="s">있음</span></div>
-<div class="ref"><b>Image 3 · 인물 3면도</b>인물 3면도(조연 직장인) — 얼굴이 정점에서 크게 보이므로 필수 · 얼굴·머리·옷만<span class="s">만들 그림</span></div>
-<div class="ref"><b>Image 4 · 장소 사진</b>장소 사진 — 낮은 건물 사이 동네 횡단보도(공간 배치만 · 날씨와 빛은 구간대로)<span class="s">만들 그림</span></div>
-</div><div class="result">새 영상 · 승인 대기</div></section>
-<h2>r1 계획(폐기 · 비교용)</h2>
+<h1>옵션 3 엔진 시험</h1>
+<p class="sub">엔진 실행기가 의뢰서부터 혼자 만든 결과 · Head 손 없음 · 2026-10-19 · 라이브러리 R2</p>
 
 <section class="case">
- <h3>투썸플레이스 · 블랙 치즈폼 라떼</h3>
- <p class="meta">9:16 · 예쁜 감성 · 의뢰서 특장점 「깊은 커피·달콤한 초콜릿·크리미한 치즈폼」</p>
- <div class="cols">
-  <div class="prev">
-   <p class="lab">이전 판 · 예전 방식 v5(10-15 납품)</p>
-   <video src="media/o3t1/prev_twosome.mp4" poster="media/o3t1/prev_twosome.jpg" controls playsinline preload="none"></video>
-   <p class="m">생성 전 검토(10-19): 의도·훅·몰입·구현 가능성 걸림, 브랜드만 통과</p>
-  </div>
-  <div>
-   <p class="lab new">시험 1 · v2 · r1 계획(검토 통과 못 해 다시 쓰는 중)</p>
-   <div class="pos">
-    <div><b>포지셔닝</b> 다른 라떼와 맛으로는 비슷함 → 「케이크 옆에 놓일 때 완성되는 디저트 같은 가을 한 잔」으로 다시 정의</div>
-   </div>
-   <ul class="win">
-    <li><span class="t">0–2초</span>케이크 단면 같은 크림빛 층에 포크 끝이 닿는다</li>
-    <li><span class="t">2–4초</span>알고 보니 창가 테이블의 라떼 잔 · 그녀가 착각에 웃는다</li>
-    <li class="pk"><span class="t">4–9초 ★</span>치즈폼을 케이크 크림처럼 한 숟갈 떠 맛보고 눈이 커진다</li>
-    <li><span class="t">9–12초</span>케이크 접시를 잔 옆으로 끌어와 나란히 놓는다</li>
-    <li><span class="t">12–15초</span>단풍 창빛 아래 잔과 케이크 · 끝 로고</li>
-   </ul>
-   <div class="refs">
-    <div class="ref"><b>Image 1 · 제품 시트</b>정면 옆·45° 위·폼 윗면·손에 든 크기<span class="s">만들 그림</span></div>
-    <div class="ref"><b>Image 2 · 인물 3면도</b>20대 여성 · 크림 니트<span class="s">만들 그림</span></div>
-    <div class="ref"><b>Image 3 · 장소</b>단풍 보이는 창가 원목 테이블<span class="s">만들 그림</span></div>
-   </div>
-   <div class="result">새 영상 · 아직</div>
+ <h2>투썸 · 블랙 치즈폼 라떼</h2>
+ <p class="st run">영상 나옴(17:16) · 후반·생성 후 검토 진행 중</p>
+ <div class="grid">
+  <div class="v2"><video src="media/o3t1/tw_r2_raw.mp4" poster="media/o3t1/tw_r2_raw.jpg" controls playsinline preload="none"></video><p class="cap">생성 원본 · 9:16 · 45cr(앵커 3장은 지난번 것 재사용)</p></div>
+  <div class="four">
+   <div class="box p"><b>문제</b><ul><li>마지막 컷 잔이 다른 잔으로 바뀜(폼 캡이 부서지고 층이 섞임)</li><li>스푼으로 뜬 폼이 버섯처럼 솟음</li><li>설계가 검토에서 3번 막혀 56분 걸림</li></ul></div>
+   <div class="box t"><b>고칠 것</b><ul><li>닫는 컷 제품 흔들림 → 대응 카드(그 컷만 다시 뽑기·제품 교체 편집)</li></ul></div>
+   <div class="box d"><b>고친 것</b><ul><li>검토는 규정만 막고, 실패 기록은 대응 카드로 깸</li><li>막히면 혼자 다시 쓰지 않고 멈춤</li><li>480p·draft 설정 고정(720p 견적 105cr 막힘)</li></ul></div>
+   <div class="box c"><b>Codex에 시킨 것</b><ul><li>89 흔들림 깨는 방법</li></ul></div>
   </div>
  </div>
 </section>
 
 <section class="case">
- <h3>오아 · 바디건(미니 마사지건)</h3>
- <p class="meta">16:9 · 재밌는 B급 · 의뢰서 특장점 「작지만 진동이 강해 시원하다」</p>
- <div class="cols">
-  <div class="prev">
-   <p class="lab">이전 판 · 예전 방식 마지막 판</p>
-   <video src="media/o3t1/prev_oa.mp4" poster="media/o3t1/prev_oa.jpg" controls playsinline preload="none"></video>
-   <p class="m">생성 전 검토(10-19): 의도·훅·몰입·구현 가능성 걸림, 브랜드만 통과</p>
-  </div>
-  <div>
-   <p class="lab new">시험 1 · v2 · r1 계획(검토 통과 못 해 다시 쓰는 중)</p>
-   <div class="pos">
-    <div><b>포지셔닝</b> 「강하다」는 아직 증거가 약함 → 작은 크기는 손·가방으로 보여 주고, 「서랍 속 큰 마사지건 말고 가방 속 내 마사지건」</div>
-   </div>
-   <ul class="win">
-    <li><span class="t">0–3초</span>정오의 사무실 복도 끝과 끝, 두 사람이 결투하듯 마주 선다</li>
-    <li><span class="t">3–5초</span>거구가 비웃는다 「그 쪼끄만 걸로?」</li>
-    <li class="pk"><span class="t">5–10초 ★</span>작은 직장인이 폼 볼을 어깨에 대자 험상궂던 얼굴이 아기처럼 녹는다 「어우야…」</li>
-    <li><span class="t">10–13초</span>거구와 동료들이 어깨를 내민 채 줄을 선다 「…나도 한 번만」</li>
-    <li><span class="t">13–15초</span>열린 케이스 홈에 쏙 · 「작다고 얕보지 마세요. 오아 바디건.」</li>
-   </ul>
-   <div class="refs">
-    <div class="ref"><b>Image 1 · 제품 시트</b>로고 면·윗면·버튼 면·손 크기·헤드 4종·케이스<span class="s">만들 그림</span></div>
-    <div class="ref"><b>Image 2 · 인물 3면도</b>작은 여직원<span class="s">만들 그림</span></div>
-    <div class="ref"><b>Image 3 · 인물 3면도</b>거구 남자<span class="s">만들 그림</span></div>
-    <div class="ref"><b>Image 4 · 장소</b>밝은 흰 사무실 복도<span class="s">만들 그림</span></div>
-   </div>
-   <div class="result">새 영상 · 아직</div>
+ <h2>오아 · 바디건</h2>
+ <p class="st bad">완성 · 생성 후 검토 통과 못 함 — 다시 뽑아야 함</p>
+ <div class="grid">
+  <div class="v2"><video src="media/o3t1/oa_repost.mp4" poster="media/o3t1/oa_repost.jpg" controls playsinline preload="none"></video><p class="cap">후반 다시 한 판 · 16:9 · 53.25cr</p></div>
+  <div class="four">
+   <div class="box p"><b>문제</b><ul><li>마지막 장면 로고 겹침(엔진 흰 심벌 위에 공식 로고를 또 얹음 · 검은 상자)</li><li>정점에서 폼 볼 변형 · 목에 안 닿음</li><li>B급을 엔진이 의뢰서 칸만 보고 정함</li></ul></div>
+   <div class="box t"><b>고칠 것</b><ul><li>영상 다시 뽑기(실패 사례·톤 고르기 반영 뒤)</li></ul></div>
+   <div class="box d"><b>고친 것</b><ul><li>완성 프레임 판정을 코드로 분리(실행기 셀프 채점 금지)</li><li>로고 방법 셋 · 덧씌움 금지 · 투명 바탕 확인</li><li>톤은 시장 근거 + 재미 강도로 엔진이 고름</li><li>검토에 「광고 완성도」 관점</li></ul></div>
+   <div class="box c"><b>Codex에 시킨 것</b><ul><li>87 톤 고르는 기준</li><li>82 연출 결 카드</li><li>88 경쟁 광고 톤 칸</li></ul></div>
   </div>
  </div>
 </section>
 
 <section class="case">
- <h3>나디아 · 플라워 암막 우양산</h3>
- <p class="meta">4:5 · 예쁜 감성 · 의뢰서 특장점 「134g 가벼움으로 비 올 때도 맑을 때도」</p>
- <div class="cols">
-  <div class="prev">
-   <p class="lab">이전 판 · v2b(10-18 · 제품 사진 한 장)</p>
-   <video src="media/o3v2b/new.mp4" poster="media/o3v2b/new.jpg" controls playsinline preload="none"></video>
-   <p class="m">6초 뒤 무늬가 옅어짐 · 안쪽 살·손잡이를 엔진이 지어냄 · 반전 약함</p>
-  </div>
-  <div>
-   <p class="lab new">시험 1 · v2 · r1 계획(검토 통과 못 해 다시 쓰는 중)</p>
-   <div class="pos">
-    <div><b>포지셔닝</b> 무게 숫자로는 더 가벼운 경쟁 제품이 있음 → 「소나기에도 땡볕에도 내 차림이 그대로 — 머리 위 한 장까지 코디」</div>
-   </div>
-   <ul class="win">
-    <li><span class="t">0–2초</span>소나기에 처마 밑 사람들 발이 묶인 사이, 그녀가 접힌 모란 우산을 들어 보이며 웃는다</li>
-    <li><span class="t">2–5초</span>모란 우산을 펴고 빗속 횡단보도로 · 주변은 검정 무지 우산</li>
-    <li class="pk"><span class="t">5–10초 ★</span>비가 뚝 그치고 땡볕 · 다들 허둥지둥 우산을 접는데 그녀만 같은 우산 그늘로 여유롭게</li>
-    <li><span class="t">10–13초</span>우산 그늘 아래 올려다보며 만족스럽게 웃는다</li>
-    <li><span class="t">13–15초</span>맑은 하늘 아래 펼친 모란 우산 · 끝 로고</li>
-   </ul>
-   <div class="refs">
-    <div class="ref"><b>Image 1 · 제품 시트</b>펼친 겉·안쪽·옆 겉·옆 안·꼭지·접힘·케이스·손 크기<span class="s">만들 그림</span></div>
-    <div class="ref have"><b>Image 2 · 인물 3면도</b>기존 시트 재사용<span class="s">있음</span></div>
-    <div class="ref"><b>Image 3 · 장소</b>카페 처마 있는 길모퉁이 횡단보도<span class="s">만들 그림</span></div>
-   </div>
-   <div class="result">새 영상 · 아직</div>
-  </div>
+ <h2>나디아 · 플라워 3단 우양산</h2>
+ <p class="st run">설계 다시 쓰는 중</p>
+ <div class="four">
+  <div class="box p"><b>문제</b><ul><li>검토자가 광고주 AI 그림을 정답으로 써서 우산 색을 잘못 고침</li><li>실행기가 제품 색을 글로 적음</li><li>검토가 후반에서 정할 서체까지 막음</li></ul></div>
+  <div class="box t"><b>고칠 것</b><ul><li>제품 시트에 우산 안쪽 면 넣기(대응 카드)</li></ul></div>
+  <div class="box d"><b>고친 것</b><ul><li>정답 자료 순서: 판매 페이지 실물 → 조사표 → 광고주 사진</li><li>참조가 있으면 지목만 — 제품 색 글로 쓰면 관문이 막음</li><li>생성 전 검토는 후반 일(서체·로고 조판·음원) 안 봄</li></ul></div>
+  <div class="box c"><b>Codex에 시킨 것</b><ul><li>89 흔들림 깨는 방법</li></ul></div>
  </div>
 </section>
 
-<h2>크레딧</h2>
-<div class="tbl"><table class="cost">
-<tr><th>항목</th><th>수량</th><th>예상</th><th>실제</th><th>상태</th></tr>
-<tr><td>그림 (GPT Image 2.5 Sunburst 2k high)</td><td>10장</td><td>약 28cr</td><td>—</td><td>승인 대기</td></tr>
-<tr><td>영상 (시댄스 2.5 · 480p 드래프트 · 15초)</td><td>3편</td><td>135cr</td><td>—</td><td>그림 확인 뒤</td></tr>
-<tr><th>합계</th><td></td><th>약 163cr</th><td>—</td><td></td></tr>
-</table></div>
+<section class="case">
+ <h2>asdf · asdf core (친구 의뢰 · 실제 고객처럼)</h2>
+ <p class="st run">엔진 진행 중 · 완성되면 관리 페이지에 「납품 전 확인 요청」</p>
+ <div class="four"><div class="box t"><b>고칠 것</b><ul><li>규제 품목(전자담배 등) 확인 단계 — 나중에</li></ul></div></div>
+</section>
 
-<p class="foot">판정: 새 영상과 이전 판을 지시문 모르는 에이전트가 나란히 보고 ① 멈춰서 보게 되나 ② 재치·매력 ③ 제품이 실물과 같나 ④ 규격에 맞나로 순위를 매기고, 최종은 Dan 판정. 단계가 진행될 때마다 이 페이지를 갱신합니다.</p>
+<section class="case">
+ <h2>롤렉스 · 서브마리너 40</h2>
+ <p class="st run">엔진 진행 중 · 완성되면 관리 페이지에 「납품 전 확인 요청」</p>
+</section>
 </div></body>
 </html>
