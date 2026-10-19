@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>원큐 옵션 3 엔진 구조</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=Gothic+A1:wght@800;900&display=swap">
+<style>
+:root{--bg:#f3f4f2;--paper:#fff;--ink:#1d2321;--mute:#5f6a66;--line:#d9dedb;--acc:#1f6f5c;--soft:#e6efeb;--warn:#a06a12;--bad:#b3402f;--good:#2e7d4f;--paid:#7a3fa0;
+ --fd:"Gothic A1","IBM Plex Sans KR",system-ui,sans-serif;--fb:"IBM Plex Sans KR",system-ui,sans-serif;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#141817;--paper:#1c2220;--ink:#e6ebe8;--mute:#9aa6a1;--line:#2f3734;--acc:#5fc2a6;--soft:#21302b;--warn:#e3b35c;--bad:#ef8a78;--good:#6fcf97;--paid:#c39be0;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 var(--fb)}
+.wrap{max-width:1000px;margin:0 auto;padding-inline:18px;padding-block:28px 80px}
+h1{font:900 clamp(26px,4.4vw,34px)/1.2 var(--fd);margin:0 0 6px}
+h2{font:900 20px/1.3 var(--fd);margin:34px 0 12px}
+.lede{color:var(--mute);max-width:70ch;margin:0 0 16px}
+.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.role{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px}
+.role b{display:block;font:800 16px/1.3 var(--fd);margin-bottom:4px}
+.flow{list-style:none;margin:0;padding:0;counter-reset:s}
+.st{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px 12px 56px;margin-bottom:10px}
+.st::before{counter-increment:s;content:counter(s);position:absolute;left:14px;top:12px;width:28px;height:28px;border-radius:50%;background:var(--soft);color:var(--acc);font:800 14px/28px var(--fb);text-align:center}
+.st.paid{border-color:var(--paid)} .st.paid::before{color:var(--paid)}
+.st.stop{border:2px solid var(--warn)}
+.st h3{margin:0 0 4px;font:800 16px/1.3 var(--fd)}
+.row{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--mute)}
+.row span b{color:var(--ink);font-weight:700}
+.tag{display:inline-block;font:700 11px/1 var(--fb);padding:4px 7px;border-radius:99px;margin-left:6px;vertical-align:2px}
+.t-code{background:var(--soft);color:var(--acc)} .t-son{background:#e8eef9;color:#2d5aa8} .t-opus{background:#f4ece0;color:#8a5a17} .t-paid{background:#f1e8f7;color:var(--paid)} .t-dan{background:#fbeee6;color:var(--bad)}
+.back{font-size:13px;color:var(--warn);margin-top:6px}
+.tbl{overflow-x:auto} table{border-collapse:collapse;width:100%;min-width:560px;background:var(--paper);border:1px solid var(--line)}
+th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:top}
+th{background:var(--soft)} td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+.foot{color:var(--mute);font-size:13px;margin-top:26px}
+</style>
+</head>
+<body><div class="wrap">
+<h1>원큐 옵션 3 엔진 구조</h1>
+<p class="lede">의뢰가 들어오면 엔진이 이 순서대로 혼자 돕니다. Dan·Head 는 진행 중에 끼어들지 않고, 끝난 건의 중간 산출물을 뜯어봐서 규칙·관문·라이브러리를 고치고 판(R2 → R3 …)을 올립니다. 2026-10-19 · 라이브러리 현재 판 <b>R2(시험판)</b></p>
+
+<div class="roles">
+ <div class="role"><b>엔진</b>실행기 <code>option3_run.py</code> + 고정 지시서 <code>OPTION3_RUNNER.md</code>. 받는 것은 의뢰서·건 폴더·정본 절차·현재 판 라이브러리뿐 — 다른 건·대화 기록은 못 읽음.</div>
+ <div class="role"><b>Dan · Head</b>① 의뢰가 들어오면 「엔진으로 돌릴까?」 한 번 확인 ② 끝난 건 분석 → 시스템 수정 → 판 올림 ③ 광고주 발송 확인.</div>
+ <div class="role"><b>Codex</b>분석에서 나온 빈칸(라이브러리 자료·조사)을 백로그로 받아 채움 — 엔진 판에 들어가기 전 검수.</div>
+</div>
+
+<h2>도는 순서</h2>
+<p class="row"><span><span class="tag t-code">코드</span> 관문·도구</span><span><span class="tag t-son">빠른 모델</span> sonnet</span><span><span class="tag t-opus">판단 모델</span> opus</span><span><span class="tag t-paid">유료</span> 힉스필드</span><span><span class="tag t-dan">사람</span></span></p>
+<ol class="flow">
+ <li class="st stop"><h3>접수 → 확인 한 번 <span class="tag t-dan">Dan</span></h3>
+  <div class="row"><span><b>입력</b> 원큐 옵션 3 의뢰 화면(new3) 6단계 → 「영상 생성」</span><span><b>나오는 것</b> 알림(☎·텔레그램)</span><span><b>막는 것</b> 실수로 도는 것 — Head 가 「엔진으로 돌릴까요?」 묻고 예일 때만</span></div></li>
+ <li class="st"><h3>조사 <span class="tag t-son">빠른 모델</span><span class="tag t-code">관문</span></h3>
+  <div class="row"><span><b>하는 일</b> 판매 페이지·홈페이지 캡처(page_capture) · 설명서·후기 · 경쟁 제품</span><span><b>나오는 것</b> research.json(21칸)</span><span><b>관문</b> research — 빈 칸·출처</span></div></li>
+ <li class="st"><h3>포지셔닝 <span class="tag t-opus">판단 모델</span><span class="tag t-code">관문</span></h3>
+  <div class="row"><span><b>하는 일</b> 광고주 특장점 1순위 · 같은 점/못한 점/차별점 · 다시 정의</span><span><b>나오는 것</b> positioning.json</span><span><b>관문</b> positioning — 근거가 조사표에 있나 · 이길 수 없는 비교 금지</span></div></li>
+ <li class="st"><h3>아이디어 · 구간 표 · 연출 결 <span class="tag t-opus">판단 모델</span><span class="tag t-code">관문</span></h3>
+  <div class="row"><span><b>하는 일</b> 장면 10개+ → 안 3개 → 하나 · 구간 3~6개 · 정점 하나 · 연출 결(여러 컷 몰입 / 적은 컷 고급) · 참조 구성</span><span><b>나오는 것</b> windows.json</span><span><b>관문</b> windows — 정점 = 제품 실제 성질 · 카메라는 정점+한 곳 · 제품 여러 방향 시트 · 장소는 인물 자리부터</span></div></li>
+ <li class="st"><h3>프롬프트 · 그림 지시서 <span class="tag t-opus">판단 모델</span><span class="tag t-code">관문</span></h3>
+  <div class="row"><span><b>나오는 것</b> prompt.txt(네 덩어리) · refs_needed.md(그림마다 생성 문장)</span><span><b>관문</b> prompt — 잠금 문장 · 연출 결 · 마지막 줄 「let the model choose」</span></div></li>
+ <li class="st"><h3>생성 전 검토 <span class="tag t-son">빠른 모델 ×3</span></h3>
+  <div class="row"><span><b>관점</b> 의도 전달 · 알려진 실패 · 브랜드·규정(지시문 모르는 에이전트)</span><span><b>막는 것</b> 규정 위반·이미 무너진 유형만 · 해 본 적 없음은 위험 목록</span></div>
+  <div class="back">↺ 막히면 판단 모델이 줄거리부터 다시 → 다시 검토(최대 2회)</div></li>
+ <li class="st"><h3>견적 · 상한 <span class="tag t-code">코드</span></h3>
+  <div class="row"><span><b>나오는 것</b> paid_plan.json</span><span><b>막는 것</b> 한 건 80cr 넘으면 생성 전 멈춤</span></div></li>
+ <li class="st paid"><h3>그림 3~4장 <span class="tag t-paid">유료</span><span class="tag t-son">빠른 모델</span></h3>
+  <div class="row"><span><b>엔진</b> GPT Image 2.5 Sunburst 2k(장당 2.75cr)</span><span><b>만드는 것</b> 제품 여러 방향 시트 · 인물 3면도 · 장소 사진</span><span><b>확인</b> 제품 시트 = 실물과 블라인드 대조 · 장소 = 인물 자리·소품·의자</span></div></li>
+ <li class="st paid"><h3>영상 한 판 <span class="tag t-paid">유료</span></h3>
+  <div class="row"><span><b>엔진</b> 시댄스 2.5 · 480p 드래프트 · 15초(45cr)</span><span><b>확인</b> 튐 검사 · 소리 그림(BGM 띠)</span><span><b>규칙</b> 한 판 — 걸려도 자동으로 다시 안 뽑음</span></div></li>
+ <li class="st"><h3>후반 <span class="tag t-code">코드</span><span class="tag t-son">빠른 모델</span></h3>
+  <div class="row"><span><b>하는 일</b> 컷별 문구 설계 · 끝 로고 카드 · 음량(-14 LUFS)</span><span><b>관문</b> post — 안전영역 · 문구 규칙 11개 · 공식 로고 · 음원 출처</span></div></li>
+ <li class="st"><h3>생성 후 검토 <span class="tag t-son">빠른 모델 ×6</span></h3>
+  <div class="row"><span><b>관점</b> 의도 · 훅 · 제품 · 몰입 · 흠 · 브랜드</span><span><b>나오는 것</b> 흠 목록 · 판정</span></div></li>
+ <li class="st stop"><h3>올리기 · 분석 → 시스템 수정 <span class="tag t-dan">Dan · Head</span></h3>
+  <div class="row"><span><b>하는 일</b> 진행 페이지 업로드 → 어느 단계·왜 → 규칙·관문·라이브러리 고침 → 판 올림 · 빈칸은 Codex</span><span><b>광고주 발송</b> Dan 확인 뒤에만</span></div></li>
+</ol>
+
+<h2>잰 시간 (첫 실행 · 오아 _run_oa_r2)</h2>
+<div class="tbl"><table>
+<tr><th>단계</th><th>걸린 시간</th><th>메모</th></tr>
+<tr><td>조사</td><td class="n">11분</td><td>설명서 페이지 캡처 + PDF 읽기 포함</td></tr>
+<tr><td>포지셔닝</td><td class="n">1분</td><td></td></tr>
+<tr><td>아이디어 ~ 생성 전 검토</td><td class="n">13분</td><td>관문 4개 + 검토 3개 모두 통과</td></tr>
+<tr><td><b>설계 합계</b></td><td class="n"><b>25분</b></td><td>이때는 한 모델(opus)이 전부 · 다음 실행부터 단계마다 모델 나눔</td></tr>
+<tr><td>그림 · 영상 · 후반 · 생성 후 검토</td><td class="n">진행 중</td><td>끝나면 채움</td></tr>
+</table></div>
+
+<h2>지금 약한 곳 (분석해서 채울 순서)</h2>
+<div class="tbl"><table>
+<tr><th>어디</th><th>상태</th><th>채우는 법</th></tr>
+<tr><td>포지셔닝</td><td>블라인드 시험 12~20/40 · 브랜드 층을 못 잡음</td><td>Codex 78·81(브랜드 층·증거 없는 판매자) → 조사표 칸 → 재시험</td></tr>
+<tr><td>아이디어 · 연출 결</td><td>라이브러리 얇음 · 오늘 투썸은 제품과 무관한 과장</td><td>Codex 82~84(연출 결 카드·효과 문장·카메라 낱말) · 관문 peak_from_product</td></tr>
+<tr><td>판 비교</td><td>고정 시험 묶음 없음 — 고친 게 나아졌는지 못 잼</td><td>시험 의뢰 세션에서 10건 고정 → 판마다 설계 단계까지 돌려 비교</td></tr>
+<tr><td>접수 연결</td><td>생성 버튼 → 알림까지만 · 엔진 자동 실행 연결 전</td><td>알림 → 「돌릴까?」 → 실행기 연결(다음 작업)</td></tr>
+</table></div>
+<p class="foot">파일: coordination/option3_run.py · OPTION3_RUNNER.md · OPTION3_PLAYBOOK.md · option3_gate.py · option3_review.py · option3_post.py · 라이브러리 판 reference_library/production_learning/library_releases/R2</p>
+</div></body>
+</html>
