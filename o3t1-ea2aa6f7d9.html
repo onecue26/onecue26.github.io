@@ -37,7 +37,7 @@ video{width:100%;border-radius:6px;background:#000;display:block}
 
 <section class="case">
  <h2>투썸 · 블랙 치즈폼 라떼</h2>
- <p class="st run">영상 나옴(17:16) · 후반·생성 후 검토 진행 중</p>
+ <p class="st bad">영상 나옴(17:16) · 실패 — 마지막 컷 잔이 망가짐 · 후반 멈춤</p>
  <div class="grid">
   <div class="v2"><video src="media/o3t1/tw_r2_raw.mp4" poster="media/o3t1/tw_r2_raw.jpg" controls playsinline preload="none"></video><p class="cap">생성 원본 · 9:16 · 45cr(앵커 3장은 지난번 것 재사용)</p></div>
   <div class="four">
@@ -53,10 +53,10 @@ video{width:100%;border-radius:6px;background:#000;display:block}
  <h2>오아 · 바디건</h2>
  <p class="st bad">완성 · 생성 후 검토 통과 못 함 — 다시 뽑아야 함</p>
  <div class="grid">
-  <div class="v2"><video src="media/o3t1/oa_repost.mp4" poster="media/o3t1/oa_repost.jpg" controls playsinline preload="none"></video><p class="cap">후반 다시 한 판 · 16:9 · 53.25cr</p></div>
+  <div class="v2"><video src="media/o3t1/oa_auto_raw.mp4" poster="media/o3t1/oa_auto_raw.jpg" controls playsinline preload="none"></video><p class="cap">생성 원본 그대로(끝에 엔진이 그린 오아 심벌) · 후반 로고 없음 · 16:9 · 53.25cr</p></div>
   <div class="four">
    <div class="box p"><b>문제</b><ul><li>마지막 장면 로고 겹침(엔진 흰 심벌 위에 공식 로고를 또 얹음 · 검은 상자)</li><li>정점에서 폼 볼 변형 · 목에 안 닿음</li><li>B급을 엔진이 의뢰서 칸만 보고 정함</li></ul></div>
-   <div class="box t"><b>고칠 것</b><ul><li>영상 다시 뽑기(실패 사례·톤 고르기 반영 뒤)</li></ul></div>
+   <div class="box t"><b>고칠 것</b><ul><li>영상 다시 뽑기(실패 사례·톤 고르기 반영 뒤)</li><li>끝에 로고가 이미 나오면 후반 로고 안 넣기 → 끝맺음 규칙에 넣음</li></ul></div>
    <div class="box d"><b>고친 것</b><ul><li>완성 프레임 판정을 코드로 분리(실행기 셀프 채점 금지)</li><li>로고 방법 셋 · 덧씌움 금지 · 투명 바탕 확인</li><li>톤은 시장 근거 + 재미 강도로 엔진이 고름</li><li>검토에 「광고 완성도」 관점</li></ul></div>
    <div class="box c"><b>Codex에 시킨 것</b><ul><li>87 톤 고르는 기준</li><li>82 연출 결 카드</li><li>88 경쟁 광고 톤 칸</li></ul></div>
   </div>
@@ -65,12 +65,15 @@ video{width:100%;border-radius:6px;background:#000;display:block}
 
 <section class="case">
  <h2>나디아 · 플라워 3단 우양산</h2>
- <p class="st run">설계 다시 쓰는 중</p>
- <div class="four">
-  <div class="box p"><b>문제</b><ul><li>검토자가 광고주 AI 그림을 정답으로 써서 우산 색을 잘못 고침</li><li>실행기가 제품 색을 글로 적음</li><li>검토가 후반에서 정할 서체까지 막음</li></ul></div>
-  <div class="box t"><b>고칠 것</b><ul><li>제품 시트에 우산 안쪽 면 넣기(대응 카드)</li></ul></div>
-  <div class="box d"><b>고친 것</b><ul><li>정답 자료 순서: 판매 페이지 실물 → 조사표 → 광고주 사진</li><li>참조가 있으면 지목만 — 제품 색 글로 쓰면 관문이 막음</li><li>생성 전 검토는 후반 일(서체·로고 조판·음원) 안 봄</li></ul></div>
-  <div class="box c"><b>Codex에 시킨 것</b><ul><li>89 흔들림 깨는 방법</li></ul></div>
+ <p class="st bad">영상 나옴(17:47) · 실패 — 다른 우산으로 만듦 · 후반 안 함</p>
+ <div class="grid">
+  <div class="v2"><video src="media/o3t1/nadia_r2_raw.mp4" poster="media/o3t1/nadia_r2_raw.jpg" controls playsinline preload="none"></video><p class="cap">생성 원본 · 4:5 · 엔진이 만든 제품 시트 ↓(실물과 다름)</p><img src="media/o3t1/nadia_r2_sheet.jpg" alt="" style="width:100%;border-radius:6px"></div>
+  <div class="four">
+   <div class="box p"><b>문제</b><ul><li>제품 시트부터 다른 우산(하늘색 데이지·나무 손잡이) — 실물은 아이보리·짙은 모란·검정 손잡이</li><li>조사 단계가 판매 페이지 사진을 안 받아 광고주 AI 그림으로 시트를 만듦</li><li>펼치는 동작·안쪽 검정은 잘 나옴</li></ul></div>
+   <div class="box t"><b>고칠 것</b><ul><li>실물 사진으로 시트 다시 → 영상 다시</li></ul></div>
+   <div class="box d"><b>고친 것</b><ul><li>코드 확인 3곳: 조사 뒤 실물 사진 없으면 받고 없으면 멈춤 · 그림 뒤 시트를 실물과 대조 · 영상 뒤 제품 망가짐 확인(후반 전)</li></ul></div>
+   <div class="box c"><b>Codex에 시킨 것</b><ul><li>89 흔들림 깨는 방법</li></ul></div>
+  </div>
  </div>
 </section>
 

@@ -96,7 +96,7 @@
       return '<button type="button" data-stage="' + i + '" data-pid="' + r.id + '" class="' + (st === "draft" ? "" : i < stage ? "done" : i === stage ? "now" : "") + '"' + (CAN && st !== "draft" ? "" : " disabled") + ">" + s + "</button>";
     }).join("");
     return '<details class="card' + (st === "submitted" ? " sub" : "") + '" data-slug="' + esc(r.slug) + '"><summary>' +
-      '<div class="nm"><b>' + esc(o.brand || r.brand) + "</b> · " + esc(o.product || r.product) + "<small>" + esc(r.slug) + " · 만든 때 " + when(r.created_at) + (o.submitted_at ? " · 요청 " + when(o.submitted_at) : "") + "</small></div>" +
+      '<div class="nm"><b>' + esc(o.brand || r.brand) + "</b> · " + esc(o.product || r.product) + "<small>" + (r.who ? "의뢰인 " + esc(r.who.name || "") + (r.who.email ? " (" + esc(r.who.email) + ")" : "") + " · " : "") + esc(r.slug) + " · 만든 때 " + when(r.created_at) + (o.submitted_at ? " · 요청 " + when(o.submitted_at) : "") + "</small></div>" +
       '<div class="badges">' + badge + (r.test_label ? '<span class="bd test">' + esc(r.test_label) + "</span>" : "") + "</div></summary>" +
       '<div class="body"><div class="grid2"><dl class="kv">' +
       kv("상호·브랜드", esc(o.brand)) + kv("제품 종류", esc(o.kind)) + kv("제품 이름", esc(o.product)) + kv("특장점", esc(o.point)) +
@@ -163,7 +163,7 @@
 
   var SIG = "";
   function load(first) {
-    return db.from("projects").select("id,slug,brand,product,created_at,updated_at,test_label").eq("production_track", "option3").order("created_at", { ascending: false })
+    return db.from("projects").select("id,slug,brand,product,created_at,updated_at,test_label,client_id").eq("production_track", "option3").order("created_at", { ascending: false })
       .then(function (r) {
         if (r.error) throw r.error;
         rows = r.data || [];
@@ -172,6 +172,18 @@
           var m = {}; (b.data || []).forEach(function (x) { m[x.project_id] = x.option3 || {}; });
           rows.forEach(function (x) { x.o3 = m[x.id] || {}; });
           return db.from("option3_reports").select("project_id,report").in("project_id", rows.map(function (x) { return x.id; }));
+        }).then(function (rr) {
+          // 10-19 Dan 「관리 페이지 프로젝트에 의뢰인 이름이 나오면 좋겠어」 — 건 → 의뢰 회사(clients) → 그 계정(profiles)
+          var cids = rows.map(function (x) { return x.client_id; }).filter(Boolean);
+          return db.from("clients").select("id,owner_id").in("id", cids).then(function (c) {
+            var own = {}; (c.data || []).forEach(function (x) { own[x.id] = x.owner_id; });
+            var uids = Object.keys(own).map(function (k) { return own[k]; }).filter(Boolean);
+            return db.from("profiles").select("id,name,email").in("id", uids).then(function (pf) {
+              var who = {}; (pf.data || []).forEach(function (x) { who[x.id] = x; });
+              rows.forEach(function (x) { x.who = who[own[x.client_id]] || null; });
+              return rr;
+            });
+          });
         }).then(function (rr) {
           var m2 = {}; ((rr && rr.data) || []).forEach(function (x) { m2[x.project_id] = x.report; });
           rows.forEach(function (x) { x.report = m2[x.id] || null; });
