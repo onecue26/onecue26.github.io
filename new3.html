@@ -154,7 +154,7 @@
 
 /* 확인 표 */
 .sum{border:1px solid var(--rule);border-radius:14px;overflow:hidden;background:var(--panel)}
-.sum-row{display:grid;grid-template-columns:26px 118px minmax(0,1fr) auto;gap:12px;padding:14px 16px;border-top:1px solid var(--rule);align-items:start}
+.sum-row{display:grid;grid-template-columns:118px minmax(0,1fr) auto;gap:12px;padding:14px 16px;border-top:1px solid var(--rule);align-items:start}
 .sum-row:first-child{border-top:0}
 .sum-row.ok{background:rgba(215,255,58,.04)}
 /* 10-18 Dan — 항목 이름(회색)을 더 잘 보이게 · 고객이 직접 쓴 글은 굵게·강조색 */
@@ -180,7 +180,7 @@
 .sum-row .ed{font-size:12.5px;color:var(--accent);background:none;border:0;cursor:pointer;padding:0;font-family:var(--mono2)}
 .sum-thumbs{display:flex;gap:6px;flex-wrap:wrap}
 .sum-thumbs img{width:54px;height:54px;object-fit:cover;border-radius:7px;border:1px solid var(--rule)}
-@media(max-width:480px){.sum-row{grid-template-columns:26px minmax(0,1fr) auto}.sum-row dt{grid-column:2}.sum-row dd{grid-column:2 / -1;grid-row:2}}
+@media(max-width:480px){.sum-row{grid-template-columns:minmax(0,1fr) auto}.sum-row dt{grid-column:1}.sum-row dd{grid-column:1 / -1;grid-row:2}}
 .ask{font-size:14.5px;color:var(--muted);text-align:center}
 .go3{width:100%;padding:17px;border-radius:999px;border:0;background:var(--accent);color:var(--accent-ink);font:inherit;font-weight:800;font-size:17px;cursor:pointer}
 .go3:disabled{background:#3a3a3d;color:#8e8b85;cursor:default}
@@ -304,7 +304,9 @@
       <input type="text" id="avoid" maxlength="80" placeholder="비워 두셔도 됩니다"></div>
     <div class="f3"><label for="refurl">참고하고 싶은 영상 <span class="opt">선택</span></label>
       <span class="ex">느낌(속도·색감·카메라·구성)만 참고합니다 — 영상 속 사람·장면을 그대로 따라 하지 않아요</span>
-      <input type="url" id="refurl" inputmode="url" placeholder="https://… (유튜브·인스타그램 등 영상 주소)"></div>
+      <div class="urlrow"><input type="url" id="refurl" inputmode="url" placeholder="https://… (유튜브·인스타그램 등 영상 주소)">
+        <button type="button" class="b3" id="refCheck" style="padding:12px 16px">주소 확인</button></div>
+      <div class="urlmsg" id="refMsg"></div></div>
   </section>
 
   <!-- 3단계 -->
@@ -331,7 +333,6 @@
     <div class="w3-q"><span class="n">4단계 · 영상 화면 비율 선택</span><h2>영상을 올릴 채널(비율)을 골라 주세요</h2>
       <p>그림은 실제 화면 모양입니다. 앱 버튼·글씨에 가리는 자리를 피해 문구와 로고를 넣습니다.</p></div>
     <div class="pick" id="aspects"></div>
-    <div class="ar-legend"><span><i class="l1"></i>문구·로고가 들어가는 자리</span><span><i class="l2"></i>앱 버튼·글씨에 가리거나 잘릴 수 있는 자리</span></div>
   </section>
 
   <!-- 5단계 -->

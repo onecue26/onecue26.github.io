@@ -39,13 +39,13 @@
     return stamp + "_" + (brand + "_" + product).trim().replace(/\s+/g, "_").slice(0, 40) + "_" + Math.random().toString(36).slice(2, 5);
   }
   function withScheme(s) { var v = trim(s); if (!v) return ""; return /^https?:\/\//i.test(v) ? v : "https://" + v.replace(/^\/+/, ""); }
-  function blank() { return { status: "draft", step: 1, brand: "", kind: "", product: "", point: "", mood: "auto", avoid: "", ref_url: "", photos: [], url: "", url_ok: false, aspect: "" }; }
+  function blank() { return { status: "draft", step: 1, brand: "", kind: "", product: "", point: "", mood: "auto", avoid: "", ref_url: "", ref_ok: false, photos: [], url: "", url_ok: false, aspect: "" }; }
 
   // ── 단계별 「다 찼나」 — 다음 버튼과 5단계 생성 버튼이 같은 검사를 쓴다 ──
   function okStep(n) {
     var o = S.o3;
     if (n === 1) return !!(trim(o.brand) && trim(o.kind) && trim(o.product) && trim(o.point).length >= 5);
-    if (n === 2) return !!MOODS[o.mood];
+    if (n === 2) return !!MOODS[o.mood] && (!trim(o.ref_url) || o.ref_ok === true);
     if (n === 3) return S.photos.filter(function (p) { return p.id; }).length > 0 && !S.uploading && (!trim(o.url) || o.url_ok === true);
     if (n === 4) return ASPECTS.some(function (a) { return a.v === o.aspect; });
     if (n === 5) return okStep(1) && okStep(2) && okStep(3) && okStep(4);
@@ -157,10 +157,7 @@
           return measure(f).then(function (m) {
             if (!m) { bad.push(f.name + " — 사진을 열 수 없습니다"); return; }
             var lo = Math.min(m.w, m.h), hi = Math.max(m.w, m.h);
-            if (lo < MIN_SIDE) {
-              bad.push(f.name + " — " + m.w + "×" + m.h + "px로 너무 작습니다. 화질이 좋은 사진으로 바꾸어 주세요");
-              URL.revokeObjectURL(m.src); return;
-            }
+            // 10-19 Dan 「사진 최소 픽셀 제한 우선 없애」 — 작은 사진도 받고 엔진이 필요하면 키운다(option3_case.py)
             m.upscale = hi < UP_LONG || lo < UP_SHORT;   // 엔진이 생성 전에 1000×600 최소로 키운다(광고주 화면에는 안 보임)
             var item = { id: null, src: m.src, w: m.w, h: m.h, name: f.name };
             S.photos.push(item); paintThumbs();
@@ -199,22 +196,26 @@
   }
 
   // ── 3단계 주소 확인 ── 브라우저에서 그 주소에 닿는지 본다(없는 주소·오타는 여기서 걸린다). 내용은 Head 가 조사 때 직접 연다
-  function checkUrl() {
-    var u = withScheme(el("url").value);
-    if (!u) { el("urlMsg").className = "urlmsg"; el("urlMsg").textContent = ""; return; }
-    el("url").value = u; S.o3.url = u; S.o3.url_ok = false;
-    try { var host = new URL(u).hostname; if (host.indexOf(".") < 0) throw 0; } catch (e) { return urlResult(false); }
-    el("urlMsg").className = "urlmsg"; el("urlMsg").textContent = "확인하는 중…"; el("urlCheck").disabled = true;
-    var done = false, t = setTimeout(function () { if (!done) { done = true; urlResult(false); } }, 9000);
+  // 10-19 Dan — 2단계 참고 영상도 3단계 홈페이지처럼 주소 확인(같은 함수 · F 로 칸만 다름)
+  var UF = { url: { inp: "url", msg: "urlMsg", btn: "urlCheck", key: "url", ok: "url_ok", yes: "✓ 페이지를 확인했어요" },
+             ref: { inp: "refurl", msg: "refMsg", btn: "refCheck", key: "ref_url", ok: "ref_ok", yes: "✓ 영상 주소를 확인했어요" } };
+  function checkUrl(which) {
+    var F = UF[which || "url"];
+    var u = withScheme(el(F.inp).value);
+    if (!u) { el(F.msg).className = "urlmsg"; el(F.msg).textContent = ""; return; }
+    el(F.inp).value = u; S.o3[F.key] = u; S.o3[F.ok] = false;
+    try { var host = new URL(u).hostname; if (host.indexOf(".") < 0) throw 0; } catch (e) { return urlResult(F, false); }
+    el(F.msg).className = "urlmsg"; el(F.msg).textContent = "확인하는 중…"; el(F.btn).disabled = true;
+    var done = false, t = setTimeout(function () { if (!done) { done = true; urlResult(F, false); } }, 9000);
     fetch(u, { mode: "no-cors", cache: "no-store", redirect: "follow" })
-      .then(function () { if (!done) { done = true; clearTimeout(t); urlResult(true); } },
-            function () { if (!done) { done = true; clearTimeout(t); urlResult(false); } });
+      .then(function () { if (!done) { done = true; clearTimeout(t); urlResult(F, true); } },
+            function () { if (!done) { done = true; clearTimeout(t); urlResult(F, false); } });
   }
-  function urlResult(ok) {
-    el("urlCheck").disabled = false;
-    S.o3.url_ok = ok;
-    el("urlMsg").className = "urlmsg " + (ok ? "ok" : "no");
-    el("urlMsg").textContent = ok ? "✓ 페이지를 확인했어요" : "페이지를 찾을 수 없어요. 입력 내용을 확인해 주세요.";
+  function urlResult(F, ok) {
+    el(F.btn).disabled = false;
+    S.o3[F.ok] = ok;
+    el(F.msg).className = "urlmsg " + (ok ? "ok" : "no");
+    el(F.msg).textContent = ok ? F.yes : "주소를 찾을 수 없어요. 입력 내용을 확인해 주세요.";
     paint();
   }
 
@@ -265,8 +266,7 @@
           '<span class="sum-edit-btns"><button type="button" class="b3 hot" data-save="' + key + '">저장</button>' +
           '<button type="button" class="b3" data-cancel="1">취소</button></span></span>'
         : val;
-      return '<div class="sum-row' + (on ? " ok" : "") + '">' +
-        '<label class="sum-chk"><input type="checkbox" data-chk="' + key + '"' + (on ? " checked" : "") + (ok ? "" : " disabled") + ' aria-label="' + k + ' 확인"><i></i></label>' +
+      return '<div class="sum-row">' +   // 10-19 Dan — 줄마다 체크는 없애고 아래 하나로만
         "<dt>" + k + '</dt><dd class="' + (!ok ? "miss" : opt.typed ? "typed" : "") + '">' + body + "</dd>" +
         (INLINE[key] && S.editing !== key ? '<button type="button" class="ed" data-edit="' + key + '">고치기</button>' : "<span></span>") + "</div>";
     }
@@ -279,24 +279,24 @@
       ["mood", "영상 분위기", esc(MOODS[o.mood] || ""), !!MOODS[o.mood]],
     ];
     if (trim(o.avoid)) rows.push(["avoid", "피하고 싶은 느낌", esc(trim(o.avoid)), true, { typed: 1 }]);
-    if (trim(o.ref_url)) rows.push(["ref_url", "참고 영상", esc(trim(o.ref_url)), true, { typed: 1 }]);
+    if (trim(o.ref_url)) rows.push(["ref_url", "참고 영상", o.ref_ok ? esc(trim(o.ref_url)) + ' <span class="okmark">✓ 확인됨</span>' : esc(trim(o.ref_url)) + " (주소 확인 필요)", !!o.ref_ok, { typed: 1 }]);
     rows.push(["photos", "등록 사진", '<span class="sum-thumbs">' + ph.map(function (p) { return '<img src="' + esc(p.src) + '" alt="">'; }).join("") + "</span>", ph.length > 0]);
     rows.push(["url", "추가 정보", trim(o.url) ? (o.url_ok ? esc(o.url) + ' <span class="okmark">✓ 확인됨</span>' : esc(o.url) + " (주소 확인 필요)") : '<span class="none">입력 안 함</span>', !trim(o.url) || o.url_ok, { typed: !!trim(o.url) }]);
     rows.push(["aspect", "화면 비율", a ? esc(a.t) + " · " + a.v : "", !!a]);
     rows.push(["len", "영상 길이", "15초 · 1편", true]);
     S.sumKeys = rows.map(function (r) { return r[0]; });
     el("sum").innerHTML = rows.map(function (r) { return row(r[0], r[1], r[2], r[3], r[4]); }).join("");
-    var all = S.sumKeys.every(function (k) { return S.checked[k]; });
+    var all = !!S.checkedAll;
     el("checkAll").checked = all;
     el("go").disabled = !(okStep(5) && all) || !!S.editing;
-    el("missList").textContent = okStep(5) && !all ? "모든 항목을 확인해 체크해 주세요" : "";
+    el("missList").textContent = okStep(5) && !all ? "입력 내용을 확인하고 아래에 체크해 주세요" : "";
     if (S.editing) { var f = el("ed_" + S.editing); if (f) { f.focus(); if (f.setSelectionRange) f.setSelectionRange(f.value.length, f.value.length); } }
   }
   function saveInline(key) {
     var v = el("ed_" + key).value;
     if (!trim(v) || (key === "point" && trim(v).length < 5)) { toast(key === "point" ? "특장점은 5자 이상 써 주세요" : "비워 둘 수 없습니다"); return; }
     S.o3[key] = v; el(key).value = v; readStep1();
-    S.editing = null; S.checked[key] = false;   // 고친 줄은 다시 확인
+    S.editing = null; S.checkedAll = false;   // 고치면 다시 확인
     save(true).then(function () { paintSummary(); toast("고쳤습니다 · 자동 저장됨"); });
   }
 
@@ -388,6 +388,7 @@
     if (!o.mood) o.mood = "auto";   // 예전 임시 저장본은 빈 값 — 맡기기로
     var m = document.querySelector('input[name="mood"][value="' + o.mood + '"]'); if (m) m.checked = true;
     el("avoid").value = o.avoid || ""; el("refurl").value = o.ref_url || "";
+    if (o.ref_url) { el("refMsg").className = "urlmsg " + (o.ref_ok ? "ok" : "no"); el("refMsg").textContent = o.ref_ok ? UF.ref.yes : "주소 확인을 눌러 주세요"; }
     var a = document.querySelector('input[name="aspect"][value="' + o.aspect + '"]'); if (a) a.checked = true;
     el("url").value = o.url || "";
     if (o.url) { el("urlMsg").className = "urlmsg " + (o.url_ok ? "ok" : "no"); el("urlMsg").textContent = o.url_ok ? "✓ 페이지를 확인했어요" : "주소 확인을 눌러 주세요"; }
@@ -398,7 +399,12 @@
     ["brand", "kind", "product", "point"].forEach(function (id) { el(id).addEventListener("input", function () { readStep1(); paint(); }); });
     el("moods").addEventListener("change", function (e) { S.o3.mood = e.target.value; paint(); });
     el("avoid").addEventListener("input", function (e) { S.o3.avoid = e.target.value; });
-    el("refurl").addEventListener("input", function (e) { S.o3.ref_url = e.target.value; });
+    el("refurl").addEventListener("input", function (e) {
+      S.o3.ref_url = trim(e.target.value); S.o3.ref_ok = false;
+      el("refMsg").className = "urlmsg"; el("refMsg").textContent = S.o3.ref_url ? "주소 확인을 눌러 주세요" : ""; paint();
+    });
+    el("refurl").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); checkUrl("ref"); } });
+    el("refCheck").addEventListener("click", function () { checkUrl("ref"); });
     el("aspects").addEventListener("change", function (e) { S.o3.aspect = e.target.value; paint(); });
     el("files").addEventListener("change", function (e) { addFiles(e.target.files); });
     var drop = el("drop");
@@ -413,8 +419,8 @@
       S.o3.url = trim(el("url").value); S.o3.url_ok = false;
       el("urlMsg").className = "urlmsg"; el("urlMsg").textContent = S.o3.url ? "주소 확인을 눌러 주세요" : ""; paint();
     });
-    el("url").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); checkUrl(); } });
-    el("urlCheck").addEventListener("click", checkUrl);
+    el("url").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); checkUrl("url"); } });
+    el("urlCheck").addEventListener("click", function () { checkUrl("url"); });
     el("prev").addEventListener("click", function () { if (S.step > 1) { if (okStep(1)) save(true); go(S.step - 1); } });   // 단계가 바뀌면 자동 저장(10-18)
     el("next").addEventListener("click", function () {
       if (!okStep(S.step)) return;
@@ -427,18 +433,11 @@
       b = e.target.closest("[data-save]"); if (b) { saveInline(b.dataset.save); return; }
       if (e.target.closest("[data-cancel]")) { S.editing = null; paintSummary(); }
     });
-    el("sum").addEventListener("change", function (e) {
-      var c = e.target.closest("[data-chk]"); if (!c) return;
-      S.checked[c.dataset.chk] = c.checked; paintSummary();
-    });
     el("sum").addEventListener("keydown", function (e) {
       if (e.key === "Enter" && e.target.id && e.target.id.indexOf("ed_") === 0 && e.target.tagName === "INPUT") { e.preventDefault(); saveInline(e.target.id.slice(3)); }
       if (e.key === "Escape" && S.editing) { S.editing = null; paintSummary(); }
     });
-    el("checkAll").addEventListener("change", function (e) {
-      (S.sumKeys || []).forEach(function (k) { var c = document.querySelector('[data-chk="' + k + '"]'); if (c && !c.disabled) S.checked[k] = e.target.checked; });
-      paintSummary();
-    });
+    el("checkAll").addEventListener("change", function (e) { S.checkedAll = e.target.checked; paintSummary(); });
     el("go").addEventListener("click", submit);
   }
 
