@@ -110,6 +110,19 @@
       }).join("") + "</details>";
   }
 
+  // 10-20 Dan 「건 하나 누르면 항목이 너무 많다 — 결과물 포함 관리자가 보는 필수만 남기고 나머지는 묶어서 접어」
+  //   펼치면: 결과 영상 · 의도 · 문제 · 크레딧 · 확정 기한 — 나머지(의뢰서·진행 단계·분석 전부·버전 비교)는 「세부」 하나에
+  function essHtml(r, o) {
+    var rp = r.report || {}, e = rp.essentials || {}, secs = rp.sections || [];
+    var find = function (re) { var x = secs.filter(function (s) { return re.test(s.title || ""); }).pop(); return x ? (x.summary || "") : ""; };
+    var idea = e.idea || find(/기획|아이디어/), prob = e.problem || find(/검수|문제/), cr = e.credits || find(/크레딧|비용/);
+    var due = "";
+    if (o.confirmed_at) due = "확정됨 → 1080p";
+    else if (o.draft_at) { var left = new Date(o.draft_at).getTime() + DRAFT_DAYS * 864e5 - Date.now(); due = left > 0 ? Math.floor(left / 864e5) + "일 " + Math.floor(left % 864e5 / 36e5) + "시간 남음" : "기한 지남(480p)"; }
+    var row = function (k, v) { return "<dt>" + k + "</dt><dd" + (v ? "" : ' class="miss"') + ">" + (v ? esc(v) : "없음") + "</dd>"; };
+    return '<dl class="kv" style="margin-bottom:12px">' + row("의도", idea) + row("문제", prob) + row("크레딧", cr) + row("확정 기한", due) + "</dl>";
+  }
+
   function card(r) {
     var o = r.o3 || {}, st = status(r), stage = Math.max(0, +o.stage || 0);
     var badge = st === "draft" ? '<span class="bd draft">작성 중 · ' + (o.step || 1) + "단계</span>"
@@ -124,7 +137,8 @@
     return '<details class="card' + (st === "submitted" ? " sub" : "") + '" data-slug="' + esc(r.slug) + '"><summary>' +
       '<div class="nm"><b>' + esc(o.brand || r.brand) + "</b> · " + esc(o.product || r.product) + "<small>" + (r.who ? "의뢰인 " + esc(r.who.name || "") + (r.who.email ? " (" + esc(r.who.email) + ")" : "") + " · " : "") + esc(r.slug) + " · 만든 때 " + when(r.created_at) + (o.submitted_at ? " · 요청 " + when(o.submitted_at) : "") + "</small></div>" +
       '<div class="badges">' + badge + (r.test_label ? '<span class="bd test">' + esc(r.test_label) + "</span>" : "") + "</div></summary>" +
-      '<div class="body">' + reviewTop(r) + '<div class="grid2"><dl class="kv">' +
+      '<div class="body">' + reviewTop(r) + essHtml(r, o) +
+      '<details class="box rsec" style="max-width:none"><summary style="cursor:pointer"><b>세부</b><span class="msg"> 의뢰서·진행 단계·조사·기획·프롬프트·작업 기록</span></summary><div class="grid2"><dl class="kv">' +
       kv("상호·브랜드", esc(o.brand)) + kv("제품 종류", esc(o.kind)) + kv("제품 이름", esc(o.product)) + kv("특장점", esc(o.point)) +
       kv("영상 분위기", esc(MOODS[o.mood] || "")) + kv("화면 비율", esc(ASPECT[o.aspect] || "")) + kv("영상 길이", "15초 · 1편") +
       kv("추가 정보", o.url ? '<a href="' + esc(o.url) + '" target="_blank" rel="noopener">' + esc(o.url) + "</a>" + (o.url_ok ? " ✓" : " (확인 안 됨)") : "") +
@@ -134,7 +148,7 @@
       (o.stage_at ? '<div class="msg">' + when(o.stage_at) + " 변경</div>" : "") + "</div>" +
       draftBox(o) +
       '<div class="links"><a class="btn3" href="new3.html?p=' + encodeURIComponent(r.slug) + '" target="_blank" rel="noopener">광고주 화면 보기 ↗</a></div>' +
-      "</div></div>" + reportHtml(r) + oldRuns(r) + "</div></details>";
+      "</div></div>" + reportHtml(r) + "</details>" + oldRuns(r) + "</div></details>";
   }
 
   function render() {
