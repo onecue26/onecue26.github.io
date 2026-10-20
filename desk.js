@@ -95,7 +95,25 @@
     }
     return '<div class="box" style="border:2px solid #d4ff3a;margin-bottom:12px"><h4>납품 전 확인 요청' + (rq && rq.at ? " · " + esc(when(rq.at)) : "") + '</h4>' +
       '<video src="' + esc(v) + '" controls playsinline preload="metadata" style="width:100%;max-height:70vh;background:#000;border-radius:8px"></video>' +
-      (note ? '<div class="msg" style="margin-top:6px">' + esc(note) + "</div>" : "") + "</div>";
+      (note ? '<div class="msg" style="margin-top:6px">' + esc(note) + "</div>" : "") + endcardPick(r) + "</div>";
+  }
+
+  // 10-20 Dan 「후작업 6개 사진을 올려서, 그중에 선택 누르고 수정하면 다시 주는」 — 엔진이 그려 둔 엔드컷 후보 · 고르면 코드가 바로 바꿈
+  function endcardPick(r) {
+    var ec = (r.report || {}).endcard, os = (ec && ec.options) || [];
+    if (!os.length) return "";
+    var cells = os.map(function (o) {
+      var on = o.n === ec.pick;
+      return '<div style="border:2px solid ' + (on ? "#d4ff3a" : "transparent") + ';border-radius:8px;padding:4px;min-width:0">' +
+        '<a href="' + esc(o.video) + '" target="_blank" rel="noopener"><img loading="lazy" src="' + esc(o.img) + '" alt="" style="width:100%;border-radius:6px;display:block"></a>' +
+        '<div style="font-size:12.5px;margin:4px 0">' + o.n + ". " + esc(o.name) + (on ? " · <b>지금 판</b>" : "") + "</div>" +
+        (on ? "" : '<button type="button" class="btn3" data-ec-pick="' + o.n + '" data-pid="' + r.id + '"' + (CAN ? "" : " disabled") + ">이 안으로</button>") + "</div>";
+    }).join("");
+    return '<details style="margin-top:10px"' + (ec.by === "관리자" ? "" : " open") + '><summary style="cursor:pointer;font-weight:700">엔드컷 후보 ' + os.length + "개 — " + (ec.by === "관리자" ? "관리자가 " : "엔진이 ") + ec.pick + "번 선택</summary>" +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:8px">' + cells + "</div>" +
+      '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><input data-ec-note="' + r.id + '" placeholder="수정 요청 (예: 로고 조금 작게)" style="flex:1;min-width:200px">' +
+      '<button type="button" class="btn3" data-ec-fix="' + r.id + '"' + (CAN ? "" : " disabled") + ">수정 요청</button></div>" +
+      '<div class="msg" data-ec-msg="' + r.id + '"></div></details>';
   }
 
   // 10-20 Dan 「예전 것은 old 로 해서 밑에서 접어서 내리고」 — 다시 만든 건의 지난 판(확인 요청)을 카드 맨 아래 접는 칸으로
@@ -258,6 +276,19 @@
     el("list").addEventListener("click", function (e) {
       var ao = e.target.closest("[data-allopen],[data-allclose]");
       if (ao) { var open = ao.hasAttribute("data-allopen"); ao.closest(".rep").querySelectorAll(".rsec").forEach(function (d) { d.open = open; }); return; }
+      var ep = e.target.closest("[data-ec-pick],[data-ec-fix]");
+      if (ep && !ep.disabled) {
+        var pid = ep.dataset.pid || ep.dataset.ecFix, inp = el("list").querySelector('[data-ec-note="' + pid + '"]'), nt = inp ? (inp.value || "").trim() : "";
+        var pk = ep.dataset.ecPick ? +ep.dataset.ecPick : null, m = el("list").querySelector('[data-ec-msg="' + pid + '"]');
+        if (!pk && !nt) { if (m) m.textContent = "수정할 내용을 적어 주세요"; return; }
+        ep.disabled = true;
+        db.rpc("onecue_option3_endcard", { p_project_id: pid, p_pick: pk, p_note: nt || null }).then(function (x) {
+          if (x.error) throw x.error;
+          if (m) m.textContent = pk ? "바꾸는 중입니다 — 1분 안에 위 영상이 바뀝니다" : "수정 요청을 보냈습니다 — 고쳐서 다시 올립니다";
+          setTimeout(function () { load(false).catch(function () {}); }, 20000);
+        }).catch(function (x) { ep.disabled = false; if (m) m.textContent = "보내지 못했습니다 — " + (x.message || x); });
+        return;
+      }
       var s = e.target.closest("[data-stage]");
       if (s && !s.disabled) { e.preventDefault(); patch(s.dataset.pid, { stage: +s.dataset.stage, stage_at: new Date().toISOString() }).catch(function (x) { alert(x.message || x); }); return; }
       var v = e.target.closest("[data-save-report]");
