@@ -140,6 +140,34 @@ code{font-size:12.5px;background:var(--soft);padding:1px 5px;border-radius:4px}
 </section>
 
 <section class="card">
+ <h2>검수 기준 — 다른 사람들이 보는 것 ↔ 우리 (10-20 조사)</h2>
+ <p class="note" style="margin-top:0">출처: Google ABCD 공식 PDF · TikTok 공식 크리에이티브 가이드(원문 확인) · Meta(검색 요약 — 원문 못 엶) · AI 영상 QA 제작사 글(2차). 전문: reference_library/production_learning/_staging/task96_qc_criteria/head_agent.md</p>
+ <div class="tbl"><table>
+  <tr><th>항목</th><th>그쪽 기준</th><th>우리 지금</th></tr>
+  <tr><td>첫 1~3초 훅</td><td>TikTok 「첫 3초에 핵심 · 훅은 6초 안」 · Meta 「첫 3초」</td><td class="bad">안 봄</td></tr>
+  <tr><td>제품 첫 등장</td><td>Google 「첫 5초 안에 제품·브랜드」 · 크게·가리지 않게</td><td class="bad">안 봄(형태만 봄)</td></tr>
+  <tr><td>소리 없이 읽힘</td><td>Meta 「화면만으로 메시지」</td><td class="bad">안 봄</td></tr>
+  <tr><td>브랜드 중간 노출</td><td>Google 「곳곳에 브랜드 큐 · 제품에 박힌 로고」</td><td class="warn">끝 로고만 봄</td></tr>
+  <tr><td>글자 읽는 속도</td><td>TikTok 「초당 5~10단어」 · 큰 글자</td><td class="warn">겹침만 봄</td></tr>
+  <tr><td>시작 속도·컷 수</td><td>Google 「첫 5초 2컷 이상」(유튜브 근거)</td><td class="warn">정지만 봄</td></tr>
+  <tr><td>손이 닿는 장면</td><td>제작사 「손이 얼굴·소품에 닿는 곳은 멈춰서 확인」</td><td class="warn">「녹음」 한 줄에 묻힘</td></tr>
+  <tr><td>제품 형태·녹음·장소 튐·끝 로고·글자 겹침</td><td>같음</td><td class="good">봄(일부는 우리가 더 촘촘)</td></tr>
+ </table></div>
+ <h2 style="margin-top:14px">넣을 후보 8개 (Dan이 고름)</h2>
+ <div class="tbl"><table>
+  <tr><th>#</th><th>항목</th><th>재는 법</th><th>제안</th></tr>
+  <tr><td>1</td><td>제품 첫 등장</td><td>0~5초 0.5초 간격 → 처음 또렷이 보이는 초</td><td>5초까지 안 나오면 실패</td></tr>
+  <tr><td>2</td><td>첫 3초 훅</td><td>0~3초 프레임 + 컷 검출</td><td>첫 1초가 정지·빈 화면이면 실패, 나머지 기록</td></tr>
+  <tr><td>3</td><td>시작 속도·컷 수</td><td>코드로 컷 검출</td><td>기록만</td></tr>
+  <tr><td>4</td><td>소리 없이 읽힘</td><td>프레임만 보고 기획 모르는 판정자가 「무슨 제품·이점」</td><td>제품 종류 못 맞히면 실패</td></tr>
+  <tr><td>5</td><td>손이 닿는 장면</td><td>모델은 닿는 초만 찾고 0.1초 프레임은 사람이 봄</td><td>손 녹음은 실패</td></tr>
+  <tr><td>6</td><td>브랜드 중간 노출</td><td>5초 간격 프레임에서 로고·브랜드명 보인 초</td><td>기록만</td></tr>
+  <tr><td>7</td><td>글자 읽는 시간·크기</td><td>코드 계산(글자 수 ÷ 길이 · 정본 크기)</td><td>위반이면 실패</td></tr>
+  <tr><td>8</td><td>라벨·가장자리 깜빡임</td><td>원본 해상도 확대 3장</td><td>기록만</td></tr>
+ </table></div>
+</section>
+
+<section class="card">
  <h2>멈출 때 나와 있던 영상</h2>
  <div class="vids">
   <div><video src="media/o3diag/drpiel_raw.mp4" poster="media/o3diag/drpiel.jpg" controls playsinline preload="none"></video><p class="cap">닥터피엘 · 생성 원본 · 제품이 0~2초만 나오고 이후 일반 샤워기 · 5.75초 장소 바뀜 · 과일이 스티커처럼 정지</p></div>
