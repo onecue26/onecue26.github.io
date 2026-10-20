@@ -98,6 +98,18 @@
       (note ? '<div class="msg" style="margin-top:6px">' + esc(note) + "</div>" : "") + "</div>";
   }
 
+  // 10-20 Dan 「예전 것은 old 로 해서 밑에서 접어서 내리고」 — 다시 만든 건의 지난 판(확인 요청)을 카드 맨 아래 접는 칸으로
+  function oldRuns(r) {
+    var h = (r.report || {}).history || [];
+    if (!h.length) return "";
+    return '<details class="box" style="margin-top:12px"><summary style="cursor:pointer;font-weight:700">이전 판 ' + h.length + "개 — 펼치기</summary>" +
+      h.slice().reverse().map(function (x) {
+        return '<div style="margin-top:10px"><div class="msg">' + esc(x.label || "") + (x.at ? " · " + esc(when(x.at)) : "") + "</div>" +
+          (x.video ? '<video src="' + esc(x.video) + '" controls playsinline preload="none" style="width:100%;max-height:50vh;background:#000;border-radius:8px"></video>' : "") +
+          (x.note ? '<div class="msg" style="margin-top:4px">' + esc(x.note) + "</div>" : "") + "</div>";
+      }).join("") + "</details>";
+  }
+
   function card(r) {
     var o = r.o3 || {}, st = status(r), stage = Math.max(0, +o.stage || 0);
     var badge = st === "draft" ? '<span class="bd draft">작성 중 · ' + (o.step || 1) + "단계</span>"
@@ -122,7 +134,7 @@
       (o.stage_at ? '<div class="msg">' + when(o.stage_at) + " 변경</div>" : "") + "</div>" +
       draftBox(o) +
       '<div class="links"><a class="btn3" href="new3.html?p=' + encodeURIComponent(r.slug) + '" target="_blank" rel="noopener">광고주 화면 보기 ↗</a></div>' +
-      "</div></div>" + reportHtml(r) + "</div></details>";
+      "</div></div>" + reportHtml(r) + oldRuns(r) + "</div></details>";
   }
 
   function render() {
