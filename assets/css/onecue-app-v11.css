@@ -1,0 +1,41 @@
+/* 10-24 · 첫 화면 v1.1 색(흰 바탕·#111·라임 #d7ff3a)을 앱 화면에 덧입힘 — Codex task144 공통 묶음. skin-v2.css 뒤에 읽는다 */
+:root,:root[data-theme=light],:root[data-theme=dark]{
+ --accent:#d7ff3a;--ink:#111;--ink-2:#333;--muted:#767676;--dim:#c4c4c4;--line:#e4e4e4;--line-2:#ddd;
+ --bg2:#fff;--ground:#fff;--panel:#fff;--sunk:#f5f5f5;--faint:#767676;--rule:var(--line);
+ --accent-ink:var(--ink);--brand:var(--accent);--brand-strong:var(--ink);--brand-soft:rgba(215,255,58,.18);
+ --cue:var(--ink);--cue-soft:var(--brand-soft);--live:#287449;--live-soft:#e8f3ec;--hold:#866015;--hold-soft:#faf0d9;
+ --error:#b42318;color-scheme:light;
+}
+html,body,body.studio-layout{background:var(--ground)!important;color:var(--ink)}
+.studio-rail{background:var(--panel)!important;border-color:var(--rule)!important}
+.studio-rail nav a{color:var(--ink-2)!important}
+.studio-rail nav a:hover{background:var(--sunk)!important;color:var(--ink)!important}
+.studio-rail nav a.on,.studio-rail nav a.on:hover{background:var(--accent)!important;color:var(--ink)!important}
+.studio-brand.v2 .dot{box-shadow:0 0 0 1px var(--ink)}
+.studio-workspace>span{color:var(--ink)!important}
+.studio-layout .topbar,body.studio-layout>header{background:rgba(255,255,255,.94)!important}
+.studio-layout .lede,.studio-heading p,.studio-layout p{color:var(--ink-2)}
+.studio-layout a{color:var(--ink)}
+.studio-layout .btn.ghost,.studio-layout .btn.secondary,.studio-layout .btn.light{background:var(--panel)!important;color:var(--ink)!important;border-color:var(--line-2)!important}
+.studio-layout .btn.ghost:hover{background:var(--sunk)!important}
+.studio-layout input::placeholder,.studio-layout textarea::placeholder{color:var(--muted);opacity:1}
+.studio-layout :is(input,textarea,select):focus-visible{outline-color:var(--ink)!important}
+.studio-layout :is(button,a):focus-visible{outline-color:var(--ink)!important}
+.studio-layout .msg.err,.studio-layout .pill.bad{color:var(--error)!important;background:#fff0ef!important}
+.studio-layout .msg.ok{color:var(--live)!important}
+.studio-layout .pill:not(.ok):not(.bad){color:var(--ink-2)}
+.studio-layout input,.studio-layout textarea,.studio-layout select{background:var(--panel)!important;color:var(--ink)!important;border-color:var(--line-2)!important}
+.studio-layout label{color:var(--ink)}
+.studio-layout .studio-workspace small,.studio-layout .studio-navlabel,.studio-layout .studio-railfoot,.studio-layout .studio-railfoot small{color:var(--muted)!important}
+.studio-layout .prose p,.studio-layout .facts strong,.studio-layout summary h2{color:var(--ink-2)!important}
+.studio-layout .gate small,.studio-layout summary small{color:var(--ink-2)}
+.studio-layout .st-act,.studio-layout .tag.st-act,.studio-layout .cstep-s.st-act{background:#fde3dc!important;color:#b42318!important;border-color:#f5b7a8!important}
+.studio-layout .st-run,.studio-layout .tag.st-run,.studio-layout .cstep-s.st-run{background:#e5efff!important;color:#1d4ed8!important;border-color:#bcd3fb!important}
+.studio-layout .st-done,.studio-layout .tag.st-done,.studio-layout .cstep-s.st-done{background:#e3f4ea!important;color:#1f7a4d!important;border-color:#b5dfc6!important}
+.studio-layout .st-fix,.studio-layout .tag.st-fix,.studio-layout .cstep-s.st-fix{background:#fff1db!important;color:#a15c00!important;border-color:#f5d39b!important}
+
+.studio-layout .card,.studio-layout .box,.studio-layout .stat,.studio-layout details.card{background:var(--panel)!important;border-color:var(--rule)!important;color:var(--ink)}
+/* 흰 바탕에서 라임 글자는 안 보임 → 글자는 검정, 라임은 바탕으로만 */
+.dk-head .eb,.dk-flow span b,.rsec>summary::before{color:var(--ink)!important}
+.studio-filters .active,.studio-layout .work.active{background:var(--accent)!important;color:var(--ink)!important;border-color:var(--accent)!important}
+.studio-layout span.reco,.studio-layout .lab-index button.on{color:var(--ink)!important}
