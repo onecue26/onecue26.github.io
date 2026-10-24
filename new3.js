@@ -128,7 +128,7 @@
       el("saved").textContent = new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" }) + " 저장됨";
       if (!quiet) toast("임시 저장했습니다 · 프로젝트 목록에 「작성 중」으로 남습니다");
       return true;
-    }).catch(function (e) { toast("저장하지 못했습니다 — " + (e.message || e)); return false; });
+    }).catch(function (e) { el("saved").textContent = "저장되지 않음"; toast("저장하지 못했습니다 — " + (e.message || e)); return false; });
   }
 
   // ── 3단계 사진 ── 고르는 즉시 크기를 재고, 작은 사진은 올리지 않는다(월드콘 148px 사진 · 10-14)
@@ -199,23 +199,38 @@
   // 10-19 Dan — 2단계 참고 영상도 3단계 홈페이지처럼 주소 확인(같은 함수 · F 로 칸만 다름)
   var UF = { url: { inp: "url", msg: "urlMsg", btn: "urlCheck", key: "url", ok: "url_ok", yes: "✓ 페이지를 확인했어요" },
              ref: { inp: "refurl", msg: "refMsg", btn: "refCheck", key: "ref_url", ok: "ref_ok", yes: "✓ 영상 주소를 확인했어요" } };
+  function resetUrl(F) {
+    F.rev = (F.rev || 0) + 1;
+    clearTimeout(F.timer);
+    if (F.controller) F.controller.abort();
+    el(F.btn).disabled = false;
+  }
   function checkUrl(which) {
     var F = UF[which || "url"];
-    var u = withScheme(el(F.inp).value);
-    if (!u) { el(F.msg).className = "urlmsg"; el(F.msg).textContent = ""; return; }
-    el(F.inp).value = u; S.o3[F.key] = u; S.o3[F.ok] = false;
-    try { var host = new URL(u).hostname; if (host.indexOf(".") < 0) throw 0; } catch (e) { return urlResult(F, false); }
+    resetUrl(F);
+    var u = withScheme(el(F.inp).value), rev = F.rev;
+    S.o3[F.ok] = false;
+    if (!u) { el(F.msg).className = "urlmsg"; el(F.msg).textContent = ""; paint(); return; }
+    el(F.inp).value = u; S.o3[F.key] = u;
+    try { var parsed = new URL(u); if (!/^https?:$/.test(parsed.protocol) || parsed.hostname.indexOf(".") < 0) throw 0; } catch (e) { return urlResult(F, false); }
     el(F.msg).className = "urlmsg"; el(F.msg).textContent = "확인하는 중…"; el(F.btn).disabled = true;
-    var done = false, t = setTimeout(function () { if (!done) { done = true; urlResult(F, false); } }, 9000);
-    fetch(u, { mode: "no-cors", cache: "no-store", redirect: "follow" })
-      .then(function () { if (!done) { done = true; clearTimeout(t); urlResult(F, true); } },
-            function () { if (!done) { done = true; clearTimeout(t); urlResult(F, false); } });
+    var done = false;
+    function finish(ok, message) {
+      if (done || F.rev !== rev || withScheme(el(F.inp).value) !== u) return;
+      done = true; clearTimeout(F.timer); urlResult(F, ok, message);
+    }
+    F.controller = new AbortController();
+    F.timer = setTimeout(function () { finish(false, "브라우저에서 응답을 확인하지 못했어요. 주소를 확인해 주세요."); F.controller.abort(); }, 9000);
+    // 10-24 Head: 쇼핑몰 대부분이 외부 읽기(cors)를 막아 정상 주소도 실패로 나옴 → 응답이 오면 확인(no-cors) · 겹친 요청 차단은 유지
+    fetch(u, { mode: "no-cors", cache: "no-store", redirect: "follow", signal: F.controller.signal })
+      .then(function () { finish(true, ""); },
+            function () { finish(false, "브라우저에서 페이지 접근을 확인하지 못했어요. 공개 주소인지 확인해 주세요."); });
   }
-  function urlResult(F, ok) {
+  function urlResult(F, ok, message) {
     el(F.btn).disabled = false;
     S.o3[F.ok] = ok;
     el(F.msg).className = "urlmsg " + (ok ? "ok" : "no");
-    el(F.msg).textContent = ok ? F.yes : "주소를 찾을 수 없어요. 입력 내용을 확인해 주세요.";
+    el(F.msg).textContent = ok ? F.yes : message || "주소를 찾을 수 없어요. 입력 내용을 확인해 주세요.";
     paint();
   }
 
@@ -293,11 +308,20 @@
     if (S.editing) { var f = el("ed_" + S.editing); if (f) { f.focus(); if (f.setSelectionRange) f.setSelectionRange(f.value.length, f.value.length); } }
   }
   function saveInline(key) {
+    if (S.inlineSaving) return;
     var v = el("ed_" + key).value;
     if (!trim(v) || (key === "point" && trim(v).length < 5)) { toast(key === "point" ? "특장점은 5자 이상 써 주세요" : "비워 둘 수 없습니다"); return; }
     S.o3[key] = v; el(key).value = v; readStep1();
-    S.editing = null; S.checkedAll = false;   // 고치면 다시 확인
-    save(true).then(function () { paintSummary(); toast("고쳤습니다 · 자동 저장됨"); });
+    S.checkedAll = false; S.inlineSaving = true;
+    el("go").disabled = true;
+    document.querySelectorAll("#sum button,#sum input,#sum textarea").forEach(function (x) { x.disabled = true; });
+    save(true).then(function (ok) {
+      S.inlineSaving = false;
+      if (ok) S.editing = null;
+      else S.editing = key;
+      paintSummary();
+      if (ok) toast("고쳤습니다 · 자동 저장됨");
+    });
   }
 
   function submit() {
@@ -353,6 +377,9 @@
     el("cEmail").textContent = ME.email || "—";
     db.from("contacts").select("phone").eq("project_id", S.pid).not("phone", "is", null).limit(1).then(function (r) {
       var ph = S.myPhone || (r.data && r.data[0] && r.data[0].phone) || (ME.user_metadata || {}).phone;
+      if (el("finalBox").hidden) el("doneNote").textContent = ph
+        ? "등록된 전화번호가 있습니다. 진행 상황과 완성 영상은 이 화면에서 확인해 주세요."
+        : "전화번호가 아직 없습니다. 진행 상황과 완성 영상은 이 화면에서 확인해 주세요.";
       el("cPhone").textContent = ph ? String(ph).replace(/^(\d{3})(\d{3,4})(\d{4})$/, "$1-$2-$3") : "아직 없습니다 — 아래 「연락처 수정하기」에서 넣어 주세요";
     });
   }
@@ -400,7 +427,7 @@
     el("moods").addEventListener("change", function (e) { S.o3.mood = e.target.value; paint(); });
     el("avoid").addEventListener("input", function (e) { S.o3.avoid = e.target.value; });
     el("refurl").addEventListener("input", function (e) {
-      S.o3.ref_url = trim(e.target.value); S.o3.ref_ok = false;
+      resetUrl(UF.ref); S.o3.ref_url = trim(e.target.value); S.o3.ref_ok = false;
       el("refMsg").className = "urlmsg"; el("refMsg").textContent = S.o3.ref_url ? "주소 확인을 눌러 주세요" : ""; paint();
     });
     el("refurl").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); checkUrl("ref"); } });
@@ -416,7 +443,7 @@
       S.photos.splice(+b.dataset.rm, 1); paintThumbs(); save(true).then(paint);   // 목록에서만 뺀다 — 올린 원본은 지우지 않는다
     });
     el("url").addEventListener("input", function () {
-      S.o3.url = trim(el("url").value); S.o3.url_ok = false;
+      resetUrl(UF.url); S.o3.url = trim(el("url").value); S.o3.url_ok = false;
       el("urlMsg").className = "urlmsg"; el("urlMsg").textContent = S.o3.url ? "주소 확인을 눌러 주세요" : ""; paint();
     });
     el("url").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); checkUrl("url"); } });
@@ -431,11 +458,11 @@
     el("sum").addEventListener("click", function (e) {
       var b = e.target.closest("[data-edit]"); if (b) { S.editing = b.dataset.edit; paintSummary(); return; }
       b = e.target.closest("[data-save]"); if (b) { saveInline(b.dataset.save); return; }
-      if (e.target.closest("[data-cancel]")) { S.editing = null; paintSummary(); }
+      if (!S.inlineSaving && e.target.closest("[data-cancel]")) { S.editing = null; paintSummary(); }
     });
     el("sum").addEventListener("keydown", function (e) {
       if (e.key === "Enter" && e.target.id && e.target.id.indexOf("ed_") === 0 && e.target.tagName === "INPUT") { e.preventDefault(); saveInline(e.target.id.slice(3)); }
-      if (e.key === "Escape" && S.editing) { S.editing = null; paintSummary(); }
+      if (e.key === "Escape" && S.editing && !S.inlineSaving) { S.editing = null; paintSummary(); }
     });
     el("checkAll").addEventListener("change", function (e) { S.checkedAll = e.target.checked; paintSummary(); });
     el("go").addEventListener("click", submit);
