@@ -95,7 +95,38 @@
     }
     return '<div class="box" style="border:2px solid #d4ff3a;margin-bottom:12px"><h4>납품 전 확인 요청' + (rq && rq.at ? " · " + esc(when(rq.at)) : "") + '</h4>' +
       '<video src="' + esc(v) + '" controls playsinline preload="metadata" style="width:100%;max-height:70vh;background:#000;border-radius:8px"></video>' +
-      (note ? '<div class="msg" style="margin-top:6px">' + esc(note) + "</div>" : "") + endcardPick(r) + "</div>";
+      (note ? '<div class="msg" style="margin-top:6px">' + esc(note) + "</div>" : "") + endcardPick(r) + reviseBox(r) + "</div>";
+  }
+
+  // 10-24 Dan 「순수하게 원큐 시스템 상에서」 — 엔진 시작 · 생성 승인 · 진행 상태 (option3_engine.py 가 report.engine 에 적음)
+  var ENG = { running: "도는 중", awaiting_approval: "생성 승인 기다림", done: "끝남", failed: "멈춤" };
+  function engineBox(r) {
+    if (status(r) === "draft") return "";
+    var e = (r.report || {}).engine || {};
+    var head = e.state ? "<b>엔진 · " + esc(ENG[e.state] || e.state) + "</b> — " + esc(e.label || "") + (e.at ? " · " + esc(when(e.at)) : "") : "<b>엔진 · 아직 돌리지 않음</b>";
+    var sum = (e.summary || []).map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("");
+    var btn = "";
+    if (e.state === "awaiting_approval") btn = '<button type="button" class="btn3" data-eng-act="approve" data-est="' + esc(e.est) + '" data-pid="' + r.id + '"' + (CAN ? "" : " disabled") + ">생성 승인 · 약 " + esc(e.est) + "cr</button>";
+    else if (!e.state || e.state === "failed") btn = '<button type="button" class="btn3" data-eng-act="design" data-pid="' + r.id + '"' + (CAN ? "" : " disabled") + ">" + (e.state ? "설계 처음부터 다시" : "엔진 시작") + " · 설계(크레딧 0)</button>";
+    return '<div class="box" style="margin-bottom:12px;border:1px solid #555"><div>' + head + "</div>" +
+      (e.state === "running" ? '<div class="msg">끝나면 이 칸이 저절로 바뀝니다(30초마다 확인)</div>' : "") +
+      (e.extra ? '<div class="msg">' + esc(e.extra) + "</div>" : "") +
+      (sum ? '<ul style="margin:8px 0 0 18px">' + sum + "</ul>" : "") +
+      (btn ? '<div style="margin-top:8px">' + btn + "</div>" : "") + '<div class="msg" data-eng-msg="' + r.id + '"></div></div>';
+  }
+
+  // 10-24 Dan 「검수한 뒤 고치는 요청을 엔진에」 — 고칠 곳 하나 + 메모 → 엔진이 그 범위만 다시(유료면 승인 뒤)
+  var SCOPES = [["ending", "엔드컷·글자", "크레딧 0"], ["brand", "로고·문구", "크레딧 0"], ["video", "영상만 다시", "약 45cr · 승인 뒤"], ["plan", "기획부터 다시", "승인 뒤 생성"]];
+  function reviseBox(r) {
+    var e = (r.report || {}).engine || {};
+    if (e.state === "running") return '<div class="msg" style="margin-top:10px">엔진이 도는 중이라 고치기 요청은 끝난 뒤에 할 수 있습니다</div>';
+    var opts = SCOPES.map(function (s) {
+      return '<label style="display:inline-flex;gap:4px;align-items:center;margin:0 14px 4px 0"><input type="radio" name="rv-' + r.id + '" value="' + s[0] + '"> ' + s[1] + ' <small class="msg">(' + s[2] + ")</small></label>";
+    }).join("");
+    return '<div style="margin-top:12px;border-top:1px solid #444;padding-top:10px"><b>고치기 요청</b><div style="margin:6px 0">' + opts + "</div>" +
+      '<textarea data-rv-note="' + r.id + '" rows="2" placeholder="무엇이 문제인지 적어 주세요 (예: 3초쯤 손가락이 이상함 · 너무 어두움)" style="width:100%;box-sizing:border-box"></textarea>' +
+      '<div style="margin-top:6px"><button type="button" class="btn3" data-rv-send="' + r.id + '"' + (CAN ? "" : " disabled") + ">고치기 요청</button></div>" +
+      '<div class="msg" data-rv-msg="' + r.id + '"></div></div>';
   }
 
   // 10-20 Dan 「후작업 6개 사진을 올려서, 그중에 선택 누르고 수정하면 다시 주는」 — 엔진이 그려 둔 엔드컷 후보 · 고르면 코드가 바로 바꿈
@@ -155,7 +186,7 @@
     return '<details class="card' + (st === "submitted" ? " sub" : "") + '" data-slug="' + esc(r.slug) + '"><summary>' +
       '<div class="nm"><b>' + esc(o.brand || r.brand) + "</b> · " + esc(o.product || r.product) + "<small>" + (r.who ? "의뢰인 " + esc(r.who.name || "") + (r.who.email ? " (" + esc(r.who.email) + ")" : "") + " · " : "") + esc(r.slug) + " · 만든 때 " + when(r.created_at) + (o.submitted_at ? " · 요청 " + when(o.submitted_at) : "") + "</small></div>" +
       '<div class="badges">' + badge + (r.test_label ? '<span class="bd test">' + esc(r.test_label) + "</span>" : "") + "</div></summary>" +
-      '<div class="body">' + reviewTop(r) + essHtml(r, o) +
+      '<div class="body">' + engineBox(r) + reviewTop(r) + essHtml(r, o) +
       '<details class="box rsec" style="max-width:none"><summary style="cursor:pointer"><b>세부</b><span class="msg"> 의뢰서·진행 단계·조사·기획·프롬프트·작업 기록</span></summary><div class="grid2"><dl class="kv">' +
       kv("상호·브랜드", esc(o.brand)) + kv("제품 종류", esc(o.kind)) + kv("제품 이름", esc(o.product)) + kv("특장점", esc(o.point)) +
       kv("영상 분위기", esc(MOODS[o.mood] || "")) + kv("화면 비율", esc(ASPECT[o.aspect] || "")) + kv("영상 길이", "15초 · 1편") +
@@ -178,14 +209,18 @@
     el("sDone").textContent = base.filter(function (r) { return status(r) === "done"; }).length;
     var show = base.filter(function (r) { return filter === "all" || status(r) === filter; });
     // 10-15 Dan 「새로고침 꼭 해야 해?」 — 30초마다 다시 그려도 펼쳐 둔 카드·항목은 그대로
-    var openCards = {}, openSecs = {};
+    var openCards = {}, openSecs = {}, typed = {}, picked = {};
     el("list").querySelectorAll("details.card[open]").forEach(function (d) { openCards[d.dataset.slug] = 1; });
+    el("list").querySelectorAll("[data-rv-note]").forEach(function (t) { if (t.value) typed[t.dataset.rvNote] = t.value; });   // 고치기 메모는 다시 그려도 남긴다
+    el("list").querySelectorAll('input[name^="rv-"]:checked').forEach(function (x) { picked[x.name] = x.value; });
     el("list").querySelectorAll("details.card .rsec").forEach(function (d) { var c = d.closest("details.card"); openSecs[c.dataset.slug + "|" + d.querySelector("summary b").textContent] = d.open; });
     var restore = function () {
       el("list").querySelectorAll("details.card").forEach(function (d) {
         if (openCards[d.dataset.slug]) d.open = true;
         d.querySelectorAll(".rsec").forEach(function (x) { var k = d.dataset.slug + "|" + x.querySelector("summary b").textContent; if (k in openSecs) x.open = openSecs[k]; });
       });
+      el("list").querySelectorAll("[data-rv-note]").forEach(function (t) { if (typed[t.dataset.rvNote]) t.value = typed[t.dataset.rvNote]; });
+      Object.keys(picked).forEach(function (n) { var x = el("list").querySelector('input[name="' + n + '"][value="' + picked[n] + '"]'); if (x) x.checked = true; });
     };
     setTimeout(restore, 0);
     el("list").innerHTML = show.length ? '<div style="display:grid;gap:10px">' + show.map(card).join("") + "</div>"
@@ -287,6 +322,25 @@
           if (m) m.textContent = pk ? "바꾸는 중입니다 — 1분 안에 위 영상이 바뀝니다" : "수정 요청을 보냈습니다 — 고쳐서 다시 올립니다";
           setTimeout(function () { load(false).catch(function () {}); }, 20000);
         }).catch(function (x) { ep.disabled = false; if (m) m.textContent = "보내지 못했습니다 — " + (x.message || x); });
+        return;
+      }
+      var eb = e.target.closest("[data-eng-act],[data-rv-send]");
+      if (eb && !eb.disabled) {
+        var epid = eb.dataset.pid || eb.dataset.rvSend, act = eb.dataset.engAct || "revise", sc = null, rn = null;
+        var em = el("list").querySelector('[data-eng-msg="' + epid + '"]');
+        if (act === "revise") {
+          var ck = el("list").querySelector('input[name="rv-' + epid + '"]:checked'), ta = el("list").querySelector('[data-rv-note="' + epid + '"]');
+          em = el("list").querySelector('[data-rv-msg="' + epid + '"]');
+          sc = ck ? ck.value : null; rn = ta ? (ta.value || "").trim() : "";
+          if (!sc || !rn) { if (em) em.textContent = "고칠 곳을 고르고 무엇이 문제인지 적어 주세요"; return; }
+        }
+        if (act === "approve" && !confirm("영상을 생성합니다 — 약 " + eb.dataset.est + "cr을 씁니다. 진행할까요?")) return;
+        eb.disabled = true;
+        db.rpc("onecue_option3_engine", { p_project_id: epid, p_action: act, p_scope: sc, p_note: rn || null }).then(function (x) {
+          if (x.error) throw x.error;
+          if (em) em.textContent = "보냈습니다 — 엔진이 받는 대로 위 상태가 바뀝니다";
+          setTimeout(function () { load(false).catch(function () {}); }, 8000);
+        }).catch(function (x) { eb.disabled = false; if (em) em.textContent = "보내지 못했습니다 — " + (x.message || x); });
         return;
       }
       var s = e.target.closest("[data-stage]");
