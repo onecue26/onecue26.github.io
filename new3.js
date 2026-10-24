@@ -76,14 +76,26 @@
       var c = i + 1 < n ? "done" : i + 1 === n ? "now" : "";
       bars[i].className = c; names[i].className = c;
     }
-    el("prev").classList.toggle("off", n === 1); el("prev").disabled = n === 1;
+    el("prev").classList.toggle("off", n === 1); el("prev").disabled = n === 1 || !!S.moving;
+    el("save").disabled = !!S.moving;
     el("next").style.visibility = n === 5 ? "hidden" : "";
-    el("next").disabled = !okStep(n);
+    el("next").disabled = !okStep(n) || !!S.moving;
     if (n === 5) paintSummary();
     if (n === 6) paintDone();
   }
 
   function go(n) { S.step = n; S.o3.step = n; paint(); window.scrollTo({ top: 0, behavior: "smooth" }); }
+
+  function moveSaved(n) {
+    if (S.moving || S.inlineSaving) return;
+    var before = S.o3.step;
+    S.moving = true; S.o3.step = n; paint();
+    save(true).then(function (ok) {
+      S.moving = false;
+      if (ok) go(n);
+      else { S.o3.step = before; paint(); }
+    });
+  }
 
   // ── 저장 ── 첫 저장 때 회사·건·브리프·연락처를 만든다(옛 의뢰와 같은 사슬, 작업은 안 만든다)
   function ensureProject() {
@@ -303,7 +315,7 @@
     el("sum").innerHTML = rows.map(function (r) { return row(r[0], r[1], r[2], r[3], r[4]); }).join("");
     var all = !!S.checkedAll;
     el("checkAll").checked = all;
-    el("go").disabled = !(okStep(5) && all) || !!S.editing;
+    el("go").disabled = !(okStep(5) && all) || !!S.editing || !!S.moving;
     el("missList").textContent = okStep(5) && !all ? "입력 내용을 확인하고 아래에 체크해 주세요" : "";
     if (S.editing) { var f = el("ed_" + S.editing); if (f) { f.focus(); if (f.setSelectionRange) f.setSelectionRange(f.value.length, f.value.length); } }
   }
@@ -325,7 +337,7 @@
   }
 
   function submit() {
-    if (!okStep(5)) return;
+    if (S.moving || S.inlineSaving || !okStep(5)) return;
     var b = el("go"); b.disabled = true; b.textContent = "영상 제작 진행 중";
     save(true).then(function (ok) {
       if (!ok) throw new Error("저장하지 못했습니다");
@@ -349,6 +361,55 @@
   // ── 6단계 ──
   // 10-18 Dan — 「영상 생성 시작」을 누른 때부터 24시간이 초시계처럼 거꾸로 흐른다(시·분·초·1/100초) · 신뢰를 위해 24시간
   var ETA_MS = 24 * 3600 * 1000;
+  var DONE_POLL_MS = 25000, doneTimer = null, doneBusy = false, doneLeft = false, doneAuthFailed = false;
+  var doneErrorNote = false, donePendingNote = "진행 상황과 완성 영상은 이 화면에서 확인해 주세요.";
+  var finalCache = null, finalSigning = null;
+  function stopDoneTimer() { clearTimeout(doneTimer); doneTimer = null; }
+  function authFailure(e) { return e && ([401, 403].indexOf(+e.status) >= 0 || /PGRST30[123]|jwt|session.*expired|not authenticated/i.test((e.code || "") + " " + (e.message || ""))); }
+  function signFinal(a) {
+    if (finalCache && finalCache.path === a.storage_path && Date.now() < finalCache.until) return Promise.resolve(finalCache);
+    if (finalSigning) return finalSigning;
+    finalSigning = Promise.all([
+      db.storage.from("uploads").createSignedUrl(a.storage_path, 3600),
+      db.storage.from("uploads").createSignedUrl(a.storage_path, 3600, { download: true }),
+    ]).then(function (u) {
+      if (u[0].error || u[1].error || !u[0].data || !u[1].data) throw u[0].error || u[1].error || new Error("완성 영상 주소를 확인하지 못했습니다");
+      finalCache = { path: a.storage_path, preview: u[0].data.signedUrl, download: u[1].data.signedUrl, until: Date.now() + 3540000 };
+      return finalCache;
+    }).finally(function () { finalSigning = null; });
+    return finalSigning;
+  }
+  function showFinal(u) {
+    if (doneLeft || document.hidden) return;
+    if (el("finalVid").src !== u.preview) el("finalVid").src = u.preview;
+    if (el("finalDl").href !== u.download) el("finalDl").href = u.download;
+    el("finalBox").hidden = false; el("etaBox").hidden = true;
+    el("doneBusyText").textContent = "완성"; el("doneNote").textContent = "영상이 완성됐어요";
+    stopDoneTimer(); cancelAnimationFrame(tick.raf);
+  }
+  function checkFinal() {
+    stopDoneTimer();
+    if (doneBusy || doneLeft || doneAuthFailed || document.hidden || S.step !== 6 || !S.pid || finalCache) return;
+    doneBusy = true;
+    // Poll only the latest final metadata; signing and video src assignment happen once on arrival.
+    db.from("assets").select("storage_path,created_at").eq("project_id", S.pid).eq("kind", "final").eq("approved", true)
+      .order("created_at", { ascending: false }).limit(1).then(function (r) {
+        if (doneLeft || document.hidden) return;
+        if (r.error) { if (authFailure(r)) doneAuthFailed = true; throw r.error; }
+        doneErrorNote = false;
+        if (el("finalBox").hidden) el("doneNote").textContent = donePendingNote;
+        var a = r.data && r.data[0];
+        if (a) return signFinal(a).then(showFinal);
+      }).catch(function (e) {
+        if (doneLeft) return;
+        doneErrorNote = true;
+        if (doneAuthFailed || authFailure(e)) { doneAuthFailed = true; el("doneNote").textContent = "로그인 상태를 확인하지 못했습니다. 다시 로그인한 뒤 이 화면을 열어 주세요."; }
+        else el("doneNote").textContent = "완성 여부를 확인하지 못했습니다. 잠시 후 다시 확인합니다.";
+      }).finally(function () {
+        doneBusy = false;
+        if (!doneLeft && !doneAuthFailed && !document.hidden && S.step === 6 && !finalCache) doneTimer = setTimeout(checkFinal, DONE_POLL_MS);
+      });
+  }
   function tick() {
     var since = new Date(S.o3.submitted_at || Date.now()).getTime();
     var left = Math.max(0, since + ETA_MS - Date.now());
@@ -360,26 +421,15 @@
   }
   function paintDone() {
     cancelAnimationFrame(tick.raf); tick();
-    // 완성본(관리자가 승인해 올린 final) — 있으면 영상·내려받기를 보여 준다(10-15 옵션 3 납품 경로)
-    db.from("assets").select("storage_path,created_at").eq("project_id", S.pid).eq("kind", "final").eq("approved", true)
-      .order("created_at", { ascending: false }).limit(1).then(function (r) {
-        var a = r.data && r.data[0];
-        if (!a) return;
-        Promise.all([db.storage.from("uploads").createSignedUrl(a.storage_path, 3600),
-                     db.storage.from("uploads").createSignedUrl(a.storage_path, 3600, { download: true })]).then(function (u) {
-          if (!u[0].data) return;
-          el("finalVid").src = u[0].data.signedUrl;
-          el("finalDl").href = (u[1].data || u[0].data).signedUrl;
-          el("finalBox").hidden = false; el("etaBox").hidden = true;
-          el("doneBusyText").textContent = "완성"; el("doneNote").textContent = "영상이 완성됐어요";
-        });
-      });
+    if (finalCache) showFinal(finalCache); else checkFinal();
+    el("editPhone").href = "login.html?focus=phone&return=" + encodeURIComponent("new3.html?p=" + encodeURIComponent(S.slug));
     el("cEmail").textContent = ME.email || "—";
     db.from("contacts").select("phone").eq("project_id", S.pid).not("phone", "is", null).limit(1).then(function (r) {
       var ph = S.myPhone || (r.data && r.data[0] && r.data[0].phone) || (ME.user_metadata || {}).phone;
-      if (el("finalBox").hidden) el("doneNote").textContent = ph
+      donePendingNote = ph
         ? "등록된 전화번호가 있습니다. 진행 상황과 완성 영상은 이 화면에서 확인해 주세요."
         : "전화번호가 아직 없습니다. 진행 상황과 완성 영상은 이 화면에서 확인해 주세요.";
+      if (el("finalBox").hidden && !doneErrorNote) el("doneNote").textContent = donePendingNote;
       el("cPhone").textContent = ph ? String(ph).replace(/^(\d{3})(\d{3,4})(\d{4})$/, "$1-$2-$3") : "아직 없습니다 — 아래 「연락처 수정하기」에서 넣어 주세요";
     });
   }
@@ -423,6 +473,23 @@
   }
 
   function wire() {
+    document.addEventListener("visibilitychange", function () { if (document.hidden) stopDoneTimer(); else if (finalCache) showFinal(finalCache); else checkFinal(); });
+    window.addEventListener("pagehide", function () { doneLeft = true; stopDoneTimer(); cancelAnimationFrame(tick.raf); });
+    window.addEventListener("pageshow", function (e) {
+      if (!e.persisted) return;
+      doneLeft = false;
+      if (S.step !== 6 || document.hidden) return;
+      if (finalCache) showFinal(finalCache);
+      else { cancelAnimationFrame(tick.raf); tick(); checkFinal(); }
+    });
+    el("finalDl").addEventListener("click", function (e) {
+      if (!finalCache || Date.now() < finalCache.until) return;
+      e.preventDefault();
+      signFinal({ storage_path: finalCache.path }).then(function (u) { showFinal(u); location.href = u.download; }).catch(function (err) { toast("영상 주소를 갱신하지 못했습니다 — " + (err.message || err)); });
+    });
+    el("finalVid").addEventListener("error", function () {
+      if (finalCache && Date.now() >= finalCache.until) signFinal({ storage_path: finalCache.path }).then(showFinal).catch(function (err) { toast("영상 주소를 갱신하지 못했습니다 — " + (err.message || err)); });
+    });
     ["brand", "kind", "product", "point"].forEach(function (id) { el(id).addEventListener("input", function () { readStep1(); paint(); }); });
     el("moods").addEventListener("change", function (e) { S.o3.mood = e.target.value; paint(); });
     el("avoid").addEventListener("input", function (e) { S.o3.avoid = e.target.value; });
@@ -448,11 +515,10 @@
     });
     el("url").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); checkUrl("url"); } });
     el("urlCheck").addEventListener("click", function () { checkUrl("url"); });
-    el("prev").addEventListener("click", function () { if (S.step > 1) { if (okStep(1)) save(true); go(S.step - 1); } });   // 단계가 바뀌면 자동 저장(10-18)
+    el("prev").addEventListener("click", function () { if (S.step > 1) moveSaved(S.step - 1); });
     el("next").addEventListener("click", function () {
       if (!okStep(S.step)) return;
-      var b = el("next"); b.disabled = true;
-      save(true).then(function (ok) { if (ok) go(S.step + 1); else paint(); });
+      moveSaved(S.step + 1);
     });
     el("save").addEventListener("click", function () { save(false); });
     el("sum").addEventListener("click", function (e) {

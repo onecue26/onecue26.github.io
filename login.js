@@ -91,6 +91,17 @@
     } catch (_) { return null; }
   }
 
+  function returnProjectUrl() {
+    var n = new URLSearchParams(location.search).get("return");
+    if (!n || /^[\\/]{2}|^\\/.test(n)) return null;
+    try {
+      var target = new URL(n, location.href), slug = target.searchParams.get("p");
+      if (target.origin !== location.origin || target.username || target.password ||
+          target.pathname !== "/new3.html" || target.hash || !slug || slug.length > 200 || /[<>\s/?#:\\]/.test(slug)) return null;
+      return target.pathname + "?p=" + encodeURIComponent(slug);
+    } catch (_) { return null; }
+  }
+
   function showWho(user) {
     el("form").style.display = "none";
     el("who").classList.add("on");
@@ -127,6 +138,16 @@
         }
         el("phone2").value = showPhone(v); el("phone2").classList.remove("need");
         el("phoneMsg").className = "msg ok"; el("phoneMsg").textContent = "연락처를 저장했습니다";
+        var backUrl = returnProjectUrl();
+        if (backUrl) {
+          var back = el("returnProject");
+          if (!back) {
+            back = document.createElement("a"); back.id = "returnProject"; back.className = "btn ghost";
+            back.textContent = "원래 프로젝트로 돌아가기";
+            el("phoneMsg").insertAdjacentElement("afterend", back);
+          }
+          back.href = backUrl;
+        }
       });
     });
 
