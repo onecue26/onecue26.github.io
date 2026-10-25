@@ -240,6 +240,11 @@
 .mysub summary h3::after{content:" ▾"}.mysub[open] summary h3::after{content:" ▴"}
 .mysub .sum{margin:4px 0 0;border:1px solid var(--rule);border-radius:10px}.mysub .sum-row{grid-template-columns:118px minmax(0,1fr)}
 .mysub-note{margin:0;font-size:13px;color:var(--muted)}
+.sum-thumbs img,#thumbs .th img{cursor:zoom-in}
+.zoom3{position:fixed;inset:0;z-index:60;background:rgba(17,17,17,.82);display:flex;align-items:center;justify-content:center;padding:24px;cursor:zoom-out}
+.zoom3[hidden]{display:none}
+.zoom3 img{max-width:min(92vw,1100px);max-height:88vh;object-fit:contain;border-radius:10px;background:#fff;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.zoom3 button{position:absolute;top:16px;right:16px;width:44px;height:44px;border-radius:50%;border:0;background:#fff;color:#111;font-size:22px;cursor:pointer}
 .loading3{color:var(--muted);text-align:center;padding:40px 0}
 
 /* Narrow progress and countdown must remain inside the existing form. */
@@ -459,6 +464,7 @@ html,body,body.studio-layout{background:var(--ground)!important;color:var(--ink)
   <button type="button" class="next" id="next" disabled>다음 단계</button>
 </div></div>
 <div class="toast" id="toast"></div>
+<div class="zoom3" id="zoom3" hidden role="dialog" aria-label="사진 크게 보기"><img id="zoom3img" alt=""><button type="button" aria-label="닫기">✕</button></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js?v=o3a"></script>

@@ -488,7 +488,17 @@
     paintThumbs();
   }
 
+  // 10-25 Dan 「내가 넣은 사진 누르면 크게」 — 3단계 사진 칸·5단계 요약·진행 화면 요약 공통
+  function zoomOpen(src) { if (!src) return; el("zoom3img").src = src; el("zoom3").hidden = false; }
+  function zoomClose() { el("zoom3").hidden = true; el("zoom3img").removeAttribute("src"); }
+
   function wire() {
+    document.addEventListener("click", function (e) {
+      var im = e.target.closest(".sum-thumbs img, #thumbs .th img");
+      if (im) { e.preventDefault(); zoomOpen(im.getAttribute("src")); return; }
+      if (!el("zoom3").hidden && e.target.closest("#zoom3")) zoomClose();
+    });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !el("zoom3").hidden) zoomClose(); });
     document.addEventListener("visibilitychange", function () { if (document.hidden) stopDoneTimer(); else if (finalCache) showFinal(finalCache); else checkFinal(); });
     window.addEventListener("pagehide", function () { doneLeft = true; stopDoneTimer(); cancelAnimationFrame(tick.raf); });
     window.addEventListener("pageshow", function (e) {
