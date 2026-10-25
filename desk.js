@@ -109,6 +109,8 @@
   function engineBox(r) {
     if (status(r) === "draft") return "";
     var e = (r.report || {}).engine || {};
+    // 10-25 그래놀라 — 엔진을 관리 화면 밖에서 돌린 건은 engine 칸이 비어 「엔진 시작」이 보였다 → 확인 요청이 있으면 끝난 건
+    if (!e.state && (r.report || {}).review_request) e = { state: "done", label: "완성 — 위 「납품 전 확인 요청」을 보세요" };
     var head = e.state ? "<b>엔진 · " + esc(ENG[e.state] || e.state) + "</b> — " + esc(e.label || "") + (e.at ? " · " + esc(when(e.at)) : "") : "<b>엔진 · 아직 돌리지 않음</b>";
     var sum = (e.summary || []).map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("");
     var btn = "";
@@ -340,6 +342,7 @@
           sc = ck ? ck.value : null; rn = ta ? (ta.value || "").trim() : "";
           if (!sc || !rn) { if (em) em.textContent = "고칠 곳을 고르고 무엇이 문제인지 적어 주세요"; return; }
         }
+        if (act === "design" && !confirm("이 건을 처음부터 다시 설계합니다(크레딧 0 · 20~30분). 진행할까요?")) return;
         if (act === "approve" && !confirm("영상을 생성합니다 — 약 " + eb.dataset.est + "cr을 씁니다. 진행할까요?")) return;
         eb.disabled = true;
         db.rpc("onecue_option3_engine", { p_project_id: epid, p_action: act, p_scope: sc, p_note: rn || null }).then(function (x) {
