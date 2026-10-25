@@ -419,8 +419,24 @@
     if (!left) { el("etaNote").textContent = "마무리 확인 중입니다. 끝나는 대로 바로 알려 드려요"; return; }
     if (S.step === 6 && !el("etaBox").hidden) tick.raf = requestAnimationFrame(tick);
   }
+  // 10-25 Dan 「제작 중일 때 넣은 정보를 고치지는 못해도 보는 기능」 — 5단계 요약과 같은 줄, 고치기 버튼 없이
+  function paintMySubmit() {
+    var o = S.o3, a = ASPECTS.filter(function (x) { return x.v === o.aspect; })[0];
+    var ph = S.photos.filter(function (p) { return p.id && p.src; });
+    var rows = [["브랜드명", esc(trim(o.brand))], ["제품 종류", esc(trim(o.kind))], ["제품 이름", esc(trim(o.product))],
+                ["제품 특장점", esc(trim(o.point))], ["영상 분위기", esc(MOODS[o.mood] || "")]];
+    if (trim(o.avoid)) rows.push(["피하고 싶은 느낌", esc(trim(o.avoid))]);
+    if (trim(o.ref_url)) rows.push(["참고 영상", esc(trim(o.ref_url))]);
+    rows.push(["등록 사진", ph.length ? '<span class="sum-thumbs">' + ph.map(function (p) { return '<img src="' + esc(p.src) + '" alt="">'; }).join("") + "</span>" : ""]);
+    rows.push(["추가 정보", esc(trim(o.url))]);
+    rows.push(["화면 비율", a ? esc(a.t) + " · " + a.v : ""]);
+    rows.push(["영상 길이", "15초 · 1편"]);
+    el("mySum").innerHTML = rows.map(function (r) {
+      return '<div class="sum-row"><dt>' + r[0] + "</dt><dd>" + (r[1] || '<span class="none">입력 안 함</span>') + "</dd></div>";
+    }).join("");
+  }
   function paintDone() {
-    cancelAnimationFrame(tick.raf); tick();
+    cancelAnimationFrame(tick.raf); tick(); paintMySubmit();
     if (finalCache) showFinal(finalCache); else checkFinal();
     el("editPhone").href = "login.html?focus=phone&return=" + encodeURIComponent("new3.html?p=" + encodeURIComponent(S.slug));
     el("cEmail").textContent = ME.email || "—";

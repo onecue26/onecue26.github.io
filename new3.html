@@ -236,6 +236,10 @@
 @media(max-width:420px){.w3-bar button{padding:12px 12px;font-size:14px}.w3-bar .next{min-width:96px}.w3-bar .saved{color:transparent}}
 .toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:var(--ink);color:var(--ground);padding:10px 16px;border-radius:999px;font-size:14px;font-weight:600;z-index:40;opacity:0;transition:opacity .2s;pointer-events:none;max-width:calc(100% - 32px);text-align:center}
 .toast.on{opacity:1}
+.mysub{text-align:left}.mysub summary{cursor:pointer;list-style:none}.mysub summary::-webkit-details-marker{display:none}
+.mysub summary h3::after{content:" ▾"}.mysub[open] summary h3::after{content:" ▴"}
+.mysub .sum{margin:4px 0 0;border:1px solid var(--rule);border-radius:10px}.mysub .sum-row{grid-template-columns:118px minmax(0,1fr)}
+.mysub-note{margin:0;font-size:13px;color:var(--muted)}
 .loading3{color:var(--muted);text-align:center;padding:40px 0}
 
 /* Narrow progress and countdown must remain inside the existing form. */
@@ -429,6 +433,11 @@ html,body,body.studio-layout{background:var(--ground)!important;color:var(--ink)
         </div>
         <p class="eta-note" id="etaNote">대부분 이보다 일찍 완성됩니다</p>
       </div>
+      <details class="card3 mysub" id="mySubmit">
+        <summary><h3>내가 넣은 의뢰 내용 보기</h3></summary>
+        <p class="mysub-note">영상 제작 진행 중에는 수정이 불가합니다.</p>
+        <dl class="sum" id="mySum"></dl>
+      </details>
       <div class="card3">
         <h3>가입 시 입력된 연락처</h3>
         <div class="kv"><span>이메일</span><b id="cEmail">—</b><span>전화</span><b id="cPhone">—</b></div>
