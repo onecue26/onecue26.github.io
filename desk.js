@@ -325,9 +325,12 @@
         var pk = ep.dataset.ecPick ? +ep.dataset.ecPick : null, m = el("list").querySelector('[data-ec-msg="' + pid + '"]');
         if (!pk && !nt) { if (m) m.textContent = "수정할 내용을 적어 주세요"; return; }
         ep.disabled = true;
-        db.rpc("onecue_option3_endcard", { p_project_id: pid, p_pick: pk, p_note: nt || null }).then(function (x) {
+        // 10-25 Dan — 엔드컷 메모 수정은 Head 알림 대신 엔진 「엔드컷·글자 고치기」(크레딧 0)로 · 후보 고르기는 그대로 코드가 바로 바꿈
+        var call = pk ? db.rpc("onecue_option3_endcard", { p_project_id: pid, p_pick: pk, p_note: nt || null })
+                      : db.rpc("onecue_option3_engine", { p_project_id: pid, p_action: "revise", p_scope: "ending", p_note: nt });
+        call.then(function (x) {
           if (x.error) throw x.error;
-          if (m) m.textContent = pk ? "바꾸는 중입니다 — 1분 안에 위 영상이 바뀝니다" : "수정 요청을 보냈습니다 — 고쳐서 다시 올립니다";
+          if (m) m.textContent = pk ? "바꾸는 중입니다 — 1분 안에 위 영상이 바뀝니다" : "엔진이 엔드컷을 고쳐서 다시 올립니다(크레딧 0)";
           setTimeout(function () { load(false).catch(function () {}); }, 20000);
         }).catch(function (x) { ep.disabled = false; if (m) m.textContent = "보내지 못했습니다 — " + (x.message || x); });
         return;
