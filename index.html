@@ -4,211 +4,526 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ONECUE — 제품만 있다면 누구나 광고주</title>
-<meta name="description" content="브랜드 이름과 사진 세 장이면 충분합니다. 10만 원, 24시간. 원큐에 끝나는 광고 제작.">
+<meta name="description" content="브랜드 이름과 사진 한 장이면 충분합니다. 10만 원, 24시간. 원큐에 끝나는 광고 제작.">
 <meta property="og:title" content="ONECUE — 제품만 있다면 누구나 광고주">
-<meta property="og:description" content="브랜드 이름과 사진 세 장이면 충분합니다. 10만 원, 24시간. 원큐에 끝나는 광고 제작.">
-<meta property="og:image" content="https://onecue26.github.io/assets/media/hero-reel-poster.jpg">
+<meta property="og:description" content="브랜드 이름과 사진 한 장이면 충분합니다. 10만 원, 24시간. 원큐에 끝나는 광고 제작.">
+<meta property="og:image" content="https://onecue26.github.io/media/01-hero.jpg">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 rx=%223%22 fill=%22%230d0d0e%22/%3E%3Ccircle cx=%2211%22 cy=%2211%22 r=%223%22 fill=%22%23d7ff3a%22/%3E%3C/svg%3E">
 <script>if(/(?:^|&)type=recovery(?:&|$)/.test(location.hash.slice(1)))location.replace('login.html?mode=recovery'+location.hash);</script>
 <link rel="preload" href="assets/fonts/PretendardVariable.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/css/onecue.css">
+<style>
+/* 10-26 친구 신규 2안(Claude Design x-dc) 을 정적 HTML 로 옮김 · 폭 820px 기준 폰/PC */
+@font-face{font-family:'Pretendard Variable';font-weight:45 920;font-style:normal;font-display:swap;src:url('assets/fonts/PretendardVariable.woff2') format('woff2-variations')}
+@font-face{font-family:'Anton';font-style:normal;font-weight:400;font-display:swap;src:url('assets/fonts/anton-latin-ext.woff2') format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1E9F,U+A720-A7FF}
+@font-face{font-family:'Anton';font-style:normal;font-weight:400;font-display:swap;src:url('assets/fonts/anton-latin.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+:root{--ac:#d7ff3a;--ink:#111;--dark:#0e0e0f;--paper:#f4f2ef;--padX:56px}
+html,body{margin:0;background:var(--dark)}
+*{box-sizing:border-box}
+a{color:inherit;text-decoration:none}
+a:hover{opacity:.8}
+summary::-webkit-details-marker{display:none}
+.page{font-family:'Pretendard Variable','Pretendard',system-ui,sans-serif;color:var(--ink);background:#fff;word-break:keep-all;-webkit-font-smoothing:antialiased}
+.in{max-width:1328px;margin:0 auto}
+.logo{display:flex;align-items:center;font-family:'Anton',sans-serif;line-height:1;letter-spacing:.01em}
+.logo b{font-weight:400;background:var(--ac);color:var(--ink);padding:.06em .08em 0;margin-left:.04em}
+header{position:sticky;top:0;z-index:50;background:rgba(14,14,15,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--paper)}
+header .in{height:72px;padding:0 var(--padX);display:flex;align-items:center;justify-content:space-between;gap:20px}
+header .logo{font-size:24px}
+header nav{display:flex;align-items:center;gap:32px;font-size:15px;font-weight:600}
+.pill{display:flex;align-items:center;height:40px;padding:0 18px;border-radius:999px;background:var(--paper);color:var(--ink);font-size:14px;font-weight:800;white-space:nowrap}
+.btn{display:flex;align-items:center;gap:10px;height:58px;padding:0 32px;border-radius:999px;background:var(--ac);color:var(--ink);font-size:17px;font-weight:800;white-space:nowrap}
+.dark{background:var(--dark);color:var(--paper)}
+.sec{padding:130px var(--padX)}
+.stack{display:flex;flex-direction:column;gap:64px}
+.eyebrow{font-size:14px;font-weight:700;color:#666}
+.dark .eyebrow{color:var(--ac)}
+h2{margin:0;font-size:clamp(40px,3.8vw,56px);font-weight:800;letter-spacing:-.04em;line-height:1.2}
+.head{display:flex;flex-direction:column;gap:14px}
+/* 01 */
+#top{padding:88px 56px 96px}
+#top .in{display:flex;flex-direction:column;align-items:center;gap:64px}
+.hero-txt{display:flex;flex-direction:column;align-items:center;gap:24px;text-align:center}
+h1{margin:0;font-weight:800;font-size:clamp(56px,6vw,88px);line-height:1.12;letter-spacing:-.045em}
+h1 span{color:var(--ac)}
+.hero-sub{margin:0;font-size:19px;font-weight:600;line-height:1.65;color:#d6d4d0}
+.reel{position:relative;width:100%;max-width:1328px;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#1b1b1c center/cover no-repeat}
+.reel video,.tile video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.reel:after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.45) 0%,rgba(0,0,0,0) 24%)}
+.snd{all:unset;cursor:pointer;position:absolute;z-index:2;right:14px;top:14px;height:32px;padding:0 13px;display:flex;align-items:center;border-radius:999px;background:rgba(0,0,0,.55);color:#fff;font-size:12px;font-weight:700}
+.snd.on{background:var(--ac);color:var(--ink)}
+/* 02 */
+.ba{display:grid;grid-template-columns:minmax(0,1.2fr) 80px minmax(0,1fr);gap:24px;align-items:center}
+.ba-col{display:flex;flex-direction:column;gap:16px}
+.ba-col>strong{font-size:15px;font-weight:800}
+.ba-col.r{align-items:center}
+.ph{position:relative;aspect-ratio:1/1;max-width:420px;border-radius:10px;border:1.5px dashed #bdbdb6;background:#f3f3f0;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;font-size:13px;font-weight:700;color:#555}
+.ba-note{font-size:14px;font-weight:600;color:#555}
+.arrow{display:flex;align-items:center;justify-content:center;font-size:56px;font-weight:300}
+.arrow:before{content:'→'}
+.vid916{position:relative;width:min(340px,100%);aspect-ratio:9/16;border-radius:12px;border:1.5px dashed #bdbdb6;background:#1b1b1c;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:16px;color:#ddd;font-size:13px;font-weight:600}
+.vid916 strong{font-size:15px;color:#fff}
+.chips{position:absolute;left:14px;right:14px;bottom:14px;display:flex;flex-wrap:wrap;gap:6px}
+.chips span{padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.12);font-size:11px;font-weight:700;color:#fff}
+/* 03 */
+#works .stack{gap:40px}
+.works-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tabs button{all:unset;cursor:pointer;height:40px;display:flex;align-items:center;padding:0 16px;border-radius:999px;font-size:14px;font-weight:700;color:var(--paper);border:1px solid rgba(255,255,255,.3)}
+.tabs button.on{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+.strip{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin:0 calc(-1 * var(--padX));padding:0 var(--padX)}
+.strip::-webkit-scrollbar{display:none}
+.tile{position:relative;flex:0 0 280px;aspect-ratio:9/16;border-radius:12px;overflow:hidden;scroll-snap-align:start;background:#1b1b1c center/cover no-repeat}
+.tile:after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(0deg,rgba(0,0,0,.78) 0%,rgba(0,0,0,0) 45%),linear-gradient(180deg,rgba(0,0,0,.45) 0%,rgba(0,0,0,0) 22%)}
+.tile .snd{right:10px;top:10px;height:30px;padding:0 11px}
+.cap{position:absolute;z-index:1;left:14px;right:14px;bottom:14px;display:flex;flex-direction:column;gap:3px;color:#fff;font-size:13px;font-weight:600}
+.cap strong{font-size:17px;font-weight:800}
+.cap em{font-style:normal;font-size:12px;color:var(--ac)}
+.strip-nav{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.strip-nav span{font-size:14px;font-weight:600;color:#bdbbb7}
+.strip-nav div{display:flex;gap:8px}
+.strip-nav button{all:unset;cursor:pointer;width:48px;height:48px;border-radius:50%;border:1px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:18px}
+/* 04 */
+.steps{display:flex;flex-direction:column;border-top:2px solid var(--ink)}
+.step{display:grid;grid-template-columns:220px minmax(0,1fr);gap:48px;align-items:center;padding:32px 0;border-bottom:1px solid #e2e2de}
+.step .box{aspect-ratio:1/1;border-radius:12px;border:1.5px dashed #bdbdb6;background:#f3f3f0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:14px;font-size:12px;font-weight:600;color:#555}
+.step .box strong{font-size:13px;color:var(--ink)}
+.step .txt{display:flex;flex-direction:column;gap:10px}
+.step .num{font-size:14px;font-weight:800;color:#666}
+.step .txt strong{font-size:28px;font-weight:800;letter-spacing:-.03em}
+.step .txt p{margin:0;font-size:18px;font-weight:600;line-height:1.7;color:#333;max-width:760px}
+.mark{display:flex}
+.mark span{font-size:18px;font-weight:800;padding:3px 8px;background:var(--ac)}
+/* 05 */
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:40px}
+.three>div{display:flex;flex-direction:column;gap:14px;padding-top:24px;border-top:1px solid rgba(255,255,255,.35)}
+.big{font-size:clamp(72px,7vw,104px);font-weight:700;letter-spacing:-.05em;line-height:1;color:var(--ac)}
+.big small{font-size:.45em}
+.three strong{font-size:18px;font-weight:800}
+.three p{margin:0;font-size:16px;font-weight:600;line-height:1.7;color:#d6d4d0}
+.cmp{display:flex;flex-direction:column;border-top:1px solid rgba(255,255,255,.35);font-size:18px;font-weight:600}
+.cmp div{display:grid;grid-template-columns:200px minmax(0,1fr) minmax(0,1fr);gap:12px;padding:18px 0;border-bottom:1px solid rgba(255,255,255,.14);align-items:baseline}
+.cmp div span:first-child,.cmp div span:last-child{font-weight:800}
+.cmp div span:nth-child(2){color:#bdbbb7}
+.cmp .th{padding:14px 0;font-size:13px;font-weight:700;color:#bdbbb7}
+.cmp .th span:last-child{color:var(--ac)}
+/* 06 */
+#record{padding:120px 56px 80px}
+#record .in{display:flex;flex-direction:column;gap:18px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:2px solid var(--ink);border-bottom:1px solid #ddd}
+.stats div{padding:24px 12px 24px 0;display:flex;flex-direction:column;gap:8px}
+.stats span{font-size:13px;font-weight:700;color:#555}
+.stats strong{font-size:40px;font-weight:700;letter-spacing:-.04em}
+.foot-note{font-size:13px;font-weight:600;color:#777}
+/* 07 */
+#faq{padding:0 56px 130px}
+#faq .in{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:64px}
+.faq{display:flex;flex-direction:column;border-top:2px solid var(--ink)}
+.faq details{border-bottom:1px solid #ddd}
+.faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:22px 0;font-size:18px;font-weight:800}
+.faq summary:after{content:'+';font-size:22px;font-weight:400}
+.faq details[open] summary:after{content:'−'}
+.faq p{margin:0 0 22px;font-size:16px;font-weight:600;line-height:1.75;color:#333}
+/* 08 */
+#start{position:relative;overflow:hidden;background:var(--dark);color:#fff}
+#start video{position:absolute;inset:-40px;width:calc(100% + 80px);height:calc(100% + 80px);object-fit:cover;filter:blur(18px);transform:scale(1.05)}
+#start .veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,14,15,.72),rgba(14,14,15,.86))}
+#start .in{position:relative;padding:160px 56px;display:flex;flex-direction:column;align-items:center;gap:36px;text-align:center}
+#start h2{font-size:clamp(48px,5.4vw,80px);letter-spacing:-.045em;line-height:1.15}
+#start h2 span{color:var(--ac)}
+#start .btn{height:60px;padding:0 34px}
+footer{background:var(--dark);color:var(--paper);border-top:1px solid rgba(255,255,255,.12)}
+footer .in{padding:36px var(--padX) 48px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:24px;font-size:14px;font-weight:600}
+footer .logo{font-size:34px}
+footer .links{display:flex;flex-wrap:wrap;gap:20px}
+footer small{color:#a9a7a3;font-size:13px}
+@media (max-width:819px){
+  :root{--padX:20px}
+  header .in{height:60px}
+  header nav{display:none}
+  .sec{padding:80px 20px}
+  .stack{gap:40px}
+  h2{font-size:30px}
+  #top{padding:48px 0 0}
+  #top .in{gap:40px}
+  .hero-txt{padding:0 20px}
+  h1{font-size:42px}
+  .hero-sub{font-size:16px}
+  .reel{aspect-ratio:9/16;border-radius:0}
+  .ba{grid-template-columns:minmax(0,1fr);gap:20px}
+  .ph{max-width:none}
+  .ba-col.r{align-items:stretch}
+  .vid916{width:100%}
+  .arrow{font-size:36px}
+  .arrow:before{content:'↓'}
+  #works .stack{gap:28px}
+  .works-head{flex-direction:column;align-items:flex-start}
+  .strip{gap:12px}
+  .tile{flex-basis:62%}
+  .step{grid-template-columns:120px minmax(0,1fr);gap:18px;padding:24px 0}
+  .step .txt strong{font-size:22px}
+  .step .txt p{font-size:16px}
+  .three{grid-template-columns:minmax(0,1fr);gap:36px}
+  .big{font-size:64px}
+  .cmp{font-size:15px}
+  .cmp div{grid-template-columns:84px minmax(0,1fr) minmax(0,1fr)}
+  #record{padding:80px 20px 64px}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stats strong{font-size:26px}
+  #faq{padding:0 20px 80px}
+  #faq .in{grid-template-columns:minmax(0,1fr);gap:28px}
+  #start .in{padding:96px 20px}
+  #start h2{font-size:34px}
+}
+/* 전환 효과(친구 원안 fx) */
+html.fx .fx-r{opacity:0;translate:0 40px;transition:opacity .9s cubic-bezier(.2,.7,.2,1),translate .9s cubic-bezier(.2,.7,.2,1),scale .9s cubic-bezier(.2,.7,.2,1);transition-delay:var(--fx-d,0ms)}
+html.fx .fx-r.fx-tile{scale:.92}
+html.fx .fx-r.fx-in{opacity:1;translate:0 0;scale:1}
+html.fx .fx-hero{animation:fxUp 1.1s cubic-bezier(.2,.7,.2,1) both;animation-delay:var(--fx-d,0ms)}
+html.fx .fx-hero-tile{animation:fxTile 1.2s cubic-bezier(.2,.7,.2,1) both;animation-delay:var(--fx-d,0ms)}
+@keyframes fxUp{from{opacity:0;translate:0 48px;clip-path:inset(0 0 100% 0)}to{opacity:1;translate:0 0;clip-path:inset(-20% -5% -20% -5%)}}
+@keyframes fxTile{from{opacity:0;translate:0 80px;scale:.9}to{opacity:1;translate:0 0;scale:1}}
+html.fx .fx-tile video{transition:scale .7s cubic-bezier(.2,.7,.2,1)}
+html.fx .fx-tile:hover video{scale:1.06}
+html.fx header.fx-scrolled{box-shadow:0 8px 30px rgba(0,0,0,.12)}
+#fx-progress{position:fixed;left:0;top:0;height:3px;width:100%;transform-origin:0 50%;transform:scaleX(0);z-index:9999;pointer-events:none;background:var(--ac);box-shadow:0 0 0 .5px rgba(0,0,0,.25)}
+@media (min-width:1100px){body{zoom:.8}html.fx .fx-reelcap{max-width:1100px!important;margin-left:auto!important;margin-right:auto!important}}
+</style>
 </head>
 <body>
+<div class="page">
 
-<header class="hdr" data-hdr>
-  <a href="#top" class="logo" aria-label="ONECUE"><span class="logo-word"><span>ONE</span><span>CUE</span></span><span class="logo-dot"></span></a>
-  <nav class="nav" aria-label="섹션">
-    <a href="#impact">IMPACT</a><a href="#vision">VISION</a><a href="#how">HOW</a><a href="#works">WORKS</a><a href="#numbers">NUMBERS</a><a href="#faq">FAQ</a>
-  </nav>
-  <a href="new3.html" class="cta-pill" data-link="cta-header">지금 바로 만들기 <span aria-hidden="true">↗</span></a>
-</header>
+  <header>
+    <div class="in">
+      <a href="#top" class="logo" aria-label="ONECUE">ONE<b>CUE</b></a>
+      <nav aria-label="섹션">
+        <a href="#how">사진 1장</a>
+        <a href="#works">작품</a>
+        <a href="#process">제작 과정</a>
+        <a href="#faq">자주 묻는 질문</a>
+      </nav>
+      <a href="new3.html" class="pill" data-link="cta-header">지금 바로 만들기</a>
+    </div>
+  </header>
 
-<main>
-  <!-- 01 Hero -->
-  <section id="top" class="hero" data-screen="01 Hero">
-    <div class="hero-tags rv"><span>광고 영상</span><span class="sl">/</span><span>브랜드 필름</span><span class="sl">/</span><span>소셜 캠페인</span></div>
-    <h1 aria-label="제품만 있다면 누구나 광고주" data-type data-l1="제품만 있다면" data-l2="누구나 광고주">
-      <span class="ln" aria-hidden="true"><span data-t1>제품만 있다면</span><span class="caret" data-c1 hidden></span></span>
-      <span class="ln" aria-hidden="true"><span class="hl" data-t2>누구나 광고주</span><span class="caret" data-c2></span></span>
-    </h1>
-    <p class="hero-sub rv" style="--d:.15s">브랜드 이름과 사진 세 장이면 충분합니다.<br>10만 원, 24시간. 원큐에 끝나는 광고 제작.</p>
-  </section>
-
-  <!-- 02 Hero Film -->
-  <section class="film-sec" data-screen="02 Hero Film">
-    <div class="film" data-film style="background-image:url('assets/media/hero-reel-poster.jpg')">
-      <video src="assets/media/hero-reel.mp4" poster="assets/media/hero-reel-poster.jpg" muted loop playsinline autoplay preload="metadata"></video>
-      <div class="film-badge"><i></i>ONECUE REEL</div>
+  <section id="top" class="dark" data-screen="01 Hero + Reel">
+    <div class="in">
+      <div class="hero-txt">
+        <h1>제품만 있다면<br><span>누구나 광고주</span></h1>
+        <p class="hero-sub">브랜드 이름과 사진 한 장이면 충분합니다.<br>10만 원, 24시간. 원큐에 끝나는 광고 제작.</p>
+        <a href="new3.html" class="btn" data-link="cta-hero">지금 바로 만들기 <span aria-hidden="true">↗</span></a>
+      </div>
+      <div class="reel" id="reel">
+        <video data-v="REEL" preload="metadata" playsinline muted loop></video>
+        <button type="button" class="snd" data-snd="REEL">♪ 소리 켜기</button>
+      </div>
     </div>
   </section>
 
-  <!-- 03 Principles : 29CM 스택 카드 -->
-  <section class="wrap sec" data-screen="03 Principles">
-    <div class="cards" data-cards>
-      <article id="impact" class="card" data-card style="--i:0">
-        <div class="card-line"><span></span></div>
-        <div class="card-num fu">01</div>
-        <div class="card-body">
-          <div class="card-label"><b>IMPACT</b><span class="caret"></span></div>
-          <div class="card-rest fu">
-            <h2>고민은 짧게, 임팩트는 선명하게</h2>
-            <p>광고 제작이라는 복잡한 미로 속에서 소상공인을 구합니다. 브랜드의 이름과 세 장의 사진만으로 시장의 흐름을 읽고, 유머부터 감성까지 시선을 사로잡는 솔루션을 발견합니다. 오랜 고민을 거듭하며 기회를 놓치는 대신, 빠른 제작물로 제품이 세상에 퍼지는 길을 넓혀드립니다.</p>
-          </div>
+  <section id="how" class="sec" data-screen="02 Photo to Film">
+    <div class="in stack">
+      <div class="head" style="align-items:center;text-align:center">
+        <span class="eyebrow">원큐가 하는 일</span>
+        <h2>사진 1장 → 15초 광고</h2>
+      </div>
+      <div class="ba">
+        <div class="ba-col">
+          <strong>보내는 것 · 제품 사진 1장</strong>
+          <div class="ph">고객이 보낸 제품 사진</div>
+          <span class="ba-note">+ 브랜드 이름, 제품 유형</span>
         </div>
-      </article>
-
-      <article id="vision" class="card" data-card style="--i:1">
-        <div class="card-line"><span></span></div>
-        <div class="card-num fu">02</div>
-        <div class="card-body">
-          <div class="card-label"><b>VISION</b><span class="caret"></span></div>
-          <div class="card-rest fu">
-            <h2>수정을 없애고, 완성도를 더하다</h2>
-            <div class="subs">
-              <div><strong>본질에 집중하는 직관</strong><span>무수한 수정과 타협의 늪 대신, AI가 분석한 가장 날것의 완벽한 감각을 신뢰합니다. 오직 제품의 본질과 시장의 반응에만 집중해 군더더기 없는 최선의 결과물을 도출합니다.</span></div>
-              <div><strong>디테일한 자체 검수</strong><span>수정을 받지 않는다는 원칙은 대충 만들겠다는 뜻이 아닙니다. 자막의 결함이나 디테일 오류를 내부 전문 검수 시스템으로 걸러낸 후 고객에게 전달합니다.</span></div>
-              <div><strong>10만 원의 가치, 24시간의 마법</strong><span>누구나 부담 없이 시작할 수 있는 합리적인 비용과, 단 24시간 만에 완성되는 압도적인 속도로 브랜드의 성장에 추진력을 더합니다.</span></div>
-            </div>
-          </div>
-        </div>
-      </article>
-
-      <article id="how" class="card" data-card style="--i:2">
-        <div class="card-line"><span></span></div>
-        <div class="card-num fu">03</div>
-        <div class="card-body">
-          <div class="card-label"><b>HOW</b><span class="caret"></span></div>
-          <div class="card-rest fu">
-            <h2>제품이 세상에 닿는 가장 간결한 여정</h2>
-            <div class="steps">
-              <div><b>01 입력</b><span>브랜드명과 제품 유형, 그리고 제품을 가장 잘 담은 사진을 올립니다.</span></div>
-              <div><b>02 분석</b><span>AI가 시장 상황을 실시간으로 분석하여 유머 또는 감성 코드 등 최적의 영상 톤 앤 매너를 스스로 결정합니다.</span></div>
-              <div><b>03 완성</b><span>자막, 배경음악, 성우의 목소리를 포함한 광고 영상을 내부 검수 완료 후 전달합니다.</span></div>
-            </div>
-            <span class="hl-box">이 모든 과정을 24시간 내에 완료합니다.</span>
-          </div>
-        </div>
-      </article>
-    </div>
-  </section>
-
-  <!-- 04 Works : 29CM SERVICES sticky 패널 -->
-  <section id="works" class="works sec" data-works data-screen="04 Works">
-    <div class="wrap works-pin">
-      <div class="works-copy">
-        <div class="works-head">
-          <h2 class="h-sec rv">15초 안에<br>시선을 붙잡은 광고</h2>
-          <div class="swap" data-wswap>
-            <div class="w-title"><strong data-wbrand>RUSH LAB</strong> : <span data-wproduct>RUSH 루비 시트러스</span></div>
-            <div class="w-meta" data-wmeta>납품 · 15초 · 9:16</div>
-          </div>
-        </div>
-        <div class="w-nav">
-          <div class="thumbs" data-thumbs></div>
-          <div class="w-ctrl">
-            <button type="button" data-wprev aria-label="이전 작품">←</button>
-            <div class="ticks" data-ticks aria-hidden="true"></div>
-            <span class="w-count" data-wcount>1 / 6</span>
-            <button type="button" data-wnext aria-label="다음 작품">→</button>
+        <div class="arrow" aria-hidden="true"></div>
+        <div class="ba-col r">
+          <strong>받는 것 · 15초 완성 영상</strong>
+          <div class="vid916">
+            <strong>신규 제작 예정</strong>
+            <span>왼쪽 사진 1장으로 만든 9:16 · 15초 영상</span>
+            <div class="chips"><span>자막</span><span>배경음악</span><span>필요하면 성우</span></div>
           </div>
         </div>
       </div>
-      <div class="player-col">
-        <div class="player" data-player>
-          <video data-va muted playsinline preload="metadata"></video>
-          <video data-vb class="is-back" muted playsinline preload="none"></video>
-          <div class="p-bar"><span data-vbar></span></div>
+    </div>
+  </section>
+
+  <section id="works" class="sec dark" data-screen="03 Works">
+    <div class="in stack">
+      <div class="works-head">
+        <div class="head">
+          <span class="eyebrow">업종별 작품</span>
+          <h2>15초 안에<br>시선을 붙잡은 광고</h2>
+        </div>
+        <div class="tabs" id="tabs"></div>
+      </div>
+      <div class="strip" id="strip"></div>
+      <div class="strip-nav">
+        <span>옆으로 넘겨 보세요</span>
+        <div><button type="button" aria-label="이전" data-scroll="-1">←</button><button type="button" aria-label="다음" data-scroll="1">→</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="process" class="sec" data-screen="04 Process">
+    <div class="in stack">
+      <div class="head">
+        <span class="eyebrow">제작 3단계</span>
+        <h2>제품이 세상에 닿는<br>가장 간결한 여정</h2>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="box"><strong>화면 영상 준비 중</strong>사진 1장을 올리는 화면</div><div class="txt"><span class="num">01</span><strong>입력</strong><p>브랜드명과 제품 유형, 그리고 제품을 가장 잘 담은 사진을 올립니다.</p></div></div>
+        <div class="step"><div class="box"><strong>화면 영상 준비 중</strong>톤 앤 매너가 정해지는 화면</div><div class="txt"><span class="num">02</span><strong>분석</strong><p>AI가 시장 상황을 실시간으로 분석하여 유머 또는 감성 코드 등 최적의 영상 톤 앤 매너를 스스로 결정합니다.</p></div></div>
+        <div class="step"><div class="box"><strong>화면 영상 준비 중</strong>자막·음악이 입혀진 완성 컷</div><div class="txt"><span class="num">03</span><strong>완성</strong><p>자막과 배경음악을 입힌 광고 영상을 내부 검수 완료 후 전달합니다. 성우 목소리는 광고에 맞을 때 넣습니다.</p></div></div>
+      </div>
+      <div class="mark"><span>이 모든 과정을 24시간 내에 완료합니다.</span></div>
+    </div>
+  </section>
+
+  <section id="numbers" class="sec dark" data-screen="05 Numbers">
+    <div class="in stack">
+      <div class="head">
+        <span class="eyebrow">숫자</span>
+        <h2>중요한 건<br>꺾이지 않는 속도와 효율</h2>
+      </div>
+      <div class="three">
+        <div><span class="big">24<small>시간</small></span><strong>기획부터 완성까지</strong><p>기다림을 지우고 속도를 채운 제작 시간</p></div>
+        <div><span class="big">15<small>초</small></span><strong>가장 완벽한 길이</strong><p>소비자의 시선을 사로잡고 브랜드의 인상을 각인시키는 15초</p></div>
+        <div><span class="big">10<small>만 원</small></span><strong>합리적인 시작</strong><p>비용의 부담은 낮추고 브랜드의 가치는 온전히 높였습니다</p></div>
+      </div>
+      <div class="head" style="gap:16px">
+        <strong style="font-size:15px;font-weight:800">기존 광고 제작과 비교</strong>
+        <div class="cmp">
+          <div class="th"><span></span><span>기존 광고 제작</span><span>원큐</span></div>
+          <div><span>준비물</span><span>기획 미팅 · 촬영</span><span>사진 1장</span></div>
+          <div><span>제작 기간</span><span>수 주</span><span>24시간</span></div>
+          <div><span>비용</span><span>수백만 원대</span><span>10만 원</span></div>
+          <div><span>완성도 관리</span><span>여러 차례 수정</span><span>내부 검수</span></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 05 Numbers -->
-  <section id="numbers" class="wrap sec" data-screen="05 Numbers">
-    <h2 class="h-sec rv" style="margin-bottom:clamp(40px,5vw,72px)">중요한 건<br>꺾이지 않는 속도와 효율</h2>
-
-    <div class="num-row" data-num="24">
-      <div class="num-l">
-        <div class="num-big"><span data-count>24</span>시간</div>
-        <div class="num-cap"><strong>기획부터 완성까지</strong><span>기다림을 지우고 속도를 채운 제작 시간</span></div>
+  <section id="record" data-screen="06 Record">
+    <div class="in">
+      <span class="eyebrow">실적</span>
+      <div class="stats">
+        <div><span>누적 제작 영상</span><strong>32편</strong></div>
+        <div><span>납품 브랜드</span><strong>4곳</strong></div>
+        <div><span>평균 제작 시간</span><strong>24시간 이내</strong></div>
       </div>
-      <div class="chart chart-clock"><div class="clock" data-clock><span></span></div><span class="chart-tag">24H</span></div>
+      <span class="foot-note">*2026년 10월 기준</span>
     </div>
-
-    <div class="num-row" data-num="15">
-      <div class="num-l">
-        <div class="num-big"><span data-count>15</span>초</div>
-        <div class="num-cap"><strong>가장 완벽한 길이</strong><span>소비자의 시선을 사로잡고 브랜드의 인상을 각인시키는 15초</span></div>
-      </div>
-      <div class="chart chart-bars" data-bars></div>
-    </div>
-
-    <div class="num-row" data-num="10">
-      <div class="num-l">
-        <div class="num-big"><span data-count>10</span>만 원</div>
-        <div class="num-cap"><strong>합리적인 시작</strong><span>비용의 부담은 낮추고 브랜드의 가치는 온전히 높였습니다</span></div>
-      </div>
-      <div class="chart chart-cost">
-        <div><em>기존 광고 제작</em><span class="b b-old"></span></div>
-        <div><em style="font-weight:800">ONECUE</em><span class="b b-new"></span></div>
-      </div>
-    </div>
-
-    <div class="stats" data-stats>
-      <div class="rv"><em>누적 제작 영상</em><b><span data-stat="32">32</span>편</b></div>
-      <div class="rv" style="--d:.06s"><em>납품 브랜드</em><b><span data-stat="4">4</span>곳</b></div>
-      <div class="rv" style="--d:.12s"><em>평균 제작 시간</em><b>24시간 이내</b></div>
-      <div class="rv" style="--d:.18s"><em>수정 요청</em><b>0회</b></div>
-    </div>
-    <p class="foot-note">*2026년 10월 기준</p>
   </section>
 
-  <!-- 06 FAQ -->
-  <section id="faq" class="wrap sec faq" data-screen="06 FAQ">
-    <h2 class="h-sec rv">자주 묻는 질문</h2>
-    <div class="faq-list" data-faq>
-      <div class="qa"><button type="button" class="qa-q" aria-expanded="false">무엇을 준비하면 되나요?<i aria-hidden="true">+</i></button><div class="qa-a"><div><p>브랜드명, 제품 유형, 그리고 제품을 가장 잘 담은 사진 세 장이면 충분합니다.</p></div></div></div>
-      <div class="qa"><button type="button" class="qa-q" aria-expanded="false">정말 24시간 안에 받을 수 있나요?<i aria-hidden="true">+</i></button><div class="qa-a"><div><p>네. 분석부터 제작, 내부 검수까지 모든 과정을 24시간 안에 마치고 전달합니다.</p></div></div></div>
-      <div class="qa"><button type="button" class="qa-q" aria-expanded="false">수정 요청은 할 수 없나요?<i aria-hidden="true">+</i></button><div class="qa-a"><div><p>원큐는 수정 대신 완성도에 집중합니다. 자막 결함이나 디테일 오류는 내부 검수 시스템에서 먼저 걸러낸 뒤 전달합니다.</p></div></div></div>
-      <div class="qa"><button type="button" class="qa-q" aria-expanded="false">영상에는 무엇이 포함되나요?<i aria-hidden="true">+</i></button><div class="qa-a"><div><p>자막, 배경음악, 성우 목소리가 모두 포함된 15초 광고 영상을 받습니다.</p></div></div></div>
-      <div class="qa"><button type="button" class="qa-q" aria-expanded="false">영상 톤은 어떻게 정해지나요?<i aria-hidden="true">+</i></button><div class="qa-a"><div><p>AI가 시장 상황을 분석해 유머 또는 감성 코드 등 제품에 가장 잘 맞는 톤 앤 매너를 스스로 결정합니다.</p></div></div></div>
+  <section id="faq" data-screen="07 FAQ">
+    <div class="in">
+      <h2>자주 묻는 질문</h2>
+      <div class="faq">
+        <details><summary>무엇을 준비하면 되나요?</summary><p>브랜드명, 제품 유형, 그리고 제품을 가장 잘 담은 사진 한 장이면 충분합니다.</p></details>
+        <details><summary>정말 24시간 안에 받을 수 있나요?</summary><p>네. 분석부터 제작, 내부 검수까지 모든 과정을 24시간 안에 마치고 전달합니다.</p></details>
+        <details><summary>수정 요청은 할 수 없나요?</summary><p>원큐는 수정 대신 완성도에 집중합니다. 자막 결함이나 디테일 오류는 내부 검수에서 먼저 걸러냅니다.</p></details>
+        <details><summary>영상에는 무엇이 포함되나요?</summary><p>자막과 배경음악이 들어간 15초 광고 영상을 받습니다. 성우 목소리는 광고에 어울릴 때 함께 넣습니다.</p></details>
+        <details><summary>영상 톤은 어떻게 정해지나요?</summary><p>AI가 시장 상황을 분석해 유머 또는 감성 코드 등 가장 잘 맞는 톤을 스스로 결정합니다.</p></details>
+      </div>
     </div>
   </section>
-</main>
 
-<!-- 07 Start -->
-<footer id="start" class="start" data-screen="07 Start">
-  <div class="start-in">
-    <div class="start-top">
-      <h2 class="rv">내가 만든 제품이<br><span>모두 쓰는 제품</span>이 되도록</h2>
-      <a href="new3.html" class="cta-big rv" style="--d:.1s" data-link="cta-order">지금 바로 만들기 <span aria-hidden="true">↗</span></a>
+  <section id="start" data-screen="08 CTA">
+    <video data-v="CTA" preload="metadata" playsinline muted loop></video>
+    <div class="veil"></div>
+    <div class="in">
+      <h2>내가 만든 제품이<br><span>모두 쓰는 제품</span>이 되도록</h2>
+      <a href="new3.html" class="btn" data-link="cta-order">지금 바로 만들기 <span aria-hidden="true">↗</span></a>
     </div>
-    <div class="foot">
-      <div><em>ORDER</em><a href="new3.html" data-link="order">↗ 광고 제작 의뢰</a><a href="login.html?next=studio.html" data-link="projects">↗ 진행 중인 프로젝트 확인</a></div>
-      <div><em>CONTACT</em><a href="#" data-link="contact">↗ 제휴 · 마케팅 문의</a></div>
-      <div><em>ACCOUNT</em><a href="login.html?next=studio.html" data-link="login">↗ 로그인</a></div>
-      <a href="#top" class="logo" aria-label="ONECUE 맨 위로"><span class="logo-word" style="color:#fff"><span>ONE</span><span>CUE</span></span><span class="logo-dot"></span></a>
-    </div>
-    <div class="copy">© 2026 ONECUE</div>
-  </div>
-</footer>
+  </section>
 
-<script src="assets/js/onecue-effects.js"></script>
+  <footer>
+    <div class="in">
+      <span class="logo">ONE<b>CUE</b></span>
+      <div class="links">
+        <a href="new3.html" data-link="order">광고 제작 의뢰</a>
+        <a href="login.html?next=studio.html" data-link="projects">진행 중인 프로젝트 확인</a>
+        <a href="#" data-link="partner">제휴 · 마케팅 문의</a>
+        <a href="login.html?next=studio.html" data-link="login">로그인</a>
+      </div>
+      <small>© 2026 ONECUE</small>
+    </div>
+  </footer>
+</div>
+
 <script>
-  OnecueEffects.init({
-    // 작품 영상 위치. 데모는 로컬 assets/media/works/ 를 씀.
-    // 운영에서 기존 GitHub Pages 를 계속 쓰려면 'https://onecue26.github.io/works-media/'
-    mediaBase: 'works-media/',
-    works: [
-      ['onecue-rush', 'RUSH LAB', 'RUSH 루비 시트러스', '납품 · 15초 · 9:16'],
-      ['onecue-fanta', '환타', '환타 오렌지맛', '납품 · 15초 · 9:16'],
-      ['onecue-choi', '최가네', '최가네 김밥집', '납품 · 15초 · 9:16'],
-      ['onecue-blendie', 'Blendie', 'Blendie Go 미니 블렌더', '납품 · 15초 · 9:16'],
-      ['pre-dhai-coffee', 'DHAI', 'DHAI SPARKLING COFFEE', '음료 · 15초 · 9:16'],
-      ['pre-aquaveil', 'aqua veil', '화장품 광고', '뷰티 · 26초 · 9:16']
-    ]
+(function(){
+  var base = 'works-media/';
+  var WORKS = [
+    ['onecue-choi', '최가네', '최가네 김밥집', '음식점', 15],
+    ['onecue-fanta', '환타', '환타 오렌지맛', '음료', 15],
+    ['onecue-rush', 'RUSH LAB', '루비 시트러스', '음료', 15],
+    ['pre-dhai-coffee', 'DHAI', '스파클링 커피', '음료', 15],
+    ['pre-aquaveil', 'aqua veil', '화장품 광고', '뷰티', 26],
+    ['onecue-blendie', 'Blendie', 'Go 미니 블렌더', '생활용품', 15]
+  ];
+  var TABS = ['전체', '음식점', '음료', '뷰티', '생활용품'];
+  var tab = '전체', sound = null, mobile = innerWidth < 820;
+  var strip = document.getElementById('strip'), tabsEl = document.getElementById('tabs');
+
+  function reelSrc(){ return mobile ? [base + 'onecue-rush.mp4', base + 'onecue-rush.jpg'] : ['media/01-hero.mp4', 'media/01-hero.jpg']; }
+  function setReel(){
+    var s = reelSrc(), r = document.getElementById('reel');
+    r.style.backgroundImage = "url('" + s[1] + "')";
+    [r.querySelector('video'), document.querySelector('#start video')].forEach(function(v){
+      if (v.getAttribute('src') !== s[0]) { v.src = s[0]; v.poster = s[1]; }
+    });
+  }
+  function esc(t){ return String(t).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function renderTabs(){
+    tabsEl.innerHTML = TABS.map(function(t){ return '<button type="button" class="' + (t === tab ? 'on' : '') + '" data-tab="' + t + '">' + t + '</button>'; }).join('');
+  }
+  function renderWorks(){
+    strip.innerHTML = WORKS.filter(function(w){ return tab === '전체' || w[3] === tab; }).map(function(w){
+      var p = base + w[0];
+      return '<div class="tile" style="background-image:url(\'' + p + '.jpg\')">' +
+        '<video data-v="' + w[0] + '" src="' + p + '.mp4" poster="' + p + '.jpg" preload="metadata" playsinline muted loop></video>' +
+        '<button type="button" class="snd" data-snd="' + w[0] + '">♪ 소리 켜기</button>' +
+        '<div class="cap"><strong>' + esc(w[1]) + '</strong><span>' + esc(w[2]) + '</span><em>' + w[3] + ' · ' + w[4] + '초</em></div></div>';
+    }).join('');
+    strip.scrollLeft = 0;
+    paintSound();
+  }
+  function paintSound(){
+    document.querySelectorAll('.snd').forEach(function(b){
+      var on = b.dataset.snd === sound;
+      b.classList.toggle('on', on); b.textContent = on ? '♪ 소리 끄기' : '♪ 소리 켜기';
+    });
+  }
+  document.addEventListener('click', function(e){
+    var t = e.target.closest('[data-tab],[data-snd],[data-scroll]'); if (!t) return;
+    if (t.dataset.tab) { tab = t.dataset.tab; renderTabs(); renderWorks(); }
+    else if (t.dataset.snd) { sound = sound === t.dataset.snd ? null : t.dataset.snd; paintSound(); tick(); }
+    else strip.scrollBy({ left: +t.dataset.scroll * strip.clientWidth * 0.8, behavior: 'smooth' });
   });
+  // 보이는 영상만 재생 · 폰은 가운데 두 개만 · 소리는 하나만
+  function tick(){
+    try {
+      var vh = innerHeight, vw = innerWidth, vids = [].slice.call(document.querySelectorAll('video[data-v]')), cand = [];
+      vids.forEach(function(v){
+        v.muted = v.dataset.v !== sound;
+        var r = v.getBoundingClientRect(); if (!r.height) return;
+        var y = Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, 0)) / r.height;
+        var x = Math.max(0, Math.min(r.right, vw) - Math.max(r.left, 0)) / r.width;
+        if (y > 0.4 && x > 0.5) cand.push({ v: v, d: Math.abs((r.top + r.bottom) / 2 - vh / 2) + Math.abs((r.left + r.right) / 2 - vw / 2) * 0.3 });
+      });
+      var play = mobile ? cand.sort(function(a, b){ return a.d - b.d; }).slice(0, 2) : cand;
+      var on = play.map(function(c){ return c.v; });
+      vids.forEach(function(v){
+        if (on.indexOf(v) >= 0) { if (v.paused) { var p = v.play(); if (p && p.catch) p.catch(function(){}); } }
+        else if (!v.paused) v.pause();
+      });
+      if (sound) { var sv = vids.filter(function(v){ return v.dataset.v === sound; })[0]; if (!sv || on.indexOf(sv) < 0) { sound = null; paintSound(); } }
+    } catch (e) {}
+  }
+  addEventListener('resize', function(){ var m = innerWidth < 820; if (m !== mobile) { mobile = m; setReel(); } });
+  setReel(); renderTabs(); renderWorks();
+  setInterval(tick, 300); tick();
+})();
+</script>
+<script>
+/* 친구 원안 전환 효과(fx) — 그대로 */
+(function(){
+  var root = document.documentElement, seen = new WeakSet(), counted = new WeakSet(), io = null;
+  var cs = function(e){ return getComputedStyle(e); };
+  var arr = function(x){ return Array.prototype.slice.call(x); };
+  function vh(){ return Math.min(innerHeight, (screen && screen.height) || innerHeight); }
+  function inView(e){ var r = e.getBoundingClientRect(); return r.top < vh() * 0.6 && r.bottom > 0; }
+  function docH(){ var b = document.body.getBoundingClientRect(); return Math.max(root.scrollHeight, b.height); }
+  function countUp(e){
+    var tn = e.firstChild; if (!tn || tn.nodeType !== 3) return;
+    var m = /^(\d+)(.*)$/.exec(tn.nodeValue); if (!m || +m[1] === 0) return;
+    var n = +m[1], suf = m[2], t0 = performance.now();
+    (function f(t){
+      var p = Math.min(1, (t - t0) / 1300), v = Math.round(n * (1 - Math.pow(1 - p, 3)));
+      tn.nodeValue = (p < 1 ? v : n) + suf;
+      if (p < 1) requestAnimationFrame(f);
+    })(t0);
+  }
+  function mark(e, delay, tile){
+    if (seen.has(e)) { if (!e.classList.contains('fx-r')) e.classList.add('fx-r', 'fx-in'); return; }
+    seen.add(e);
+    e.style.setProperty('--fx-d', delay + 'ms');
+    if (tile) e.classList.add('fx-tile');
+    if (inView(e)) { e.classList.add('fx-r', 'fx-in'); return; }
+    e.classList.add('fx-r'); io.observe(e);
+  }
+  function hero(){
+    var top = document.querySelector('#top'), h1 = top.querySelector('h1'), i = 0;
+    h1.style.setProperty('--fx-d', '0ms'); h1.classList.add('fx-hero'); i++;
+    arr(h1.parentElement.children).forEach(function(c){
+      if (c !== h1) { c.style.setProperty('--fx-d', (220 + i++ * 110) + 'ms'); c.classList.add('fx-hero'); }
+    });
+    var t = document.getElementById('reel'); t.style.setProperty('--fx-d', '350ms'); t.classList.add('fx-hero-tile', 'fx-tile', 'fx-reelcap');
+  }
+  function isHS(el){ return /auto|scroll/.test(cs(el).overflowX); }
+  function inHScroll(e){ for (var a = e.parentElement; a && a !== document.body; a = a.parentElement) if (isHS(a)) return true; return false; }
+  function scan(){
+    var cand = [];
+    arr(document.querySelectorAll('section div')).forEach(function(d){
+      if (!isHS(d) || seen.has(d)) return;
+      d.style.setProperty('overflow-y', 'hidden');
+      cand.push({ e: d, tile: false });
+    });
+    arr(document.querySelectorAll('section')).forEach(function(s){
+      if (s.id === 'top') return;
+      arr(s.querySelectorAll('h2,h3,p,details,div,span')).forEach(function(e){
+        var tag = e.tagName, par = e.parentElement, ok = false, tile = false, st, pst;
+        if (/^(H2|H3|P|DETAILS)$/.test(tag)) ok = true;
+        else if (tag === 'SPAN') ok = !!(e.nextElementSibling && e.nextElementSibling.tagName === 'H2');
+        else {
+          st = cs(e); pst = par && cs(par);
+          if (st.aspectRatio && st.aspectRatio !== 'auto' && e.getBoundingClientRect().width > 60) { ok = true; tile = true; }
+          else if (st.display === 'grid' && parseFloat(st.borderBottomWidth) > 0 && pst && pst.display === 'flex') ok = true;
+          else if (pst && pst.display === 'grid' && par.children.length >= 3) ok = true;
+        }
+        if (ok && inHScroll(e)) ok = false;
+        if (ok) cand.push({ e: e, tile: tile });
+      });
+    });
+    var set = new Set(cand.map(function(c){ return c.e; }));
+    cand = cand.filter(function(c){ for (var a = c.e.parentElement; a; a = a.parentElement) if (set.has(a)) return false; return true; });
+    var idx = new Map();
+    cand.forEach(function(c){
+      var p = c.e.parentElement, i = idx.get(p) || 0; idx.set(p, i + 1);
+      mark(c.e, Math.min(i, 6) * 90, c.tile);
+    });
+    arr(document.querySelectorAll('section span, section strong')).forEach(function(e){
+      if (counted.has(e)) return;
+      var tn = e.firstChild;
+      if (!tn || tn.nodeType !== 3 || !/^\d+/.test(tn.nodeValue) || parseFloat(cs(e).fontSize) < 26) return;
+      counted.add(e);
+      var ob = new IntersectionObserver(function(es){ es.forEach(function(x){ if (x.isIntersecting) { ob.disconnect(); countUp(e); } }); }, { threshold: .4 });
+      ob.observe(e);
+    });
+  }
+  var hdr, bar, reel, ctaV;
+  function onScroll(){
+    var y = scrollY, H = docH() - vh();
+    if (bar) bar.style.transform = 'scaleX(' + (H > 0 ? Math.min(1, y / H) : 0) + ')';
+    if (hdr) hdr.classList.toggle('fx-scrolled', y > 12);
+    if (reel) {
+      var r = reel.getBoundingClientRect(), p = Math.max(0, Math.min(1, (vh() - r.top) / (vh() * 0.9)));
+      reel.style.setProperty('scale', (0.86 + 0.14 * p).toFixed(4));
+    }
+    if (ctaV) {
+      var c = ctaV.parentElement.getBoundingClientRect();
+      ctaV.style.setProperty('translate', '0 ' + ((c.top + c.height / 2 - vh() / 2) * -0.12).toFixed(1) + 'px');
+    }
+  }
+  root.classList.add('fx');
+  io = new IntersectionObserver(function(es){ es.forEach(function(x){ if (x.isIntersecting) { io.unobserve(x.target); x.target.classList.add('fx-in'); } }); }, { rootMargin: '0px 0px -8% 0px', threshold: .08 });
+  bar = document.createElement('div'); bar.id = 'fx-progress'; document.body.appendChild(bar);
+  hdr = document.querySelector('header'); reel = document.getElementById('reel'); ctaV = document.querySelector('#start video');
+  hero(); scan(); onScroll();
+  var raf = 0;
+  addEventListener('scroll', function(){ if (!raf) raf = requestAnimationFrame(function(){ raf = 0; onScroll(); }); }, { passive: true });
+  addEventListener('resize', onScroll);
+  setInterval(scan, 700);
+})();
 </script>
 </body>
 </html>
