@@ -112,11 +112,20 @@
     // 10-25 그래놀라 — 엔진을 관리 화면 밖에서 돌린 건은 engine 칸이 비어 「엔진 시작」이 보였다 → 확인 요청이 있으면 끝난 건
     if (!e.state && (r.report || {}).review_request) e = { state: "done", label: "완성 — 위 「납품 전 확인 요청」을 보세요" };
     var head = e.state ? "<b>엔진 · " + esc(ENG[e.state] || e.state) + "</b> — " + esc(e.label || "") + (e.at ? " · " + esc(when(e.at)) : "") : "<b>엔진 · 아직 돌리지 않음</b>";
+    // 10-26 Dan 「버튼을 더 잘 알아보게 — 나도 실수로 눌렀고 친구도 뭔지 궁금해함」 — 왜 여기 있는지·누르면 무엇이 되는지 한 줄씩
+    var why = !e.state ? "광고주가 「영상 생성 시작」을 눌렀지만 엔진이 아직 돌지 않은 건입니다(자동 실행이 꺼져 있었거나 횟수 제한)."
+      : e.state === "failed" ? "엔진이 중간에 멈춘 건입니다. 이유는 위 줄에 있습니다."
+      : e.state === "awaiting_approval" ? "기획이 끝났습니다. 아래 요약을 보고 괜찮으면 승인하세요. 승인하면 그림·영상을 만들고 크레딧이 듭니다." : "";
+    var what = !e.state || e.state === "failed" ? "누르면: 이 건을 처음부터 설계합니다(브리프 → 카드 고르기 → 기획 · 20~30분 · 크레딧 0). 끝나면 「생성 승인」 버튼이 뜨고, 승인 전에는 아무것도 생성하지 않습니다." : "";
     var sum = (e.summary || []).map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("");
     var btn = "";
     if (e.state === "awaiting_approval") btn = '<button type="button" class="btn3" data-eng-act="approve" data-est="' + esc(e.est) + '" data-pid="' + r.id + '"' + (CAN ? "" : " disabled") + ">생성 승인 · 약 " + esc(e.est) + "cr</button>";
-    else if (!e.state || e.state === "failed") btn = '<button type="button" class="btn3" data-eng-act="design" data-pid="' + r.id + '"' + (CAN ? "" : " disabled") + ">" + (e.state ? "설계 처음부터 다시" : "엔진 시작") + " · 설계(크레딧 0)</button>";
-    return '<div class="box" style="margin-bottom:12px;border:1px solid #555"><div>' + head + "</div>" +
+    else if (!e.state || e.state === "failed") btn = '<button type="button" class="btn3" data-eng-act="design" data-pid="' + r.id + '"' + (CAN ? "" : " disabled") + ">" + (e.state ? "이 건 다시 설계하기" : "이 건 설계 시작하기") + " (크레딧 0)</button>";
+    if (why) head += '<div class="msg" style="margin-top:6px">' + why + "</div>";
+    if (what) head += '<div class="msg" style="margin-top:4px">' + what + "</div>";
+    var tone = !e.state ? "border:2px dashed #b8860b;background:#fffbea" : e.state === "failed" ? "border:2px solid #b42318;background:#fff5f4"
+      : e.state === "awaiting_approval" ? "border:2px solid #d4ff3a" : "border:1px solid #ccc";
+    return '<div class="box" style="margin-bottom:12px;' + tone + '"><div>' + head + "</div>" +
       (e.state === "running" ? '<div class="msg">끝나면 이 칸이 저절로 바뀝니다(30초마다 확인)</div>' : "") +
       (e.extra ? '<div class="msg">' + esc(e.extra) + "</div>" : "") +
       (sum ? '<ul style="margin:8px 0 0 18px">' + sum + "</ul>" : "") +
