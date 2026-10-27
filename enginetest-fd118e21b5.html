@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>엔진 시험 모음</title>
+<style>
+:root{--bg:#f6f5f1;--card:#fff;--ink:#1d2321;--muted:#5f6a66;--rule:#dcdcd5;--accent:#c9f23a;--accent-ink:#1d2321;--good:#1f7a55;--warn:#b45f06;--bad:#b42318;--chip:#eef0ea}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#121514;--card:#1b1f1d;--ink:#e9ece9;--muted:#9aa5a0;--rule:#2d3330;--accent:#c9f23a;--accent-ink:#121514;--good:#5fd09a;--warn:#f0a050;--bad:#ff7b6e;--chip:#252a28}}
+:root[data-theme="dark"]{--bg:#121514;--card:#1b1f1d;--ink:#e9ece9;--muted:#9aa5a0;--rule:#2d3330;--accent:#c9f23a;--accent-ink:#121514;--good:#5fd09a;--warn:#f0a050;--bad:#ff7b6e;--chip:#252a28}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.65 "Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:28px 16px 80px}
+h1{font-size:26px;margin:0 0 6px;letter-spacing:-.01em}
+h2{font-size:19px;margin:40px 0 12px;padding-top:8px;border-top:2px solid var(--ink)}
+h3{font-size:16px;margin:0}
+.sub{color:var(--muted);margin:0 0 18px}
+.box{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:16px 18px;margin:12px 0}
+.hl{border:2px solid var(--accent)}
+ul{margin:6px 0 0 18px;padding:0}
+li{margin:3px 0}
+.tbw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
+th,td{border-bottom:1px solid var(--rule);padding:7px 8px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600;white-space:nowrap}
+td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+.up{color:var(--good);font-weight:700}.dn{color:var(--bad);font-weight:700}
+.chip{display:inline-block;background:var(--chip);border-radius:999px;padding:1px 9px;font-size:12.5px;margin:2px 4px 2px 0;white-space:nowrap}
+.case{background:var(--card);border:1px solid var(--rule);border-radius:12px;margin:14px 0;overflow:hidden}
+.case>summary{cursor:pointer;padding:14px 18px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;list-style:none}
+.case>summary::-webkit-details-marker{display:none}
+.case>summary b{font-size:17px}
+.case .idea{color:var(--muted);font-size:14px}
+.case .body{padding:0 18px 18px}
+.hist{margin:8px 0 0;padding:0;list-style:none}
+.hist li{display:grid;grid-template-columns:86px 1fr;gap:8px;padding:5px 0;border-bottom:1px dashed var(--rule);font-size:14px}
+.hist li span:first-child{color:var(--muted);font-variant-numeric:tabular-nums}
+.ev{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:12px}
+.ev div{border-radius:10px;padding:10px 12px;background:var(--chip);font-size:14px}
+.ev b{display:block;font-size:12.5px;margin-bottom:2px}
+.ev .g b{color:var(--good)}.ev .w b{color:var(--warn)}.ev .r b{color:var(--bad)}
+.note{color:var(--muted);font-size:13px}
+.legend{font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>엔진 시험 모음 · 10-27</h1>
+<p class="sub">원큐 옵션 3 엔진을 하루 동안 v1.9 → v1.13.9 로 고치며 같은 의뢰 8건의 기획을 반복해서 뽑은 기록 · 크레딧 0 (기획만, 영상 생성 없음) · 점수=Codex 평가 · 「Head 평가」=제 판단</p>
+
+<div class="box hl">
+<h3>한 줄 결론</h3>
+<ul>
+<li><b>확실히 좋아진 것:</b> 업종 단골(달걀 깨기 등)을 피함 · 제품 구조를 지어내던 오류(없는 뚜껑) 사라짐 · 브리프에 시장 네 줄과 무드가 생김 · 형식 하나로 설계가 멈추던 구멍 3개 막음 · 판매 페이지가 로그인 화면이면 돈 쓰기 전에 멈춤</li>
+<li><b>아직 약한 것:</b> 의외성이 2~3점에 머묾(가장 큰 숙제) · 첫 2초가 「차분한 고급」 건에서 다시 약해짐 · 의뢰서와 사진이 어긋나는 건(닥터피엘)을 엔진이 해결 못 함</li>
+<li><b>점수를 읽는 법:</b> 같은 엔진도 돌릴 때마다 기획이 달라집니다. 판마다 한 번씩만 뽑아서, 점수가 1~2점 오르내린 것이 엔진 덕인지 우연인지 아직 가를 수 없습니다(아래 「다음」 참고).</li>
+</ul>
+</div>
+
+<h2>판마다 바꾼 것</h2>
+<div class="tbw"><table>
+<thead><tr><th>판</th><th>무엇을 바꿨나</th><th>계기</th></tr></thead>
+<tbody>
+<tr><td class="n">v1.9</td><td>아침 기준 · 지시서 다이어트 17KB</td><td>밤사이 카드 1350장</td></tr>
+<tr><td class="n">v1.10</td><td>기획 모델이 지시서를 못 받던 버그 고침 · 기획 필수 칸 코드 검사 · 광고주 전달 기능</td><td>하림이 다시 「달걀 깨기」로 돌아감</td></tr>
+<tr><td class="n">v1.10.1</td><td>브리프에 「제품 생김새」(뚜껑·인쇄 그림 구분)</td><td>띠에 인쇄된 짚을 진짜 짚으로 읽음</td></tr>
+<tr><td class="n">v1.11</td><td>첫 그림 단골 검사 · 비유는 한 화면에서 잇기 · 대비는 전 모습도 · 정점=최대 변화 · 장소는 글로</td><td>Dan 「엔진이 할 줄 알아야」</td></tr>
+<tr><td class="n">v1.11.1~9</td><td>1080p 확정용 기록 · 잇기 카드 15 · 단골 560줄 · 포장 오독 30 · 얇은 업종 카드 · 제품 시트는 보이는 면만 · 의외성 견본 16 · 첫 2초 견본 84</td><td>Codex 194~201 · 첫 평가</td></tr>
+<tr><td class="n">v1.12~12.4</td><td>지시서 다이어트 2차 · 생성 실패 예방 문장 9 · 얇은 9업종 카드 +30</td><td>Codex 202~205</td></tr>
+<tr><td class="n">v1.13~13.6</td><td><b>시장 네 줄(가격대·구매 이유·인지도·구매 결정) → 무드 표 → 엔드컷도 무드</b> · 형식 멈춤 2개</td><td>Dan 「타겟층·가격대별로」</td></tr>
+<tr><td class="n">v1.13.7~8</td><td>생김새 낱말 그대로 · 동작=상태 변화 하나 · 시장 줄 (가정) · 고른 분위기 × 가격대 12칸</td><td>v1.13 평가</td></tr>
+<tr><td class="n">v1.13.9</td><td>로그인 화면 캡처면 멈춤 · 동작=변하는 물체 하나 · 무드 파서</td><td>v1.13.8 평가</td></tr>
+</tbody></table></div>
+
+<h2>점수 (Codex · 5점)</h2>
+<p class="legend">순서: 첫 2초 / 의외성 / 메시지 / 앞뒤 맞음 / 제작 가능성 · 「앞뒤 맞음」은 기획서 안의 일관성(사진 정확도와 별개) · 「제작 가능성」은 실제 생성 성공률이 아님 · 판마다 한 번 뽑은 값</p>
+<div class="tbw"><table>
+<thead><tr><th>건</th><th>v1.11.4</th><th>v1.13</th><th>v1.13.8</th><th>눈에 띄는 변화</th></tr></thead>
+<tbody>
+<tr><td>하림</td><td class="n">3/2/3/1/3</td><td class="n">4/3/3/3/3</td><td class="n">2/2/3/4/3</td><td>앞뒤 맞음 <span class="up">1→4</span> · 첫 2초 <span class="dn">4→2</span></td></tr>
+<tr><td>유기샘</td><td class="n">3/3/4/3/2</td><td class="n">3/2/4/3/3</td><td class="n">4/2/4/3/3</td><td>첫 2초 <span class="up">→4</span> · 의외성 2 그대로</td></tr>
+<tr><td>다온 이지드롭</td><td class="n">3/3/4/3/3</td><td class="n">3/3/4/3/2</td><td class="n">3/3/4/3/3</td><td>제작 가능성 <span class="up">2→3</span></td></tr>
+<tr><td>롤렉스</td><td class="n">–</td><td class="n">4/3/3/4/3</td><td class="n">3/2/3/3/3</td><td>의외성 <span class="dn">3→2</span></td></tr>
+<tr><td>닥터피엘</td><td class="n">–</td><td class="n">3/4/3/1/2</td><td class="n">3/3/3/2/2</td><td>앞뒤 맞음 <span class="up">1→2</span></td></tr>
+<tr><td>투썸</td><td class="n">–</td><td class="n">4/3/4/4/4</td><td class="n">4/3/3/3/3</td><td>메시지·제작 <span class="dn">−1</span></td></tr>
+<tr><td>나디아</td><td class="n">–</td><td class="n">4/3/4/4/3</td><td class="n">4/3/4/2/2</td><td>제품 사진 없음 → v1.13.9 부터 멈춤</td></tr>
+<tr><td>오아</td><td class="n">–</td><td class="n">4/3/4/2/2</td><td class="n">3/3/4/2/2</td><td>여러 소품 동시 흔들림 그대로</td></tr>
+</tbody></table></div>
+<p class="note">아침 판(v1.9)은 하림·유기샘·다온만 189 기준으로 매겨 표에서 뺐습니다(하림 3/3/4/3/3 · 유기샘 4/3/3/2/2 · 다온 2/2/4/3/2).</p>
+
+<h2>가격대에 따라 무드가 갈렸나</h2>
+<div class="box">
+<ul>
+<li><b>갈린 쪽:</b> 롤렉스(명품 × 과시) = 말 없이 시선이 손목으로 모이는 절제 · 다온(생필품 × 매일) = 밝은 욕실의 생활 유머 · 닥터피엘(B급 지정 · 프리미엄) = 「자신만만한 판단이 뒤집힘」 · 오아(B급 지정 · 일상 기호품) = 작은 제품·주변 과잉</li>
+<li><b>못 가린 쪽:</b> 투썸·나디아(예쁜 감성 지정)는 둘 다 일상 기호품이라 가격대 차이를 시험할 표본이 아님</li>
+<li><b>시장 네 줄 정답 대조(32칸):</b> 일치 15 · 대안 인정 5 · 충돌 1(다온 「일상 기호품」 → 정답 생필품) · 근거 부족 11(대부분 한국 인지도 자료 없음)</li>
+</ul>
+</div>
+
+<h2>건별 (v1.13.8 기준 · 판별 기획 변화 + Head 평가)</h2>
+<p class="legend">눌러서 펼치기 · 초록=좋아진 점 · 주황=아직 약한 점 · 빨강=실제로 만들면 걱정되는 점</p>
+<div id="cases"></div>
+
+<h2>다음</h2>
+<div class="box">
+<ul>
+<li><b>점수 흔들림 줄이기:</b> 판마다 건당 한 번만 뽑아 우연과 엔진 효과가 섞입니다. 다음 판부터 건당 2~3번 뽑아 같은 칸의 평균으로 보겠습니다(기획만이라 크레딧 0, 모델 비용·시간만 늘어남).</li>
+<li><b>의외성:</b> 견본(2·4·5점)을 넣었는데도 2~3점 — 기획 모델이 「안전한 반전」으로 수렴합니다. 다음 빈칸 후보: 후보 3줄 중 하나는 반드시 업종 밖 무대·주인공에서 출발.</li>
+<li><b>의뢰서 ↔ 사진 불일치:</b> 닥터피엘처럼 둘이 다르면 기획 전에 「어느 쪽이 정답인지」 사람이 고르게 멈추는 쪽이 맞는지 검토.</li>
+<li>영상 생성은 하지 않았습니다. 실제 생성으로 확인할 건은 Dan 승인 후 하나씩.</li>
+</ul>
+</div>
+<p class="note">근거 파일: reference_library/production_learning/_staging/eval/ (task199_v1114 · task_v113 · task_v1138) · 엔진 판 기록 coordination/ENGINE_VERSIONS.md</p>
+</div>
+
+<script>
+var C = [
+ {n:"하림 달걀", tag:["생필품(정답) / 엔진: 프리미엄","작은 사치","따져 보고"],
+  h:[["v1.9","귀한 손님 같은 암탉 (낯선 닭이 주인공)"],["v1.9 재시험","달걀 깨기 → 노른자 슬로우 (지시서 누락 버그)"],["v1.10","두 세계의 손이 한 달걀을 돌봄 (「단골 0」이라 적고 깨기 컷)"],["v1.10.1","사료가 노른자로 (곡물 쏟아짐 = 업종 단골)"],["v1.11","한 알에 넓은 자리 (넓은 공간 = 동물복지)"],["v1.11.4","빛을 품은 달걀 → 인증 박스 공개"],["v1.12","좁은 칸인 줄 알았던 달걀이 넓은 공간에"],["v1.13","어두운 조리개가 열리며 넓은 터전"],["v1.13.8","빗각 빛이 20알 반복 구조를 읽고 인증 띠 → 상자 전체 (원테이크)"]],
+  g:"업종 단골 0개 · 인쇄된 짚을 실물로 그리지 않음 · 없는 뚜껑을 지어내지 않음(앞뒤 맞음 1→4)",
+  w:"첫 2초가 「빛이 구조를 읽어 냄」으로 너무 조용함(2점) · 제품 자세를 「세움」으로 적음(실물은 눕힘)",
+  r:"사람 없이 상자 하나를 15초 원테이크로 훑는 정물 — 생성은 쉽지만 광고로는 지루할 위험"},
+ {n:"유기샘 그래놀라", tag:["일상 기호품","작은 사치","따져 보고(가정)"],
+  h:[["v1.9","보석 세공사의 손길"],["v1.11.4","그래놀라 감정사가 루페로 감정"],["v1.12","꿀 바른 표면인 줄 → 들어 올리면 수제 클러스터"],["v1.13","완성된 볼에서 재료로 거슬러 올라감"],["v1.13.8","쪼갠 클러스터의 꿀 속살 → 꿀 리본 → 요거트 위 안착"]],
+  g:"첫 2초에 손가락으로 쪼개 속살을 보임(4점) · 의뢰서의 「다이어트 식품처럼 보이기 싫음」을 지킴",
+  w:"꿀 붓기·요거트 위로 쏟기 = 식품 광고 단골이라 의외성 2 · 아침 판의 「보석 세공사」 같은 낯선 시선이 오히려 사라짐",
+  r:"손가락이 클러스터를 쪼개는 접사와 꿀의 점성 — 손가락·물성 흠이 나기 쉬운 장면"},
+ {n:"다온 이지드롭", tag:["생필품(정답) / 엔진: 일상 기호품","매일","따져 보고"],
+  h:[["v1.9","쓴 솜이 파란 소용돌이로 녹아 사라짐"],["v1.11.4","쓴 솜을 떨궈 버리고 손·봉이 깨끗이 남음"],["v1.12","「쏙」의 두 뜻 — 패드도 보관 고민도 사라짐"],["v1.13","변기 안쪽 시점, 손 안 대고 떨어뜨림"],["v1.13.8","다시 꽂을 솔이 없다 — 빈 솔걸이로 반전"]],
+  g:"「빈 솔걸이 = 꽂을 솔이 없음」이 제품 정체성을 한 장면으로 보여 줌 · 마지막 복합 동작을 컷으로 나눠 제작 가능성 2→3",
+  w:"가격대를 여전히 「일상 기호품」으로 분류(정답 생필품) — 브리프 단계 판단이 고쳐지지 않음",
+  r:"버튼을 누르면 파드가 떨어지는 기계 동작 — 생성에서 구조가 틀어지기 쉬움"},
+ {n:"롤렉스 서브마리너", tag:["명품","과시·소장","따져 보고"],
+  h:[["v1.12","300m 다이빙 시계의 가장 깊은 다이빙은 저녁 축배"],["v1.13","빛점 두 흐름이 시계로 수렴 (모든 시선이 이 하나로)"],["v1.13.8","시간을 보는 줄 → 맞은편 시선이 손목에 멈춤 (조용한 과시)"]],
+  g:"광고주 원문 「자랑하기 좋다」를 브랜드 격에 맞게 「말 없는 과시」로 옮김 · 명품 무드(절제·말 적게) 정확",
+  w:"회의실 두 남자 = 익숙한 무대(의외성 3→2) · 첫 2초 「시계 보기」가 평범",
+  r:"인물 두 명 글 묘사 — 실존 인물 닮음 위험 · 다이얼·베젤 디테일 정확도"},
+ {n:"닥터피엘 샤워 필터", tag:["미확정(SKU 불일치)","매일","따져 보고"],
+  h:[["v1.12","속이 안 보이는 샤워 → 투명 필터, 숨길 게 없는 샤워"],["v1.13","물 입국심사대 — 필터가 녹물·염소를 막는 검문"],["v1.13.8","워터 소믈리에가 물을 자랑하다 녹물에 당황 → 필터 끼움 (B급)"]],
+  g:"B급을 고른 프리미엄 제품답게 「자신만만한 판단이 뒤집힘」으로 결이 분명해짐 · 의외성은 셋 중 가장 높은 편(3~4)",
+  w:"의뢰서는 「비타민 향 필터」, 광고주 사진은 「샤워헤드 전체」 — 이 불일치를 엔진이 해결 못 함(앞뒤 맞음 1~2)",
+  r:"샤워 물을 마시는 장면·녹물 조각을 보여 주는 장면은 확인 안 된 효능 주장으로 읽힐 수 있음"},
+ {n:"투썸 블랙 치즈폼 라떼", tag:["일상 기호품","작은 사치","바로 사는"],
+  h:[["v1.12","무채색 카페에서 라떼만 색을 쥐고 번짐"],["v1.13","커피 캐스케이드를 협곡·폭포 풍경처럼"],["v1.13.8","세 가을 풍경이 알고 보니 한 잔의 세 층"]],
+  g:"「세 풍경 = 한 잔의 세 층」이 제품 구조(치즈폼·에스프레소·라떼)와 정확히 맞물림 · 잇기 카드(link197) 사용",
+  w:"매크로 감상이 길어 「가을 신메뉴, 지금 한 잔」이라는 구매 초대가 약함(메시지 4→3)",
+  r:"세 층의 순서·두께를 컷마다 같게 유지해야 함"},
+ {n:"나디아 꽃우산", tag:["일상 기호품","작은 사치","바로 사는"],
+  h:[["v1.12","비·해 두 세계가 한 우산에서 만남 (여우비)"],["v1.13","우산은 그대로, 하늘만 맑음→소나기+햇살"],["v1.13.8","손끝에서 피어나는 134g 꽃우산"]],
+  g:"판매 포인트 「134g 가벼움」을 첫 장면에 바로 보임",
+  w:"판매 페이지 캡처가 네이버 로그인 화면이라 확인된 제품 사진이 0장 — 그 화면을 제품 참조로 씀(앞뒤 맞음 4→2)",
+  r:"v1.13.9 부터 이런 건은 생성 전에 멈춤(8건 중 나디아만 해당 확인) · 실제 건이면 판매 페이지를 다시 받아야 함"},
+ {n:"오아 미니 안마건", tag:["일상 기호품","작은 사치","따져 보고"],
+  h:[["v1.12","작은 안마기를 켜자 책상이 지진"],["v1.13","손바닥 장난감인 줄 → 켜자 온몸이 들썩"],["v1.13.8","제품·사람은 그대로, 주변만 점점 세게 흔들림 (데드팬)"]],
+  g:"B급의 웃음 구조(정색한 사람 + 주변 과잉)가 분명하고 「작아도 세다」 포인트와 맞음",
+  w:"펜·포스트잇·머그·모니터가 「같이」 흔들림 = 동작 여럿(앞뒤 맞음 2) → v1.13.9 에 「변하는 물체 하나」 규칙",
+  r:"여러 소품의 흔들림 물리와 얼굴 데드팬 유지 — 생성 흠이 나기 쉬움(제작 가능성 2)"}
+];
+var el = document.getElementById("cases");
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+el.innerHTML = C.map(function(c,i){
+  var last = c.h[c.h.length-1][1];
+  return '<details class="case"'+(i===0?' open':'')+'><summary><b>'+esc(c.n)+'</b><span class="idea">'+esc(last)+'</span></summary><div class="body">'+
+   '<div>'+c.tag.map(function(t){return '<span class="chip">'+esc(t)+'</span>';}).join('')+'</div>'+
+   '<ul class="hist">'+c.h.map(function(x){return '<li><span>'+esc(x[0])+'</span><span>'+esc(x[1])+'</span></li>';}).join('')+'</ul>'+
+   '<div class="ev"><div class="g"><b>좋아진 점</b>'+esc(c.g)+'</div><div class="w"><b>아직 약한 점</b>'+esc(c.w)+'</div><div class="r"><b>만들면 걱정되는 점</b>'+esc(c.r)+'</div></div></div></details>';
+}).join("");
+</script>
+</body>
+</html>
