@@ -101,7 +101,35 @@
     }
     return '<div class="box" style="border:2px solid #d4ff3a;margin-bottom:12px"><h4>납품 전 확인 요청' + (rq && rq.at ? " · " + esc(when(rq.at)) : "") + took + '</h4>' +
       '<video src="' + esc(v) + '" controls playsinline preload="metadata" style="width:100%;max-height:70vh;background:#000;border-radius:8px"></video>' +
-      (note ? '<div class="msg" style="margin-top:6px">' + esc(note) + "</div>" : "") + endcardPick(r) + reviseBox(r) + "</div>";
+      (note ? '<div class="msg" style="margin-top:6px">' + esc(note) + "</div>" : "") + deliverBox(r, rq) + endcardPick(r) + reviseBox(r) + "</div>";
+  }
+
+  // 10-27 Dan 「광고주 전달 기능 넣어」 — 우리 검수가 끝나면 이 버튼 = 납품. 지금 확인 요청 영상이 광고주 화면에 완성 영상으로 뜬다(480p 시안 그대로)
+  function deliverBox(r, rq) {
+    if (!rq || !rq.video) return "";
+    var d = (r.report || {}).delivered, e = (r.report || {}).engine || {};
+    if (d && d.video === rq.video) return '<div class="msg" style="margin-top:10px;font-weight:700;color:#1f6f5c">✔ 납품 완료 · ' + esc(when(d.at)) + (d.by ? " · " + esc(d.by) : "") + " — 광고주 화면에 이 영상이 올라갔습니다</div>";
+    if (e.state === "running") return "";
+    return '<div style="margin-top:10px"><button type="button" class="btn3" data-eng-act="deliver" data-pid="' + r.id + '"' + (CAN ? "" : " disabled") +
+      ' style="background:#d4ff3a;color:#111;font-weight:800;border-color:#d4ff3a">최종 컨펌 · 광고주에게 전달</button>' +
+      '<div class="msg" style="margin-top:4px">누르면: 위 영상이 광고주 화면에 완성 영상으로 뜹니다(1분 안). 이 순간이 납품입니다' + (d ? " · 이전에 전달한 판이 있습니다(새 판으로 바뀝니다)" : "") + '.</div><div class="msg" data-eng-msg="' + r.id + '"></div></div>';
+  }
+
+  // 10-27 — 광고주 화면과 같은 기준: 「영상 생성 시작」 시각부터 24시간 · 납품(최종 컨펌)까지. 2시간 미만 주황 · 1시간 미만 빨강
+  var DUE_MS = 24 * 3600 * 1000;
+  function dueChip(o) {
+    if (o.status !== "submitted" || !o.submitted_at) return "";
+    if (o.delivered_at) return '<span class="bd" style="color:#1f6f5c;border-color:#1f6f5c">납품 완료</span>';
+    return '<span class="bd" data-due="' + (new Date(o.submitted_at).getTime() + DUE_MS) + '"></span>';
+  }
+  function paintDue() {
+    document.querySelectorAll("[data-due]").forEach(function (x) {
+      var left = +x.dataset.due - Date.now(), a = Math.abs(left), p2 = function (n) { return String(n).padStart(2, "0"); };
+      var t = Math.floor(a / 36e5) + ":" + p2(Math.floor(a % 36e5 / 6e4)) + ":" + p2(Math.floor(a % 6e4 / 1e3));
+      x.textContent = left > 0 ? "납품까지 " + t : "기한 지남 " + t;
+      var c = left <= 36e5 ? "#b42318" : left <= 72e5 ? "#c4620a" : "";
+      x.style.color = c ? "#fff" : ""; x.style.background = c; x.style.borderColor = c;
+    });
   }
 
   // 10-24 Dan 「순수하게 원큐 시스템 상에서」 — 엔진 시작 · 생성 승인 · 진행 상태 (option3_engine.py 가 report.engine 에 적음)
@@ -202,7 +230,7 @@
     }).join("");
     return '<details class="card' + (st === "submitted" ? " sub" : "") + '" data-slug="' + esc(r.slug) + '"><summary>' +
       '<div class="nm"><b>' + esc(o.brand || r.brand) + "</b> · " + esc(o.product || r.product) + "<small>" + (r.who ? "의뢰인 " + esc(r.who.name || "") + (r.who.email ? " (" + esc(r.who.email) + ")" : "") + " · " : "") + esc(r.slug) + " · 만든 때 " + when(r.created_at) + (o.submitted_at ? " · 요청 " + when(o.submitted_at) : "") + "</small></div>" +
-      '<div class="badges">' + badge + (r.test_label ? '<span class="bd test">' + esc(r.test_label) + "</span>" : "") + "</div></summary>" +
+      '<div class="badges">' + dueChip(o) + badge + (r.test_label ? '<span class="bd test">' + esc(r.test_label) + "</span>" : "") + "</div></summary>" +
       '<div class="body">' + engineBox(r) + reviewTop(r) + essHtml(r, o) +
       '<details class="box rsec" style="max-width:none"><summary style="cursor:pointer"><b>세부</b><span class="msg"> 의뢰서·진행 단계·조사·기획·프롬프트·작업 기록</span></summary><div class="grid2"><dl class="kv">' +
       kv("상호·브랜드", esc(o.brand)) + kv("제품 종류", esc(o.kind)) + kv("제품 이름", esc(o.product)) + kv("특장점", esc(o.point)) +
@@ -240,6 +268,7 @@
       Object.keys(picked).forEach(function (n) { var x = el("list").querySelector('input[name="' + n + '"][value="' + picked[n] + '"]'); if (x) x.checked = true; });
     };
     setTimeout(restore, 0);
+    setTimeout(paintDue, 0);
     el("list").innerHTML = show.length ? '<div style="display:grid;gap:10px">' + show.map(card).join("") + "</div>"
       : '<div class="empty">표시할 의뢰가 없습니다.</div>';
   }
@@ -356,6 +385,8 @@
         }
         if (act === "design" && !confirm("이 건을 처음부터 다시 설계합니다(크레딧 0 · 20~30분). 진행할까요?")) return;
         if (act === "approve" && !confirm("영상을 생성합니다 — 약 " + eb.dataset.est + "cr을 씁니다. 진행할까요?")) return;
+        if (act === "deliver") em = eb.parentNode.querySelector("[data-eng-msg]");   // 엔진 칸에도 같은 표시 자리가 있어 버튼 옆 것으로
+        if (act === "deliver" && !confirm("광고주에게 보냅니다 — 지금 확인 요청 영상이 광고주 화면에 완성 영상으로 뜹니다(480p 시안). 진행할까요?")) return;
         eb.disabled = true;
         db.rpc("onecue_option3_engine", { p_project_id: epid, p_action: act, p_scope: sc, p_note: rn || null }).then(function (x) {
           if (x.error) throw x.error;
@@ -387,6 +418,7 @@
         wire();
         // 화면에 보이는 동안 30초마다 새 의뢰·분석을 다시 불러온다
         setInterval(function () { if (document.visibilityState === "visible") load(false).catch(function () {}); }, 30000);
+        setInterval(function () { if (document.visibilityState === "visible") paintDue(); }, 1000);   // 남은 시간은 다시 그리지 않고 글자만
         document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") load(false).catch(function () {}); });
         return load(true);
       });
