@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>엔진 보고 — ONECUE</title>
+<link rel="stylesheet" href="style.css?v=1f228d76">
+<link rel="stylesheet" href="studio.css?v=3">
+<script defer src="studio-shell.js?v=dan1"></script>
+<link rel="stylesheet" href="brand.css?v=red1"><link rel="stylesheet" href="skin-v2.css?v=13"><link rel="stylesheet" href="assets/css/onecue-app-v11.css?v=1">
+<style>
+/* 엔진 보고 (Dan 전용) — 10-28 Dan 「버전별로 누적 · 즐겨찾기하고 볼 테니 날짜별로 테스트한 것 올리고 가다듬고」
+   내용은 DB(engine_reports)에 있고 dhstar43 만 읽힌다. 이 파일에는 내용이 없다. */
+.el{max-width:980px}
+.el h2{margin:28px 0 10px;font-size:18px}
+.el-trend{width:100%;border-collapse:collapse;font-size:13px}
+.el-trend th,.el-trend td{border-bottom:1px solid #e6e2da;padding:7px 8px;text-align:left;vertical-align:top}
+.el-trend th{font-weight:700;color:#6b6459;white-space:nowrap}
+.el-trend td:first-child,.el-trend td:nth-child(2){white-space:nowrap}
+.el-badge{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
+.el-badge.ok{background:#e3f1e8;color:#2f6b4f}.el-badge.no{background:#fbe6e3;color:#9a3412}
+.el-badge.run{background:#fff4e0;color:#7a4a00}.el-badge.log{background:#eeece7;color:#6b6459}
+.el-card{border:1px solid #e6e2da;border-radius:10px;margin:12px 0;background:#fff}
+.el-card>summary{cursor:pointer;padding:12px 14px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;list-style:none}
+.el-card>summary::-webkit-details-marker{display:none}
+.el-card>summary b{font-size:15px}.el-card>summary .d{color:#8a8378;font-size:12px;font-variant-numeric:tabular-nums}
+.el-body{padding:0 14px 14px;font-size:14px;line-height:1.6}
+.el-body h3{font-size:14px;margin:16px 0 6px;color:#3d3830}
+.el-line{background:#f6f4ef;border-left:3px solid #c0392b;padding:8px 10px;margin:8px 0;font-weight:600}
+.el-nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.el-nums div{background:#f6f4ef;border-radius:8px;padding:8px 10px}.el-nums span{display:block;font-size:12px;color:#6b6459}.el-nums b{font-size:18px;font-variant-numeric:tabular-nums}
+.el-pair{border:1px solid #e6e2da;border-radius:8px;padding:10px;margin:10px 0}
+.el-pair .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:640px){.el-pair .two{grid-template-columns:1fr}}
+.el-pair .side{background:#faf9f6;border-radius:6px;padding:8px 10px;font-size:13px}
+.el-pair .side b{display:block;margin-bottom:4px}
+.el-pair .pick{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.el-pair .pick button{border:1px solid #cfc9be;background:#fff;border-radius:6px;padding:5px 14px;cursor:pointer;font:inherit}
+.el-pair .pick button.on{background:#c0392b;border-color:#c0392b;color:#fff}
+.el-pair .ans{margin-top:6px;font-size:12px;color:#6b6459}
+.el-ex{width:100%;border-collapse:collapse;font-size:13px}
+.el-ex th,.el-ex td{border-bottom:1px solid #eee;padding:6px;text-align:left;vertical-align:top}
+.el-hold{color:#7a4a00;background:#fff4e0;border-radius:6px;padding:8px 10px;font-size:13px}
+.el-scroll{overflow-x:auto}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="topbar-in">
+  <a class="mark" href="studio.html">엔진 보고</a>
+  <div class="spacer"></div>
+  <span class="acct" id="acct"></span>
+</div></div>
+<main class="el">
+  <div class="studio-heading"><div><div class="studio-eyebrow">ENGINE REPORT · DAN</div><h1>엔진 보고</h1>
+    <p>엔진 판과 실험 결과를 날짜별로 쌓습니다. 최신이 위입니다.</p></div></div>
+  <div id="gate" class="empty">권한 확인 중…</div>
+  <div id="app" hidden>
+    <h2>판별 흐름</h2>
+    <div class="el-scroll"><table class="el-trend" id="trend"></table></div>
+    <h2>날짜별 기록</h2>
+    <div id="cards"></div>
+  </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js?v=d4d97baa"></script>
+<script src="auth.js?v=fa839557"></script>
+<script>
+(function () {
+  var db = window.ONECUE_DB || (window.ONECUE_DB = window.supabase.createClient(ONECUE.supabaseUrl, ONECUE.supabaseAnonKey));
+  var gate = document.getElementById('gate'), app = document.getElementById('app');
+  var picks = {};
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]; }); }
+  function badge(st) {
+    var cls = /채택/.test(st) ? 'ok' : /기각|되돌/.test(st) ? 'no' : /진행|대기/.test(st) ? 'run' : 'log';
+    return '<span class="el-badge ' + cls + '">' + esc(st || '기록') + '</span>';
+  }
+  function calib(r) { return ((r.body || {}).calib || {}).pairs || []; }
+  function done(r) {   // 보정 쌍을 다 고르기 전에는 결과를 가린다(결과를 먼저 보면 고르는 눈이 기운다)
+    var ps = calib(r);
+    return ps.every(function (p) { return picks[r.id + '|' + p.key]; });
+  }
+  function side(lbl, s) {
+    s = s || {};
+    return '<div class="side"><b>' + lbl + ' · ' + esc(s.title) + '</b>' +
+      (s.first2 ? '<div><u>첫 2초</u> ' + esc(s.first2) + '</div>' : '') +
+      (s.flow ? '<div>' + esc(s.flow) + '</div>' : '') + '</div>';
+  }
+  function pairHtml(r, p, open) {
+    var k = r.id + '|' + p.key, mine = picks[k], b = r.body.calib;
+    var btn = function (v, t) { return '<button type="button" data-r="' + esc(r.id) + '" data-k="' + esc(p.key) + '" data-v="' + v + '"' + (mine === v ? ' class="on"' : '') + '>' + t + '</button>'; };
+    var ans = '';
+    if (open) {
+      var j = (b.judge || {})[p.key], a = (b.answer || {})[p.key];
+      ans = '<div class="ans">판정자: ' + esc(j === 'same' ? '비슷' : j || '—') + ' · ' + (mine && j ? (mine === j ? '<b>Dan 과 같음</b>' : '<b>Dan 과 다름</b>') : '') +
+        (a ? ' · X = ' + esc(a.X) + ', Y = ' + esc(a.Y) : '') + '</div>';
+    }
+    return '<div class="el-pair"><div><b>' + esc(p.case) + '</b></div><div class="two">' + side('X', p.X) + side('Y', p.Y) + '</div>' +
+      '<div class="pick">' + btn('X', 'X 가 낫다') + btn('Y', 'Y 가 낫다') + btn('same', '비슷') + '</div>' + ans + '</div>';
+  }
+  function card(r, i) {
+    var b = r.body || {}, ps = calib(r), open = done(r), h = '';
+    if (b.why) h += '<h3>무엇을 왜 바꿨나</h3><div>' + esc(b.why) + '</div>';
+    if (ps.length) {
+      h += '<h3>보정 — 어느 쪽이 나은지 먼저 골라 주세요</h3>' + (open ? '' : '<div class="el-hold">' + ps.length + '쌍을 다 고르시면 아래 결과가 열립니다. 어느 방식인지는 고른 뒤에 보입니다.</div>');
+      ps.forEach(function (p) { h += pairHtml(r, p, open); });
+    }
+    if (open) {
+      if (b.result) h += '<h3>결론</h3><div class="el-line">' + esc(b.result) + '</div>';
+      if (b.numbers && b.numbers.length) h += '<div class="el-nums">' + b.numbers.map(function (n) { return '<div><span>' + esc(n[0]) + '</span><b>' + esc(n[1]) + '</b></div>'; }).join('') + '</div>';
+      if (b.scores) {
+        h += '<h3>' + esc(b.scores.title || '점수') + '</h3><div class="el-scroll"><table class="el-ex"><tr>' + b.scores.cols.map(function (c) { return '<th>' + esc(c) + '</th>'; }).join('') + '</tr>' +
+          b.scores.rows.map(function (row) { return '<tr>' + row.map(function (c) { return '<td>' + esc(c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</table></div>';
+      }
+      if (b.examples && b.examples.length) {
+        var cols = b.example_cols || ['A', 'B'];
+        h += '<h3>건별 예시</h3><div class="el-scroll"><table class="el-ex"><tr><th>건</th>' + cols.map(function (c) { return '<th>' + esc(c) + '</th>'; }).join('') + '</tr>' +
+          b.examples.map(function (e) { return '<tr><td><b>' + esc(e.case) + '</b></td>' + cols.map(function (c) { return '<td>' + (e[c] || []).map(esc).join('<br>') + '</td>'; }).join('') + '</tr>'; }).join('') + '</table></div>';
+      }
+      if (b.reasons && b.reasons.length) h += '<h3>이기고 진 이유</h3><ul>' + b.reasons.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
+      if (b.notes && b.notes.length) h += '<h3>메모</h3><ul>' + b.notes.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
+      if (b.next) h += '<h3>다음 할 일</h3><div>' + esc(b.next) + '</div>';
+    }
+    return '<details class="el-card"' + (i === 0 ? ' open' : '') + '><summary><span class="d">' + esc(r.day) + '</span><b>' + esc(r.title) + '</b>' +
+      (r.version ? '<span class="d">' + esc(r.version) + '</span>' : '') + badge(b.status) + '</summary><div class="el-body">' + h + '</div></details>';
+  }
+  function trend(rows) {
+    return '<tr><th>날짜</th><th>엔진 판</th><th>바꾼 것</th><th>결과</th><th>상태</th></tr>' + rows.map(function (r) {
+      var b = r.body || {};
+      return '<tr><td>' + esc(r.day) + '</td><td>' + esc(r.version) + '</td><td>' + esc(b.changed) + '</td><td>' +
+        (done(r) ? esc(b.result_short || b.result) : '보정 쌍을 고른 뒤 보입니다') + '</td><td>' + badge(b.status) + '</td></tr>';
+    }).join('');
+  }
+  var ROWS = [];
+  function paint() {
+    document.getElementById('trend').innerHTML = trend(ROWS);
+    var openIds = [].map.call(document.querySelectorAll('.el-card'), function (d, i) { return d.open ? i : -1; });
+    document.getElementById('cards').innerHTML = ROWS.map(card).join('') || '<div class="empty">아직 기록이 없습니다.</div>';
+    if (openIds.length) [].forEach.call(document.querySelectorAll('.el-card'), function (d, i) { d.open = openIds.indexOf(i) >= 0; });
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('.el-pair .pick button'); if (!t) return;
+    var r = t.dataset.r, k = t.dataset.k, v = t.dataset.v;
+    db.from('engine_report_picks').upsert({report_id: r, pair_key: k, choice: v, picked_at: new Date().toISOString()}).then(function (res) {
+      if (res.error) { alert('저장하지 못했습니다: ' + res.error.message); return; }
+      picks[r + '|' + k] = v; paint();
+    });
+  });
+  db.auth.getUser().then(function (u) {
+    if (!u.data || !u.data.user) { gate.textContent = '로그인이 필요합니다.'; return; }
+    return db.rpc('is_onecue_dan').then(function (r) {
+      if (!r || r.data !== true) { gate.textContent = '이 화면은 볼 수 없습니다.'; return; }
+      return Promise.all([
+        db.from('engine_reports').select('*').order('day', {ascending: false}).order('sort', {ascending: false}),
+        db.from('engine_report_picks').select('*')
+      ]).then(function (res) {
+        if (res[0].error) { gate.textContent = '불러오지 못했습니다: ' + res[0].error.message; return; }
+        ROWS = res[0].data || [];
+        (res[1].data || []).forEach(function (p) { picks[p.report_id + '|' + p.pair_key] = p.choice; });
+        gate.hidden = true; app.hidden = false; paint();
+      });
+    });
+  }).catch(function (e) { gate.textContent = '오류: ' + e.message; });
+})();
+</script>
+</body>
+</html>
