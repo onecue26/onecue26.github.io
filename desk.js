@@ -7,7 +7,7 @@
   "use strict";
 
   var db = null, CAN = false, rows = [], filter = "all";
-  var MOODS = { bgrade: "재밌는 B급 · 병맛", pretty: "예쁜 감성", clean: "깔끔한 정보" };
+  var MOODS = { pretty: "기발하고 유쾌하게", bgrade: "크고 시원하게", clean: "깔끔한 정보" };   // 11-01 연출 스타일
   var ASPECT = { "16:9": "유튜브 · 16:9", "9:16": "쇼츠·릴스·틱톡 · 9:16", "4:5": "인스타그램 피드 · 4:5" };
   var STAGES = ["접수", "시장 조사", "기획", "영상 생성", "검수", "완성"];
 
@@ -234,7 +234,7 @@
       '<div class="body">' + engineBox(r) + reviewTop(r) + essHtml(r, o) +
       '<details class="box rsec" style="max-width:none"><summary style="cursor:pointer"><b>세부</b><span class="msg"> 의뢰서·진행 단계·조사·기획·프롬프트·작업 기록</span></summary><div class="grid2"><dl class="kv">' +
       kv("상호·브랜드", esc(o.brand)) + kv("제품 종류", esc(o.kind)) + kv("제품 이름", esc(o.product)) + kv("특장점", esc(o.point)) +
-      kv("영상 분위기", esc(MOODS[o.mood] || "")) + kv("화면 비율", esc(ASPECT[o.aspect] || "")) + kv("영상 길이", "15초 · 1편") +
+      kv("연출 스타일", esc(MOODS[o.mood] || "")) + kv("화면 비율", esc(ASPECT[o.aspect] || "")) + kv("영상 길이", "15초 · 1편") +
       kv("추가 정보", o.url ? '<a href="' + esc(o.url) + '" target="_blank" rel="noopener">' + esc(o.url) + "</a>" + (o.url_ok ? " ✓" : " (확인 안 됨)") : "") +
       "<dt>사진</dt><dd>" + (photos ? '<div class="ph">' + photos + "</div>" : '<span class="miss">없음</span>') + "</dd>" +
       '</dl><div style="display:grid;gap:12px;align-content:start">' +

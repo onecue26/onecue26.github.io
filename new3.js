@@ -21,7 +21,7 @@
     { v: "9:16", t: "쇼츠 · 릴스 · 틱톡", d: "세로 영상 · 휴대폰 전체 화면", spec: "UNI_9x16", w: 1080, h: 1920, top: 288, bottom: 672, left: 120, right: 192 },
     { v: "4:5", t: "인스타그램 피드", d: "피드에서 가장 크게 보이는 세로형", spec: "META_FEED_4x5", w: 1080, h: 1350, top: 135, bottom: 135, left: 108, right: 108 },
   ];
-  var MOODS = { auto: "원큐에 맡기기", bgrade: "재밌는 B급 · 병맛", pretty: "예쁜 감성", clean: "깔끔한 정보" };   // clean 은 예전 저장본 표시용(화면에서는 뺌 10-18)
+  var MOODS = { auto: "원큐에게 맡기기", pretty: "기발하고 유쾌하게", bgrade: "크고 시원하게", clean: "깔끔한 정보" };   // 11-01 연출 스타일(값은 엔진이 읽는 그대로) · clean 은 예전 저장본 표시용
   // 진행 칸 — Head 가 briefs.option3.stage 를 올린다. 남은 시간은 넉넉하게 잡고 단계가 끝날수록 줄인다
   var STAGES = [["접수", 48], ["시장 조사", 42], ["기획", 34], ["영상 생성", 20], ["검수", 6], ["완성", 0]];
 
@@ -303,7 +303,7 @@
       ["kind", "제품 종류", esc(trim(o.kind)), !!trim(o.kind), { typed: 1 }],
       ["product", "제품 이름", esc(trim(o.product)), !!trim(o.product), { typed: 1 }],
       ["point", "제품 특장점", esc(trim(o.point)), trim(o.point).length >= 5, { typed: 1 }],
-      ["mood", "영상 분위기", esc(MOODS[o.mood] || ""), !!MOODS[o.mood]],
+      ["mood", "연출 스타일", esc(MOODS[o.mood] || ""), !!MOODS[o.mood]],
     ];
     if (trim(o.avoid)) rows.push(["avoid", "피하고 싶은 느낌", esc(trim(o.avoid)), true, { typed: 1 }]);
     if (trim(o.ref_url)) rows.push(["ref_url", "참고 영상", o.ref_ok ? esc(trim(o.ref_url)) + ' <span class="okmark">✓ 확인됨</span>' : esc(trim(o.ref_url)) + " (주소 확인 필요)", !!o.ref_ok, { typed: 1 }]);
@@ -424,7 +424,7 @@
     var o = S.o3, a = ASPECTS.filter(function (x) { return x.v === o.aspect; })[0];
     var ph = S.photos.filter(function (p) { return p.id && p.src; });
     var rows = [["브랜드명", esc(trim(o.brand))], ["제품 종류", esc(trim(o.kind))], ["제품 이름", esc(trim(o.product))],
-                ["제품 특장점", esc(trim(o.point))], ["영상 분위기", esc(MOODS[o.mood] || "")]];
+                ["제품 특장점", esc(trim(o.point))], ["연출 스타일", esc(MOODS[o.mood] || "")]];
     if (trim(o.avoid)) rows.push(["피하고 싶은 느낌", esc(trim(o.avoid))]);
     if (trim(o.ref_url)) rows.push(["참고 영상", esc(trim(o.ref_url))]);
     rows.push(["등록 사진", ph.length ? '<span class="sum-thumbs">' + ph.map(function (p) { return '<img src="' + esc(p.src) + '" alt="">'; }).join("") + "</span>" : ""]);
