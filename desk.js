@@ -100,7 +100,7 @@
       if (ms > 0) { var mi = Math.round(ms / 6e4); took = " · 의뢰부터 " + (mi >= 60 ? Math.floor(mi / 60) + "시간 " + (mi % 60) + "분" : mi + "분") + " 걸림"; }
     }
     return '<div class="box" style="border:2px solid #d4ff3a;margin-bottom:12px"><h4>납품 전 확인 요청' + (rq && rq.at ? " · " + esc(when(rq.at)) : "") + took + '</h4>' +
-      '<video src="' + esc(v) + '" controls playsinline preload="metadata" style="width:100%;max-height:70vh;background:#000;border-radius:8px"></video>' +
+      hdPair(rp.hd, v) +
       (note ? '<div class="msg" style="margin-top:6px">' + esc(note) + "</div>" : "") + deliverBox(r, rq) + hdBox(r, rq) + endcardPick(r) + reviseBox(r) + "</div>";
   }
 
