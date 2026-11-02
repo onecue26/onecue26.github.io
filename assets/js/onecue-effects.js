@@ -201,7 +201,9 @@
     function playFront() { if (!wVisible) return; var p = front.play(); p && p.catch && p.catch(function () {}); }
     function layoutWorks() {
       if (!W) return;
-      var mode = (!reduce && isDesk() && vh() >= 640) ? 'scroll' : 'player';
+      // v1.12.2 (11-02 친구 맥 터치패드 「스크롤이 안 되고 영상들이 넘어간다」) — 스크롤 고정 방식은 터치패드 관성 한 번에 6편이 다 넘어가고
+      //   페이지가 멈춘 듯 보임 → PC 도 휴대폰과 같은 재생 방식(끝나면 다음 · 썸네일·화살표). 되돌리려면 아래 false 를 지움
+      var mode = (false && !reduce && isDesk() && vh() >= 640) ? 'scroll' : 'player';
       if (mode === wMode) return;
       wMode = mode;
       W.classList.toggle('is-scroll', mode === 'scroll');
