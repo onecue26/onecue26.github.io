@@ -104,7 +104,7 @@
       (note ? '<div class="msg" style="margin-top:6px">' + esc(note) + "</div>" : "") + deliverBox(r, rq) + hdBox(r, rq) + endcardPick(r) + reviseBox(r) + "</div>";
   }
 
-  // 10-27 Dan 「광고주 전달 기능 넣어」 — 우리 검수가 끝나면 이 버튼 = 납품. 지금 확인 요청 영상이 광고주 화면에 완성 영상으로 뜬다(480p 시안 그대로)
+  // 10-27 Dan 「광고주 전달 기능 넣어」 — 우리 검수가 끝나면 이 버튼 = 납품. 지금 확인 요청 영상이 광고주 화면에 완성 영상으로 뜬다(1080p 로 바꿨으면 1080p)
   function deliverBox(r, rq) {
     if (!rq || !rq.video) return "";
     var d = (r.report || {}).delivered, e = (r.report || {}).engine || {};
@@ -112,9 +112,9 @@
     // 11-02 — 1080p로 바꾼 뒤엔 같은 주소라도 광고주 화면엔 예전(480p) 파일이 남아 있다 → 1080p 완성이 전달보다 나중이면 다시 전달 버튼
     if (d && d.video === rq.video && !(hd.state === "done" && hd.at && d.at && new Date(hd.at) > new Date(d.at))) return '<div class="msg" style="margin-top:10px;font-weight:700;color:#1f6f5c">✔ 납품 완료 · ' + esc(when(d.at)) + (d.by ? " · " + esc(d.by) : "") + " — 광고주 화면에 이 영상이 올라갔습니다</div>";
     if (e.state === "running") return "";
-    return '<div style="margin-top:10px"><button type="button" class="btn3" data-eng-act="deliver" data-pid="' + r.id + '"' + (CAN ? "" : " disabled") +
+    return '<div style="margin-top:10px"><button type="button" class="btn3" data-eng-act="deliver" data-hd="' + (hd.state === "done" ? "1" : "") + '" data-pid="' + r.id + '"' + (CAN ? "" : " disabled") +
       ' style="background:#d4ff3a;color:#111;font-weight:800;border-color:#d4ff3a">최종 컨펌 · 광고주에게 전달</button>' +
-      '<div class="msg" style="margin-top:4px">누르면: 위 영상이 광고주 화면에 완성 영상으로 뜹니다(1분 안). 이 순간이 납품입니다' + (d ? " · 이전에 전달한 판이 있습니다(새 판으로 바뀝니다)" : "") + '.</div><div class="msg" data-eng-msg="' + r.id + '"></div></div>';
+      '<div class="msg" style="margin-top:4px">누르면: 위 ' + (hd.state === "done" ? "1080p " : "480p 시안 ") + '영상이 광고주 화면에 완성 영상으로 뜹니다(1분 안). 이 순간이 납품입니다' + (d ? " · 이전에 전달한 판이 있습니다(새 판으로 바뀝니다)" : "") + '.</div><div class="msg" data-eng-msg="' + r.id + '"></div></div>';
   }
 
   // 11-02 Dan 「1080p로 교체된 거 맞아? 480p와 구분되도록 나란히」 — 1080p를 끝냈으면 이름표 붙여 두 판을 나란히 · 같은 주소라 옛 파일이 안 뜨게 ?hd=
@@ -417,7 +417,8 @@
         if (act === "approve" && !confirm("영상을 생성합니다 — 약 " + eb.dataset.est + "cr을 씁니다. 진행할까요?")) return;
         if (act === "hd" && !confirm("1080p로 바꿉니다 — 약 " + eb.dataset.est + "cr을 씁니다(같은 장면 확정). 진행할까요?")) return;
         if (act === "deliver" || act === "hd") em = eb.parentNode.querySelector("[data-eng-msg]");   // 엔진 칸에도 같은 표시 자리가 있어 버튼 옆 것으로
-        if (act === "deliver" && !confirm("광고주에게 보냅니다 — 지금 확인 요청 영상이 광고주 화면에 완성 영상으로 뜹니다(480p 시안). 진행할까요?")) return;
+        // 11-02 Dan — 1080p 로 바꾼 건은 1080p 로 전달 · 안 바꾼 건만 「480p 로 전달할까요?」 묻는다
+        if (act === "deliver" && !confirm(eb.dataset.hd ? "광고주에게 1080p 최종본을 보냅니다 — 확인 요청의 1080p 영상이 광고주 화면에 완성 영상으로 뜹니다. 진행할까요?" : "아직 1080p로 바꾸지 않은 480p 시안입니다. 1080p 변환 없이 480p로 광고주에게 전달할까요? (1080p로 보내려면 취소하고 「1080p로 바꾸기」를 먼저 누르세요)")) return;
         eb.disabled = true;
         db.rpc("onecue_option3_engine", { p_project_id: epid, p_action: act, p_scope: sc, p_note: rn || null }).then(function (x) {
           if (x.error) throw x.error;
