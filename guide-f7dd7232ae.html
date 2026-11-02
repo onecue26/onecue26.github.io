@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow"><title>원큐 시험 매뉴얼</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=Gothic+A1:wght@800;900&family=Anton&display=swap">
+<style>
+:root{--bg:#f4f4f1;--paper:#fff;--ink:#111;--mute:#62625c;--line:#e2e2dc;--lime:#d7ff3a;--warn:#b45309;--fd:"Gothic A1","IBM Plex Sans KR",system-ui,sans-serif;--fb:"IBM Plex Sans KR",system-ui,sans-serif;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#121211;--paper:#1c1c1a;--ink:#ececE6;--mute:#a3a39b;--line:#33332f;--warn:#f0a94a;color-scheme:dark}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.75 var(--fb)}
+.wrap{max-width:860px;margin:0 auto;padding-inline:16px;padding-block:28px 90px}
+.logo{font:400 26px/1 Anton,Impact,sans-serif;letter-spacing:.01em}.logo b{font-weight:400;background:var(--lime);color:#111;padding:.06em .08em 0;margin-left:.04em}
+h1{font:900 clamp(24px,5vw,32px)/1.3 var(--fd);margin:14px 0 6px}
+h2{font:800 20px/1.35 var(--fd);margin:40px 0 10px;padding-top:6px;border-top:2px solid var(--ink)}
+h3{font:800 16px/1.4 var(--fd);margin:0 0 6px}
+.lede{color:var(--mute);margin:0 0 18px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:12px;min-width:0}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.pill{display:inline-block;font-size:12.5px;font-weight:700;border:1px solid var(--line);border-radius:99px;padding:1px 10px;margin:0 4px 4px 0;background:var(--paper)}
+.lime{background:var(--lime);color:#111;border-color:var(--lime)}
+ol,ul{margin:6px 0 0;padding-left:20px}li{margin:4px 0}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps>li{counter-increment:s;position:relative;padding:12px 14px 12px 50px;background:var(--paper);border:1px solid var(--line);border-radius:10px;margin:8px 0}
+.steps>li:before{content:counter(s);position:absolute;left:14px;top:12px;width:24px;height:24px;border-radius:50%;background:var(--ink);color:var(--bg);font:800 13px/24px var(--fd);text-align:center}
+code{font:13px ui-monospace,Consolas,monospace;background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:0 5px}
+video{width:100%;display:block;border-radius:10px;background:#000;max-height:60vh}
+.note{border-left:3px solid var(--warn);background:var(--paper);padding:10px 14px;border-radius:0 10px 10px 0;margin-top:12px}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}th{color:var(--mute);font-weight:500;white-space:nowrap}
+.tw{overflow-x:auto}
+.time{display:inline-block;min-width:76px;font-weight:700}
+small{color:var(--mute)}
+</style></head><body><div class="wrap">
+
+<div class="logo">ONE<b>CUE</b></div>
+<h1>원큐 시험 매뉴얼</h1>
+<p class="lede">11-02 기준입니다. 광고주 화면에서 바뀐 부분과 원큐가 영상을 만드는 방식을 설명합니다. 이어서 광고주 아이디로 직접 의뢰해 보고, 관리자 아이디로 확인·납품까지 해 보는 순서를 처음부터 끝까지 정리했습니다.</p>
+
+<div class="card">
+  <h3>한눈에</h3>
+  <ul>
+    <li><b>광고주 아이디</b>(<code>sh@onecue.kr</code> · <code>psw@onecue.kr</code>)로 의뢰하면 승인 없이 끝까지 자동으로 만들어집니다. <b>아이디마다 새 의뢰 4건까지</b>입니다.</li>
+    <li><b>관리자 아이디</b>(<code>sh1@onecue.kr</code> · <code>psw1@onecue.kr</code>)로 결과를 확인하고, 고치기 요청을 넣고, 광고주에게 전달(납품)까지 합니다.</li>
+    <li>의뢰부터 확인 요청 알림까지 보통 <b>30~40분</b>입니다.</li>
+  </ul>
+</div>
+
+<h2>1. 바뀐 부분 — 「연출 스타일」</h2>
+<p>의뢰서 2단계 이름이 「영상 분위기」에서 <b>「연출 스타일」</b>로 바뀌었습니다. 화면 제목은 「제품에서 눈길을 확 끄는 장면 하나를 만들어 드립니다」입니다. 고르는 칸은 세 가지입니다.</p>
+<div class="g3">
+  <div class="card"><span class="pill lime">추천</span><h3>원큐에게 맡기기</h3>제품과 톤을 보고 원큐가 두 가지 중 하나를 고릅니다. 고른 이유는 기획서에 남습니다.</div>
+  <div class="card"><h3>기발하고 유쾌하게</h3>제품의 성질이 세상의 규칙이 되는 식의 재치 있는 장면입니다. 밝고 귀여운 쪽입니다.</div>
+  <div class="card"><h3>크고 시원하게</h3>방이나 거리 전체가 바뀌는 큰 장면입니다. 압도하고 감탄하게 하는 쪽입니다.</div>
+</div>
+
+<h2>2. 원큐가 만드는 방식 — 「강한 장면 하나」</h2>
+<p>15초 안에 여러 장면을 나열하지 않습니다. <b>제품이어야만 성립하는 강한 장면 하나</b>를 만듭니다. 파도 서핑이나 환타 회오리 같은 장면입니다. 첫 1초 안에 바로 변화가 시작되고, 가운데에 가장 크고 긴 정점이 오고, 끝은 제품과 로고로 맺습니다.</p>
+<div class="g2">
+  <div class="card">
+    <span class="pill">기발하고 유쾌하게</span>
+    <h3>오아 손 선풍기</h3>
+    <video src="media/o3t1/e8bc32a9d_post.mp4" controls playsinline preload="metadata"></video>
+    <p style="margin:8px 0 0">무더위에 축 처진 공원에서 손바닥만 한 선풍기를 켜는 순간, 그 바람이 공원 전체의 규칙이 되어 세상이 시원하게 살아납니다.</p>
+  </div>
+  <div class="card">
+    <span class="pill">크고 시원하게 · 맡기기에서 원큐가 고름</span>
+    <h3>꼼뚜 압화 항아리 캔들</h3>
+    <video src="media/o3t1/ea53f40e5_post.mp4" controls playsinline preload="metadata"></video>
+    <p style="margin:8px 0 0">캔들 윗면의 마른 압화가 깨어나 고요한 방 전체를 정원으로 피워 냅니다.</p>
+  </div>
+</div>
+<div class="card">
+  <h3>원큐가 혼자 하는 일</h3>
+  <ol>
+    <li><b>브리프</b> — 판매 페이지를 읽고 실물 사진을 찾아 정답 사진을 고릅니다. 대상, 가격대, 공식 로고·문구도 확인합니다.</li>
+    <li><b>기획</b> — 연출 스타일에 맞는 장면 하나를 정하고, 버린 후보와 그 이유, 15초 흐름을 씁니다.</li>
+    <li><b>참조 그림</b> — 제품 시트(실물과 대조해 통과해야 씀), 인물, 장소를 만듭니다.</li>
+    <li><b>영상</b> — 15초를 생성합니다.</li>
+    <li><b>후반</b> — 엔드카드 후보 여러 개를 만들고 점수로 하나를 골라 얹습니다.</li>
+    <li><b>게시</b> — 관리 화면에 확인 요청을 올리고 알림을 보냅니다.</li>
+  </ol>
+</div>
+
+<h2>3. 아이디와 횟수</h2>
+<div class="card tw"><table>
+  <tr><th>아이디</th><th>용도</th><th>할 수 있는 것</th></tr>
+  <tr><td><code>sh@onecue.kr</code><br><code>psw@onecue.kr</code></td><td><b>광고주</b></td><td>의뢰서 작성 → 「영상 생성 시작」 → 진행 화면 → 납품되면 완성 영상 보기·내려받기<br><b>새 의뢰 4건까지 자동</b>(11-02 이후 새로 넣는 것부터 셉니다)</td></tr>
+  <tr><td><code>sh1@onecue.kr</code><br><code>psw1@onecue.kr</code></td><td><b>관리자</b></td><td>제작 관리에서 결과 확인 · 엔드카드 바꾸기 · 고치기 요청 · 생성 승인 · <b>최종 컨펌·광고주에게 전달(납품)</b><br>이 아이디로 넣은 의뢰는 자동으로 돌지 않습니다(확인용)</td></tr>
+</table></div>
+<div class="note">5번째 의뢰부터는 자동으로 돌지 않습니다. 설계까지만 하고 <b>「생성 승인」을 기다립니다</b>. 더 필요하면 Dan 께 말씀해 주세요.</div>
+
+<h2>4. 시뮬레이션 ① 광고주 아이디로 의뢰하기</h2>
+<ol class="steps">
+  <li><b>로그인</b> — 원큐 첫 화면 오른쪽 위 <b>「지금 바로 만들기」</b>를 누르거나 로그인 화면에서 광고주 아이디(<code>sh@</code> 또는 <code>psw@</code>)로 들어갑니다.</li>
+  <li><b>1단계 · 기본 정보 입력</b> — 상호/브랜드명, 제품 종류, 제품 이름, 가장 자랑하고 싶은 특장점을 씁니다. 피하고 싶은 느낌과 참고 영상은 비워 둬도 됩니다.</li>
+  <li><b>2단계 · 연출 스타일</b> — 세 가지 중 하나를 고릅니다. 처음에는 「원큐에게 맡기기」를 권합니다.</li>
+  <li><b>3단계 · 사진 등록 &amp; 비즈니스 링크</b> — 제품 사진 1~3장(필수)과 판매 페이지 주소를 넣고 「주소 확인」을 누릅니다.<br><small>판매 페이지는 <b>공식몰이나 컬리 같은 일반 페이지</b>가 가장 잘 읽힙니다. 네이버 스마트스토어는 로그인 화면으로 막히는 일이 많습니다. 막혀도 원큐가 웹에서 실물 사진을 찾아 진행하지만, 공식몰이 더 정확합니다.</small></li>
+  <li><b>4단계 · 영상 화면 비율 선택</b> — 올릴 채널(비율)을 고릅니다.</li>
+  <li><b>5단계 · 입력 내용 확인 &amp; 영상 생성</b> — 줄마다 확인 체크를 하면 <b>「영상 생성 시작」</b>이 켜집니다. 누르면 끝입니다.</li>
+  <li><b>진행 화면</b> — 「영상 제작 진행 중」과 예상 소요 시간이 나옵니다. 창을 닫아도 원큐는 계속 만듭니다.</li>
+</ol>
+<div class="card">
+  <h3>누른 뒤 일어나는 일 (실측 예: 오아 선풍기)</h3>
+  <div><span class="time">0분</span>접수 — 텔레그램 「새 의뢰」 알림</div>
+  <div><span class="time">~15분</span>브리프 — 판매 페이지·실물 사진 조사</div>
+  <div><span class="time">~20분</span>기획 — 장면 하나·15초 흐름</div>
+  <div><span class="time">~30분</span>참조 그림·영상·후반(약 10분)</div>
+  <div><span class="time">~35분</span>게시 — 텔레그램 <b>「완성 · 확인 요청」</b> 알림</div>
+  <p style="margin:8px 0 0"><small>중간에 멈추면 텔레그램 「멈춤」 알림이 원인과 함께 옵니다. 그때는 Dan 께 알려 주세요.</small></p>
+</div>
+<div class="note">광고주 화면에는 <b>납품하기 전까지 완성 영상이 뜨지 않습니다.</b> 관리자가 확인하고 「최종 컨펌」을 눌러야 광고주 화면에 완성 영상이 올라갑니다(다음 ②).</div>
+
+<h2>5. 시뮬레이션 ② 관리자 아이디로 확인·납품하기</h2>
+<ol class="steps">
+  <li><b>로그인</b> — 로그아웃한 뒤 관리자 아이디(<code>sh1@</code> 또는 <code>psw1@</code>)로 들어갑니다. 텔레그램 알림에 있는 「관리 화면」 주소를 눌러도 됩니다.</li>
+  <li><b>제작 관리</b> — 왼쪽 메뉴 「제작 관리」에서 건을 엽니다. 맨 위 <b>「납품 전 확인 요청」</b>에 완성 영상과 의뢰부터 걸린 시간이 있습니다.</li>
+  <li><b>엔드카드 바꾸기</b>(필요할 때) — 「엔드컷 후보」 중 다른 것을 누르면 코드가 바로 바꿔 다시 올립니다. 크레딧은 들지 않습니다.</li>
+  <li><b>고치기 요청</b>(필요할 때) — 고칠 곳 하나를 고르고 메모를 쓰면 엔진이 그 범위만 다시 합니다.
+    <ul>
+      <li>엔드컷·글자 / 로고·문구 — 크레딧 0, 바로 다시 올라옵니다.</li>
+      <li>영상만 다시 / 기획부터 다시 — 크레딧이 들어서 <b>「생성 승인」</b> 버튼이 뜹니다. 눌러야 생성합니다.</li>
+    </ul>
+  </li>
+  <li><b>최종 컨펌 · 광고주에게 전달</b> — 연두색 버튼입니다. 확인 창에서 한 번 더 누르면 <b>이 순간이 납품</b>이고, 1분 안에 광고주 화면에 완성 영상이 뜹니다.</li>
+  <li><b>광고주 화면 확인</b> — 다시 광고주 아이디로 들어가 그 의뢰를 열면 「완성 영상」과 「영상 내려받기」가 보입니다.</li>
+</ol>
+<div class="note">관리 화면의 다른 버튼은 시험할 때 누르지 않아도 됩니다. 「이 건 다시 설계하기」는 처음부터 다시 만드는 버튼입니다. 엔진이 멈춘 건에만 씁니다.</div>
+
+<h2>6. 시험 끝나고 알려 주실 것</h2>
+<div class="card"><ul>
+  <li>연출 스타일을 무엇으로 골랐고, 결과가 그 느낌이었는지</li>
+  <li>제품 생김새(색·모양·로고)가 실물과 같은지</li>
+  <li>멈춤 알림이 왔는지, 왔다면 그 내용</li>
+  <li>의뢰서나 관리 화면에서 헷갈렸던 곳</li>
+</ul></div>
+<p style="margin-top:30px"><small>이 페이지는 시험용 임시 페이지입니다(검색에 나오지 않음).</small></p>
+</div></body></html>
