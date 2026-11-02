@@ -101,18 +101,37 @@
     }
     return '<div class="box" style="border:2px solid #d4ff3a;margin-bottom:12px"><h4>납품 전 확인 요청' + (rq && rq.at ? " · " + esc(when(rq.at)) : "") + took + '</h4>' +
       '<video src="' + esc(v) + '" controls playsinline preload="metadata" style="width:100%;max-height:70vh;background:#000;border-radius:8px"></video>' +
-      (note ? '<div class="msg" style="margin-top:6px">' + esc(note) + "</div>" : "") + deliverBox(r, rq) + endcardPick(r) + reviseBox(r) + "</div>";
+      (note ? '<div class="msg" style="margin-top:6px">' + esc(note) + "</div>" : "") + deliverBox(r, rq) + hdBox(r, rq) + endcardPick(r) + reviseBox(r) + "</div>";
   }
 
   // 10-27 Dan 「광고주 전달 기능 넣어」 — 우리 검수가 끝나면 이 버튼 = 납품. 지금 확인 요청 영상이 광고주 화면에 완성 영상으로 뜬다(480p 시안 그대로)
   function deliverBox(r, rq) {
     if (!rq || !rq.video) return "";
     var d = (r.report || {}).delivered, e = (r.report || {}).engine || {};
-    if (d && d.video === rq.video) return '<div class="msg" style="margin-top:10px;font-weight:700;color:#1f6f5c">✔ 납품 완료 · ' + esc(when(d.at)) + (d.by ? " · " + esc(d.by) : "") + " — 광고주 화면에 이 영상이 올라갔습니다</div>";
+    var hd = (r.report || {}).hd || {};
+    // 11-02 — 1080p로 바꾼 뒤엔 같은 주소라도 광고주 화면엔 예전(480p) 파일이 남아 있다 → 1080p 완성이 전달보다 나중이면 다시 전달 버튼
+    if (d && d.video === rq.video && !(hd.state === "done" && hd.at && d.at && new Date(hd.at) > new Date(d.at))) return '<div class="msg" style="margin-top:10px;font-weight:700;color:#1f6f5c">✔ 납품 완료 · ' + esc(when(d.at)) + (d.by ? " · " + esc(d.by) : "") + " — 광고주 화면에 이 영상이 올라갔습니다</div>";
     if (e.state === "running") return "";
     return '<div style="margin-top:10px"><button type="button" class="btn3" data-eng-act="deliver" data-pid="' + r.id + '"' + (CAN ? "" : " disabled") +
       ' style="background:#d4ff3a;color:#111;font-weight:800;border-color:#d4ff3a">최종 컨펌 · 광고주에게 전달</button>' +
       '<div class="msg" style="margin-top:4px">누르면: 위 영상이 광고주 화면에 완성 영상으로 뜹니다(1분 안). 이 순간이 납품입니다' + (d ? " · 이전에 전달한 판이 있습니다(새 판으로 바뀝니다)" : "") + '.</div><div class="msg" data-eng-msg="' + r.id + '"></div></div>';
+  }
+
+  // 11-02 Dan 「480p 드래프트 버전을 1080p로 바꿀 수 있는 버튼과 기능을 관리자 페이지에」 — 같은 테이크를 1080p로 확정(엔진 hd) · 만든 뒤 5일 안만
+  var HD_DAYS = 5, HD_EST = 240;
+  function hdBox(r, rq) {
+    if (!rq || !rq.video || /_raw\.mp4/.test(rq.video)) return "";
+    var hd = (r.report || {}).hd || {}, e = (r.report || {}).engine || {};
+    if (hd.state === "done") return '<div class="msg" style="margin-top:10px;font-weight:700;color:#1f6f5c">✔ 1080p 완성 · ' + esc(when(hd.at)) + ' — 위 영상이 1080p 판입니다' +
+      (hd.video_480 ? ' · <a href="' + esc(hd.video_480) + '" target="_blank" rel="noopener">480p 판 보기</a>' : "") + "</div>";
+    if (hd.state === "running" || e.state === "running") return hd.state === "running" ? '<div class="msg" style="margin-top:10px">1080p로 바꾸는 중 — 약 ' + esc(hd.est) + 'cr · 끝나면 위 영상이 바뀝니다</div>' : "";
+    var left = new Date(rq.at).getTime() + HD_DAYS * 864e5 - Date.now();
+    if (!(left > 0)) return '<div class="msg" style="margin-top:10px">1080p 변환 기한(만든 뒤 ' + HD_DAYS + '일)이 지나 480p로 남습니다.</div>';
+    var hh = Math.floor(left / 36e5);
+    return '<div style="margin-top:10px"><button type="button" class="btn3" data-eng-act="hd" data-est="' + (hd.est || HD_EST) + '" data-pid="' + r.id + '"' + (CAN ? "" : " disabled") +
+      '>1080p로 바꾸기 · 약 ' + (hd.est || HD_EST) + 'cr</button>' +
+      '<div class="msg" style="margin-top:4px">누르면: 위 480p 시안과 같은 장면을 1080p로 확정하고 엔드카드를 다시 얹어 이 자리에 올립니다(10~20분 · 15초 기준 약 ' + HD_EST + 'cr). 새로 뽑는 것이 아니라 장면은 그대로입니다. ' +
+      (hd.state === "failed" ? "지난번 시도가 멈췄습니다 — 이유는 위 엔진 칸에 있습니다. " : "") + '남은 기한 ' + (hh >= 24 ? Math.floor(hh / 24) + "일 " + (hh % 24) + "시간" : hh + "시간") + '.</div><div class="msg" data-eng-msg="' + r.id + '"></div></div>';
   }
 
   // 10-27 — 광고주 화면과 같은 기준: 「영상 생성 시작」 시각부터 24시간 · 납품(최종 컨펌)까지. 2시간 미만 주황 · 1시간 미만 빨강
@@ -385,7 +404,8 @@
         }
         if (act === "design" && !confirm("이 건을 처음부터 다시 설계합니다(크레딧 0 · 20~30분). 진행할까요?")) return;
         if (act === "approve" && !confirm("영상을 생성합니다 — 약 " + eb.dataset.est + "cr을 씁니다. 진행할까요?")) return;
-        if (act === "deliver") em = eb.parentNode.querySelector("[data-eng-msg]");   // 엔진 칸에도 같은 표시 자리가 있어 버튼 옆 것으로
+        if (act === "hd" && !confirm("1080p로 바꿉니다 — 약 " + eb.dataset.est + "cr을 씁니다(같은 장면 확정). 진행할까요?")) return;
+        if (act === "deliver" || act === "hd") em = eb.parentNode.querySelector("[data-eng-msg]");   // 엔진 칸에도 같은 표시 자리가 있어 버튼 옆 것으로
         if (act === "deliver" && !confirm("광고주에게 보냅니다 — 지금 확인 요청 영상이 광고주 화면에 완성 영상으로 뜹니다(480p 시안). 진행할까요?")) return;
         eb.disabled = true;
         db.rpc("onecue_option3_engine", { p_project_id: epid, p_action: act, p_scope: sc, p_note: rn || null }).then(function (x) {
