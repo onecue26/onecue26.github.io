@@ -55,7 +55,10 @@
   function readStep1() {
     S.o3.brand = el("brand").value; S.o3.kind = el("kind").value;
     S.o3.product = el("product").value; S.o3.point = el("point").value;
-    el("pointCount").textContent = trim(S.o3.point).length + " / 200";
+    var pl = trim(S.o3.point).length;   // 11-02 친구 「다음 단계가 안 눌림」 — 「귀여움」(3자)처럼 5자 미만이면 왜 막혔는지 칸 바로 아래 빨간 글로
+    el("pointCount").textContent = pl > 0 && pl < 5 ? "5자 이상 적어 주세요 · 지금 " + pl + "자" : pl + " / 200";
+    el("pointCount").style.color = pl > 0 && pl < 5 ? "#c0392b" : "";
+    el("pointCount").style.fontWeight = pl > 0 && pl < 5 ? "700" : "";
   }
 
   function paint() {
@@ -477,7 +480,7 @@
   function fill() {
     var o = S.o3;
     el("brand").value = o.brand || ""; el("kind").value = o.kind || ""; el("product").value = o.product || ""; el("point").value = o.point || "";
-    el("pointCount").textContent = trim(o.point).length + " / 200";
+    el("pointCount").textContent = trim(o.point).length + " / 200";   // 불러온 직후 — 5자 미만 안내는 아래 readStep1 이 다시 칠함
     if (!o.mood) o.mood = "auto";   // 예전 임시 저장본은 빈 값 — 맡기기로
     var m = document.querySelector('input[name="mood"][value="' + o.mood + '"]'); if (m) m.checked = true;
     el("avoid").value = o.avoid || ""; el("refurl").value = o.ref_url || "";
