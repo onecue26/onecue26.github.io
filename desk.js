@@ -117,6 +117,17 @@
       '<div class="msg" style="margin-top:4px">누르면: 위 영상이 광고주 화면에 완성 영상으로 뜹니다(1분 안). 이 순간이 납품입니다' + (d ? " · 이전에 전달한 판이 있습니다(새 판으로 바뀝니다)" : "") + '.</div><div class="msg" data-eng-msg="' + r.id + '"></div></div>';
   }
 
+  // 11-02 Dan 「1080p로 교체된 거 맞아? 480p와 구분되도록 나란히」 — 1080p를 끝냈으면 이름표 붙여 두 판을 나란히 · 같은 주소라 옛 파일이 안 뜨게 ?hd=
+  function hdPair(hd, v) {
+    var vid = function (src) { return '<video src="' + esc(src) + '" controls playsinline preload="metadata" style="width:100%;max-height:70vh;background:#000;border-radius:8px"></video>'; };
+    if (!(hd && hd.state === "done" && hd.video_480)) return vid(v);
+    var one = function (src, tag, sub) {
+      return '<div style="flex:1 1 260px;min-width:0"><div style="font-weight:800;margin:0 0 4px">' + tag + ' <span style="font-weight:400;color:#666;font-size:13px">' + sub + "</span></div>" + vid(src) + "</div>";
+    };
+    return '<div style="display:flex;gap:12px;flex-wrap:wrap">' + one(v + (v.indexOf("?") < 0 ? "?" : "&") + "hd=" + encodeURIComponent(hd.at || "1"), "1080p", "· 최종 후보 · " + esc(when(hd.at))) +
+      one(hd.video_480, "480p 시안", "· 바꾸기 전") + "</div>";
+  }
+
   // 11-02 Dan 「480p 드래프트 버전을 1080p로 바꿀 수 있는 버튼과 기능을 관리자 페이지에」 — 같은 테이크를 1080p로 확정(엔진 hd) · 만든 뒤 5일 안만
   var HD_DAYS = 5, HD_EST = 240;
   function hdBox(r, rq) {
