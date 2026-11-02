@@ -100,8 +100,27 @@
       if (ms > 0) { var mi = Math.round(ms / 6e4); took = " · 의뢰부터 " + (mi >= 60 ? Math.floor(mi / 60) + "시간 " + (mi % 60) + "분" : mi + "분") + " 걸림"; }
     }
     return '<div class="box" style="border:2px solid #d4ff3a;margin-bottom:12px"><h4>납품 전 확인 요청' + (rq && rq.at ? " · " + esc(when(rq.at)) : "") + took + '</h4>' +
-      hdPair(rp.hd, v) +
+      hdPair(rp.hd, v) + fbBox(r) +
       (note ? '<div class="msg" style="margin-top:6px">' + esc(note) + "</div>" : "") + deliverBox(r, rq) + hdBox(r, rq) + endcardPick(r) + reviseBox(r) + "</div>";
+  }
+
+  // 11-02 Dan 「친구들이 광고 4개씩 만들고, 각 완성본에 피드백을 기재하고 저장」 — 눈에 띄는 색 · 저장하면 엔진이 광고별로 정리해 Dan 에게 보고(option3_feedback_report.py)
+  var FB = {}, FB_ON = true;   // 건 id → [{by_name, body, created_at}] · 표가 없으면(DB 적용 전) 칸을 숨김
+  var FBC = "#e0115f";
+  function fbBox(r) {
+    if (!FB_ON) return "";
+    var list = (FB[r.id] || []).map(function (f) {
+      return '<div style="border-left:4px solid ' + FBC + ';padding:6px 10px;margin:6px 0;background:#fff0f5;border-radius:4px">' +
+        '<div style="font-size:12px;color:#666">' + esc(f.by_name || "관리자") + " · " + esc(when(f.created_at)) + "</div>" +
+        '<div style="color:' + FBC + ';font-weight:700;white-space:pre-wrap;line-height:1.5">' + esc(f.body) + "</div></div>";
+    }).join("");
+    return '<div style="margin:12px 0 4px;padding:10px 12px;border:2px solid ' + FBC + ';border-radius:8px;background:#fffafc">' +
+      '<div style="color:' + FBC + ';font-weight:800;font-size:15px">시험 피드백' + (list ? " · " + FB[r.id].length + "건" : "") + "</div>" +
+      '<div class="msg" style="margin:2px 0 6px">이 완성본을 보고 좋은 점·아쉬운 점·고쳐야 할 점을 적고 저장하세요. 저장하면 광고별로 정리되어 Dan에게 보고됩니다(여러 번 저장해도 됩니다).</div>' +
+      list +
+      '<textarea data-fb-note="' + r.id + '" rows="3" placeholder="예) 첫 2초가 약해요 · 제품이 실물보다 커 보여요 · 엔드카드 글자가 작아요" style="width:100%;box-sizing:border-box;font:inherit;padding:8px;border:1px solid ' + FBC + ';border-radius:6px;color:' + FBC + ';font-weight:700"></textarea>' +
+      '<div style="margin-top:6px"><button type="button" class="btn3" data-fb-save="' + r.id + '" style="background:' + FBC + ';color:#fff;border-color:' + FBC + ';font-weight:800">피드백 저장</button> ' +
+      '<span class="msg" data-fb-msg="' + r.id + '"></span></div></div>';
   }
 
   // 10-27 Dan 「광고주 전달 기능 넣어」 — 우리 검수가 끝나면 이 버튼 = 납품. 지금 확인 요청 영상이 광고주 화면에 완성 영상으로 뜬다(1080p 로 바꿨으면 1080p)
@@ -289,7 +308,8 @@
     // 10-15 Dan 「새로고침 꼭 해야 해?」 — 30초마다 다시 그려도 펼쳐 둔 카드·항목은 그대로
     var openCards = {}, openSecs = {}, typed = {}, picked = {};
     el("list").querySelectorAll("details.card[open]").forEach(function (d) { openCards[d.dataset.slug] = 1; });
-    el("list").querySelectorAll("[data-rv-note]").forEach(function (t) { if (t.value) typed[t.dataset.rvNote] = t.value; });   // 고치기 메모는 다시 그려도 남긴다
+    el("list").querySelectorAll("[data-rv-note]").forEach(function (t) { if (t.value) typed[t.dataset.rvNote] = t.value; });
+    el("list").querySelectorAll("[data-fb-note]").forEach(function (t) { if (t.value) typed["fb" + t.dataset.fbNote] = t.value; });   // 고치기 메모는 다시 그려도 남긴다
     el("list").querySelectorAll('input[name^="rv-"]:checked').forEach(function (x) { picked[x.name] = x.value; });
     el("list").querySelectorAll("details.card .rsec").forEach(function (d) { var c = d.closest("details.card"); openSecs[c.dataset.slug + "|" + d.querySelector("summary b").textContent] = d.open; });
     var restore = function () {
@@ -298,6 +318,7 @@
         d.querySelectorAll(".rsec").forEach(function (x) { var k = d.dataset.slug + "|" + x.querySelector("summary b").textContent; if (k in openSecs) x.open = openSecs[k]; });
       });
       el("list").querySelectorAll("[data-rv-note]").forEach(function (t) { if (typed[t.dataset.rvNote]) t.value = typed[t.dataset.rvNote]; });
+      el("list").querySelectorAll("[data-fb-note]").forEach(function (t) { if (typed["fb" + t.dataset.fbNote]) t.value = typed["fb" + t.dataset.fbNote]; });
       Object.keys(picked).forEach(function (n) { var x = el("list").querySelector('input[name="' + n + '"][value="' + picked[n] + '"]'); if (x) x.checked = true; });
     };
     setTimeout(restore, 0);
@@ -359,11 +380,16 @@
         }).then(function (rr) {
           var m2 = {}; ((rr && rr.data) || []).forEach(function (x) { m2[x.project_id] = x.report; });
           rows.forEach(function (x) { x.report = m2[x.id] || null; });
+          return db.from("option3_feedback").select("project_id,by_name,body,created_at").in("project_id", rows.map(function (x) { return x.id; })).order("created_at").then(function (fb) {
+            FB_ON = !fb.error; FB = {};
+            ((fb && fb.data) || []).forEach(function (f) { (FB[f.project_id] = FB[f.project_id] || []).push(f); });
+          });
+        }).then(function () {
           rows.sort(function (a, b) { return (b.o3.submitted_at || b.created_at) > (a.o3.submitted_at || a.created_at) ? 1 : -1; });
           return photos(rows);
         });
       }).then(function () {
-        var sig = JSON.stringify(rows.map(function (x) { return [x.id, x.test_label, x.o3, x.report]; }));
+        var sig = JSON.stringify(rows.map(function (x) { return [x.id, x.test_label, x.o3, x.report, FB[x.id]]; }));
         if (sig === SIG) return;
         SIG = sig;
         render();
@@ -404,6 +430,19 @@
           if (m) m.textContent = pk ? "바꾸는 중입니다 — 1분 안에 위 영상이 바뀝니다" : "엔진이 엔드컷을 고쳐서 다시 올립니다(크레딧 0)";
           setTimeout(function () { load(false).catch(function () {}); }, 20000);
         }).catch(function (x) { ep.disabled = false; if (m) m.textContent = "보내지 못했습니다 — " + (x.message || x); });
+        return;
+      }
+      var fs = e.target.closest("[data-fb-save]");
+      if (fs && !fs.disabled) {
+        var fpid = fs.dataset.fbSave, fta = el("list").querySelector('[data-fb-note="' + fpid + '"]'), fm = el("list").querySelector('[data-fb-msg="' + fpid + '"]');
+        var fbody = fta ? (fta.value || "").trim() : "";
+        if (!fbody) { if (fm) fm.textContent = "피드백 내용을 적어 주세요"; return; }
+        fs.disabled = true;
+        db.rpc("onecue_option3_feedback", { p_project_id: fpid, p_body: fbody }).then(function (x) {
+          if (x.error) throw x.error;
+          fta.value = ""; fs.disabled = false;
+          return load(false).then(function () { var m3 = el("list").querySelector('[data-fb-msg="' + fpid + '"]'); if (m3) m3.textContent = "저장했습니다 — Dan에게 정리해서 보고됩니다"; });
+        }).catch(function (x) { fs.disabled = false; if (fm) fm.textContent = "저장하지 못했습니다 — " + (x.message || x); });
         return;
       }
       var eb = e.target.closest("[data-eng-act],[data-rv-send]");
