@@ -421,7 +421,7 @@
         if (act === "hd" && !confirm("1080p로 바꿉니다 — 약 " + eb.dataset.est + "cr을 씁니다(같은 장면 확정). 진행할까요?")) return;
         if (act === "deliver" || act === "hd") em = eb.parentNode.querySelector("[data-eng-msg]");   // 엔진 칸에도 같은 표시 자리가 있어 버튼 옆 것으로
         // 11-02 Dan — 1080p 로 바꾼 건은 1080p 로 전달 · 안 바꾼 건만 「480p 로 전달할까요?」 묻는다
-        if (act === "deliver" && !confirm(eb.dataset.hd ? "광고주에게 1080p 최종본을 보냅니다 — 확인 요청의 1080p 영상이 광고주 화면에 완성 영상으로 뜹니다. 진행할까요?" : "아직 1080p로 바꾸지 않은 480p 시안입니다. 1080p 변환 없이 480p로 광고주에게 전달할까요? (1080p로 보내려면 취소하고 「1080p로 바꾸기」를 먼저 누르세요)")) return;
+        if (act === "deliver" && !confirm(eb.dataset.hd ? "광고주에게 1080p 최종본을 보냅니다 — 확인 요청의 1080p 영상이 광고주 화면에 완성 영상으로 뜹니다. 진행할까요?" : "아직 1080p로 바꾸지 않은 480p 시안입니다. 1080p 변환 없이 480p로 광고주에게 전달할까요?" + (HD_OFF ? "" : " (1080p로 보내려면 취소하고 「1080p로 바꾸기」를 먼저 누르세요)"))) return;
         eb.disabled = true;
         db.rpc("onecue_option3_engine", { p_project_id: epid, p_action: act, p_scope: sc, p_note: rn || null }).then(function (x) {
           if (x.error) throw x.error;
