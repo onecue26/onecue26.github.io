@@ -130,6 +130,7 @@
 
   // 11-02 Dan 「480p 드래프트 버전을 1080p로 바꿀 수 있는 버튼과 기능을 관리자 페이지에」 — 같은 테이크를 1080p로 확정(엔진 hd) · 만든 뒤 5일 안만
   var HD_DAYS = 5, HD_EST = 240;
+  var HD_OFF = true;   // 11-02 Dan 「1080p 버튼은 비활성화해 놔. 내가 다시 요청할 때까진 못 하게」 — 켤 때 false (엔진 option3_engine.HD_OFF 도 같이)
   function hdBox(r, rq) {
     if (!rq || !rq.video || /_raw\.mp4/.test(rq.video)) return "";
     var hd = (r.report || {}).hd || {}, e = (r.report || {}).engine || {};
@@ -139,6 +140,8 @@
     var left = new Date(rq.at).getTime() + HD_DAYS * 864e5 - Date.now();
     if (!(left > 0)) return '<div class="msg" style="margin-top:10px">1080p 변환 기한(만든 뒤 ' + HD_DAYS + '일)이 지나 480p로 남습니다.</div>';
     var hh = Math.floor(left / 36e5);
+    if (HD_OFF) return '<div style="margin-top:10px"><button type="button" class="btn3" disabled style="opacity:.45;cursor:not-allowed">1080p로 바꾸기 · 지금 꺼 둠</button>' +
+      '<div class="msg" style="margin-top:4px">1080p 변환은 잠시 꺼 두었습니다(다시 켜 달라고 하실 때까지). 남은 기한 ' + (hh >= 24 ? Math.floor(hh / 24) + "일 " + (hh % 24) + "시간" : hh + "시간") + '.</div></div>';
     return '<div style="margin-top:10px"><button type="button" class="btn3" data-eng-act="hd" data-est="' + (hd.est || HD_EST) + '" data-pid="' + r.id + '"' + (CAN ? "" : " disabled") +
       '>1080p로 바꾸기 · 약 ' + (hd.est || HD_EST) + 'cr</button>' +
       '<div class="msg" style="margin-top:4px">누르면: 위 480p 시안과 같은 장면을 1080p로 확정하고 엔드카드를 다시 얹어 이 자리에 올립니다(10~20분 · 15초 기준 약 ' + HD_EST + 'cr). 새로 뽑는 것이 아니라 장면은 그대로입니다. ' +
