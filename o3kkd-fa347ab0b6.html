@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow"><title>꼼뚜 캔들 제작 과정</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=Gothic+A1:wght@800;900&display=swap">
+<style>
+:root{--bg:#f4f2ee;--paper:#fff;--ink:#22201c;--mute:#6b665d;--line:#e0dbd2;--acc:#9a3b2c;--good:#2e7d4f;--warn:#a86a12;--fd:"Gothic A1","IBM Plex Sans KR",system-ui,sans-serif;--fb:"IBM Plex Sans KR",system-ui,sans-serif;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#171513;--paper:#211e1b;--ink:#ece7df;--mute:#a59e93;--line:#38332d;--acc:#e58a72;--good:#6fcf97;--warn:#e0a84e;color-scheme:dark}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--fb)}
+.wrap{max-width:1000px;margin:0 auto;padding-inline:16px;padding-block:28px 80px}
+h1{font:900 clamp(24px,5vw,34px)/1.25 var(--fd);margin:0 0 6px}
+h2{font:800 19px/1.35 var(--fd);margin:0 0 4px}
+.lede{color:var(--mute);margin:0 0 20px;max-width:70ch}
+.hero{display:grid;grid-template-columns:minmax(0,300px) 1fr;gap:20px;align-items:start}
+@media (max-width:640px){.hero{grid-template-columns:1fr}}
+video{width:100%;display:block;border-radius:10px;background:#000}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.stat{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px}
+.stat b{display:block;font:800 22px/1.2 var(--fd)}.stat span{color:var(--mute);font-size:13px}
+.step{display:grid;grid-template-columns:54px 1fr;gap:14px;margin-top:30px}
+.no{font:900 15px/1 var(--fd);color:var(--acc);border:2px solid var(--acc);border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center}
+.time{color:var(--mute);font-size:13px;margin:0 0 8px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px;margin-top:10px;min-width:0}
+.card h3{font:800 15px/1.35 var(--fd);margin:0 0 6px}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.frames{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:6px}
+figure{margin:0}img{width:100%;display:block;border-radius:6px;border:1px solid var(--line);background:#fff}
+figcaption{color:var(--mute);font-size:12.5px;margin-top:4px;line-height:1.5}
+ul{margin:6px 0 0;padding-left:18px}li{margin:2px 0}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:99px;border:1px solid currentColor;margin-right:4px}
+.eng{color:var(--good)}.me{color:var(--warn)}
+.note{border-left:3px solid var(--warn);padding:8px 12px;background:var(--paper);border-radius:0 8px 8px 0;margin-top:10px}
+table{width:100%;border-collapse:collapse;font-size:14px}td,th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}th{color:var(--mute);font-weight:500;white-space:nowrap}
+.tw{overflow-x:auto}
+pre{white-space:pre-wrap;word-break:break-word;font:12.5px/1.55 ui-monospace,Consolas,monospace;background:var(--bg);padding:12px;border-radius:6px;max-height:420px;overflow:auto;margin:8px 0 0}
+summary{cursor:pointer;font-weight:700;color:var(--acc)}
+blockquote{margin:6px 0;padding:6px 12px;border-left:3px solid var(--line);color:var(--mute)}
+</style></head><body><div class="wrap">
+
+<h1>꼼뚜 압화 항아리 캔들 — 엔진 제작 과정</h1>
+<p class="lede">11-01 밤, 광고주 화면에 새 건을 넣고 원큐 엔진 v2.2가 어떤 순서로 무엇을 정해 만들었는지, 엔진 기록과 결과 파일에서 그대로 옮겼습니다. 내용(브리프·기획·그림·영상·엔드카드)은 전부 엔진이 정했고, 사람이 손댄 곳은 엔진이 멈췄을 때 코드를 고친 것뿐입니다(<span class="tag me">Head</span> 표시).</p>
+
+<div class="hero">
+  <video src="media/o3kkd-fa347ab0b6/final.mp4" controls playsinline preload="metadata" poster="media/o3kkd-fa347ab0b6/fr_9.jpg"></video>
+  <div>
+    <div class="stats">
+      <div class="stat"><b>약 1시간 7분</b><span>접수 20:39 → 확인 요청 21:46</span></div>
+      <div class="stat"><b>약 45cr</b><span>시댄스 영상 견적 · 사진은 구독 GPT 0cr</span></div>
+      <div class="stat"><b>10분</b><span>실제 생성(사진 3장+영상+후반)</span></div>
+      <div class="stat"><b>약 35분</b><span>엔진이 멈춰 코드를 고친 시간</span></div>
+    </div>
+    <div class="card">
+      <h3>한 줄 기획</h3>
+      작은 옹기 캔들 윗면의 마른 압화가 깨어나, 고요한 방 전체를 세상에 하나뿐인 정원으로 피워 낸다.
+      <div style="margin-top:6px;color:var(--mute);font-size:13px">연출 스타일: 「맡기기」로 접수 → 엔진이 「크게」 선택 · 끝 문구 「작은 항아리에, 당신만의 정원.」</div>
+    </div>
+  </div>
+</div>
+
+<!-- 1 -->
+<div class="step"><div class="no">1</div><div>
+<h2>접수 — 광고주가 넣은 것</h2>
+<p class="time">20:39 · 광고주 화면 「영상 생성 시작」</p>
+<div class="card tw"><table>
+<tr><th>브랜드</th><td>꼼뚜</td></tr>
+<tr><th>제품</th><td>전통 압화 수제항아리(소) 소이캔들</td></tr>
+<tr><th>포인트</th><td>플라워디자인을 전공한 조향사가 압화를 직접 디자인해 올린 전통 항아리 소이캔들입니다. 주문이 들어오면 그때 만들어 보내 드려요.</td></tr>
+<tr><th>피하고 싶은 것</th><td>명절 선물세트 광고처럼 촌스러운 느낌</td></tr>
+<tr><th>연출 스타일</th><td>원큐에게 맡기기 · 9:16</td></tr>
+<tr><th>판매 페이지</th><td>smartstore.naver.com/commddu</td></tr>
+</table></div>
+<div class="g2" style="margin-top:10px">
+<figure><img src="media/o3kkd-fa347ab0b6/p1.jpg" alt="광고주 사진 1" loading="lazy"><figcaption>광고주 사진 1</figcaption></figure>
+<figure><img src="media/o3kkd-fa347ab0b6/p2.jpg" alt="광고주 사진 2" loading="lazy"><figcaption>광고주 사진 2</figcaption></figure>
+</div>
+<div class="note">엔진의 광고주 사진 판정: 두 장 다 <b>AI 생성 사진으로 의심</b>(지나치게 매끈한 질감·소품 비율). 그래서 정답(실물 기준)으로 쓰지 않고 아래 2단계에서 실물 사진을 따로 찾았습니다.</div>
+</div></div>
+
+<!-- 2 -->
+<div class="step"><div class="no">2</div><div>
+<h2>브리프 — 조사와 정답 사진</h2>
+<p class="time">20:42 ~ 20:52 · 크레딧 0 · <span class="tag eng">엔진</span></p>
+<div class="card">
+<h3>한 일</h3>
+<ul>
+<li>판매 페이지 캡처 시도 → <b>네이버 로그인 화면</b>만 나와 막힘(기록: blocked)</li>
+<li>웹 이미지 검색 4종으로 실물 사진 수집 — 제품 40장 · 측면 12장 · 불 켜진 모습 30장 · 점화 20장</li>
+<li>네이버 쇼핑 실물 사진 중 <b>정답 2장·상태 2장</b> 고름(원본 1000×1000)</li>
+<li>공식몰에서 로고(commddu 워드마크)·슬로건 「꼼뚜의 향기는 다를 수 밖에 없습니다」 확인</li>
+<li>시장: 단품 ₩22,000 · 유사품 ₩17,500~26,000 · 아이디어스 후기 5.0점 65건 · 선물용</li>
+<li>점화 상태 실물 사진은 못 찾음 → <b>불 켜진 장면은 그리지 않음</b>으로 정함</li>
+</ul></div>
+<div class="g3" style="margin-top:10px">
+<figure><img src="media/o3kkd-fa347ab0b6/t1.jpg" alt="정답 1" loading="lazy"><figcaption>정답 1 — 이후 모든 그림의 기준</figcaption></figure>
+<figure><img src="media/o3kkd-fa347ab0b6/t2.jpg" alt="정답 2" loading="lazy"><figcaption>정답 2</figcaption></figure>
+<figure><img src="media/o3kkd-fa347ab0b6/s1.jpg" alt="상태 1" loading="lazy"><figcaption>상태 사진 1</figcaption></figure>
+<figure><img src="media/o3kkd-fa347ab0b6/s2.jpg" alt="상태 2" loading="lazy"><figcaption>상태 사진 2</figcaption></figure>
+</div>
+<details class="card"><summary>검색해 모은 사진 시트 보기</summary>
+<div class="g2" style="margin-top:10px">
+<figure><img src="media/o3kkd-fa347ab0b6/r_prod.jpg" alt="제품 검색" loading="lazy"><figcaption>「꼼뚜 전통 압화 수제항아리 소이캔들」 40장</figcaption></figure>
+<figure><img src="media/o3kkd-fa347ab0b6/r_fire.jpg" alt="점화 검색" loading="lazy"><figcaption>「항아리 소이캔들 불꽃 심지」 — 같은 제품 없음</figcaption></figure>
+</div></details>
+<div class="card">
+<h3>브리프 카드 요약</h3>
+<ul>
+<li><b>대상</b>: 특별하고 한국적인 선물을 찾는 20~40대 여성 · 외국인 선물 담당자</li>
+<li><b>경쟁 차이</b>: 조향사가 직접 디자인한 수제 1개 — 같은 꽃 배치가 없는 세상에 하나뿐인 캔들</li>
+<li><b>톤</b>: 고요하고 우아한 감성 아트피스 — 명절·기념품 느낌 제거</li>
+<li><b>제품 생김새</b>: 짙은 갈색 옹기 둥근 항아리 · 뚜껑 없음 · 납작한 도자기 받침 · 흰 소이왁스 위 압화</li>
+</ul></div>
+<div class="note"><span class="tag me">Head</span> 20:52 멈춤 — 「부위 사진에 아랫면이 없다」는 검사에 걸림. 코드를 「아랫면 사진 없음(생성 금지)」을 자동으로 적고 계속하도록 고침(v2.2.15).</div>
+</div></div>
+
+<!-- 3 -->
+<div class="step"><div class="no">3</div><div>
+<h2>기획 — 강한 장면 하나</h2>
+<p class="time">20:54 ~ 21:18 · 크레딧 0 · <span class="tag eng">엔진</span></p>
+<div class="card">
+<h3>연출 스타일을 「크게」로 고른 이유 (엔진 원문)</h3>
+<blockquote>톤이 「고요하고 우아한 아트피스」라 소동·웃음(기발)보다, 방 전체가 정원으로 피어나는 큰 환경 변화를 진지하게 경외로 받는 쪽이 촌스러움 없이 커진다.</blockquote>
+<h3 style="margin-top:12px">장치 — 「이름이 현실」</h3>
+뚜껑 없는 윗면에 박힌 압화(제품이 보여 주는 정원 그림)가 실제로 피어나 방을 삼킨다.
+<h3 style="margin-top:12px">버린 후보 3개</h3>
+<ul>
+<li>크기 뒤집기(손가락만 한 사람이 압화 들판을 거님) — 미니어처는 시댄스 약점, 우아함보다 귀여움</li>
+<li>규모 폭발(불 붙자 꽃잎 폭풍) — 소동은 「촌스럽지 않게」와 어긋남, 점화 사진도 없음</li>
+<li>향 닿는 곳마다 계절이 바뀜 — 향은 눈에 안 보여 약함</li>
+</ul>
+<h3 style="margin-top:12px">왜 이 제품이어야 하나</h3>
+제품 윗면 자체가 꽃 그림이라, 압화 캔들이 아니면 「그림이 살아나 정원이 된다」가 성립하지 않음.
+</div>
+<div class="card tw"><h3>15초 흐름 (4컷 · 정점 컷 최장)</h3><table>
+<tr><th>0–3초</th><td>윗면 접사 — 압화 한 송이가 왁스에서 들려 생화로 피어남</td></tr>
+<tr><th>3–10초</th><td><b>정점</b> — 정원이 방 전체로 번짐 · 덩굴이 벽을 타고 꽃잎이 눈처럼 날림 · 카메라가 뒤로 빠지며 낮게 회전</td></tr>
+<tr><th>10–12초</th><td>여자가 조용히 숨을 들이켜고 꽃잎 한 장이 손에 내려앉음</td></tr>
+<tr><th>12–15초</th><td>정원이 자리 잡은 방, 테이블 위 캔들이 또렷이 빛남 · 인물 없음</td></tr>
+</table></div>
+<div class="note"><span class="tag me">Head</span> 두 번 멈춤 — ① 기획만 다시 돌리는 단계가 옛 방식(v1)으로 바뀜 → 이어 돌릴 때 건의 방식 유지(v2.2.16) ② 「판매 페이지 캡처가 로그인 화면」 검사에 걸림 → 막힌 캡처는 정답에서 빼고, 찾아 둔 실물 사진을 정답으로 쓰게 고침(v2.2.17). 21:18 설계 끝 · 견적 45cr · 자동 승인.</div>
+</div></div>
+
+<!-- 4 -->
+<div class="step"><div class="no">4</div><div>
+<h2>참조 그림 3장 — 구독 GPT</h2>
+<p class="time">21:18 ~ 21:20 · 0cr · <span class="tag eng">엔진</span></p>
+<div class="card">
+<figure><img src="media/o3kkd-fa347ab0b6/img1.jpg" alt="제품 시트" loading="lazy"><figcaption><b>Image 1 · 제품 시트</b> — 정답·상태 사진 4장을 붙여 생성. 둥근 제품이라 「제 축으로 돌린 세 모습」 배치 문장은 코드가 붙임. 실물 대조 판정 <b class="eng">통과</b>(차이 없음).</figcaption></figure>
+</div>
+<div class="g2">
+<div class="card"><figure><img src="media/o3kkd-fa347ab0b6/img2.jpg" alt="인물 앵커" loading="lazy"><figcaption><b>Image 2 · 인물 앵커</b> — 20대 후반 여성 · 선물을 받는 사람. 머리 없는 전신 정면 / 전신 뒷면 / 얼굴, 3칸 틀은 코드가 씀.</figcaption></figure></div>
+<div class="card"><figure><img src="media/o3kkd-fa347ab0b6/img3.jpg" alt="장소" loading="lazy"><figcaption><b>Image 3 · 장소</b> — 고요하고 우아한 거실 · 가운데 원목 사이드 테이블 · 러그·액자·거울·상표·사람 없음.</figcaption></figure></div>
+</div>
+</div></div>
+
+<!-- 5 -->
+<div class="step"><div class="no">5</div><div>
+<h2>영상 — 시댄스 2.5</h2>
+<p class="time">21:20 ~ 21:25 · 약 45cr · <span class="tag eng">엔진</span></p>
+<div class="card">
+<ul>
+<li>시댄스 2.5 · omni reference · 480p draft · 15초 · 9:16 · 소리 생성 켬</li>
+<li>참조 3장(제품 시트·인물·장소) + 4컷 타임라인 프롬프트</li>
+<li>음악: 꽃이 피어날 때 조용히 부풀어 오르는 오케스트라 · 타악 드롭·목소리 없음</li>
+</ul>
+<details style="margin-top:8px"><summary>엔진이 쓴 영상 프롬프트 원문</summary>
+<pre>Shot 1 [0-3s] (extreme close-up on the candle top): From the first frame the open wax top of the onggi candle, exactly as on Image 1, is clearly visible; one pressed dried flower lifts out of the wax and unfurls into a living bloom, as if a flower were waking from sleep. ...
+Shot 2 [3-10s] (wide, the room): the garden pours out of the little jar and floods the whole room (Image 3) - vines run across the wooden table and climb the neutral walls, dried ferns turn green and sway, poppies and daisies burst open, and petals drift through the air like a slow snowfall while warm light swells through the room. The woman (Image 2) stands near the table, her hair and the hem of her clothes lifted as if by a soft wind moving through the blooms. Let the camera crash-dolly back and rotate low ... This is the peak: biggest, longest, most camera energy.
+Shot 3 [10-12s] (medium, the woman): the woman (Image 2) draws a slow, quiet breath, softly moved; a single petal settles onto her open hand.
+Shot 4 [12-15s] (close-up, product): ... the small onggi candle, exactly as on Image 1, glows clearly in front with its pressed-flower top facing us. No person is present in this shot.</pre></details>
+</div>
+<div class="card"><h3>나온 영상 장면별</h3>
+<div class="frames">
+<figure><img src="media/o3kkd-fa347ab0b6/fr_0.5.jpg" alt="" loading="lazy"><figcaption>0.5초</figcaption></figure>
+<figure><img src="media/o3kkd-fa347ab0b6/fr_2.jpg" alt="" loading="lazy"><figcaption>2초</figcaption></figure>
+<figure><img src="media/o3kkd-fa347ab0b6/fr_4.jpg" alt="" loading="lazy"><figcaption>4초</figcaption></figure>
+<figure><img src="media/o3kkd-fa347ab0b6/fr_6.5.jpg" alt="" loading="lazy"><figcaption>6.5초</figcaption></figure>
+<figure><img src="media/o3kkd-fa347ab0b6/fr_9.jpg" alt="" loading="lazy"><figcaption>9초</figcaption></figure>
+<figure><img src="media/o3kkd-fa347ab0b6/fr_11.jpg" alt="" loading="lazy"><figcaption>11초</figcaption></figure>
+<figure><img src="media/o3kkd-fa347ab0b6/fr_12.5.jpg" alt="" loading="lazy"><figcaption>12.5초</figcaption></figure>
+<figure><img src="media/o3kkd-fa347ab0b6/fr_14.6.jpg" alt="" loading="lazy"><figcaption>14.6초</figcaption></figure>
+</div>
+<details style="margin-top:10px"><summary>후반 전 원본 영상</summary><video src="media/o3kkd-fa347ab0b6/raw.mp4" controls playsinline preload="none" style="max-width:300px;margin-top:8px"></video></details>
+</div>
+</div></div>
+
+<!-- 6 -->
+<div class="step"><div class="no">6</div><div>
+<h2>후반 — 엔드카드 후보 6개 중 코드가 고름</h2>
+<p class="time">21:25 ~ 21:27 · 0cr · <span class="tag eng">코드</span></p>
+<div class="card">
+<figure><img src="media/o3kkd-fa347ab0b6/endcards.jpg" alt="엔드카드 후보" loading="lazy"><figcaption>1 장면 어둡게+흰 로고 · 2 빈 자리에 로고 · 3 흰 띠 · 4 흰 판 · 5 검정 카드 · 6 밝은 카드</figcaption></figure>
+<p style="margin:10px 0 0">선택: <b>1번 「장면 어둡게 + 흰 로고」</b> — 점수 10.6 · 글자 대비 11.0:1 · 제품 가림 0 · 앞 장면과 흐름 차 0.15. 마지막 2.5초에 얹음. 모델 판단 없이 end_card.py 점수로 결정.</p>
+</div>
+</div></div>
+
+<!-- 7 -->
+<div class="step"><div class="no">7</div><div>
+<h2>게시 · 확인 요청 · 납품</h2>
+<p class="time">21:27 ~ 21:46 사이트 배포 · 23:11 납품</p>
+<div class="card"><ul>
+<li>21:46 사이트에 영상·후반 올림 → 관리 화면 확인 요청 등록 · 텔레그램 알림</li>
+<li>23:11 Dan 「최종 컨펌·전달」 → 광고주 화면에 완성 영상 올라감</li>
+</ul></div>
+</div></div>
+
+<!-- 정리 -->
+<div class="step"><div class="no">✓</div><div>
+<h2>정리</h2>
+<div class="card"><h3>잘된 것</h3><ul>
+<li>광고주 사진이 AI 의심이고 판매 페이지가 막혔는데도, 엔진이 실물 사진을 스스로 찾아 기준으로 씀 → 영상의 항아리 윗면(빨간 꽃·하트 꽃잎·고사리)이 실물과 같음</li>
+<li>점화 실물이 없자 불 켜진 장면을 아예 빼서 지어내지 않음</li>
+<li>0.5~2초 첫 장면부터 바로 꽃이 피어 훅이 빠름 · 정점 3~10초 가장 김</li>
+</ul></div>
+<div class="card"><h3>아쉬운 것 (블라인드 검수)</h3><ul>
+<li>방 장면(4~9초)에서 항아리가 실물 회갈색보다 <b>더 반짝이고 붉게</b> 나옴</li>
+<li>방 장면(4초~)부터 끝까지 항아리 둘레에 실물에 없는 <b>덩굴 화환</b>이 붙음</li>
+<li>로고 「commddu」는 공식 로고의 mm 모양 그대로 — 오타 아님</li>
+</ul></div>
+<div class="card"><h3>엔진에 들어간 고침 (이번 건 이후)</h3><ul>
+<li>v2.2.14 · v2.2.19 — 접수되면 바로 설계 시작, Dan 에게는 유료 생성 승인만</li>
+<li>v2.2.15 — 아랫면 사진이 없으면 「사진 없음」을 적고 계속</li>
+<li>v2.2.16 — 브리프·기획 검사에 걸리면 이유를 주고 한 번 다시 · 이어 돌릴 때 방식 유지</li>
+<li>v2.2.17 — 로그인 화면 캡처는 정답·참조에서 빼고 진행</li>
+<li>v2.2.18 — 자동 승인 건엔 승인 요청 알림을 보내지 않음</li>
+</ul></div>
+<p style="color:var(--mute);font-size:13px;margin-top:12px">크레딧은 견적 기준(45cr)입니다. 실제로 빠진 금액은 아직 장부와 맞추지 않았습니다. 이 페이지는 임시이며 11-16 무렵 내립니다.</p>
+</div></div>
+
+</div></body></html>
