@@ -122,9 +122,9 @@
     var vid = function (src) { return '<video src="' + esc(src) + '" controls playsinline preload="metadata" style="width:100%;max-height:70vh;background:#000;border-radius:8px"></video>'; };
     if (!(hd && hd.state === "done" && hd.video_480)) return vid(v);
     var one = function (src, tag, sub) {
-      return '<div style="flex:1 1 260px;min-width:0"><div style="font-weight:800;margin:0 0 4px">' + tag + ' <span style="font-weight:400;color:#666;font-size:13px">' + sub + "</span></div>" + vid(src) + "</div>";
+      return '<div style="min-width:0"><div style="font-weight:800;margin:0 0 4px">' + tag + ' <span style="font-weight:400;color:#666;font-size:13px">' + sub + "</span></div>" + vid(src) + "</div>";
     };
-    return '<div style="display:flex;gap:12px;flex-wrap:wrap">' + one(v + (v.indexOf("?") < 0 ? "?" : "&") + "hd=" + encodeURIComponent(hd.at || "1"), "1080p", "· 최종 후보 · " + esc(when(hd.at))) +
+    return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' + one(v + (v.indexOf("?") < 0 ? "?" : "&") + "hd=" + encodeURIComponent(hd.at || "1"), "1080p", "· 최종 후보 · " + esc(when(hd.at))) +
       one(hd.video_480, "480p 시안", "· 바꾸기 전") + "</div>";
   }
 
