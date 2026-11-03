@@ -35,7 +35,7 @@ if(q.error){msgAll('<span class="fbmsg">관리자 계정만 볼 수 있습니다
 boxes.forEach(function(b){[].forEach.call(b.querySelectorAll(".fb"),function(f){var w=f.dataset.who;var rows=q.data.filter(function(x){return x.project_id===b.dataset.pid&&WHO[x.by_id]===w});
 var h=rows.map(function(x){return '<div class="it">'+esc(x.body)+'<div class="at">'+esc(x.created_at.slice(5,16).replace("T"," "))+'</div></div>'}).join("")||'<span class="fbmsg">아직 없음</span>';
 var keep=f.querySelector("textarea");var draft=keep?keep.value:"";
-f.querySelector(".fbl").innerHTML=h+(w===me?'<textarea placeholder="이 버전 피드백을 적어 주세요"></textarea><button type="button">저장</button><span class="fbmsg"></span>':'');
+f.querySelector(".fbl").innerHTML=h+(w===me?'<textarea placeholder="이 버전 피드백을 적어 주세요"></textarea><button type="button">저장</button><span class="fbmsg"></span>':'<div class="fbmsg" style="margin-top:6px">'+w+' 계정으로 로그인하면 여기에 적을 수 있습니다</div>');
 var ta=f.querySelector("textarea");if(ta){ta.value=draft;f.querySelector("button").onclick=function(){var body=ta.value.trim();if(!body)return;var m=f.querySelector(".fbmsg");m.textContent="저장 중…";
 db.rpc("onecue_option3_feedback",{p_project_id:b.dataset.pid,p_body:body}).then(function(x){if(x.error){m.textContent="저장 못 함 — "+x.error.message;return}ta.value="";m.textContent="저장했습니다";load()})}}})})})}})})();
 </script></body></html>
