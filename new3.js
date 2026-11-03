@@ -36,7 +36,7 @@
   function slugify(brand, product) {
     var d = new Date(), p = function (n) { return String(n).padStart(2, "0"); };
     var stamp = String(d.getFullYear()).slice(2) + p(d.getMonth() + 1) + p(d.getDate());
-    return stamp + "_" + (brand + "_" + product).trim().replace(/\s+/g, "_").slice(0, 40) + "_" + Math.random().toString(36).slice(2, 5);
+    return stamp + "_" + (brand + "_" + product).trim().replace(/[\\/:*?"<>|#%&]+/g, "_").replace(/\s+/g, "_").slice(0, 40) + "_" + Math.random().toString(36).slice(2, 5);
   }
   function withScheme(s) { var v = trim(s); if (!v) return ""; return /^https?:\/\//i.test(v) ? v : "https://" + v.replace(/^\/+/, ""); }
   function blank() { return { status: "draft", step: 1, brand: "", kind: "", product: "", point: "", mood: "auto", avoid: "", ref_url: "", ref_ok: false, photos: [], url: "", url_ok: false, aspect: "" }; }

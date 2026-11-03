@@ -206,7 +206,7 @@
   function slugify(brand, product) {
     var d = new Date(), p = function (n) { return String(n).padStart(2, "0"); };
     var stamp = String(d.getFullYear()).slice(2) + p(d.getMonth() + 1) + p(d.getDate());
-    var name = (brand + "_" + product).trim().replace(/\s+/g, "_").slice(0, 40);
+    var name = (brand + "_" + product).trim().replace(/[\\/:*?"<>|#%&]+/g, "_").replace(/\s+/g, "_").slice(0, 40);
     return stamp + "_" + name + "_" + Math.random().toString(36).slice(2, 5);
   }
 
