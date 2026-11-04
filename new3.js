@@ -136,6 +136,7 @@
     if (!okStep(1)) { if (!quiet) toast("1단계 네 칸을 먼저 채워 주세요"); return Promise.resolve(false); }
     S.o3.photos = S.photos.filter(function (p) { return p.id; }).map(function (p) { return p.id; });
     S.o3.saved_at = new Date().toISOString();
+    delete S.o3.archived; delete S.o3.archived_at;   // 11-05 엔진 v2 보관 건도 광고주가 다시 저장하면 제작 관리 목록에 돌아온다
     return ensureProject().then(function () {
       return db.from("briefs").update({ option3: S.o3, raw: trim(S.o3.point) }).eq("project_id", S.pid);
     }).then(function (r) {
