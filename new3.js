@@ -481,7 +481,7 @@
     var o = S.o3;
     el("brand").value = o.brand || ""; el("kind").value = o.kind || ""; el("product").value = o.product || ""; el("point").value = o.point || "";
     el("pointCount").textContent = trim(o.point).length + " / 200";   // 불러온 직후 — 5자 미만 안내는 아래 readStep1 이 다시 칠함
-    if (!o.mood) o.mood = "auto";   // 예전 임시 저장본은 빈 값 — 맡기기로
+    if (!o.mood || o.mood !== "auto") o.mood = "auto";   // 예전 임시 저장본은 빈 값 — 맡기기로 · 11-05 두 스타일 선택지를 접어 맡기기만 남김
     var m = document.querySelector('input[name="mood"][value="' + o.mood + '"]'); if (m) m.checked = true;
     el("avoid").value = o.avoid || ""; el("refurl").value = o.ref_url || "";
     if (o.ref_url) { el("refMsg").className = "urlmsg " + (o.ref_ok ? "ok" : "no"); el("refMsg").textContent = o.ref_ok ? UF.ref.yes : "주소 확인을 눌러 주세요"; }

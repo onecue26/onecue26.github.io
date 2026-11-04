@@ -355,6 +355,12 @@
   }
 
   var SIG = "";
+  var ARCH = (new URLSearchParams(location.search).get("archive") || "").replace(/[^a-z0-9_]/g, "");
+  if (ARCH) {
+    var h1 = document.querySelector(".dk-head h1"), hp = document.querySelector(".dk-head h1 + p");
+    if (h1) h1.textContent = "엔진 v2 보관";
+    if (hp) hp.textContent = "엔진 v3로 바꾸기 전(11-05까지) 시험한 건입니다. 지우지 않고 여기 모아 두었습니다 — 제작 관리 목록에는 나오지 않습니다.";
+  }
   function load(first) {
     return db.from("projects").select("id,slug,brand,product,created_at,updated_at,test_label,client_id").eq("production_track", "option3").order("created_at", { ascending: false })
       .then(function (r) {
@@ -364,6 +370,10 @@
         return db.from("briefs").select("project_id,option3").in("project_id", rows.map(function (x) { return x.id; })).then(function (b) {
           var m = {}; (b.data || []).forEach(function (x) { m[x.project_id] = x.option3 || {}; });
           rows.forEach(function (x) { x.o3 = m[x.id] || {}; });
+          // 11-05 Dan 「새 엔진으로 새롭게 테스트할 거라 리스트에서 빼되 나중에 볼 수 있게」 — briefs.option3.archived 가 붙은 건은
+          //   기본 목록에서 빼고, desk.html?archive=<그 값>(왼쪽 「엔진 v2 보관」)에서만 보인다. 지우지 않음 · 표시만 지우면 원래대로
+          rows = rows.filter(function (x) { return ARCH ? x.o3.archived === ARCH : !x.o3.archived; });
+          if (!rows.length) return;
           return db.from("option3_reports").select("project_id,report").in("project_id", rows.map(function (x) { return x.id; }));
         }).then(function (rr) {
           // 10-19 Dan 「관리 페이지 프로젝트에 의뢰인 이름이 나오면 좋겠어」 — 건 → 의뢰 회사(clients) → 그 계정(profiles)
