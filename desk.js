@@ -299,7 +299,7 @@
 
   function render() {
     var ht = hideTest();
-    var base = rows.filter(function (r) { return !(ht && r.test_label); });
+    var base = rows.filter(function (r) { return VIEW || !(ht && r.test_label); });
     el("sAll").textContent = base.length;
     el("sSub").textContent = base.filter(function (r) { return status(r) === "submitted"; }).length;
     el("sDraft").textContent = base.filter(function (r) { return status(r) === "draft"; }).length;
@@ -356,6 +356,14 @@
 
   var SIG = "";
   var ARCH = (new URLSearchParams(location.search).get("archive") || "").replace(/[^a-z0-9_]/g, "");
+  // 11-05 Dan 「테스트 페이지를 따로 안에 관리자만 볼 수 있게 — 리스트 따로 옮기는 귀찮음이 적고 한 번에」 — 시험 건(test_label)은 desk.html?view=test 에서만
+  var VIEW = (new URLSearchParams(location.search).get("view") || "") === "test";
+  if (VIEW) {
+    var th1 = document.querySelector(".dk-head h1"), thp = document.querySelector(".dk-head h1 + p");
+    if (th1) th1.textContent = "시험";
+    if (thp) thp.textContent = "엔진 시험으로 만든 영상입니다(관리자만). 영상을 보고 아래 「피드백 저장」에 리뷰·고칠 점을 적어 주세요 — Head가 받아 원인과 개선안을 정리해 보고합니다. 제작 관리 목록에는 나오지 않습니다.";
+    var htl = document.getElementById("hideTest"); if (htl && htl.parentNode) htl.parentNode.style.display = "none";
+  }
   if (ARCH) {
     var h1 = document.querySelector(".dk-head h1"), hp = document.querySelector(".dk-head h1 + p");
     if (h1) h1.textContent = "엔진 v2 보관";
@@ -372,7 +380,7 @@
           rows.forEach(function (x) { x.o3 = m[x.id] || {}; });
           // 11-05 Dan 「새 엔진으로 새롭게 테스트할 거라 리스트에서 빼되 나중에 볼 수 있게」 — briefs.option3.archived 가 붙은 건은
           //   기본 목록에서 빼고, desk.html?archive=<그 값>(왼쪽 「엔진 v2 보관」)에서만 보인다. 지우지 않음 · 표시만 지우면 원래대로
-          rows = rows.filter(function (x) { return ARCH ? x.o3.archived === ARCH : !x.o3.archived; });
+          rows = rows.filter(function (x) { return ARCH ? x.o3.archived === ARCH : (!x.o3.archived && (VIEW ? !!x.test_label : !x.test_label)); });
           if (!rows.length) return;
           return db.from("option3_reports").select("project_id,report").in("project_id", rows.map(function (x) { return x.id; }));
         }).then(function (rr) {
@@ -406,6 +414,12 @@
         if (!first) return;
         // 텔레그램 링크(desk.html?p=건) — 그 건만 펼치고 그 자리로
         var want = new URLSearchParams(location.search).get("p");
+        if (want && !VIEW && !ARCH && !rows.some(function (x) { return x.slug === want; })) {   // 시험 건 링크(텔레그램)면 시험 보기로
+          db.from("projects").select("slug,test_label").eq("slug", want).maybeSingle().then(function (t) {
+            if (t.data && t.data.test_label) location.replace("desk.html?view=test&p=" + encodeURIComponent(want));
+          });
+          return;
+        }
         if (want) {
           var c = el("list").querySelector('[data-slug="' + want.replace(/"/g, "") + '"]');
           if (!c && rows.some(function (x) { return x.slug === want && x.test_label; })) { el("hideTest").checked = false; try { localStorage.setItem("desk_hide_test", "0"); } catch (e) {} render(); c = el("list").querySelector('[data-slug="' + want.replace(/"/g, "") + '"]'); }
