@@ -169,7 +169,8 @@
 
   // 10-27 — 광고주 화면과 같은 기준: 「영상 생성 시작」 시각부터 24시간 · 납품(최종 컨펌)까지. 2시간 미만 주황 · 1시간 미만 빨강
   var DUE_MS = 24 * 3600 * 1000;
-  function dueChip(o) {
+  function dueChip(o) { if (typeof VIEW !== "undefined" && VIEW) return "";   // 11-05 시험 건은 납품 기한 없음
+
     if (o.status !== "submitted" || !o.submitted_at) return "";
     if (o.delivered_at) return '<span class="bd" style="color:#1f6f5c;border-color:#1f6f5c">납품 완료</span>';
     return '<span class="bd" data-due="' + (new Date(o.submitted_at).getTime() + DUE_MS) + '"></span>';
