@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>토모리 밤 작업 보고</title>
+<style>
+:root{--bg:#fafaf8;--fg:#1d1d1b;--mut:#6b6b66;--line:#e2e1dc;--ok:#1f7a4d;--warn:#a6620b;--bad:#b3261e;--card:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#161615;--fg:#ecebe6;--mut:#a3a29c;--line:#33322f;--ok:#5cc28e;--warn:#e0a64a;--bad:#ef7a72;--card:#1f1f1d}}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.65 -apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+main{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:22px;margin:0 0 4px}h2{font-size:17px;margin:28px 0 8px;padding-top:10px;border-top:1px solid var(--line)}
+.sub{color:var(--mut);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:10px 0}
+table{border-collapse:collapse;width:100%;font-size:14px}td,th{border-bottom:1px solid var(--line);padding:6px 6px;text-align:left;vertical-align:top}
+.ok{color:var(--ok);font-weight:600}.warn{color:var(--warn);font-weight:600}.bad{color:var(--bad);font-weight:600}
+.tag{display:inline-block;font-size:12px;border:1px solid var(--line);border-radius:6px;padding:0 6px;color:var(--mut)}
+ol li,ul li{margin:4px 0}
+a{color:inherit}
+</style></head><body><main>
+<h1>토모리 채지우 · 밤 작업 보고</h1>
+<div class="sub">11-12 00:40 ~ 03:30 (한국 시각) · Dan 지시 「영상 생성 직전까지 해놔」 · 유료 생성(480p·1080p) 0건</div>
+
+<div class="card">
+<b>한 줄 요약</b> — 프롤로그는 콘티 4컷 · 평면도 3장 · 컷 배경 3장까지 했습니다. p4 프리비즈는 「컷 배경 확정」(Dan 몫) 뒤에 열립니다. 씬1 5단계와 씬2~4 소품은 엔진 빈틈 때문에 멈췄고, 원인과 고칠 방향을 아래에 적었습니다.<br>
+스튜디오에서 보기: <a href="https://tomori-studio.jaa5525321.workers.dev/">tomori-studio</a> → 채지우 → 4단계(시트·장소·소품) · 5단계(콘티·컷 배경)
+</div>
+
+<h2>1. 결정하실 것</h2>
+<ol>
+<li><b>1-1</b> 프롤로그 콘티 4컷 — 밤에 제가 임시로 골라 두었습니다(<span class="tag">our.S0.board_pick · Claude 밤 임시</span>). 맞으면 그대로, 아니면 컷마다 다시 고르시면 됩니다.</li>
+<li><b>1-2</b> 프롤로그 컷 배경 p1·p2·p4 「확정」 — 확정하시면 p4 프리비즈(틸트업)를 바로 만듭니다(무료).</li>
+<li><b>1-3</b> 씬별 「✓ 이 씬 검수 끝」 — 프롤로그·씬1 시트(쇼츠), 남자 시트(손), 하트 카드 전·후를 보시고 눌러 주십시오.</li>
+<li><b>1-4</b> 480p 생성 OK 여부 — 프롤로그 4컷을 컷마다 한 편씩 만들면 최대 4 × 45cr = <b>약 180cr</b>입니다(시댄스 480p 15초 기준 · 실제 길이는 컷별 각본 길이로 다시 셈).</li>
+<li><b>1-5</b> 씬2 그녀 시트 — 각본 대조 검사가 「상의 밑단이 배꼽 위에서 끝나 한 뼘 드러남」으로 불합격입니다. 이대로 둘지, 다시 뽑을지 정해 주십시오.</li>
+</ol>
+
+<h2>2. 프롤로그 — 컷마다</h2>
+<table>
+<tr><th>컷</th><th>콘티</th><th>평면도</th><th>컷 배경</th><th>프리비즈</th></tr>
+<tr><td>p1 팔목 잡힘</td><td class="ok">통과</td><td class="ok">r262 · 벤치에 앉은 그 → 3.5m</td><td class="ok">r264 통과 · 앉은 눈높이 · 덤벨 랙·빈 바닥·파워랙</td><td>필요 없음(고정)</td></tr>
+<tr><td>p2 내 손 덤벨→가리킴</td><td class="ok">통과</td><td class="ok">r263 · 랙 앞 선 그 → 1.0m</td><td class="warn">r265 참고 — 가리키는 벤치가 화면 오른쪽 밖</td><td>필요 없음(고정)</td></tr>
+<tr><td>p3 폰 화면 인서트</td><td class="ok">통과 · 팔목 사진·말풍선·답장·엄지</td><td>필요 없음</td><td>필요 없음(폰 화면)</td><td>필요 없음</td></tr>
+<tr><td>p4 카운터 하트</td><td class="ok">통과 · 하트 그리는 순간</td><td class="ok">r261 · 카운터 왼쪽 끝 · 3.5m</td><td class="ok">r266 통과 · 발~머리 위 다 들어옴</td><td class="warn">필요(틸트업) · 컷 배경 확정 대기</td></tr>
+</table>
+<p class="sub">손으로 처리 표시: 콘티 요청은 Dan PC Claude 몫이라 밤에 제가 러너 콘티 엔진에 넘겼습니다(#254). 컷 배경 3장은 지시서 원문을 붙인 하위 에이전트가 만들었고, 제가 원본 크기로 다시 대조했습니다. 각본 칸 중 cam·크기 칸은 프롤로그 구조상 비어 있어 각본 글(what)에서 가져왔다고 요청 답에 적혀 있습니다.</p>
+
+<h2>3. 앵커 — 고친 것과 결과</h2>
+<ul>
+<li><b>그녀 시트 치마 문제</b> — 원인: 시트용 의상 글을 다듬는 단계가 「바이커 쇼츠(…엉덩이·Y존…)」를 몸 낱말 때문에 통째로 지움 + 자동 넣기가 각본 대조 불합격 판도 칸에 넣음. 고침: 낱말만 빼고 옷은 남김 · 가장 최근 판이 검사 합격일 때만 칸에. 결과: 프롤로그 #721·씬1 #722 = 라이트 그레이 바이커 쇼츠 · 검사 합격.</li>
+<li><b>남자 시트 손</b> — 원인: 셋째 칸 판정 낱말 「밴드」가 옷의 「허리 밴드」에 걸려 「밴드 부위 클로즈업」(허리 쥐는 손)이 됨. 고침: 몸에 붙은 밴드만 · 손 = 앞으로 내밀어 펴 보임 · 옷 상태는 정면 칸과 같게. 결과: 프롤로그 #748 · 씬1 #749 · 씬2~4 #766~#768 새 판(씬1 반바지 밑단에 작은 라벨 자국 하나).</li>
+<li><b>회원 카드 하트 전·후</b> — 원인: 하트 전을 다시 뽑은 뒤 하트 있음이 따라 안 바뀜 + 리서치 사진까지 붙여 카드를 새로 그림 + 편집 문장에 벤치 낱말. 고침: 상태 사진 = 기준 사진만 붙여 편집 · 공통 문장 · 기준이 바뀌면 같은 작업에서 다시. 결과: r250 = 같은 카드에 오른쪽 위 하트만.</li>
+</ul>
+
+<h2>4. 엔진에서 고친 것 (덧붙이지 않고 원리로 교체)</h2>
+<ul>
+<li>5단계 재료는 컷 표와 같은 판정 하나 — 프롤로그 컷마다 그 공간 정본(카운터 컷 = 카운터) · 프롤로그 남자 시트.</li>
+<li>그 컷 각본 글이 기본 문장보다 우선 — 카메라 칸이 없으면 각본 글의 카메라 문장 · 1인칭이면 「3인칭」 문장 안 넣음 · 각본에 적힌 사람만 · 콘티 한 장 = 포인트 순간 하나(칸 나눔 없음).</li>
+<li>콘티에 칸의 소품 사진 붙임(한 번에 뽑기에는 소품 확정 칸이 없어 한 번도 안 붙던 것).</li>
+<li>평면도 — 프롤로그가 자기 정본을 가지면 컷마다 각본 글·공간 정본(예전엔 p5 만 넘김).</li>
+<li>러너 — 우리 run_mac 이 원래와 같은 인자(컷별 폴더·한 장씩 넘김) · 검사 임시 폴더 이름 겹침(같은 초에 컷 4개 검사가 다른 컷 그림을 판정하던 것).</li>
+<li>컷 배경 도구 — 캐릭터 번호(DPC_CID) · 정본 대화 주소를 정본 그림 옆 기록에서 찾음.</li>
+</ul>
+
+<h2>5. 멈춘 것 · 원인 · 고칠 방향</h2>
+<ul>
+<li><b>씬1 5단계</b> <span class="bad">멈춤</span> — 콘티 재료에 진입 컷 하나만 들어오고 그 컷 동작 글도 비어 있음. 씬1 각본 칸 이름과 콘티 재료 매핑을 맞춰야 합니다(프롤로그에서 고친 「각본 글 우선」과 같은 방식).</li>
+<li><b>씬2~4 소품</b> <span class="bad">멈춤</span> — 소품 표가 처음 돌던 프롤로그·씬1 것만 있고, 표가 있으면 다시 안 만듦. 또 「한 면만 보이는」 회원 카드의 뒷면 요청(#243)이 처리하는 곳 없이 대기라 오케스트레이터가 계속 기다림. 고칠 방향: 씬마다 소품 표 · 한 면 물건은 뒷면을 셈에서 뺌.</li>
+<li><b>한 번에 뽑기는 화면이 열려 있어야 이어짐</b> — 밤엔 제가 화면을 20분 열어 돌렸습니다. 러너 쪽으로 옮기는 게 맞는지 정해 주십시오.</li>
+<li><b>같은 평면도 작업이 두 번 돎</b>(#765) — 자동 확정된 요청에 잡이 하나 더 붙어 p2 평면도 칸이 새 판으로 바뀜(내용은 같은 요청).</li>
+<li><b>자동으로 칸에 넣은 판의 「by」가 Dan</b>으로 찍힘 — 화면을 연 계정 이름이 들어가는 구조. 실제로는 자동(oneshot)이니 표시를 「자동」으로 바꿔야 합니다.</li>
+</ul>
+
+<h2>6. 하지 않은 것</h2>
+<ul><li>유료 생성 0건 · Dan 확정·검수 끝 버튼 누르지 않음 · 러너는 진행 중 작업 0일 때만 재시작(2번).</li></ul>
+</main></body></html>
