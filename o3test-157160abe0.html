@@ -1,0 +1,195 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>원큐 템플릿 시험 · 참기름</title>
+<style>
+:root{--bg:#f6f5f1;--card:#fff;--fg:#1d1d1b;--mut:#6b6a65;--line:#e4e2db;--acc:#c98a12;--good:#2e7d4f;--meh:#b9862f;--bad:#9a4b4b}
+@media (prefers-color-scheme:dark){:root{--bg:#161614;--card:#21211e;--fg:#ecebe6;--mut:#a3a29b;--line:#34332f}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 -apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+main{max-width:980px;margin:0 auto;padding:16px}h1{font-size:22px;margin:6px 0}h2{font-size:17px;margin:26px 0 10px}h3{font-size:16px;margin:0}
+.mut{color:var(--mut);font-size:13px}.lab{font-size:12px;font-weight:700;color:var(--mut);margin:0 0 4px}
+.banner{background:#fff4d6;color:#5a4300;border-radius:10px;padding:10px 12px;font-size:13px}@media (prefers-color-scheme:dark){.banner{background:#3a3115;color:#f3dc9a}}
+.box,.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
+.item{display:grid;grid-template-columns:160px 1fr;gap:14px;align-items:start}.item img{width:100%;border-radius:10px;border:1px solid var(--line)}
+.item a.go{display:inline-block;margin-top:8px;background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:99px;text-decoration:none;font-weight:700}
+.item ul{margin:6px 0 0;padding-left:18px;font-size:14px}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.steps div{background:var(--bg);border-radius:10px;padding:10px;font-size:13px}.steps b{display:block;font-size:14px}
+.card header{display:flex;gap:10px;align-items:flex-start}.no{flex:none;width:28px;height:28px;border-radius:50%;background:var(--fg);color:var(--bg);display:grid;place-items:center;font-weight:700;font-size:13px}
+.card header div{flex:1}.bt{flex:none;font-size:12px;border:1px solid var(--line);border-radius:99px;padding:2px 9px}
+.ex{background:var(--bg);border-radius:8px;padding:8px 10px;font-size:14px;margin:10px 0}
+.pair{display:grid;grid-template-columns:1fr 1.4fr;gap:12px}
+.slot{aspect-ratio:9/16;max-height:420px;border:2px dashed var(--line);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--mut)}.slot span{font-weight:700}.slot small{font-size:11px;text-align:center;padding:0 8px}
+.refs{display:grid;grid-template-columns:1fr 1fr;gap:8px}figure{margin:0}video{width:100%;max-height:420px;border-radius:10px;background:#000;aspect-ratio:9/16;object-fit:contain}figcaption{font-size:12px;color:var(--mut)}
+.pl{margin-top:6px;font-size:13px}
+.auto{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:12px 0 4px}.auto .lab{margin:0 4px 0 0}.ck{font-size:12px;background:var(--bg);border-radius:99px;padding:2px 9px;color:var(--mut)}
+.vote{border-top:1px solid var(--line);margin-top:10px;padding-top:10px}.btns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.btns button{font:inherit;font-weight:700;padding:12px 0;border-radius:10px;border:2px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer}
+.btns button.on[data-v=good]{background:var(--good);border-color:var(--good);color:#fff}.btns button.on[data-v=meh]{background:var(--meh);border-color:var(--meh);color:#fff}.btns button.on[data-v=bad]{background:var(--bad);border-color:var(--bad);color:#fff}
+.why{width:100%;margin-top:8px;padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:inherit}
+.others{margin-top:10px}
+.who{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.who input{padding:8px 10px;border-radius:8px;border:1px solid var(--line);font:inherit;background:var(--bg);color:var(--fg)}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left}th{font-size:12px;color:var(--mut)}td a{color:inherit}
+.tw{overflow-x:auto}
+@media (max-width:640px){.item{grid-template-columns:1fr}.item img{max-width:220px}.steps{grid-template-columns:1fr 1fr}.pair{grid-template-columns:1fr}.slot{max-height:300px;aspect-ratio:auto;height:220px}}
+</style></head><body><main>
+<p class="banner">⚠ <b>틀 미리보기</b>입니다. 결과 영상은 아직 없고, 판정 버튼은 눌러 보기만 됩니다(저장 안 됨). 생성 승인 뒤 실제 영상·판정 저장을 붙입니다.</p>
+<h1>원큐 템플릿 시험 · 참기름 한 제품 × 템플릿 10개</h1>
+<p class="mut">같은 제품을 서로 다른 방식 10가지로 만들어, 어떤 템플릿이 실제로 쓸 만한지 Dan·친구들이 판정합니다.</p>
+
+<h2>시험 제품</h2>
+<section class="box item"><img src="media/tpltest/sesame_main.jpg" alt="시험 제품 사진">
+<div><p class="lab">가공식품·비주류 음료 › 소스·양념</p><h3>영자씨의부엌 (홀센피그 공식몰)<br>저온압착 국산 스퀴즈 참기름 200ml</h3><p class="mut">29,500원 · 2026-11-16 판매 페이지 열어 확인</p>
+<ul><li>원큐 고객이 가장 많은 상품군 1위(287 리서치 · 온라인 거래액 31조)</li><li>중소기업 자체 상표 제품으로 확인된 사례(287)</li><li>눌러 짜는 노란 뾰족 노즐 · 금빛 기름 · 라벨의 영자씨 그림 — 템플릿마다 쓸 거리가 다름</li></ul><a class="go" href="https://horsenpig.com/product/detail.html?product_no=183" target="_blank" rel="noopener">판매 페이지 열기 ↗</a></div></section>
+
+<h2>판정하는 법</h2>
+<section class="box"><div class="steps">
+<div><b>① 이름</b>처음 한 번만 적습니다</div><div><b>② 영상 보기</b>왼쪽 우리 결과, 오른쪽 참고 광고</div>
+<div><b>③ 누르기</b>쓸 만함 · 애매 · 별로 + 이유 한 줄(선택)</div><div><b>④ 다른 판정</b>내가 누른 뒤에 다른 사람 판정이 보입니다</div></div>
+<p class="mut" style="margin-top:10px"><b>쓸 만함</b> = 넘기다 멈출 만하고, 참기름이 기억나고, 광고로 내보낼 만하다. 자동 검사(1초 효과·제품 모양·끝 장면·손몸 깨짐)에 걸린 판은 여기 올리지 않습니다.</p>
+<div class="who" style="margin-top:8px"><span class="lab" style="margin:0">내 이름</span><input placeholder="예: Dan" maxlength="12"></div></section>
+
+<h2>잘 된 예 (비교 기준)</h2>
+<section class="box"><p class="mut">이미 「Dan 좋음」으로 확인된 T01 분출·회오리. 판정할 때 이 정도면 「쓸 만함」의 기준으로 봅니다.</p>
+<div class="refs" style="max-width:420px"><figure><video src="media/o3tpl/VR274-037.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>환타 회오리</figcaption></figure></div></section>
+
+<h2>판정 모음</h2>
+<section class="box tw"><table><thead><tr><th>템플릿</th><th>회차</th><th>쓸 만함</th><th>애매</th><th>별로</th><th>결과</th></tr></thead><tbody><tr><td><a href="#X2">X2 빛이 모임</a></td><td>1차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td><a href="#T16">T16 접점에서 비현실 패턴 번짐</a></td><td>1차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td><a href="#T18">T18 동일 위치 불가능 매치 컷</a></td><td>1차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td><a href="#T13">T13 평면에서 튀어나오기</a></td><td>1차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td><a href="#T02">T02 크기 뒤집기</a></td><td>1차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td><a href="#T09">T09 공간 전환</a></td><td>2차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td><a href="#T05">T05 제품이 살아 움직이기</a></td><td>2차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td><a href="#T11">T11 장르 패러디·말장난</a></td><td>2차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td><a href="#T10">T10 반복·증식</a></td><td>2차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td><a href="#T03">T03 재질·상태 치환</a></td><td>2차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr></tbody></table>
+<p class="mut">결과 규칙(안): 절반 넘게 「쓸 만함」 → <b>됨</b> · 갈리면 Dan 결정 · 서로 다른 제품에서 2번 「별로」 → <b>보류</b>. 「됨」은 엔진 템플릿 표에 올라갑니다.</p></section>
+
+<h2>템플릿 10개 <span class="mut">· 1차 5판 먼저, 판정 보고 2차 5판</span></h2>
+<article class="card" id="X2">
+<header><span class="no">1</span><div><h3>X2 빛이 모임</h3><p class="mut">고정된 제품에 좁은 빛 한 줄기가 지나가며 가장자리만 밝히고, 주변 빛·시선이 제품 하나로 모임</p></div><span class="bt">1차</span></header>
+<p class="ex"><b>참기름이라면</b> 병 모서리에 빛 한 줄이 지나가며 금빛이 병 하나로 모임 <span class="mut">(예시 · 실제 장면은 엔진이 제품 사진을 보고 씀)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <details class="pl"><summary>엔진이 쓴 기획 보기</summary><p class="mut">기획 뒤 여기에 장면·영상 지시문이 들어갑니다.</p></details></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/ON292-OPTICFIELD.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Celsius Can Lights Up Stadium Fiel</figcaption></figure><figure><video src="media/o3tpl/REF288-CRAYLIGHT.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Crayola Digital Light Designer · 빛</figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="X2"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><article class="card" id="T16">
+<header><span class="no">2</span><div><h3>T16 접점에서 비현실 패턴 번짐</h3><p class="mut">한 방울에서 예상 밖의 패턴이 번지며 표면 전체를 차지한다. 제품 실물은 고정한다.</p></div><span class="bt">1차</span></header>
+<p class="ex"><b>참기름이라면</b> 기름 한 방울이 닿은 자리에서 무늬가 번짐 <span class="mut">(예시 · 실제 장면은 엔진이 제품 사진을 보고 씀)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <details class="pl"><summary>엔진이 쓴 기획 보기</summary><p class="mut">기획 뒤 여기에 장면·영상 지시문이 들어갑니다.</p></details></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/meta_992188786634143.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>극소수 · Meta 광고 992188786634143</figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="T16"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><article class="card" id="T18">
+<header><span class="no">3</span><div><h3>T18 동일 위치 불가능 매치 컷</h3><p class="mut">기준 윤곽의 위치를 고정한 채 물리적으로 연결될 수 없는 두 공간이나 물체를 한 번 자른다.</p></div><span class="bt">1차</span></header>
+<p class="ex"><b>참기름이라면</b> 기름 방울 원이 같은 자리에서 다른 장면의 원으로 바뀜 <span class="mut">(예시 · 실제 장면은 엔진이 제품 사진을 보고 씀)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <details class="pl"><summary>엔진이 쓴 기획 보기</summary><p class="mut">기획 뒤 여기에 장면·영상 지시문이 들어갑니다.</p></details></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/REF288-KAUFAPPLE.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Kaufland · 사과에서 오렌지로</figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="T18"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><article class="card" id="T13">
+<header><span class="no">4</span><div><h3>T13 평면에서 튀어나오기</h3><p class="mut">표면의 표시나 인쇄 외곽이 입체로 나와도 원래 표면은 유지된다.</p></div><span class="bt">1차</span></header>
+<p class="ex"><b>참기름이라면</b> 라벨 속 영자씨 그림이 입체로 튀어나옴(라벨 자체는 그대로) <span class="mut">(예시 · 실제 장면은 엔진이 제품 사진을 보고 씀)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <details class="pl"><summary>엔진이 쓴 기획 보기</summary><p class="mut">기획 뒤 여기에 장면·영상 지시문이 들어갑니다.</p></details></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/REF286-ELITE.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Elite 컵누들 · 두 광고판을 가로지르는 포크</figcaption></figure><figure><video src="media/o3tpl/ON291-PRINGLES.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Pringles Ingredients Burst Out fro</figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="T13"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><article class="card" id="T02">
+<header><span class="no">5</span><div><h3>T02 크기 뒤집기</h3><p class="mut">평소 크기 기준물을 남긴 채 상품이나 인물 한쪽의 비율을 바꾼다.</p></div><span class="bt">1차</span></header>
+<p class="ex"><b>참기름이라면</b> 사람보다 큰 기름 방울, 또는 작아진 사람 옆 병 <span class="mut">(예시 · 실제 장면은 엔진이 제품 사진을 보고 씀)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <details class="pl"><summary>엔진이 쓴 기획 보기</summary><p class="mut">기획 뒤 여기에 장면·영상 지시문이 들어갑니다.</p></details></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/ON-food-02.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>&#x27;Origin&#x27; | GIGIL for Danes Cheese</figcaption></figure><figure><video src="media/o3tpl/OWN-PADO.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>파도캔 · 빨대 위 서핑</figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="T02"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><article class="card" id="T09">
+<header><span class="no">6</span><div><h3>T09 공간 전환</h3><p class="mut">제품을 같은 위치에 남기고 한 경계를 넘는 순간 배경 세계가 바뀐다.</p></div><span class="bt">2차</span></header>
+<p class="ex"><b>참기름이라면</b> 병을 지나는 순간 배경이 참깨밭으로 바뀜 <span class="mut">(예시 · 실제 장면은 엔진이 제품 사진을 보고 씀)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <details class="pl"><summary>엔진이 쓴 기획 보기</summary><p class="mut">기획 뒤 여기에 장면·영상 지시문이 들어갑니다.</p></details></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/BF-FUEGO.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Stare into the Fueg-hole — Skittle</figcaption></figure><figure><video src="media/o3tpl/ON292-DORITOSDOOR.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Doritos Chip Portal Reveals Packs </figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="T09"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><article class="card" id="T05">
+<header><span class="no">7</span><div><h3>T05 제품이 살아 움직이기</h3><p class="mut">상품의 외곽을 보존한 채 사물 스스로 역할 한 가지를 수행한다.</p></div><span class="bt">2차</span></header>
+<p class="ex"><b>참기름이라면</b> 스퀴즈 병이 스스로 몸을 눌러 요리에 기름을 뿌림 <span class="mut">(예시 · 실제 장면은 엔진이 제품 사진을 보고 씀)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <details class="pl"><summary>엔진이 쓴 기획 보기</summary><p class="mut">기획 뒤 여기에 장면·영상 지시문이 들어갑니다.</p></details></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/ON-food-02.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>&#x27;Origin&#x27; | GIGIL for Danes Cheese</figcaption></figure><figure><video src="media/o3tpl/REF288-LEGOASTRO.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>LEGO Astronaut Grabbed by Hand in </figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="T05"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><article class="card" id="T11">
+<header><span class="no">8</span><div><h3>T11 장르 패러디·말장난</h3><p class="mut">익숙한 장르 표지나 한 단어의 다른 뜻이 하나의 불가능한 사건으로 나타난다.</p></div><span class="bt">2차</span></header>
+<p class="ex"><b>참기름이라면</b> 익숙한 장르 장면 패러디(참고 광고 4편으로 가장 많음) <span class="mut">(예시 · 실제 장면은 엔진이 제품 사진을 보고 씀)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <details class="pl"><summary>엔진이 쓴 기획 보기</summary><p class="mut">기획 뒤 여기에 장면·영상 지시문이 들어갑니다.</p></details></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/ON291-NONGSHIM.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Nongshim Fish Roller Coaster</figcaption></figure><figure><video src="media/o3tpl/meta_1555536043258861.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>극소수 · Meta 광고 1555536043258861</figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="T11"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><article class="card" id="T10">
+<header><span class="no">9</span><div><h3>T10 반복·증식</h3><p class="mut">고정 축의 같은 단위를 늘리거나 모아 새로운 하나의 형상을 만든다.</p></div><span class="bt">2차</span></header>
+<p class="ex"><b>참기름이라면</b> 기름 방울이 반복돼 하나의 모양을 만듦 <span class="mut">(예시 · 실제 장면은 엔진이 제품 사진을 보고 씀)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <details class="pl"><summary>엔진이 쓴 기획 보기</summary><p class="mut">기획 뒤 여기에 장면·영상 지시문이 들어갑니다.</p></details></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/ON-food-01.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>&quot;Spoons&quot; | Graza</figcaption></figure><figure><video src="media/o3tpl/BF-MILK.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Sephora Makeup Tint Filling Store </figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="T10"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><article class="card" id="T03">
+<header><span class="no">10</span><div><h3>T03 재질·상태 치환</h3><p class="mut">같은 축과 윤곽을 유지하며 재질이나 상태를 한 번 교대한다.</p></div><span class="bt">2차</span></header>
+<p class="ex"><b>참기름이라면</b> 기름 줄기가 금빛 비단으로 바뀌었다 돌아옴 <span class="mut">(예시 · 실제 장면은 엔진이 제품 사진을 보고 씀)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <details class="pl"><summary>엔진이 쓴 기획 보기</summary><p class="mut">기획 뒤 여기에 장면·영상 지시문이 들어갑니다.</p></details></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/BF-AGORA.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Agora Mall × Munné · Chocolate Bar</figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="T03"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article>
+
+<h2>후보로 미뤄 둔 것</h2>
+<section class="box"><ul><li><b>T06 성질이 공간의 규칙</b> — 시댄스 어려움(추정)</li><li><b>T08 불가능한 연쇄</b> — 시댄스 어려움(추정)</li><li><b>T19 한 방울이 골조로 접혀 자람</b> — 시댄스 어려움(추정) · 참고 광고 없음</li><li><b>T20 제품이 꺼낸 접힌 무대</b> — 시댄스 어려움(추정)</li><li><b>T04 안으로 들어갔다 나오기</b> — 시댄스 어려움(추정)</li><li><b>T14 내부 구조의 단계적 전개</b> — 시댄스 어려움(추정)</li><li><b>X4 제품 뒤 소재 (고급형)</b> — 효과 방식이 X2·T10 과 겹침</li><li><b>T07 착시·시점 공개</b> — 참기름에서 점수 낮음</li><li><b>T21 제품 그림자가 독립해 움직임</b> — 참기름에서 점수 낮음</li></ul><p class="mut">T01 회오리는 이미 확인돼 새로 시험하지 않습니다. 「어려움」은 Codex 추정이라 버리지 않고 순서만 뒤로 둡니다.</p></section>
+</main>
+<script>
+document.querySelectorAll('.vote').forEach(v=>{const bs=[...v.querySelectorAll('button')];bs.forEach(b=>b.onclick=()=>{bs.forEach(x=>x.classList.toggle('on',x===b));v.querySelector('.others').hidden=false})});
+</script></body></html>
