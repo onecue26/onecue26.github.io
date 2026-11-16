@@ -1,16 +1,16 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex,nofollow"><title>원큐 템플릿 시험 · 참기름</title>
-<style>
-:root{--bg:#f6f5f1;--card:#fff;--fg:#1d1d1b;--mut:#6b6a65;--line:#e4e2db;--acc:#c98a12;--good:#2e7d4f;--meh:#b9862f;--bad:#9a4b4b}
+<meta name="robots" content="noindex,nofollow"><title>원큐 템플릿 시험</title><style>
+:root{--bg:#f6f5f1;--card:#fff;--fg:#1d1d1b;--mut:#6b6a65;--line:#e4e2db;--good:#2e7d4f;--meh:#b9862f;--bad:#9a4b4b}
 @media (prefers-color-scheme:dark){:root{--bg:#161614;--card:#21211e;--fg:#ecebe6;--mut:#a3a29b;--line:#34332f}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 -apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
 main{max-width:980px;margin:0 auto;padding:16px}h1{font-size:22px;margin:6px 0}h2{font-size:17px;margin:26px 0 10px}h3{font-size:16px;margin:0}
-.mut{color:var(--mut);font-size:13px}.lab{font-size:12px;font-weight:700;color:var(--mut);margin:0 0 4px}
+.mut,.sub{color:var(--mut);font-size:13px}.lab{font-size:12px;font-weight:700;color:var(--mut);margin:0 0 4px}
 .banner{background:#fff4d6;color:#5a4300;border-radius:10px;padding:10px 12px;font-size:13px}@media (prefers-color-scheme:dark){.banner{background:#3a3115;color:#f3dc9a}}
 .box,.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
-.item{display:grid;grid-template-columns:160px 1fr;gap:14px;align-items:start}.item img{width:100%;border-radius:10px;border:1px solid var(--line)}
+.item{display:grid;grid-template-columns:160px 1fr;gap:14px;align-items:start}.item img{width:100%;border-radius:10px;border:1px solid var(--line)}.noimg{aspect-ratio:1;border:2px dashed var(--line);border-radius:10px;display:grid;place-items:center;color:var(--mut);font-size:13px}
 .item a.go{display:inline-block;margin-top:8px;background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:99px;text-decoration:none;font-weight:700}
 .item ul{margin:6px 0 0;padding-left:18px;font-size:14px}
+.ptabs{display:flex;gap:8px;flex-wrap:wrap;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:2}.ptab{border:0;background:var(--line);color:var(--fg);border-radius:99px;padding:8px 14px;font:inherit;font-weight:700;cursor:pointer}.ptab.on{background:var(--fg);color:var(--bg)}.ptab.on .sub{color:var(--bg)}
 .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.steps div{background:var(--bg);border-radius:10px;padding:10px;font-size:13px}.steps b{display:block;font-size:14px}
 .card header{display:flex;gap:10px;align-items:flex-start}.no{flex:none;width:28px;height:28px;border-radius:50%;background:var(--fg);color:var(--bg);display:grid;place-items:center;font-weight:700;font-size:13px}
 .card header div{flex:1}.bt{flex:none;font-size:12px;border:1px solid var(--line);border-radius:99px;padding:2px 9px}
@@ -26,379 +26,768 @@ main{max-width:980px;margin:0 auto;padding:16px}h1{font-size:22px;margin:6px 0}h
 .why{width:100%;margin-top:8px;padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:inherit}
 .others{margin-top:10px}
 .who{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.who input{padding:8px 10px;border-radius:8px;border:1px solid var(--line);font:inherit;background:var(--bg);color:var(--fg)}
-table{border-collapse:collapse;width:100%;font-size:14px}th,td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left}th{font-size:12px;color:var(--mut)}td a{color:inherit}
-.tw{overflow-x:auto}
-@media (max-width:640px){.item{grid-template-columns:1fr}.item img{max-width:220px}.steps{grid-template-columns:1fr 1fr}.pair{grid-template-columns:1fr}.slot{max-height:300px;aspect-ratio:auto;height:220px}}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left}th{font-size:12px;color:var(--mut)}
+.tw{overflow-x:auto}[hidden]{display:none!important}
+@media (max-width:640px){.item{grid-template-columns:1fr}.item img,.noimg{max-width:220px}.steps{grid-template-columns:1fr 1fr}.pair{grid-template-columns:1fr}.slot{max-height:300px;aspect-ratio:auto;height:220px}}
 </style></head><body><main>
 <p class="banner">⚠ <b>틀 미리보기</b>입니다. 결과 영상은 아직 없고, 판정 버튼은 눌러 보기만 됩니다(저장 안 됨). 생성 승인 뒤 실제 영상·판정 저장을 붙입니다.</p>
-<h1>원큐 템플릿 시험 · 참기름 한 제품 × 어울리는 템플릿 9개</h1>
-<p class="mut">템플릿 20개 중 이 제품에 「어울린다」고 판정된 것만 서로 다른 방식으로 만들어, 어떤 템플릿이 실제로 쓸 만한지 Dan·친구들이 판정합니다.</p>
-
-<h2>시험 제품</h2>
-<section class="box item"><img src="media/tpltest/sesame_main.jpg" alt="시험 제품 사진">
-<div><p class="lab">가공식품·비주류 음료 › 소스·양념</p><h3>영자씨의부엌 (홀센피그 공식몰)<br>저온압착 국산 스퀴즈 참기름 200ml</h3><p class="mut">29,500원 · 2026-11-16 판매 페이지 열어 확인</p>
-<ul><li>원큐 고객이 가장 많은 상품군 1위(287 리서치 · 온라인 거래액 31조)</li><li>중소기업 자체 상표 제품으로 확인된 사례(287)</li><li>눌러 짜는 노란 뾰족 노즐 · 금빛 기름 · 라벨의 영자씨 그림 — 템플릿마다 쓸 거리가 다름</li></ul><a class="go" href="https://horsenpig.com/product/detail.html?product_no=183" target="_blank" rel="noopener">판매 페이지 열기 ↗</a></div></section>
-
-<h2>이 제품의 판매 포인트 <span class="mut">· 상세페이지 18장을 본 판정 에이전트 정리</span></h2>
-<section class="box"><ul><li>국산 통참깨 100% · 통통하고 고품질로만 선별 <span class="mut">(d03 「국내산 100% 참깨」 아이콘 「100% 국내산 통참깨 사용」 / d11 QUALITY 「통통하고 고품질로만 선별된 국내산 통참깨 100%」+참깨 더미 사진 / 라벨 「국산 통참깨 100%」 / 원재료명 참깨(국내산) 100% (d16))</span></li><li>저온압착(Cold Pressed) — 영양소와 풍미를 그대로 <span class="mut">(d03 「전통방식 저온압착」 / d06 「저온압착으로 만들어진 깨끗하고 안전한 국산 참기름! 고소한 풍미는 폭발!」 / d16 Tasting Note 압착 방식 Cold 쪽 끝, 「저온압착(Cold Press)으로 영양소와 풍미를 그대로」)</span></li><li>&#x27;한 방울의 황금&#x27; — 한 방울만 넣어도 맛있는 기름 (압착기에서 황금빛 기름이 흘러내림) <span class="mut">(d09·d10 COLD PRESSED 「우리는 이것을 &#x27;한 방울의 황금&#x27;이라고 부릅니다」 「한 방울만 넣어도 맛있는」 + 스테인리스 압착 원통에서 노란 기름이 줄줄이 흘러내리는 영상)</span></li><li>단 한 번만 착유 — 신선한 깻묵 <span class="mut">(d11 FRESH 「신선함에는 다 이유가 있습니다. 단 한 번의 착유」 + 원판 모양 깻묵 사진 「단 한 번만 착유하여 최상급 품질」)</span></li><li>특별 로스팅 레시피 — 깊은 맛, 진한 향 (풍미 강도 Heavy, 로스팅은 저온~중온 사이) <span class="mut">(d14 Roast 「특별 로스팅 레시피 깊은맛, 진한 향의 비법」 + 로스팅 솥 영상 / d16 풍미 강도 Heavy(진함) 쪽, 로스팅 방식 Low~Mid 사이 / d06 후기 「코끝을 확 잡아끄는 진한 향」 「고소함」)</span></li><li>스퀴즈 보틀 — 어디서든 간편하게, 원하는 만큼 직접 짜서 / 흘림 없이 깔끔 / 마지막 한 방울까지 <span class="mut">(d04 아이콘 「쉽게 짜서 먹는 타입」 / d07·d08 캠핑장에서 병을 거꾸로 짜 유리 그릇에 받는 사진 「어디서든 간편하게, 원하는 만큼. 직접 짜서 먹어요」 / d05 노즐 근접·그릇에 짜는 영상 / 페이지 요약문 「마지막 한 방울까지 깔끔하게」 / d06 후기 「뚜껑을 살짝 돌려 짜면 &#x27;착&#x27; 흘림 없이」 「마지막 한 방울까지 알뜰하게」 「배송 중 깨질 걱정 없고」)</span></li><li>빛 차단 스퀴즈보틀로 신선함 유지 <span class="mut">(d06 추천 대상 목록 「빛 차단 스퀴즈보틀로 신선함을 오래 유지하고 싶은 분」 (근거는 이 한 줄뿐, 차광 정도 수치는 확인 못 함))</span></li><li>위생·안전 — 3회 이상 기계 세척, HACCP, CESCO 24시간 위생관리, 벤조피렌 불검출, 잔류농약 102항목 불검출, 용기·캡 유해물질 정밀검사 적합 <span class="mut">(d12·d13 CLEAN 「3회 이상 깔끔하고 위생적으로 기계 세척」+참깨가 회오리치며 세척되는 영상 / d03·d04 아이콘 「기계 세척으로 위생적」 「유해물질 NO!」 「HACCP 인증 식품」 / d15 HACCP·CESCO 로고, 한서대 벤조피렌 불검출·한울생명과학 102항목 불검출 성적서 / d16 스퀴즈보틀·캡 식품용기 정밀검사 적합)</span></li><li>브랜드 인물 — 구독자 95만 푸드크리에이터 &#x27;영자씨&#x27;가 직접 생산, &#x27;엄마의 마음(MOM&#x27;S RECIPE)&#x27; <span class="mut">(d06 영자씨 본인 사진(초록 앞치마, 병을 들고 미소) 「구독자 95만, 대한민국 대표 푸드크리에이터 영자씨의부엌에서 직접 생산합니다」 / 「MOM&#x27;S RECIPE 엄마의 마음으로」 / d11 상단 「따뜻한 엄마의 마음으로 만드는 건강한 기름」 / 라벨 KOREAN MOM 배지·영자씨 일러스트)</span></li><li>선물용으로도 추천 <span class="mut">(d06 추천 대상 「소중한 사람에게 센스있는 선물을 하고 싶은 분」 (선물 포장 모습은 이 페이지에서 확인 못 함 — 별도 선물세트 상품 존재만 페이지 텍스트에서 확인))</span></li><li>먹는 장면 — 간장+참기름 흰쌀밥 비빔 등 <span class="mut">(d06 후기 「진간장에 참기름 살짝 넣어 흰쌀밥 비벼 먹었습니다」 (판매자가 직접 보여 준 요리 사진은 없음 — 후기 문구만))</span></li></ul></section>
+<h1>원큐 템플릿 시험 · 제품 3개</h1>
+<p class="mut">제품마다 템플릿 20개 중 「어울린다」고 판정된 것만 엔진이 혼자 기획해 만들고, 어떤 템플릿이 실제로 쓸 만한지 Dan·친구들이 판정합니다.</p>
 
 <h2>템플릿을 고른 기준</h2>
-<section class="box"><p><b>어울리는가</b> 하나로 골랐습니다(만들 수 있는지는 해 봐야 알아서 기준에서 뺌). 제 지시문을 보지 않은 하위 에이전트가 판매 페이지와 템플릿 설명만 보고 20개를 판정했습니다.</p>
-<ul><li><b>재료</b> — 그 효과의 재료가 이 제품에 실제로 있나</li><li><b>장점 전달</b> — 판매 포인트 하나를 보여 주나(어느 것인지 지목)</li><li><b>거부감</b> — 먹기 싫어지거나 브랜드 분위기와 어긋나지 않나</li></ul>
-<p class="mut">결과: 상 9 · 중 10 · 하 1 → 상만 시험합니다.</p></section>
+<section class="box"><p><b>어울리는가</b> 하나로 골랐습니다(만들 수 있는지는 해 봐야 알아서 기준에서 뺌). 제 지시문을 보지 않은 하위 에이전트가 판매 페이지 상세 그림과 템플릿 설명만 보고 20개를 판정합니다.</p>
+<ul><li><b>재료</b> — 그 효과의 재료가 이 제품에 실제로 있나</li><li><b>장점 전달</b> — 판매 포인트 하나를 보여 주나(어느 것인지 지목)</li><li><b>거부감</b> — 제품이 싫어지거나 브랜드 분위기와 어긋나지 않나</li></ul></section>
 
 <h2>판정하는 법</h2>
 <section class="box"><div class="steps">
 <div><b>① 이름</b>처음 한 번만 적습니다</div><div><b>② 영상 보기</b>왼쪽 우리 결과, 오른쪽 참고 광고</div>
 <div><b>③ 누르기</b>쓸 만함 · 애매 · 별로 + 이유 한 줄(선택)</div><div><b>④ 다른 판정</b>내가 누른 뒤에 다른 사람 판정이 보입니다</div></div>
-<p class="mut" style="margin-top:10px"><b>쓸 만함</b> = 넘기다 멈출 만하고, 참기름이 기억나고, 광고로 내보낼 만하다. 자동 검사(1초 효과·제품 모양·끝 장면·손몸 깨짐)에 걸린 판은 여기 올리지 않습니다.</p>
+<p class="mut" style="margin-top:10px"><b>쓸 만함</b> = 넘기다 멈출 만하고, 제품이 기억나고, 광고로 내보낼 만하다. 자동 검사(1초 효과·제품 모양·끝 장면·손몸 깨짐)에 걸린 판은 여기 올리지 않습니다.</p>
 <div class="who" style="margin-top:8px"><span class="lab" style="margin:0">내 이름</span><input placeholder="예: Dan" maxlength="12"></div></section>
 
 <h2>잘 된 예 (비교 기준)</h2>
-<section class="box"><p class="mut">다른 제품(환타)으로 「Dan 좋음」이 나온 T01 분출·회오리 결과. 판정할 때 이 정도면 「쓸 만함」의 기준으로 봅니다.</p>
+<section class="box"><p class="mut">다른 제품(환타)으로 「Dan 좋음」이 나온 T01 분출·회오리 결과. 이 정도면 「쓸 만함」의 기준으로 봅니다.</p>
 <div class="refs" style="max-width:420px"><figure><video src="media/o3tpl/VR274-037.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>환타 회오리</figcaption></figure></div></section>
 
 <h2>판정 모음</h2>
-<section class="box tw"><table><thead><tr><th>템플릿</th><th>회차</th><th>쓸 만함</th><th>애매</th><th>별로</th><th>결과</th></tr></thead><tbody><tr><td><a href="#T01">T01 분출·회오리</a></td><td>1차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td><a href="#T03">T03 재질·상태 치환</a></td><td>1차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td><a href="#T04">T04 안으로 들어갔다 나오기</a></td><td>1차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td><a href="#T05">T05 제품이 살아 움직이기</a></td><td>1차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td><a href="#T09">T09 공간 전환</a></td><td>1차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td><a href="#T10">T10 반복·증식</a></td><td>2차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td><a href="#T11">T11 장르 패러디·말장난</a></td><td>2차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td><a href="#T13">T13 평면에서 튀어나오기</a></td><td>2차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td><a href="#T18">T18 동일 위치 불가능 매치 컷</a></td><td>2차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr></tbody></table>
+<section class="box tw"><table><thead><tr><th>제품</th><th>템플릿</th><th>회차</th><th>쓸 만함</th><th>애매</th><th>별로</th><th>결과</th></tr></thead><tbody><tr><td>저온압착 국산 스퀴즈 참기</td><td>T01 분출·회오리</td><td>1차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>저온압착 국산 스퀴즈 참기</td><td>T03 재질·상태 치환</td><td>1차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>저온압착 국산 스퀴즈 참기</td><td>T04 안으로 들어갔다 나오기</td><td>1차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>저온압착 국산 스퀴즈 참기</td><td>T05 제품이 살아 움직이기</td><td>1차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>저온압착 국산 스퀴즈 참기</td><td>T09 공간 전환</td><td>1차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>저온압착 국산 스퀴즈 참기</td><td>T10 반복·증식</td><td>2차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>저온압착 국산 스퀴즈 참기</td><td>T11 장르 패러디·말장난</td><td>2차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>저온압착 국산 스퀴즈 참기</td><td>T13 평면에서 튀어나오기</td><td>2차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>저온압착 국산 스퀴즈 참기</td><td>T18 동일 위치 불가능 매치 컷</td><td>2차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>라면 노즈워크 토이</td><td>T01 분출·회오리</td><td>1차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>라면 노즈워크 토이</td><td>T03 재질·상태 치환</td><td>1차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>라면 노즈워크 토이</td><td>T04 안으로 들어갔다 나오기</td><td>1차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>라면 노즈워크 토이</td><td>T08 불가능한 연쇄</td><td>1차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>라면 노즈워크 토이</td><td>T11 장르 패러디·말장난</td><td>2차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>라면 노즈워크 토이</td><td>T12 인물 상태·시간 변환</td><td>2차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>라면 노즈워크 토이</td><td>T14 내부 구조의 단계적 전개</td><td>2차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>라면 노즈워크 토이</td><td>T20 제품이 꺼낸 접힌 무대</td><td>2차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>[Note] Memorie</td><td>T01 분출·회오리</td><td>1차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>[Note] Memorie</td><td>T04 안으로 들어갔다 나오기</td><td>1차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>[Note] Memorie</td><td>T05 제품이 살아 움직이기</td><td>1차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>[Note] Memorie</td><td>T09 공간 전환</td><td>1차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>[Note] Memorie</td><td>T10 반복·증식</td><td>1차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>[Note] Memorie</td><td>T11 장르 패러디·말장난</td><td>2차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>[Note] Memorie</td><td>T12 인물 상태·시간 변환</td><td>2차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>[Note] Memorie</td><td>T13 평면에서 튀어나오기</td><td>2차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>[Note] Memorie</td><td>T14 내부 구조의 단계적 전개</td><td>2차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr><tr><td>[Note] Memorie</td><td>T20 제품이 꺼낸 접힌 무대</td><td>2차</td><td>0</td><td>0</td><td>0</td><td class="mut">판정 전</td></tr></tbody></table>
 <p class="mut">결과 규칙(안): 절반 넘게 「쓸 만함」 → <b>됨</b> · 갈리면 Dan 결정 · 서로 다른 제품에서 2번 「별로」 → <b>보류</b>. 「됨」은 엔진 템플릿 표에 올라갑니다.</p></section>
 
-<h2>시험할 템플릿 9개 <span class="mut">· 1차 5판 먼저, 판정 보고 나머지</span></h2>
-<article class="card" id="T01">
+<h2>시험 제품</h2>
+<div class="ptabs"><button class="ptab on" data-k="sesame">저온압착 국산 스퀴즈 참기름  <span class="sub">9판</span></button><button class="ptab" data-k="howlpot">라면 노즈워크 토이 <span class="sub">8판</span></button><button class="ptab" data-k="lolly">[Note] Memories  <span class="sub">10판</span></button></div>
+<div class="prod" data-k="sesame"><section class="box item"><img src="media/tpltest/sesame_main.jpg" alt="시험 제품 사진">
+<div><p class="lab">가공식품·비주류 음료 › 소스·양념 · Head 선택(287 리서치 사례)</p><h3>영자씨의부엌 (홀센피그 공식몰)<br>저온압착 국산 스퀴즈 참기름 200ml</h3><p class="mut">29,500원</p><ul><li>원큐 고객이 가장 많은 상품군 1위(287 리서치 · 온라인 거래액 31조)</li><li>중소기업 자체 상표 제품으로 확인된 사례(287)</li></ul>
+<a class="go" href="https://horsenpig.com/product/detail.html?product_no=183" target="_blank" rel="noopener">판매 페이지 열기 ↗</a></div></section><h2>판매 포인트 <span class="mut">· 판정 에이전트가 상세 그림 18장을 보고 정리</span></h2>
+<section class="box"><ul><li>국산 통참깨 100% · 통통하고 고품질로만 선별 <span class="mut">(d03 「국내산 100% 참깨」 아이콘 「100% 국내산 통참깨 사용」 / d11 QUALITY 「통통하고 고품질로만 선별된 국내산 통참깨 100%」+참깨 더미 사진 / 라벨 「국산 통참깨 100%」 / 원재료명 참깨(국내산) 100% (d16))</span></li><li>저온압착(Cold Pressed) — 영양소와 풍미를 그대로 <span class="mut">(d03 「전통방식 저온압착」 / d06 「저온압착으로 만들어진 깨끗하고 안전한 국산 참기름! 고소한 풍미는 폭발!」 / d16 Tasting Note 압착 방식 Cold 쪽 끝, 「저온압착(Cold Press)으로 영양소와 풍미를 그대로」)</span></li><li>&#x27;한 방울의 황금&#x27; — 한 방울만 넣어도 맛있는 기름 (압착기에서 황금빛 기름이 흘러내림) <span class="mut">(d09·d10 COLD PRESSED 「우리는 이것을 &#x27;한 방울의 황금&#x27;이라고 부릅니다」 「한 방울만 넣어도 맛있는」 + 스테인리스 압착 원통에서 노란 기름이 줄줄이 흘러내리는 영상)</span></li><li>단 한 번만 착유 — 신선한 깻묵 <span class="mut">(d11 FRESH 「신선함에는 다 이유가 있습니다. 단 한 번의 착유」 + 원판 모양 깻묵 사진 「단 한 번만 착유하여 최상급 품질」)</span></li><li>특별 로스팅 레시피 — 깊은 맛, 진한 향 (풍미 강도 Heavy, 로스팅은 저온~중온 사이) <span class="mut">(d14 Roast 「특별 로스팅 레시피 깊은맛, 진한 향의 비법」 + 로스팅 솥 영상 / d16 풍미 강도 Heavy(진함) 쪽, 로스팅 방식 Low~Mid 사이 / d06 후기 「코끝을 확 잡아끄는 진한 향」 「고소함」)</span></li><li>스퀴즈 보틀 — 어디서든 간편하게, 원하는 만큼 직접 짜서 / 흘림 없이 깔끔 / 마지막 한 방울까지 <span class="mut">(d04 아이콘 「쉽게 짜서 먹는 타입」 / d07·d08 캠핑장에서 병을 거꾸로 짜 유리 그릇에 받는 사진 「어디서든 간편하게, 원하는 만큼. 직접 짜서 먹어요」 / d05 노즐 근접·그릇에 짜는 영상 / 페이지 요약문 「마지막 한 방울까지 깔끔하게」 / d06 후기 「뚜껑을 살짝 돌려 짜면 &#x27;착&#x27; 흘림 없이」 「마지막 한 방울까지 알뜰하게」 「배송 중 깨질 걱정 없고」)</span></li><li>빛 차단 스퀴즈보틀로 신선함 유지 <span class="mut">(d06 추천 대상 목록 「빛 차단 스퀴즈보틀로 신선함을 오래 유지하고 싶은 분」 (근거는 이 한 줄뿐, 차광 정도 수치는 확인 못 함))</span></li><li>위생·안전 — 3회 이상 기계 세척, HACCP, CESCO 24시간 위생관리, 벤조피렌 불검출, 잔류농약 102항목 불검출, 용기·캡 유해물질 정밀검사 적합 <span class="mut">(d12·d13 CLEAN 「3회 이상 깔끔하고 위생적으로 기계 세척」+참깨가 회오리치며 세척되는 영상 / d03·d04 아이콘 「기계 세척으로 위생적」 「유해물질 NO!」 「HACCP 인증 식품」 / d15 HACCP·CESCO 로고, 한서대 벤조피렌 불검출·한울생명과학 102항목 불검출 성적서 / d16 스퀴즈보틀·캡 식품용기 정밀검사 적합)</span></li><li>브랜드 인물 — 구독자 95만 푸드크리에이터 &#x27;영자씨&#x27;가 직접 생산, &#x27;엄마의 마음(MOM&#x27;S RECIPE)&#x27; <span class="mut">(d06 영자씨 본인 사진(초록 앞치마, 병을 들고 미소) 「구독자 95만, 대한민국 대표 푸드크리에이터 영자씨의부엌에서 직접 생산합니다」 / 「MOM&#x27;S RECIPE 엄마의 마음으로」 / d11 상단 「따뜻한 엄마의 마음으로 만드는 건강한 기름」 / 라벨 KOREAN MOM 배지·영자씨 일러스트)</span></li><li>선물용으로도 추천 <span class="mut">(d06 추천 대상 「소중한 사람에게 센스있는 선물을 하고 싶은 분」 (선물 포장 모습은 이 페이지에서 확인 못 함 — 별도 선물세트 상품 존재만 페이지 텍스트에서 확인))</span></li><li>먹는 장면 — 간장+참기름 흰쌀밥 비빔 등 <span class="mut">(d06 후기 「진간장에 참기름 살짝 넣어 흰쌀밥 비벼 먹었습니다」 (판매자가 직접 보여 준 요리 사진은 없음 — 후기 문구만))</span></li></ul></section>
+<p class="mut">어울림 결과: 상 9 · 중 10 · 하 1 → 상만 시험합니다.</p>
+<h2>시험할 템플릿 9개 <span class="mut">· 1차 5판 먼저, 판정 보고 나머지</span></h2><article class="card" id="sesame-T01">
 <header><span class="no">1</span><div><h3>T01 분출·회오리</h3><p class="mut">제품의 입구에서 물성 한 가지가 방향을 유지하며 공간으로 커진다.</p></div><span class="bt">1차</span></header>
 <p class="ex"><b>이 제품이라면</b> 0초 식탁 위 흰쌀밥 옆에 놓인 병 → 1초 노즐에서 황금 기름 한 줄기가 위로 솟아 리본처럼 부엌을 가로질러 감김 → 줄기가 밥 위 한 점으로 내려앉음 → 손이 실제 병을 들어 &#x27;착&#x27; 짜는 실물 컷.<br><span class="mut"><b>보여 줄 장점</b> 스퀴즈 보틀 &#x27;원하는 만큼 직접 짜서&#x27; + &#x27;한 방울의 황금&#x27;. 노즐에서 나온 황금 줄기가 방향을 유지하며 리본처럼 커지는 것 자체가 &#x27;정확하게 짜이는 노즐&#x27;과 &#x27;황금빛 기름&#x27;을 동시에 보여 줌.</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
 <div class="pair">
  <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
-  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="psum">김밥집 사장님이 밥 양푼에 꾹 짜자 노즐의 황금 참기름 줄기가 리본 회오리로 양푼을 감아 돌다 한 방울도 안 흘리고 밥 위에 내려앉음 (T01·B·S2·6컷·45cr)</p><details class="pl"><summary>엔진이 쓴 기획 · 영상 지시문 보기</summary><p><b>스타일</b> B 물성 폭발 · 사장님이 병을 꾹 짜는 순간 노란 노즐에서 나온 황금빛 참기름 줄기가 떨어지지 않고 양푼 둘레를 리본처럼 회오리치며 감아 돌다가 한 방울도 안 흘리고 밥 위에 전부 내려앉는다</p><p><b>인물</b> 40대 김밥집 사장님(여성) — 흰 두건·노란 앞치마·스테인리스 조리대·김·단무지·햄 재료통이 첫 컷에 보임</p><p><b>효과 근거</b> &quot;뚜껑을 살짝 돌려 짜면 &#x27;착&#x27; 흘림 없이&quot; · &quot;어디서든 편하게 짜서 바로 짜먹는&quot; · &quot;마지막 한 방울까지 깔끔하게&quot; → 노즐 한 곳에서 가는 줄기로 나와 흘리지 않고 원하는 자리에 다 떨어짐을 터무니없이 정확한 리본 비행으로 키움</p><pre>ASSET MAPPING
-Image 1 = the sesame oil squeeze bottle (product sheet). Image 1 is the sole product-geometry and printed-artwork reference for every shot where the bottle is visible: a dark brown opaque squeeze bottle with rounded shoulders, a yellow ridged screw cap, and a pointed yellow nozzle on top, with the yellow front label exactly as on Image 1. A 200 mL bottle that fits in one hand. Do not invent extra printed text.
-Image 2 = the shop owner (character sheet) — face, headscarf, apron and clothes exactly as on Image 2; her body shape and proportions follow Image 2 exactly.
-Image 3 = the kimbap shop kitchen counter (place). Other images supply framing and scale only, not the product shape or lettering.
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="psum">집 식탁에서 집밥 크리에이터가 계란밥 위로 스퀴즈 병을 손목 한 바퀴 돌려 짜자, 가는 금빛 참기름 한 줄이 병 둘레를 회오리로 감아 오르다 밥 위에 감겨 내려앉는다</p><p class="mut">1차(고치기 전): 점심 장사 직전 김밥집 조리대에서 사장님이 밥 양푼에 참기름을 꾹 짜자 황금 줄기가 리본처럼 양푼을 휘감아 돌다 한 방울도 안 흘리고 밥 위에 내려앉는다</p><details class="pl"><summary>엔진이 쓴 기획 · 영상 지시문 보기</summary><p><b>스타일</b> B 물성 폭발 · 짜는 순간 노즐에서 나온 가는 금빛 참기름 한 줄이 떨어지지 않고 병과 손 둘레를 회오리로 감아 올라갔다가 밥 위로 감겨 내려앉는다</p><p><b>장소 근거</b> 집 부엌 옆 식탁 — brief_card 「상황(언제·어디서): 집 부엌 식탁·밥상, 밥 위에 짜서 얹는 순간(state_pour_1.jpg 계란밥 위 사진)」 · 바뀐 장소 없음</p><p><b>인물</b> 집밥 크리에이터 30대 여성(person186_08 바탕) — 화면에 보이는 표시: 앞치마 · 식탁 끝 작은 삼각대에 꽂힌 휴대폰(뒷면이 카메라 쪽)</p><p><b>효과 근거</b> &quot;어디서든 편하게 짜서 바로 짜먹는 참기름. 마지막 한 방울까지 깔끔하게!&quot; → 짜면 실제로 노즐 끝에서 가는 금빛 줄기가 나와 밥 위에 얹힘 — 그 줄기를 크게 보여 줌</p><pre>ASSET MAPPING
+Image 1: product sheet — the soft squeeze bottle of sesame oil. Image 1 is the sole product-geometry and printed-artwork reference for every shot where the product is visible; keep its visible shape, components, colors and material unchanged. Other images supply framing and scale only, not lettering. Do not invent extra printed text.
+Image 2: the home-cooking video creator — face, hair and outfit.
+Image 3: the dining table beside the kitchen — the same place in every shot.
+Image 4: the bowl of warm rice with a fried egg.
 
 BRIEF
-A kimbap shop owner squeezes the bottle; the golden oil stream whirls around her rice bowl, then lands entirely on the rice, not a drop spilled. Playful, bright. Get to the whirl fast and give it the most time, scale and camera energy.
+Her squeeze sends the thin golden oil thread spiraling around the bottle before it lands on the rice. Playful, warm. Get to the spiral fast and give it the most time and camera energy.
 
-Shot 1 [0-2s] (medium): Image 3 counter. Her right hand squeezes Image 1 upside down over the rice bowl, left hand on the rim. A moment later the golden stream curves sideways around the bowl; her eyes follow it.
+Shot 1 [0-2s] (medium close-up): At Image 3, the woman of Image 2 holds Image 1 nozzle-down in her right hand over the bowl of Image 4 and squeezes with a wrist twirl. A moment later a thin golden oil thread leaves the tip and curls up around the bottle. Her eyes follow it.
 Cut to
-Shot 2 [2-4s] (macro): one unbroken golden stream leaves only the nozzle tip and bends into a ribbon.
+Shot 2 [2-5s] (macro of the nozzle tip): The thread keeps flowing from the tip, looping wider around the bottle and her hand, sesame seeds glinting inside.
 Cut to
-Shot 3 [4-5s] (close): the ribbon sweeps past her face; her eyes follow it, delighted.
+Shot 3 [5-9s] (camera inside the swirl): The golden ribbon spins around the camera, droplets sweeping past the lens, sunlight glowing through; the camera spirals along.
 Cut to
-Shot 4 [5-10s] (low angle at bowl height): the glossy golden ribbon whirls around the bowl up to her shoulders, sweeping past the lens; she looks up at it. She stops squeezing; the whole ribbon spirals down onto the rice. The counter stays spotless.
+Shot 4 [9-11s] (top-down on the bowl): The ribbon funnels down in one tight spiral onto the rice and egg, leaving a glossy coat.
 Cut to
-Shot 5 [10-13s] (medium): she squeezes Image 1 once more; a straight thin stream falls on the shiny rice. She smiles.
-[10-12s] Korean narrator says: &quot;국산 통참깨 백 퍼센트, 저온압착.&quot;
+Shot 5 [11-13s] (upper body, real size): She squeezes the same hand-sized 200 mL bottle in a normal zigzag over the rice, releases, and the last drop falls. Her eyes stay on the rice, smiling.
+Cut to
+Shot 6 [13-15s] (close): Her hand holds the bottle upright, label to camera. Leave the top quarter of the frame as clean empty background.
+
+Sound: kitchen tone, soft squeeze, liquid whoosh, a drip.
+[11-13s] Korean narrator says: &quot;국산 통참깨, 저온압착.&quot;
 Spoken only — no on-screen text, subtitles or captions anywhere in the video.
-Cut to
-Shot 6 [13-15s] (close): her right hand holds Image 1 upright, label to camera; top quarter of the frame clean empty background.
+Music: light playful acoustic plucks.
 
-Sound: kitchen sounds, a glossy whoosh growing at the whirl, indistinct low murmur with no clear words. A staff member rolls kimbap behind her; a customer waits.
-Music: light plucked-string tune, low.
-Keep exactly these shots and timing. Let the model choose lenses, camera moves and micro-acting, preserving Image 1 and Image 2.
+Keep exactly the shots listed above, in this order and timing. Let the model choose lenses, camera moves and micro-acting within each shot, while preserving the bottle, the woman and the table.
 </pre></details></div></div>
  <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/VR274-037.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>환타 회오리</figcaption></figure><figure><video src="media/o3tpl/VR274-028.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>[애경산업/스웨이] 잔여 세제 없는 스웨이 식기세척기 액체 캡</figcaption></figure></div></div>
 </div>
 <div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
-<div class="vote" data-t="T01"><p class="lab">판정</p>
+<div class="vote" data-t="sesame-T01"><p class="lab">판정</p>
  <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
  <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
  <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
-</div></article><article class="card" id="T03">
+</div></article><article class="card" id="sesame-T03">
 <header><span class="no">2</span><div><h3>T03 재질·상태 치환</h3><p class="mut">같은 축과 윤곽을 유지하며 재질이나 상태를 한 번 교대한다.</p></div><span class="bt">1차</span></header>
 <p class="ex"><b>이 제품이라면</b> 0초 도마 위 병 모양으로 쌓인 참깨 더미 → 1초 같은 윤곽이 그대로 매끈한 적갈색 병·노란 캡으로 바뀜 → 라벨 &#x27;국산 통참깨 100%&#x27; 클로즈업 → 손이 실물 병을 듦.<br><span class="mut"><b>보여 줄 장점</b> 국산 통참깨 100%(d03·d11) — 병 모양 그대로 참깨 알갱이 덩어리였다가 실물 병이 되면 &#x27;이 병은 통참깨 그 자체&#x27;라는 원료 순도를 바로 보여 줌. 또는 깻묵 원판→병으로 &#x27;단 한 번 착유&#x27;.</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
 <div class="pair">
  <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
-  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="psum">출근 전 원룸 식탁에서 밥 한 공기에 참기름을 꾹 짜자 닿은 점부터 밥 전체가 윤곽 그대로 황금 거울 유약 돔으로 바뀌었다 윤기 흐르는 밥알로 돌아옴 (T03·B·S2·6컷·45cr)</p><details class="pl"><summary>엔진이 쓴 기획 · 영상 지시문 보기</summary><p><b>스타일</b> B 물성 폭발(V03 성질이 세상 규칙 — 회오리 대신 「상태 치환」 모양: T03 템플릿이 정한 모양이고 참기름의 실제 결과가 「밥에 윤기 코팅」이라 퍼지는 유약이 더 맞음) · 짜서 떨어진 참기름 한 줄기가 닿은 자리부터 흰 밥 한 공기 전체가 윤곽 그대로 매끈한 황금 거울 유약 돔으로 바뀌었다가, 윤기 흐르는 밥알로 돌아온다</p><p><b>인물</b> 30대 초반 남성 직장인 — 출근 전 셔츠 차림·원룸 식탁·밥 한 공기·수저가 첫 컷에 보임</p><p><b>효과 근거</b> &quot;어디서든 편하게 짜서 바로 짜먹는&quot; · &quot;SQUEEZE GOLDEN LIQUID&quot; · &quot;우리는 이것을 &#x27;한 방울의 황금&#x27;이라고 부릅니다&quot;(page_text.txt · 008·014.jpg) → 짠 참기름이 밥에 금빛 윤기를 입히는 실제 결과를 「한 줄기로 공기 전체가 황금 거울」로 키움</p><pre>ASSET MAPPING
-Image 1 = the sesame oil squeeze bottle (product sheet). Image 1 is the sole product-geometry and printed-artwork reference for every shot where the bottle is visible: a dark brown opaque squeeze bottle with rounded shoulders, a yellow ridged screw cap, and a pointed yellow nozzle on top, with the yellow front label exactly as on Image 1. A 200 mL bottle that fits in one hand. Do not invent extra printed text.
-Image 2 = the young office worker (character sheet) — face, hair and clothes exactly as on Image 2; his body shape and proportions follow Image 2 exactly.
-Image 3 = his small studio-apartment dining table with a bowl of plain white rice (place). Other images supply framing and scale only, not the product shape or lettering.
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="psum">집 식탁에서 계란밥 위로 스퀴즈 병을 짜자 노즐에서 통참깨 알 줄기가 흘러나오고, 떨어지는 도중 같은 줄기 그대로 금빛 참기름이 되어 밥 위에 나선으로 내려앉는다</p><p class="mut">1차(고치기 전): 출근 전 원룸 식탁에서 직장인이 밥 한 공기에 참기름을 꾹 짜자 닿은 자리부터 밥 전체가 황금 거울 유약 돔으로 바뀌었다가 윤기 흐르는 밥알로 돌아온다</p><details class="pl"><summary>엔진이 쓴 기획 · 영상 지시문 보기</summary><p><b>스타일</b> B 물성 폭발 · 짜는 순간 나온 물성(기름 줄기)이 상태를 한 번 바꿈 — 기름 대신 통참깨가 기름처럼 흘러나와 공중에서 금빛 기름으로 바뀜 · 회오리 대신 상태 교대인 이유: 템플릿 T03 + 「통참깨 → 기름」이 포인트 원문 그 자체</p><p><b>장소 근거</b> 집 부엌 옆 식탁(계란밥) — 브리프 카드 「상황: 집 부엌 식탁·밥상, 밥 위에 짜서 얹는 순간(state_pour_1.jpg 계란밥 위 사진)」 · 바뀐 장소 없음</p><p><b>인물</b> 30대 집밥 크리에이터 — 겨자색 셔츠·벽돌색 앞치마 · 식탁 끝 삼각대에 꽂힌 휴대폰(뒷면이 카메라 쪽)</p><p><b>효과 근거</b> &quot;국산 통참깨 100% 저온압착 참기름&quot; → 이 기름이 통참깨를 짠 것이라는 실제 사실을 줄기 하나에서 보여 줌(통참깨 → 기름)</p><pre>ASSET MAPPING
+Image 1 = product sheet: the soft squeeze bottle of sesame oil. Image 1 is the sole product-geometry and printed-artwork reference for every shot where the bottle is visible: a dark-brown soft cylindrical squeeze bottle with rounded shoulders, a ribbed yellow collar and a pointed yellow nozzle cap, joined to the yellow wrap-around label. Other images supply framing and scale only, not lettering. Do not invent extra printed text.
+Image 2 = the home cook (character sheet). Her body shape and proportions follow Image 2 exactly.
+Image 3 = the dining table beside the kitchen counter (place).
+Image 4 = the white bowl of rice with a fried egg (prop).
 
 BRIEF
-Before work, a young man squeezes the bottle over his rice; where the oil touches, the whole bowl of rice turns into one smooth golden mirror-glaze dome, then melts back into glossy rice grains. Playful, bright morning. Get to the change fast and give the golden dome the most time, scale and camera energy.
+Squeezed sesame oil pours out as whole toasted seeds that turn into golden oil mid-air. Warm, playful tone. Get to the seed stream fast; give the seed-to-oil change the most time, scale and camera energy.
 
-Shot 1 [0-2s] (medium): Image 3 table, steaming white rice. His right hand tilts Image 1 nozzle-down and squeezes; a thin golden stream leaves only the nozzle tip. A moment later, from the spot it touches, the white rice starts turning into glossy golden glaze.
+Shot 1 [0-2s] (medium close-up): At the Image 3 table, the Image 2 woman holds the Image 1 bottle nozzle-down in her right hand over the Image 4 bowl; left hand on the table. A moment later she squeezes and a thin stream of whole golden sesame seeds flows from the nozzle like a thread of oil. Her eyes follow it down.
 Cut to
-Shot 2 [2-4s] (close, bowl height): the golden glaze spreads to the rim, keeping the rice mound&#x27;s exact shape; his blurred face behind, eyes following it.
+Shot 2 [2-5s] (close-up): The same seed stream keeps flowing; halfway down the seeds turn into a glossy thread of golden oil. Her eyes stay on it.
 Cut to
-Shot 3 [4-5s] (close): he leans in nose-close, golden light on his face, amazed grin.
+Shot 3 [5-10s] (macro, stream fills the frame): Nozzle tip at the top edge. Seeds pour toward the lens and turn into shining amber droplets glowing in window light. The camera dives with the stream as the oil lands in a spiral on the egg and rice. The pouring sound swells.
 Cut to
-Shot 4 [5-10s] (macro): the golden mirror-glaze dome fills the frame like a mirror-glaze cake, window light gliding over it; the camera circles it. One last drop sends a single ring across the mirror. Then it melts back into rice grains, each shining with oil. The table stays spotless.
+Shot 4 [10-13s] (medium shot, real size): She squeezes the same 200 mL bottle in one hand; plain oil zigzags over the rice, she lets go, a last drop falls.
 Cut to
-Shot 5 [10-13s] (close on hand): his right hand squeezes Image 1 once; a straight thin stream falls on the shiny rice.
-[10-12s] Korean narrator says: &quot;국산 통참깨 백 퍼센트, 저온압착.&quot;
+Shot 5 [13-15s] (close-up): Her right hand holds the bottle upright, label to camera, exactly as Image 1. Leave the top quarter of the frame as clean empty background.
+
+[11-13s] Korean narrator says: &quot;통참깨 그대로, 저온압착.&quot;
 Spoken only — no on-screen text, subtitles or captions anywhere in the video.
-Cut to
-Shot 6 [13-15s] (close): his right hand holds Image 1 upright, label to camera; top quarter of the frame clean empty background.
-
-Sound: rice cooker steam, soft morning birds outside, a bright glassy shimmer as the glaze spreads.
-Music: light plucked-string tune, low.
-Keep exactly these shots and timing. Let the model choose lenses, camera moves and micro-acting, preserving Image 1 and Image 2.
+Sound: pouring-seed rustle, oil drip, quiet kitchen. Music: light warm acoustic.
+Keep exactly the shots listed above, in this order and timing. Let the model choose lenses, camera moves and micro-acting within each shot.
 </pre></details></div></div>
  <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/BF-AGORA.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Agora Mall × Munné · Chocolate Bar</figcaption></figure></div></div>
 </div>
 <div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
-<div class="vote" data-t="T03"><p class="lab">판정</p>
+<div class="vote" data-t="sesame-T03"><p class="lab">판정</p>
  <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
  <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
  <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
-</div></article><article class="card" id="T04">
+</div></article><article class="card" id="sesame-T04">
 <header><span class="no">3</span><div><h3>T04 안으로 들어갔다 나오기</h3><p class="mut">제품 입구·단면을 통로로 삼고 같은 표지를 따라 실물로 돌아온다.</p></div><span class="bt">1차</span></header>
 <p class="ex"><b>이 제품이라면</b> 0초 식탁 위 병 노즐 클로즈업 → 1초 카메라가 노즐 구멍으로 빨려 들어가 황금 기름이 흘러내리는 스테인리스 압착 원통 사이를 지나감 → 참깨 더미 위를 날아 다시 노즐 끝으로 빠져나와 한 방울 맺힘 → 손이 실물 병을 듦.<br><span class="mut"><b>보여 줄 장점</b> 저온압착·단 한 번 착유·3회 세척 — 노즐 안으로 들어가면 황금 기름이 흐르는 압착기와 깻묵이 보이고 다시 노즐로 나오는 흐름이 &#x27;어떻게 만들었는지&#x27;를 한 번에 보여 줌.</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
 <div class="pair">
  <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
-  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="psum">캠핑장 아침 계란밥에 참기름을 꾹 짜자 카메라가 노즐 끝 금빛 방울로 들어가 통참깨가 별처럼 떠다니는 황금 기름 바다를 날고 같은 방울을 타고 나와 밥에 톡 떨어짐 (T04·K·S1·5컷·45cr)</p><details class="pl"><summary>엔진이 쓴 기획 · 영상 지시문 보기</summary><p><b>스타일</b> K 안으로 들어가기 · 캠퍼가 병을 꾹 짜 노즐 끝에 금빛 방울이 맺히는 순간 카메라가 그 방울로 들어가면, 안은 국산 통참깨가 별처럼 떠다니는 황금 참기름 바다 — 같은 방울을 타고 나와 계란밥에 떨어진다</p><p><b>인물</b> 20대 후반 여성 캠퍼 — 캠핑 의자·접이식 테이블·법랑 그릇 계란밥이 첫 컷에 보임</p><p><b>효과 근거</b> &quot;국산 통참깨 100% 저온압착&quot; · &quot;우리는 이것을 &#x27;한 방울의 황금&#x27;이라고 부릅니다&quot;(008·014·016.jpg) → 한 방울이 통참깨를 그대로 짠 맑은 황금 기름이라는 실제 사실을 방울 속 세계로 키움</p><pre>ASSET MAPPING
-Image 1 = the sesame oil squeeze bottle (product sheet). Image 1 is the sole product-geometry and printed-artwork reference for every shot where the bottle is visible: a dark brown opaque squeeze bottle with rounded shoulders, a yellow ridged screw cap, and a pointed yellow nozzle on top, with the yellow front label exactly as on Image 1. A 200 mL bottle that fits in one hand. Do not invent extra printed text.
-Image 2 = the young woman camper (character sheet) — face, hair and clothes exactly as on Image 2; her body shape and proportions follow Image 2 exactly.
-Image 3 = her campsite folding table with a bowl of egg rice (place). Other images supply framing and scale only, not the product shape or lettering.
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="psum">집 식탁에서 계란밥에 참기름을 짜는 순간, 카메라가 노즐 끝으로 들어가 금빛 기름을 거슬러 통참깨 저온압착 벽에 닿고, 방울 하나를 따라 같은 노즐로 나와 노른자 위에 떨어진다.</p><p class="mut">1차(고치기 전): 캠핑장 아침 접이식 테이블에서 캠퍼가 계란밥에 참기름을 꾹 짜자 카메라가 노즐 끝 금빛 방울로 들어가 통참깨가 별처럼 떠다니는 황금 기름 바다를 날고, 같은 방울을 타고 나와 계란밥에 톡 떨어진다</p><details class="pl"><summary>엔진이 쓴 기획 · 영상 지시문 보기</summary><p><b>스타일</b> K 안으로 들어가기 · 짜는 순간 카메라가 노즐 끝으로 들어가 금빛 기름을 거슬러 가면 통참깨가 저온압착되는 압착기 벽 — 기름 방울 하나를 따라 같은 노즐로 나와 계란밥 위에 떨어짐</p><p><b>장소 근거</b> 집 식탁(계란밥) — 브리프 카드 「상황: 집 부엌 식탁·밥상, 밥 위에 짜서 얹는 순간」 · 바뀐 장소 압착기 안 — 제조 안내 카드 03 「전통 방식으로 &#x27;저온압착&#x27;」 세로 홈 강철 원통 압착기 = 이 기름을 만드는 곳(원료·제조와 바로 이어짐)</p><p><b>인물</b> 집밥 해 먹는 30대 여성 — 화면 표시: 앞치마·소매 걷은 셔츠·식탁의 계란밥(직업 설정 없음)</p><p><b>효과 근거</b> &quot;전통방식 저온압착&quot;·&quot;100% 국내산 통참깨 사용&quot;(shots/04) → 통참깨를 눌러 기름이 나오는 실제 결과(불·연기 없이 눌러서 나옴)</p><pre>ASSET MAPPING
+Image 1 = product_sheet: the sole product-geometry and printed-artwork reference for every shot where the sesame oil squeeze bottle is visible. Other images supply framing and scale only, not lettering. Do not invent extra printed text.
+Image 2 = anchor_cook: the woman&#x27;s face, hair and outfit.
+Image 3 = place_kitchen: the home dining table in shots 1, 4, 5 and 6.
+Image 4 = place_press: the inside of the cold press in shot 3.
 
 BRIEF
-At a morning campsite she squeezes the bottle over egg rice; the camera dives into the golden drop at the nozzle tip, flies through a golden oil sea of drifting whole sesame seeds, and rides the same drop back out. Playful wonder. Get into the drop fast and give the golden sea the most time, scale and camera energy.
+The camera dives into the nozzle, back through the oil to sesame seeds being cold-pressed, and rides one drop back out. Get into the nozzle fast and give the press the most time, scale and camera energy.
 
-Shot 1 [0-2s] (medium, one move): Image 3 table. Her left hand holds the bowl rim; her right hand holds Image 1 upside down and squeezes. A golden drop forms at the nozzle tip; the camera rushes straight into it.
+Shot 1 [0-2s] (close-up): The woman holds the 200 mL bottle exactly as Image 1 in her right hand, nozzle down over egg rice. A moment later she squeezes, a golden stream starts, her eyes follow it, and the camera rushes into the tip.
+No cut.
+Shot 2 [2-5s] (macro): Inside: glowing golden oil and bubbles; the camera glides toward a warm light.
+No cut.
+Shot 3 [5-9s] (wide, Image 4): Steel slats packed with whole roasted sesame seeds; golden oil beads out between every slat and runs down in shining ribbons, filling the frame as the camera sweeps along. No smoke.
+No cut.
+Shot 4 [9-10.5s] (macro): One golden drop flies back out the same nozzle tip and lands on the egg yolk.
 Cut to
-Shot 2 [2-5s] (inside): the camera glides up through the short yellow nozzle tunnel; warm golden light opens wide ahead.
+Shot 5 [10.5-13s] (upper body): She squeezes once over the rice with her right hand, spoon in her left, and breathes in the aroma, pleased.
+[10.5-13s] Korean narrator says: &quot;통참깨를 그대로 눌러 짰어요.&quot; Spoken only — no on-screen text, subtitles or captions anywhere in the video.
 Cut to
-Shot 3 [5-10s] (inside, wide): a vast sea of clear golden sesame oil fills the frame, whole toasted sesame seeds drifting slowly like stars. The camera flies between them, then speeds toward a round bright opening and bursts out with the drop, which falls onto the egg rice with a soft tap.
-Cut to
-Shot 4 [10-13s] (seated, knees up): her right hand squeezes Image 1 once; a straight thin stream falls on the rice. She grins. A distant camper cooks blurred behind.
-[10-12s] Korean narrator says: &quot;국산 통참깨 백 퍼센트, 저온압착.&quot;
-Spoken only — no on-screen text, subtitles or captions anywhere in the video.
-Cut to
-Shot 5 [13-15s] (close): her right hand holds Image 1 upright, label to camera; top quarter of the frame clean empty sky.
+Shot 6 [13-15s] (close): She holds the bottle upright, label facing the camera. Leave the top quarter of the frame as clean empty background.
 
-Sound: morning birds, camp stove hiss, indistinct low murmur with no clear words; a deep soft hum inside the drop.
-Music: light plucked-string tune, low.
-Keep exactly these shots and timing. Let the model choose lenses, camera moves and micro-acting, preserving Image 1 and Image 2.
+The yellow nozzle cap stays on; oil only leaves its tip, downward.
+Sound: squeeze, trickling oil, a tap on the yolk, quiet room. Warm acoustic music.
+Keep exactly the shots listed above, in this order and timing. Let the model choose lenses, camera moves and micro-acting within each shot, while preserving the bottle from Image 1, the woman from Image 2 and the room from Image 3.
 </pre></details></div></div>
  <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/WEB-OREO-WONDER.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>OREO Wonder Flavors</figcaption></figure></div></div>
 </div>
 <div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
-<div class="vote" data-t="T04"><p class="lab">판정</p>
+<div class="vote" data-t="sesame-T04"><p class="lab">판정</p>
  <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
  <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
  <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
-</div></article><article class="card" id="T05">
+</div></article><article class="card" id="sesame-T05">
 <header><span class="no">4</span><div><h3>T05 제품이 살아 움직이기</h3><p class="mut">상품의 외곽을 보존한 채 사물 스스로 역할 한 가지를 수행한다.</p></div><span class="bt">1차</span></header>
 <p class="ex"><b>이 제품이라면</b> 0초 비빔밥 그릇 옆에 서 있는 병 → 1초 병이 스스로 통통 걸어와 그릇 위에서 거꾸로 몸을 숙이고 황금 기름 한 줄을 정확히 짠 뒤 다시 바로 섬 → 손이 실물 병을 들어 똑같이 짬.<br><span class="mut"><b>보여 줄 장점</b> 쉽게 짜서 먹는 타입·원하는 만큼(d04·d07) — 병이 혼자 걸어와 밥 위에서 몸을 숙이고 딱 한 줄 짜고 서는 행동 하나가 사용법 장점 그 자체.</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
 <div class="pair">
  <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
-  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="psum">펜션 저녁 상 가운데 눕힌 참기름 병(노즐 연 상태)이 혼자 제자리에서 병 돌리기처럼 돌다 탁 멈춰 노즐로 그녀 앞 그릇을 가리키고, 그녀가 들어서 꾹 짬 — 물리 검토 4건 반영(노즐 열림 통일·네 그릇 같은 비빔밥·긁히는 소리·가장자리 배치) (T05·G·S2·5컷·45cr)</p><details class="pl"><summary>엔진이 쓴 기획 · 영상 지시문 보기</summary><p><b>스타일</b> G 물리 법칙 비틀기 · 아무도 손대지 않은 참기름 병 하나만 혼자 돈다(사물은 혼자 안 움직인다는 법칙 하나만 깨짐) — 멈춘 노즐이 「여기 짜라」고 그녀 앞 비빔밥을 가리킨다</p><p><b>인물</b> 30대 초반 여성(그 그릇 주인) + 친구 셋 — 펜션 좌식 상·비빔밥 네 그릇이 첫 컷에 보임</p><p><b>효과 근거</b> &quot;어디서든 짜서 쓰는 스퀴즈 보틀&quot; · 작동 「노즐 끝 구멍으로 가늘게 나옴」 → 노즐이 향하는 곳이 기름이 갈 곳이라는 실제 구조를 「노즐이 스스로 그 곳을 가리킴」으로 키움</p><pre>ASSET MAPPING
-Image 1 = the sesame oil squeeze bottle (product sheet). Image 1 is the sole product-geometry and printed-artwork reference for every shot where the bottle is visible: a dark brown opaque squeeze bottle with rounded shoulders, a yellow ridged screw cap, and a pointed yellow nozzle on top, with the yellow front label exactly as on Image 1. A 200 mL bottle that fits in one hand. Do not invent extra printed text.
-Image 2 = the woman in her early 30s (character sheet) — face, hair and clothes exactly as on Image 2; her body shape and proportions follow Image 2 exactly.
-Image 3 = the pension low dining table with four bowls of bibimbap (place). Other images supply framing and scale only, not the product shape or lettering.
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="psum">집 식탁에서 비빔밥 위로 스퀴즈 병을 한 번 짜자, 금빛 참기름 줄기가 살아 움직여 고리를 그리며 내려와 밥과 나물 위에 윤기 나는 나선을 깐다.</p><p class="mut">1차(고치기 전): 펜션 저녁 좌식 상에서 친구 넷이 비빔밥을 비비려는데, 상 가운데 눕혀 둔 참기름 병이 혼자 병 돌리기처럼 제자리에서 빙글빙글 돌다 노란 노즐로 그녀 앞 그릇을 딱 가리키고, 그녀가 병을 들어 꾹 짠다</p><details class="pl"><summary>엔진이 쓴 기획 · 영상 지시문 보기</summary><p><b>스타일</b> B 물성 폭발 · 짜는 순간 나온 황금빛 참기름 줄기가 스스로 살아 움직여 밥 위에 나선을 그림(회오리 기본 모양을 그릇 둘레 크기로)</p><p><b>장소 근거</b> 집 식탁(바로 옆 부엌 조리대) — 브리프 카드 `상황(언제·어디서): 집 부엌 식탁·밥상, 밥 위에 짜서 얹는 순간` · `용도: 집에서 밥·나물·국수에 참기름을 한 손으로 짜 얹는 양념` (바뀌는 장소 없음)</p><p><b>인물</b> 집에서 혼자 점심을 먹는 30대 여성 — 집 식탁·비빔밥 그릇·편한 셔츠로 보임</p><p><b>효과 근거</b> &quot;어디서든 편하게 짜서 바로 짜먹는 참기름. 마지막 한 방울까지 깔끔하게!&quot; → 짜면 노즐 끝에서 가는 줄기로 나와 밥 위에 얹히고, 끝은 방울 하나로 깔끔히 끊김(그 줄기를 크게·살아 있게)</p><pre>ASSET MAPPING
+Image 1 = product sheet. Image 1 is the sole product-geometry and printed-artwork reference for every shot where the bottle is visible: a soft dark-brown squeeze bottle with a ribbed yellow collar and a pointed yellow nozzle cap, label exactly as on Image 1. Other images supply framing and scale only, not lettering. Do not invent extra printed text.
+Image 2 = the woman (character sheet) — face, hair and clothes exactly as Image 2; her body shape and proportions follow Image 2 exactly.
+Image 3 = the home dining table — room, table, bowl and light exactly as Image 3.
 
 BRIEF
-At a pension dinner, the bottle lying in the table centre starts spinning by itself like a spin-the-bottle game, then stops with its yellow nozzle pointing at her bowl. Deadpan, playful. Get to the spin fast and give the stop the most time and camera energy.
+Squeezed over bibimbap, the golden oil comes alive and curls itself into a glossy spiral. Warm, playful. Get to the living ribbon fast; give the spiral the most time, scale and camera energy.
 
-Shot 1 [0-2s] (medium, eye level): Image 3 table: four identical unmixed bibimbap bowls without oil sit at the table edges, the centre clear. Image 1 lies on its side in the centre, nozzle open, untouched. A moment later it spins flat in place by itself, never rolling; spoons freeze.
+Shot 1 [0-2s] (medium close-up): The woman from Image 2 at the table from Image 3 holds the bottle in her right hand, nozzle down above a bibimbap bowl with a fried egg. A moment later she squeezes once; a thin golden stream leaves the nozzle tip and curls down in slow loops. Her eyes follow it.
 Cut to
-Shot 2 [2-5s] (medium across the table): the bottle spins faster in place, bowls outside its reach; four faces follow the nozzle.
+Shot 2 [2-5s] (close-up): The ribbon keeps flowing, looping on its own and laying shiny lines across the vegetables. Her eyes follow it.
 Cut to
-Shot 3 [5-10s] (straight top-down close): the bottle spins in place, shape and label unchanged, camera shaking; it stops with a sharp tap. The camera rushes along the nozzle&#x27;s line to her bowl. No oil comes out while it spins.
+Shot 3 [5-9s] (macro, low at the bowl rim): Only the oil: the ribbon sweeps past the lens and coils into a glossy spiral on the rice and yolk, golden beads glinting. The camera swings with it.
 Cut to
-Shot 4 [10-13s] (seated, waist up): Image 2 lifts Image 1 from the centre in her right hand, turns it nozzle-down and squeezes once; a thin golden stream falls onto her bowl. Friends clap.
-[10-12s] Korean narrator says: &quot;국산 통참깨 백 퍼센트, 저온압착.&quot;
+Shot 4 [9-10s] (extreme close-up on the nozzle): The stream stops cleanly; one last golden drop falls.
+Cut to
+Shot 5 [10-13s] (upper body): The 200 mL bottle fits in her one hand; she squeezes once and a normal thin stream falls onto the rice. She smiles.
+[11-13s] Korean narrator says: &quot;통참깨 그대로, 저온압착.&quot;
 Spoken only — no on-screen text, subtitles or captions anywhere in the video.
 Cut to
-Shot 5 [13-15s] (close): her right hand holds Image 1 upright, label to camera; top quarter of the frame clean empty warm wooden wall.
+Shot 6 [13-15s] (close-up): The bottle upright in her hand, label facing camera. Leave the top quarter of the frame as clean empty background.
 
-Sound: spoons clinking, indistinct low murmur with no clear words, plastic scraping as it spins on the wooden table, speeding up, a sharp tap, then silence.
-Music: light plucked-string tune, low.
-Keep exactly these shots and timing. Let the model choose lenses, camera moves and micro-acting, preserving Image 1 and Image 2.
+Sound: soft glossy oil pour swelling at the spiral; light warm acoustic music. The oil only leaves the nozzle tip and moves down.
+Keep exactly these shots, order and timing. Let the model choose lenses, camera moves and micro-acting within each shot, keeping the bottle exactly as Image 1.
 </pre></details></div></div>
  <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/ON-food-02.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>&#x27;Origin&#x27; | GIGIL for Danes Cheese</figcaption></figure><figure><video src="media/o3tpl/REF288-LEGOASTRO.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>LEGO Astronaut Grabbed by Hand in </figcaption></figure></div></div>
 </div>
 <div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
-<div class="vote" data-t="T05"><p class="lab">판정</p>
+<div class="vote" data-t="sesame-T05"><p class="lab">판정</p>
  <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
  <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
  <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
-</div></article><article class="card" id="T09">
+</div></article><article class="card" id="sesame-T09">
 <header><span class="no">5</span><div><h3>T09 공간 전환</h3><p class="mut">제품을 같은 위치에 남기고 한 경계를 넘는 순간 배경 세계가 바뀐다.</p></div><span class="bt">1차</span></header>
 <p class="ex"><b>이 제품이라면</b> 0초 집 부엌 식탁 위 병 → 1초 손이 병을 짜는 순간 병 뒤 배경이 캠핑장 텐트 앞으로 바뀜(병 위치·각도 고정) → 한 번 더 바뀌어 회사 도시락 자리 → 손이 실물 병을 듦.<br><span class="mut"><b>보여 줄 장점</b> &#x27;어디서든 간편하게, 원하는 만큼&#x27;(d07)·&#x27;배송 중 깨질 걱정 없음&#x27;(d06 후기) — 병은 그대로 두고 배경이 집 부엌→캠핑장→도시락 자리로 바뀌면 &#x27;어디서나 짜서 쓰는 스퀴즈&#x27; 장점이 그대로 보임.</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
 <div class="pair">
  <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
-  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="psum">퇴근 저녁 주방에서 비빔밥에 꾹 짠 황금 줄기가 그릇 뒤 공중에 고리를 그리고 고리 안 벽만 햇살 국산 참깨밭이 됐다가 다시 줄기로 풀려 그릇에 내려앉음 (T09·E·S2·6컷·45cr)</p><details class="pl"><summary>엔진이 쓴 기획 · 영상 지시문 보기</summary><p><b>스타일</b> E 이야기·시간 · 노즐에서 나온 황금 줄기 하나가 부엌과 참기름이 온 곳(국산 참깨밭)을 잇는다 — 원테이크 여행 대신 줄기가 그린 고리 안만 밭이 됨(원칙 3: 부엌을 먼 곳으로 바꿔치지 않음)</p><p><b>인물</b> 30대 후반 여성 — 퇴근 차림(셔츠 소매 걷음)으로 아일랜드에 선 모습 · 뒤 소파에 남동생 1명(편한 후드)</p><p><b>효과 근거</b> &quot;국산 통참깨 100%&quot; (page_text.txt 34행) → 기름이 실제로 온 곳(국산 참깨밭)이 보임 · 특정 농가·제법 장면은 지어내지 않음(밭과 말리는 참깨 단만)</p><pre>ASSET MAPPING
-Image 1 = the sesame oil squeeze bottle (product sheet). Image 1 is the sole product-geometry and printed-artwork reference for every shot where the bottle is visible: a dark brown opaque squeeze bottle with rounded shoulders, a yellow ridged screw cap, and a pointed yellow nozzle on top, with the yellow front label exactly as on Image 1. A 200 mL bottle that fits in one hand. Do not invent extra printed text.
-Image 2 = the woman in her late 30s (character sheet) — face, hair and clothes exactly as on Image 2; her body shape and proportions follow Image 2 exactly.
-Image 3 = the apartment kitchen island with one bowl of bibimbap and a white tiled wall behind it (place).
-Image 4 = the sunlit Korean sesame field with drying sesame bundles (place, seen only inside the ring). Other images supply framing and scale only, not the product shape or lettering.
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="psum">점심 비빔밥 위에 스퀴즈 병을 짜자 떨어진 참기름 한 방울의 금빛 고리가 퍼지며 식탁 둘레를 국산 참깨밭으로 바꿨다가, 손을 놓자 고리가 접혀 다시 집 식탁으로 돌아온다.</p><p class="mut">1차(고치기 전): 퇴근 저녁 아파트 주방에서 그녀가 비빔밥에 참기름을 꾹 짜자 황금 줄기가 그릇 뒤 공중에 고리를 그리고, 고리 안쪽 벽만 햇살 비치는 국산 참깨밭이 되어 그 빛이 그릇을 비추다가, 고리가 다시 줄기로 풀려 그릇에 내려앉는다</p><details class="pl"><summary>엔진이 쓴 기획 · 영상 지시문 보기</summary><p><b>스타일</b> E 이야기·시간 · 노즐에서 떨어진 참기름 한 방울의 금빛 고리를 따라 식탁 둘레가 원료가 자란 국산 참깨밭으로 건너갔다 돌아옴(장소 2개)</p><p><b>장소 근거</b> 집 식탁 — brief_card 「상황(언제·어디서): 집 부엌 식탁·밥상, 밥 위에 짜서 얹는 순간」 · 바뀐 장소 국산 참깨밭 — 원료 「국산 통참깨 100%」(광고주 포인트·판매 페이지)가 자란 곳</p><p><b>인물</b> 30대 초 한국 여성 — 집 식탁에서 혼자 점심(소매 걷은 셔츠·식탁 위 비빔밥 한 그릇으로 보임)</p><p><b>효과 근거</b> &quot;어디서든 편하게 짜서 바로 짜먹는 참기름&quot; · &quot;국산 통참깨 100%&quot; → 짜면 노즐에서 금빛 기름이 바로 밥 위로 나옴(실제 결과) · 그 기름이 국산 참깨에서 온 것(원료가 자란 곳으로 건너감)</p><pre>ASSET MAPPING
+Image 1 = the soft squeeze bottle of sesame oil. Image 1 is the sole product-geometry and printed-artwork reference for every shot where the product is visible: a dark-brown soft cylindrical squeeze bottle with rounded shoulders, a ribbed yellow collar topped by a pointed yellow nozzle cap, and the yellow wrap-around label exactly as on Image 1. Other images supply framing and scale only, not lettering. Do not invent extra printed text.
+Image 2 = the woman (face, hair, outfit). Her body shape and proportions follow Image 2 exactly.
+Image 3 = her home dining table at lunchtime (the home space).
+Image 4 = the Korean sesame field (the world the ring reveals).
 
 BRIEF
-Her squeezed oil stream curls into a ring in the air; inside it only, the kitchen wall becomes a sunlit sesame field. Playful, warm. Get to the ring fast and give the field the most time and camera energy.
+A drop of squeezed sesame oil sends out a golden ring; wherever it passes, her apartment becomes a sunlit sesame field, while she, the table and the bottle stay put. Warm, playful home-meal tone. Get to the ring fast and give the sesame field the most time, scale and camera energy.
 
-Shot 1 [0-2s] (medium, waist up): Image 3 kitchen. Image 2 holds Image 1 nozzle-down over the bowl in her right hand. A moment later she squeezes; the stream curls back upward behind the bowl. Her eyes follow it.
+Shot 1 [0-2s] (medium): Ordinary lunch as Image 3, bottle in her right hand over the bibimbap. A moment later she squeezes; a thin golden stream falls from the nozzle tip onto the egg and a golden ring spreads across the table. Her eyes follow the ring.
 Cut to
-Shot 2 [2-4s] (extreme close-up): the thin golden stream leaves the single nozzle tip and arcs back.
+Shot 2 [2-5s] (medium wide): The ring sweeps past her; walls and floor become the field of Image 4. She turns her head to follow it.
 Cut to
-Shot 3 [4-9s] (medium toward the wall, pushing in): the stream closes into a shoulder-wide ring in the air. Inside the ring only, the tiles become Image 4: sesame stalks sway all at once, sunlight spills onto the bowl and her face, camera shaking. Her brother on the sofa behind looks up. Outside the ring nothing changes.
+Shot 3 [5-9s] (low, circling): The camera glides low between sesame stalks around the table; the golden stream glows in backlit sunshine and pools on the rice.
 Cut to
-Shot 4 [9-10.5s] (close on the bowl): she relaxes her grip; the ring unwinds into the bowl, nothing spilled. The wall is tiles again.
+Shot 4 [9-10.5s] (close-up): She stops squeezing; the stream breaks. The ring folds back and her apartment returns.
 Cut to
-Shot 5 [10.5-13s] (full body, side view): she squeezes once more; a straight thin stream falls into the bowl. She grins.
-[10.5-12.5s] Korean narrator says: &quot;국산 통참깨 백 퍼센트, 저온압착.&quot;
-Spoken only — no on-screen text, subtitles or captions anywhere in the video.
+Shot 5 [10.5-13s] (upper body): A 200 mL squeeze bottle that fits in one hand; she squeezes once over the bowl and lets go, one last drop falls.
 Cut to
-Shot 6 [13-15s] (close): her right hand holds Image 1 upright, label to camera; top quarter of the frame clean empty white tiled wall.
+Shot 6 [13-15s] (hand close-up): She lifts the bottle, label facing camera. Leave the top quarter of the frame as clean empty background.
 
-Sound: kitchen hood hum, then wind rustling sesame stalks and insects through the ring, indistinct low murmur with no clear words.
-Music: light acoustic guitar, low.
-Keep exactly these shots and timing. Let the model choose lenses, camera moves and micro-acting, preserving Image 1 and Image 2.
+Sound: spoon on bowl, a soft drip, then wind through sesame stalks and crickets. [10.5-12.5s] Korean narrator says: &quot;국산 통참깨, 저온압착.&quot; Spoken only — no on-screen text, subtitles or captions anywhere in the video.
+Music: gentle acoustic guitar.
+Keep exactly these shots and timing; bottle and hand stay fixed, only the background changes. Let the model choose lenses, camera moves and micro-acting.
 </pre></details></div></div>
  <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/BF-FUEGO.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Stare into the Fueg-hole — Skittle</figcaption></figure><figure><video src="media/o3tpl/ON292-DORITOSDOOR.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Doritos Chip Portal Reveals Packs </figcaption></figure></div></div>
 </div>
 <div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
-<div class="vote" data-t="T09"><p class="lab">판정</p>
+<div class="vote" data-t="sesame-T09"><p class="lab">판정</p>
  <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
  <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
  <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
-</div></article><article class="card" id="T10">
+</div></article><article class="card" id="sesame-T10">
 <header><span class="no">6</span><div><h3>T10 반복·증식</h3><p class="mut">고정 축의 같은 단위를 늘리거나 모아 새로운 하나의 형상을 만든다.</p></div><span class="bt">2차</span></header>
 <p class="ex"><b>이 제품이라면</b> 0초 접시 위 참깨 한 줌 → 1초 참깨 알들이 날아올라 모이며 병 실루엣을 쌓음 → 실루엣이 실물 병으로 굳음 → 손이 실물 병을 듦.<br><span class="mut"><b>보여 줄 장점</b> 국산 통참깨 100%·고품질 선별(d11) — 참깨 알이 모여 병 실루엣·&#x27;참기름&#x27; 글자를 만드는 장면이 &#x27;이 병은 참깨 알갱이만으로 되어 있다&#x27;를 보여 줌.</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
 <div class="pair">
  <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
-  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="psum">T10 반복·증식(물리 검토 반영) — 탕비실 도시락 위로 꾹꾹 짤 때마다 방울이 노즐 아래 같은 축에 쌓여 거꾸로 든 병과 노즐을 맞댄 황금 기름 병이 되고, 손을 놓자 곧게 아래 도시락에 내려앉아 마지막 한 방울이 노른자에</p><details class="pl"><summary>엔진이 쓴 기획 · 영상 지시문 보기</summary><p><b>스타일</b> B 물성 폭발 · 회오리 대신 템플릿 모양 「반복·증식」 — 꾹 짤 때마다 노즐에서 나온 똑같은 황금 방울 하나가 떨어지지 않고 노즐 바로 아래 밥 위 공중에 멈춰 아래부터 쌓이고, 수백 방울이 모여 거꾸로 든 실물 병과 노즐 끝을 맞댄 똑바로 선 황금 기름 병(이 병의 윤곽 그대로 · 거울처럼)이 됐다가, 손을 놓으면 같은 축으로 곧게 아래 도시락에 내려앉아 마지막 한 방울로 끝남</p><p><b>인물</b> 30대 초반 남자 직장인 — 셔츠·니트 조끼 사무실 차림으로 탕비실 식탁에 앉음 · 뒤 전자레인지 앞 동료 2명(사원증 목걸이 · 흐리게)</p><p><b>효과 근거</b> &quot;마지막 한 방울까지 깔끔하게&quot; (page_text.txt · brief_card 기능) · &quot;뚜껑을 살짝 돌려 짜면 ‘착’ 흘림 없이&quot; → 한 방울씩 나뉘어 나오고, 다 모인 기름이 흘림 없이 그릇에 들어가 마지막 한 방울로 끝나는 실제 결과를 키움</p><pre>ASSET MAPPING
-Image 1 = the sesame oil squeeze bottle (product sheet). Image 1 is the sole product-geometry and printed-artwork reference for every shot where the bottle is visible: a dark brown opaque squeeze bottle with rounded shoulders, a yellow ridged screw cap, and a pointed yellow nozzle on top, with the yellow front label exactly as on Image 1. A 200 mL bottle that fits in one hand. Do not invent extra printed text.
-Image 2 = the office worker in his early 30s (character sheet) — face, hair and clothes exactly as on Image 2; his body shape and proportions follow Image 2 exactly.
-Image 3 = the office pantry table with his open lunch box of white rice and a fried egg (place). Other images supply framing and scale only, not the product shape or lettering.
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="psum">집 식탁에서 비빔밥 위로 스퀴즈 참기름을 짜자, 방울이 떨어지지 않고 노즐 아래 공중에 줄줄이 멈춰 쌓이다가 그릇만 한 한 방울로 뭉쳐 밥 위에 내려앉는다.</p><p class="mut">1차(고치기 전): 평일 점심 회사 탕비실에서 그가 도시락 계란밥에 참기름을 꾹꾹 짜자 방울마다 노즐 아래 밥 위 공중에 멈춰 쌓여 거꾸로 든 병과 노즐 끝을 맞댄 황금 기름 병이 되고, 손을 놓자 곧게 아래 도시락에 다 내려앉아 마지막 한 방울이 노른자에 떨어진다</p><details class="pl"><summary>엔진이 쓴 기획 · 영상 지시문 보기</summary><p><b>스타일</b> B 물성 폭발 · 짜는 동작마다 노즐 아래에 같은 금빛 방울이 같은 모양으로 늘어서 공중에 멈추고, 모여 그릇만 한 한 방울이 됨(Q12 「동작마다 주변이 같은 모양으로 반응」 · 기본 모양 회오리 대신 반복 — 템플릿 T10 지정이고 방울 하나가 참기름의 실제 단위라서)</p><p><b>장소 근거</b> 집 식탁 — 브리프 카드 「상황(언제·어디서): 집 부엌 식탁·밥상, 밥 위에 짜서 얹는 순간」 · 장소는 끝까지 바뀌지 않음</p><p><b>인물</b> 집에서 점심 먹는 30대 초 여성 — 화면 표시: 집 식탁·비빔밥 한 그릇·편한 셔츠(직업 설정 없음)</p><p><b>효과 근거</b> &quot;어디서든 편하게 짜서 바로 짜먹는 참기름. 마지막 한 방울까지 깔끔하게!&quot; → 누를 때마다 노즐에서 한 방울씩 또렷하게 끊겨 나오는 실제 결과를 공중에 멈춰 늘어놓고, 모은 마지막 한 방울이 밥 위에 남김없이 내려앉음</p><pre>ASSET MAPPING
+Image 1 = the soft sesame-oil squeeze bottle. Image 1 is the sole product-geometry and printed-artwork reference for every shot where the bottle is visible: a dark-brown soft round squeeze bottle, a ribbed yellow collar topped by a pointed yellow nozzle cap, the yellow wrap-around label exactly as on Image 1. Other images supply framing and scale only, not lettering. Do not invent extra printed text.
+Image 2 = the woman (face, hair, outfit).
+Image 3 = the home dining table; every shot happens at this same table.
 
 BRIEF
-Squeezed oil drops stop in mid-air and stack into an upright mirror of the bottle, then fall into his lunch box to the last drop. Playful. Give the golden bottle the most time and camera energy.
+Squeezed sesame-oil drops hang in mid-air, then merge into one bowl-sized drop that glazes the bibimbap. Give that drop the most time and camera energy.
 
-Shot 1 [0-2s] (medium, seated): Image 3 pantry at noon. Image 2 holds Image 1 nozzle-down at chest height over the lunch box in his right hand. A moment later he squeezes; one golden drop falls and stops just above the rice.
+Shot 1 [0-2s] (medium shot, her eye level): The woman from Image 2, spoon in left hand, bottle in right, nozzle down over the bowl. She squeezes; a moment later the drops stop in mid-air, a straight string down to the rice. Her eyes follow it down.
 Cut to
-Shot 2 [2-5s] (close): he squeezes in short pulses; each new drop falls onto the last one and stops, a column growing up from the rice toward the nozzle. His eyes follow it. Two coworkers turn.
+Shot 2 [2-5s] (close side shot): Drops form only in that one vertical string under the nozzle. With each squeeze she raises the bottle higher, and the string grows longer and denser. Her eyes run along it, delighted.
 Cut to
-Shot 3 [5-10s] (medium, camera arcing in from the front): the drops stack into a glossy amber-gold oil copy of Image 1&#x27;s outline, upright on the rice, its nozzle touching the real nozzle, forearm-tall, hundreds of glinting drops, no label. The camera trembles as drops chime.
+Shot 3 [5-8s] (macro, low at the bowl rim): Only the nozzle tip shows at the top edge, high above. Below it the string merges into one glossy golden drop the size of the bowl, hanging above the rice, glowing amber. The camera circles it.
 Cut to
-Shot 4 [10-11s] (close): he relaxes his grip; the golden shape collapses straight down into the rice below, one last drop on the yolk. Nothing spilled.
+Shot 4 [8-10s] (macro): It slowly settles onto the rice, glazing rice, vegetables and egg without splashing.
 Cut to
-Shot 5 [11-13s] (two-shot, waist up): a coworker leans in; he squeezes once more, a thin straight stream, and grins.
-[10-13s] Korean narrator says: &quot;국산 통참깨, 마지막 한 방울까지.&quot;
+Shot 5 [10-13s] (waist-up, her right front): She squeezes the one-hand 200 mL bottle once; a thin stream falls and cuts off cleanly.
+[10-13s] Korean narrator says: &quot;국산 통참깨, 저온압착.&quot;
 Spoken only — no on-screen text, subtitles or captions anywhere in the video.
 Cut to
-Shot 6 [13-15s] (close): his right hand holds Image 1 upright, label to camera; top quarter clean empty pale wall.
+Shot 6 [13-15s] (medium close-up): She holds the bottle upright, label to camera. Leave the top quarter of the frame as clean empty background.
 
-Sound: soft tick per drop, indistinct low murmur with no clear words.
-Music: light marimba, low.
-Keep exactly these shots and timing. Let the model choose lenses, camera moves and micro-acting, preserving Image 1 and Image 2.
+Sound: quiet room, drip plinks. Light acoustic music.
+Keep exactly these shots and timing. Label front only in shots 1, 5, 6. Let the model choose lenses, camera moves and micro-acting, preserving Image 1&#x27;s bottle.
 </pre></details></div></div>
  <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/ON-food-01.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>&quot;Spoons&quot; | Graza</figcaption></figure><figure><video src="media/o3tpl/BF-MILK.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Sephora Makeup Tint Filling Store </figcaption></figure></div></div>
 </div>
 <div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
-<div class="vote" data-t="T10"><p class="lab">판정</p>
+<div class="vote" data-t="sesame-T10"><p class="lab">판정</p>
  <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
  <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
  <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
-</div></article><article class="card" id="T11">
+</div></article><article class="card" id="sesame-T11">
 <header><span class="no">7</span><div><h3>T11 장르 패러디·말장난</h3><p class="mut">익숙한 장르 표지나 한 단어의 다른 뜻이 하나의 불가능한 사건으로 나타난다.</p></div><span class="bt">2차</span></header>
 <p class="ex"><b>이 제품이라면</b> 0초 법정, 판사가 &#x27;피고 참기름, 너무 고소하다는 혐의&#x27; → 1초 증거물로 놓인 병 노즐에서 황금 줄기가 터져 방청석 밥그릇마다 한 줄씩 → 판사가 비빔밥 한 입 &#x27;인정&#x27; 망치 → 손이 실물 병을 듦.<br><span class="mut"><b>보여 줄 장점</b> 고소한 풍미(d06·d16 풍미 강도 진함) — &#x27;고소하다&#x27;(맛) ↔ &#x27;고소(告訴)&#x27; 법정 드라마 패러디, 또는 &#x27;한 방울의 황금&#x27; 금고 털이 장르로 &#x27;진한 고소함&#x27;을 한 사건으로 보여 줌.</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
 <div class="pair">
  <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
-  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="psum">T11 말장난 — 신혼 아침 계란밥에 참기름을 짜자 노즐에서 통참깨가 폭포처럼 쏟아져 식탁을 덮고 남편이 정색하고 「깨가 쏟아지네」 · 다시 짜면 맑은 기름이 깨 더미 위에 번짐(물리 검토 반영)</p><details class="pl"><summary>엔진이 쓴 기획 · 영상 지시문 보기</summary><p><b>스타일</b> B 물성 폭발(V05 말이 현실) · 꾹 짜는 순간 노즐의 황금 줄기가 통참깨 줄기로 바뀌어 쏟아지고, 쏟아지는 깨가 식탁을 덮자 남편이 「깨가 쏟아지네」 — 관용구가 말 그대로 현실 (회오리 대신 쏟아짐: 관용구 낱말이 「쏟아지다」라 모양이 정해짐 · 회오리는 T01 판이 씀)</p><p><b>인물</b> 30대 초 신혼부부 — 같은 잠옷 계열 홈웨어·작은 2인 식탁으로 첫 컷에 「신혼집」이 보임 · 그녀가 짜고, 맞은편 남편이 보며 한마디</p><p><b>효과 근거</b> &quot;국산 통참깨 100%&quot; (brief.json 포인트 · page_capture/images/008·016.jpg) → 이 기름이 실제로 통참깨만 짜서 나왔다는 결과를 거꾸로 보여 줌(효능 주장 없음)</p><pre>ASSET MAPPING
-Image 1 = product sheet: the sesame oil squeeze bottle. Image 1 is the sole product-geometry and printed-artwork reference for every shot where the product is visible: a dark brown squeeze bottle with rounded shoulders, a yellow ridged screw cap and a pointed yellow nozzle on top, the yellow front label exactly as on Image 1. Other images supply framing and scale only, not lettering. Do not invent extra printed text.
-Image 2 = the wife (character sheet): her face, hair and clothes in every shot.
-Image 3 = the husband (character sheet): his face, hair and clothes in every shot.
-Image 4 = the small two-person breakfast table by the window, before anything happens. Same room in every shot.
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="psum">집 식탁에서 비빔밥에 참기름을 짜던 여자 앞에서, 기름 줄이 스스로 엮여 금빛 그물로 그릇 위에 떴다가 밥 위로 사르르 내려앉는다.</p><p class="mut">1차(고치기 전): 주말 아침 신혼집 2인 식탁에서 그녀가 계란밥에 스퀴즈 참기름을 꾹 짜자 황금 줄기가 통참깨 폭포로 바뀌어 식탁을 덮고, 맞은편 남편이 정색하고 「깨가 쏟아지네」 한다</p><details class="pl"><summary>엔진이 쓴 기획 · 영상 지시문 보기</summary><p><b>스타일</b> B 물성 폭발 · 쓰는 순간의 물성(가는 참기름 줄) 하나가 그릇 위를 바꿈 — 기본 모양 회오리 대신 「엮임」: T11 말장난 「짜다」의 다른 뜻(실로 짜다)이 그림이 되려면 줄이 엮여야 하고, 크기는 그릇 둘레 안(v3.15 몸·제품 둘레)</p><p><b>장소 근거</b> 집 식탁(비빔밥 한 그릇) — 브리프 카드 「상황: 집 부엌 식탁·밥상, 밥 위에 짜서 얹는 순간(state_pour_1.jpg)」 · 바뀐 장소 없음</p><p><b>인물</b> 30대 초 여성 — 화면에 보이는 표시: 집에서 입는 편한 옷차림으로 혼자 점심 비빔밥 앞(직업 설정 없음)</p><p><b>효과 근거</b> &quot;어디서든 편하게 짜서 바로 짜먹는 참기름. 마지막 한 방울까지 깔끔하게!&quot; → 노즐 끝 가는 줄이 원하는 자리에 정확히 얹힘(실제 결과)을 실처럼 엮이는 정확함으로 · 내려앉을 때 튀지 않고 끝에서 깔끔히 끊김</p><pre>ASSET MAPPING
+Image 1 = product sheet of the soft squeeze bottle of sesame oil. Image 1 is the sole product-geometry and printed-artwork reference for every shot where the bottle is visible; other images supply framing and scale only, not lettering. Do not invent extra printed text.
+Image 2 = the woman (character sheet): her face, hair and clothes in every shot where she appears.
+Image 3 = the dining table and room: same table, bowl of bibimbap, window and light in every shot.
 
 BRIEF
-Newlyweds at weekend breakfast: her squeezed sesame oil turns into a waterfall of whole sesame seeds. Give the seed waterfall the most time and camera energy.
+A squeezed stream of sesame oil weaves itself into a floating golden net above the rice. Get to the weaving fast; give the net the most time, scale and camera energy.
 
-Shot 1 [0-2s] (medium, both at the table): Her right hand holds the bottle upside down over her egg rice bowl and squeezes; her left hand holds the bowl rim. A thin golden oil stream falls, then a moment later turns into pale golden whole sesame seeds pattering into the bowl. Across the table, he stops eating and stares.
+Shot 1 [0-2s] (medium close-up): The woman from Image 2 at the table of Image 3, right hand holding the bottle from Image 1 nozzle-down over the bowl, a 200 mL bottle that fits in one hand. She squeezes; a thin golden oil stream falls, then swings side to side by itself, the bottle still, laying threads just above the rice. Her eyes follow it.
 Cut to
-Shot 2 [2-5s] (close-up of nozzle and bowl): The seed stream grows thicker, heaps over the rice and spills over the rim.
+Shot 2 [2-5s] (medium shot): She keeps squeezing. The stream weaves over and under its own threads until a golden net reaches the bowl rim, floating just above the rice. Her eyes follow the net, amazed.
 Cut to
-Shot 3 [5-10s] (wide, the whole table): A waterfall of seeds pours from the nozzle into her bowl and spreads across the table around both bowls. The camera pushes in with a slight shake. She eases her grip, the pouring stops; he looks at her, deadpan.
-[9-10s] The husband says in Korean: &quot;깨가 쏟아지네.&quot;
-Spoken only — no on-screen text, subtitles or captions anywhere in the video.
+Shot 3 [5-9s] (macro, only the net): The floating net of glossy golden oil threads, like a woven basket, glitters. The camera glides low around and pushes beneath it; the trickle grows louder.
 Cut to
-Shot 4 [10-13s] (both, upper body): The seeds still cover the table. Her right hand gives the one-hand-sized 200 mL bottle one short squeeze; this time only a thin golden oil stream falls onto the seed heap in her bowl and seeps between the seeds. She smiles calmly; he laughs.
+Shot 4 [9-10s] (close-up): She stops squeezing; the stream breaks cleanly. The net settles softly onto the rice as a glossy sheen, no splash.
 Cut to
-Shot 5 [13-15s] (product close-up): Her right hand holds the bottle upright, label to camera, the seed-covered table soft below. Leave the top quarter of the frame as clean empty background.
+Shot 5 [10-13s] (medium shot, true size): She lowers the bottle near the bowl and squeezes once; an ordinary thin stream lands on the spinach. Satisfied smile.
+Cut to
+Shot 6 [13-15s] (close-up): Her right hand holds the bottle upright, label front as Image 1, face out of frame. Leave the top quarter of the frame as clean empty background.
 
-Sound: seeds rattling like rain, then fading; birds.
-Keep exactly the shots listed above, in this order and timing. Let the model choose lenses, camera moves and micro-acting within each shot, preserving the bottle, couple and room.
+Sound: oil trickle, quiet room tone. No speech. No on-screen text, subtitles or captions.
+Music: soft plucked strings.
+Keep exactly the shots listed above, in this order and timing. Let the model choose lenses, camera moves and micro-acting within each shot.
 </pre></details></div></div>
  <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/ON291-NONGSHIM.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Nongshim Fish Roller Coaster</figcaption></figure><figure><video src="media/o3tpl/meta_1555536043258861.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>극소수 · Meta 광고 1555536043258861</figcaption></figure></div></div>
 </div>
 <div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
-<div class="vote" data-t="T11"><p class="lab">판정</p>
+<div class="vote" data-t="sesame-T11"><p class="lab">판정</p>
  <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
  <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
  <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
-</div></article><article class="card" id="T13">
+</div></article><article class="card" id="sesame-T13">
 <header><span class="no">8</span><div><h3>T13 평면에서 튀어나오기</h3><p class="mut">표면의 표시나 인쇄 외곽이 입체로 나와도 원래 표면은 유지된다.</p></div><span class="bt">2차</span></header>
 <p class="ex"><b>이 제품이라면</b> 0초 식탁 위 병 → 1초 라벨 속 영자씨 일러스트가 상반신으로 라벨 밖에 튀어나와(라벨은 그대로) &#x27;저온압착&#x27; 말풍선을 들고 윙크 → 다시 라벨로 쏙 → 손이 실물 병을 듦.<br><span class="mut"><b>보여 줄 장점</b> 브랜드 인물 — &#x27;구독자 95만 푸드크리에이터 영자씨가 직접 생산&#x27;(d06)·&#x27;엄마의 마음&#x27;. 라벨의 영자씨가 입체로 나와 &#x27;저온압착&#x27; 말풍선을 내밀면 누가 만들었는지와 핵심 공법을 한 번에 전달.</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
 <div class="pair">
  <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
-  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="psum">T13 튀어나오기 재기획 — 명절 전날 거실에서 김에 스퀴즈 참기름을 꾹 짜 그은 기름 줄마다 통참깨가 줄지어 솟아 서고(기름 줄은 납작 그대로), 가라앉은 뒤 그녀가 그냥 기름 줄을 직접 짠다</p><details class="pl"><summary>엔진이 쓴 기획 · 영상 지시문 보기</summary><p><b>스타일</b> M 평면 밖으로 · 짜서 그은 납작한 기름 줄(평면 표시)에서 그 기름의 재료인 통참깨가 입체로 줄지어 솟아 서고, 기름 줄은 납작하게 그대로 남음 — 「국산 통참깨 100%」가 줄에서 튀어나옴</p><p><b>인물</b> 30대 초 여자(딸) — 연한 회색 맨투맨·검은 머리 집게 핀 · 거실 바닥 좌식 상 앞에 앉음 · 첫 컷에 보임 / 60대 엄마 — 옆에서 소금 그릇·김 붓 들고 있음(영상 문장에만 · 앵커 없음 · 얼굴 작게)</p><p><b>효과 근거</b> &quot;국산 통참깨 100%&quot;(병 라벨 · client/truth_1.jpg · page_capture/images/008.jpg) · &quot;SQUEEZE GOLDEN LIQUID&quot;(008.jpg) → 짜면 노즐에서 가는 황금 줄이 나온다는 실제 결과 + 그 줄의 재료가 통참깨라는 원문 · 깨가 줄에서 서는 것만 불가능</p><pre>ASSET MAPPING
-Image 1 = product sheet: the sesame oil squeeze bottle. Image 1 is the sole product-geometry and printed-artwork reference for every shot where the product is visible: a dark brown squeeze bottle with rounded shoulders, a yellow ridged screw cap and a pointed yellow nozzle on top, the front label exactly as on Image 1. Other images supply framing and scale only, not lettering. Do not invent extra printed text.
-Image 2 = the young woman (character sheet): her face, hair and clothes in every shot.
-Image 3 = the opening: the living-room low table with a tray and one flat sheet of dried black seaweed, before anything happens. Same table in every shot.
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="psum">집 식탁에서 비빔밥에 참기름을 짜자 라벨의 「참기름」 붓글씨 획이 금빛 기름 리본으로 솟아 밥 위를 감싸고, 손을 놓으면 멈추며 글자는 라벨에 그대로 남는다.</p><p class="mut">1차(고치기 전): 명절 전날 낮 아파트 거실 바닥 상에서 그녀가 김 굽기 준비로 까만 김에 스퀴즈 참기름을 꾹 짜 줄을 긋자, 기름 줄을 따라 통참깨 알들이 톡톡 솟아 서고, 옆의 엄마가 붓을 든 채 멈춘다</p><details class="pl"><summary>엔진이 쓴 기획 · 영상 지시문 보기</summary><p><b>스타일</b> M 화면 밖으로 · 평면(라벨 인쇄)에 있던 것이 실제 공간으로 나옴 — 짜는 순간 라벨의 큰 빨간 「참기름」 붓글씨 획이 진짜 금빛 참기름 리본이 되어 라벨에서 솟아 비빔밥 위로 흘러내림(라벨 글자는 그대로 남음)</p><p><b>장소 근거</b> 집 식탁(부엌 옆) — brief_card 「상황(언제·어디서): 집 부엌 식탁·밥상, 밥 위에 짜서 얹는 순간(state_pour_1.jpg 계란밥 위 사진)」 · 장소 바뀜 없음</p><p><b>인물</b> 집에서 점심 먹는 30대 초 여성 — 화면 표시: 니트 가디건·식탁 위 비빔밥 한 그릇</p><p><b>효과 근거</b> &quot;어디서든 편하게 짜서 바로 짜먹는 참기름&quot;(판매 페이지) → 짜면 금빛 기름이 바로 밥 위에 얹힘(실제 결과를 크게 · 비유 아님)</p><pre>ASSET MAPPING
+Image 1 = product sheet of the soft squeeze bottle of sesame oil. Image 1 is the sole product-geometry and printed-artwork reference for every shot where the product is visible. Other images supply framing and scale only, not lettering. Do not invent extra printed text.
+Image 2 = the woman: her face, hair and clothes in every shot.
+Image 3 = the home dining table: same table, bowl, window and light in every shot.
 
 BRIEF
-Each golden oil line squeezed onto seaweed sprouts a row of standing whole sesame seeds; the flat line stays underneath. Get to the seeds fast and give the seed rows the most time, the most scale and the most camera energy.
+At home lunch, a woman squeezes sesame oil onto bibimbap, and the big red word on the label lifts off as glossy golden oil ribbons while the printed word stays. Warm, playful. Get to the lift-off fast and give the ribbons the most time, scale and camera energy.
 
-Shot 1 [0-2s] (medium, across the table): Her right hand holds the bottle upside down, nozzle open, and squeezes a thin golden line across the seaweed. A moment later whole sesame seeds pop up one after another along the line and stand on it. Her eyes leave the nozzle and follow the seeds as they rise.
+Shot 1 [0-2s] (medium close-up): Her right hand holds the squeeze bottle exactly as Image 1, a 200 mL bottle that fits in one hand, nozzle down over the bowl; she squeezes a thin golden stream onto the rice. A moment later the red word&#x27;s strokes rise off the label as golden oil ribbons; the printed word stays crisp. Her eyes leave the bowl and follow the ribbons as they rise.
 Cut to
-Shot 2 [2-5s] (upper body, her right side): She squeezes a second and third line; more seeds pop up taller along each line. Her eyes stay on the rising seeds, never on the nozzle. Her mother beside her freezes, pastry brush in hand.
+Shot 2 [2-5s] (close-up): She keeps squeezing; more ribbons rise from the label and arc over the bowl rim. Her eyes follow the ribbons.
 Cut to
-Shot 3 [5-10s] (close-up, camera low at the seaweed surface): Only the three rows of fingertip-sized roasted seeds standing like a tiny crop field, the flat oil lines shining beneath. The camera glides along the rows, slightly shaking. Then the seeds sink back into the oil lines.
+Shot 3 [5-8s] (macro at the bowl rim): Only the ribbons: golden oil glides past the lens and wraps the rice and egg. The camera rushes along a ribbon; the oil sound swells.
 Cut to
-Shot 4 [10-13s] (upper body): She squeezes the bottle once more; a plain golden line, no seeds. She grins.
+Shot 4 [8-10s] (close-up): She releases; the ribbons stop and settle on the rice as a glossy sheen. Her eyes stay on the rice.
 Cut to
-Shot 5 [13-15s] (product close-up): Her right hand holds the bottle upright, label to camera. Leave the top quarter of the frame as clean empty background.
+Shot 5 [10-13s] (hand close-up with bowl): She squeezes once, a thin stream only, then releases.
+Cut to
+Shot 6 [13-15s] (close-up): She holds the bottle upright, label to camera. Leave the top quarter of the frame as clean empty background.
 
-The bottle never changes shape.
-Sound: soft seed popping that swells in shot 3, indistinct low TV murmur with no clear words.
-No on-screen text, subtitles or captions anywhere in the video.
-Keep exactly the shots listed above, in this order and timing. Let the model choose lenses, camera moves and micro-acting within each shot.
+Sound: room tone, an oil trickle growing in shots 3-4. Music: light playful acoustic beat. No speech. No on-screen text, subtitles or captions.
+Keep exactly these shots, in this order and timing. Let the model choose lenses, camera moves and micro-acting, preserving Image 1, Image 2 and Image 3.
 </pre></details></div></div>
  <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/REF286-ELITE.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Elite 컵누들 · 두 광고판을 가로지르는 포크</figcaption></figure><figure><video src="media/o3tpl/ON291-PRINGLES.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Pringles Ingredients Burst Out fro</figcaption></figure></div></div>
 </div>
 <div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
-<div class="vote" data-t="T13"><p class="lab">판정</p>
+<div class="vote" data-t="sesame-T13"><p class="lab">판정</p>
  <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
  <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
  <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
-</div></article><article class="card" id="T18">
+</div></article><article class="card" id="sesame-T18">
 <header><span class="no">9</span><div><h3>T18 동일 위치 불가능 매치 컷</h3><p class="mut">기준 윤곽의 위치를 고정한 채 물리적으로 연결될 수 없는 두 공간이나 물체를 한 번 자른다.</p></div><span class="bt">2차</span></header>
 <p class="ex"><b>이 제품이라면</b> 0초 황금 기름이 줄줄 흘러내리는 스테인리스 압착 원통(화면 중앙) → 1초 같은 위치·같은 윤곽으로 컷, 식탁 위 병으로 바뀌고 노즐 끝에 한 방울 → 손이 실물 병을 듦.<br><span class="mut"><b>보여 줄 장점</b> 저온압착·단 한 번 착유 — 같은 위치에서 &#x27;기름이 흐르는 압착 원통 → 병&#x27;으로 자르면 &#x27;이 병 속 기름이 그 압착기에서 바로 왔다&#x27;를 보여 줌.</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
 <div class="pair">
  <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
-  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="psum">T18 매치 컷(물리 검토 반영) — 집 주방에서 계란밥에 짜던 황금 줄기가 끊기지 않은 채 한 번 잘려 새벽 바닷가 차 트렁크로 · 바다·그녀·그릇·카메라 순서 고정 · 실제 크기 10-13초 · 생성 없음(영상 45cr 예상)</p><details class="pl"><summary>엔진이 쓴 기획 · 영상 지시문 보기</summary><p><b>스타일</b> G 물리 법칙 비틀기 · 공간이 한 번 통째로 바뀌는데 짜고 있던 병·줄기·그릇만 같은 자리에 그대로 — 「어디서든 짜서」가 짜는 도중 「어디서든」이 됨</p><p><b>인물</b> 30대 초반 여자 혼자 — 회청색 체크 잠옷 위아래·회색 털 슬리퍼 · 1컷은 손만 · 2컷부터 상반신</p><p><b>효과 근거</b> &quot;SQUEEZE GOLDEN LIQUID&quot;(page_capture/images/008.jpg) · 「어디서든 간편하게, 원하는 만큼. 직접 짜서 먹어요.」(p2.jpg) · 기름 색 「맑은 황금빛」(brief 작동 줄) → 짜면 노즐 끝으로 가는 황금 줄기가 나온다는 실제 결과 그대로 · 불가능한 것은 짜는 도중 장소가 바뀌는 것 하나</p><pre>ASSET MAPPING
-Image 1 = product sheet: the sesame oil squeeze bottle. Image 1 is the sole product-geometry and printed-artwork reference for every shot where the product is visible: a dark brown squeeze bottle with rounded shoulders, a yellow ridged screw cap and a pointed yellow nozzle on top, the yellow front label exactly as on Image 1. Other images supply framing and scale only, not lettering. Do not invent extra printed text.
-Image 2 = the young woman (character sheet): her face, hair and checked pajamas in every shot.
-Image 3 = the opening: the home kitchen counter in the morning, the egg rice bowl, before anything happens.
-Image 4 = the beach: the bowl on the open trunk board, the sea and dawn sun behind, same framing as Image 3.
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="psum">비빔밥 위로 짜던 참기름 줄기가 같은 자리 매치 컷 한 번에 저온압착기 출구 줄기가 되고, 그 줄기가 금빛 리본으로 불어나 화면을 채운 뒤 다시 식탁으로 돌아온다.</p><p class="mut">1차(고치기 전): 이른 아침 집 주방에서 계란밥에 스퀴즈 참기름을 짜던 그녀의 손·병·줄기·그릇만 그대로 남은 채 세상이 한 번 잘려 새벽 바닷가 차박 트렁크가 되고, 잠옷 차림의 그녀는 바다를 한 번 보고도 계속 짠다</p><details class="pl"><summary>엔진이 쓴 기획 · 영상 지시문 보기</summary><p><b>스타일</b> E 이야기·시간 · 그녀가 짜는 기름 줄기 하나가 장면을 이어, 같은 자리 그대로 부엌에서 저온압착기 출구로 건너감(T18 템플릿이라 원테이크 대신 같은 자리 매치 컷 한 번)</p><p><b>장소 근거</b> 집 식탁 — 브리프 카드 「상황(언제·어디서): 집 부엌 식탁·밥상, 밥 위에 짜서 얹는 순간」 · 저온압착실(바뀐 장소) — 브리프 판매 사실 「저온압착」 + client/state_squeeze_1.jpg 동봉 리플릿 03 「전통 방식으로 저온압착」 압착기 사진(만드는 곳)</p><p><b>인물</b> 30대 초 여성 — 집 식탁에서 혼자 비빔밥 점심(앞치마·직업 설정 없음, 보이는 것만)</p><p><b>효과 근거</b> &quot;저온압착&quot; · &quot;SQUEEZE GOLDEN LIQUID&quot;(브리프 판매 사실·공식 표기) → 압착기에서 막 나온 맑은 금빛 기름 줄기 그 자체(실제로 압착기가 내놓는 것)</p><pre>ASSET MAPPING
+Image 1 = product sheet: the soft squeeze bottle of sesame oil. Image 1 is the sole product-geometry and printed-artwork reference for every shot where the bottle is visible. Other images supply framing and scale only, not lettering. Do not invent extra printed text.
+Image 2 = the woman (person sheet).
+Image 3 = her home dining table (shots 1, 5, 6).
+Image 4 = the cold oil-press room (shots 2, 3, 4).
 
 BRIEF
-Mid-squeeze, one cut turns her kitchen into a dawn beach; hands, bottle, golden stream and bowl stay in place. Give the stream on the rice the most time.
+On one match cut her squeezed sesame-oil stream is pouring from a cold oil press. Warm and playful. Get to the cut fast and give the oil ribbon at the press the most time, scale and camera energy.
 
-Shot 1 [0-2s] (close-up from behind the bowl, hands only, Image 3): Her right hand squeezes the upside-down bottle; a thin golden stream falls onto the yolk, left hand on the bowl rim. At 1s one hard cut to Image 4: everything keeps its place in frame and the stream never breaks; only the background changes.
+Shot 1 [0-1.2s] (waist-up across the table, Image 3): An ordinary lunch. She holds the bottle exactly as in Image 1 in her right hand, nozzle down over the bowl. A moment later she squeezes it and a thin golden stream drops down the frame centre onto the egg. Her eyes follow the stream.
 Cut to
-Shot 2 [2-5s] (upper body, from the trunk side, front three-quarter): In pajamas, her back to the sea and dawn sky, she keeps squeezing over the bowl, glances over her shoulder at the sea, then back.
+Shot 2 [1.2-3s] (same framing, Image 4): The same thin stream, same place and thickness, now falls from the steel spout of the press into a stainless basin. No woman, bottle or table.
 Cut to
-Shot 3 [5-10s] (close-up, only the stream): Her hand circles the bottle; the low sun makes the stream glitter as it rings the yolk and rice, now glossy. The camera circles, slightly shaking. Her hand relaxes; a last drop falls.
+Shot 3 [3-5.5s] (closer): The stream swells into a glossy golden ribbon filling the basin.
 Cut to
-Shot 4 [10-13s] (waist-up, side): Seated on the trunk edge facing the sea, the bowl beside her thigh, left hand on its rim, her right hand lifts the bottle beside her face, then squeezes once over the bowl; she grins.
+Shot 4 [5.5-10s] (macro at the spout): Slow motion, the golden ribbon folds over itself like warm honey, glowing in backlight, sweeping past the lens to fill the frame; the pour sound swells.
 Cut to
-Shot 5 [13-15s] (product and bowl): The bottle lies on its side, label up, nozzle level toward the sea, beside the glossy bowl. Leave the top quarter of the frame as clean empty sky.
+Shot 5 [10-13s] (same framing as shot 1, Image 3): Back at her table, the 200 mL bottle fits in one hand. She squeezes once, a thin stream runs onto the rice, she releases and it stops. Her eyes stay on the bowl, a small smile.
+Cut to
+Shot 6 [13-15s] (hand close-up): Her right hand holds the bottle upright, label to camera. Leave the top quarter as clean empty background.
 
-Distant campers ignore her. Sound: fridge hum, then waves; oil pattering continues across the cut; indistinct low murmur with no clear words.
-No on-screen text, subtitles or captions anywhere in the video.
-Keep exactly the shots listed above, in this order and timing. Let the model choose lenses, camera moves and micro-acting within each shot.
+Sound: quiet room, press hum, soft pour. No other people. No on-screen text or captions.
+
+Keep exactly these shots, in this order and timing; let the model choose lenses, camera moves and micro-acting, preserving the bottle from Image 1.
 </pre></details></div></div>
  <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/REF288-KAUFAPPLE.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Kaufland · 사과에서 오렌지로</figcaption></figure></div></div>
 </div>
 <div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
-<div class="vote" data-t="T18"><p class="lab">판정</p>
+<div class="vote" data-t="sesame-T18"><p class="lab">판정</p>
  <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
  <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
  <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
-</div></article>
+</div></article><h2>이번에 뺀 것 (어울림 중·하)</h2><section class="box"><ul><li><b>T02 크기 뒤집기</b> — 어울림 중 · B 약함 — 크기 변화가 연결되는 판매 포인트가 &#x27;통통한 참깨&#x27; 정도이고, 상품 자체의 크기 변화로는 장점이 안 드러남.</li><li><b>T06 성질이 공간의 규칙</b> — 어울림 중 · B 약함 — 규칙으로 옮길 성질(황금빛·느린 방울)이 특정 판매 포인트 하나에 딱 붙지 않고, 기름이 공간을 덮는 연출은 느끼함으로 읽힐 수 있음.</li><li><b>T07 착시·시점 공개</b> — 어울림 중 · B 약함 — 착시 재료는 있으나 공개된 정체(깻묵)가 소비자에게 바로 장점으로 읽히지 않음.</li><li><b>T08 불가능한 연쇄</b> — 어울림 중 · B 중간 — 포인트(한 방울만 넣어도 맛있음)는 있으나 연쇄가 길어질수록 제품보다 음식 반응이 주인공이 됨.</li><li><b>T14 내부 구조의 단계적 전개</b> — 어울림 중 · A 약함 — 병 내부에 벌릴 실제 층이 거의 없어 &#x27;참깨 층&#x27; 같은 지어낸 층이 필요함.</li><li><b>X2 빛이 모임</b> — 어울림 중 · B 약함·C 약간 — 어느 판매 포인트도 지목되지 않고, 고급 조명 톤이 발랄한 브랜드와 거리가 있음.</li><li><b>X4 제품 뒤 소재 (고급형)</b> — 어울림 중 · C 약간 — 재료·포인트는 맞지만 &#x27;고급형&#x27; 톤이 브랜드 분위기(발랄·친근)와 맞지 않음.</li><li><b>T16 접점에서 비현실 패턴 번짐</b> — 어울림 중 · C 위험 — 기름이 번지는 연출은 느끼함으로 읽힐 수 있어 패턴 선택에 따라 거부감이 생김.</li><li><b>T19 한 방울이 골조로 접혀 자람</b> — 어울림 중 · B 약함 — 세워지는 형상이 특정 판매 포인트에 붙지 않음.</li><li><b>T20 제품이 꺼낸 접힌 무대</b> — 어울림 중 · A 약함 — 무대를 펼치는 매개체로 &#x27;기름&#x27;이 어색함(라벨이었다면 더 맞음).</li><li><b>T21 제품 그림자가 독립해 움직임</b> — 어울림 하 · 재료(물성이 드러나는 그림자)가 이 불투명 병에 없고, 그림자 동작이 판매 포인트와 연결되지 않음.</li></ul><p class="mut">「중」은 버리지 않고 후보로 둡니다. 다른 제품에서는 「상」일 수 있습니다.</p></section></div><div class="prod" data-k="howlpot" hidden><section class="box item"><img src="media/tpltest/howlpot_main.jpg" alt="시험 제품 사진">
+<div><p class="lab">반려동물 생활소품 · 친구 추천</p><h3>하울팟<br>라면 노즈워크 토이</h3><p class="mut"></p><ul><li>친구 추천 · 9번 반려동물 생활소품(하울팟 자사몰)</li></ul>
+<a class="go" href="https://www.howlpot.com/shop_view/?idx=135" target="_blank" rel="noopener">판매 페이지 열기 ↗</a></div></section><h2>판매 포인트 <span class="mut">· 판정 에이전트가 상세 그림 1장을 보고 정리</span></h2>
+<section class="box"><ul><li>면발·야채 토핑·컵라면 용기 3곳에 간식을 숨겨 후각으로 찾아 먹는 노즈워크 <span class="mut">(상세 조각 d00 본문 「면발, 야채 토핑, 컵라면 용기 3곳에 간식을 자유자재로 넣어 후각 활동을 통해 찾아 먹는」)</span></li><li>난이도 3단계(초급 5-15분 / 중급 10-25분 / 상급 20-30분, 상급은 벨크로 잠금) <span class="mut">(d09~d10 초급·중급·상급 표, PLAY TIME, 「입구를 벨크로 잠금으로 닫아주세요」)</span></li><li>간식 크기별로 숨기는 자리가 다름(1-2cm 토핑 주머니·면발 사이 / 2.5-4cm 용기와 면발 사이 / 10cm~ 깊은 용기) <span class="mut">(d08~d09 원형 사진 3장과 문구)</span></li><li>신발끈을 좋아하는 반려견에게 딱 — 면발이 신발끈 같은 코튼 끈, 당기며 노는 장난감 <span class="mut">(d07 Check Point 1 「신발끈을 좋아하는 반려견에게 딱!」, d10 중급 「면발 절반을 용기 밖으로… 쉽게 잡아당기며 놀 수 있게」)</span></li><li>탄성 있는 면발 토이 + 토핑 토이 구조 <span class="mut">(d07 Check Point 2)</span></li><li>영유아 장난감에 쓰는 코튼·라이렉스 원단(면발=코튼, 용기·토핑=라이렉스) <span class="mut">(d07 Check Point 3, d12 제품 정보 소재 칸)</span></li><li>정품 — 가품은 원단·공정·유통을 알 수 없어 안전 보장 불가 <span class="mut">(d03 하단 문구)</span></li><li>(연출 사진, 문구 아님) 사람 컵라면 옆 강아지 전용 컵라면 — 같이 먹는 듯한 재미 <span class="mut">(d06 위쪽 사진: 남자 앞 신라면 컵·젓가락 / 프렌치불독 앞 Ramen 토이·젓가락. 판매 문구로 적힌 포인트는 아님)</span></li></ul></section>
+<p class="mut">어울림 결과: 상 8 · 중 8 · 하 4 → 상만 시험합니다.</p>
+<h2>시험할 템플릿 8개 <span class="mut">· 1차 4판 먼저, 판정 보고 나머지</span></h2><article class="card" id="howlpot-T01">
+<header><span class="no">1</span><div><h3>T01 분출·회오리</h3><p class="mut">제품의 입구에서 물성 한 가지가 방향을 유지하며 공간으로 커진다.</p></div><span class="bt">1차</span></header>
+<p class="ex"><b>이 제품이라면</b> 0초 거실 바닥 컵라면 토이 앞에 앉은 강아지 → 1초 입구에서 면발이 간식을 품고 회오리치며 방 위로 솟음 → 면발이 바닥에 내려앉아 강아지가 킁킁 → 끝 보호자가 실제 크기 컵을 손에 듦<br><span class="mut"><b>보여 줄 장점</b> 면발 속에 간식이 숨어 있는 노즈워크 구조(d00) — 쏟아지는 면발 회오리 사이로 간식 조각이 섞여 보임</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="pbad">엔진이 멈춤 — 공간·물리 검토 fail(지시서 모르는 검토자 · OPTION3_PHYSCHECK.md): 컷3·4 (8번, 힘은 가까운 것부터): 간식 수십 개와 끈 다발을 강아지 머리 높이·키 두 배까지 올리는 센 회오리인데, 가장 가까운 강아지(푸들의 곱슬 귀털·머리털·수염)는 반응이 없고 눈·코·꼬리만 씀. 맞추려면 컷3·4에 &#x27;회오리의 바람결에 귀털과 머리털이 위로 흩날린다/몸이 살짝 밀린다&#x27;를 넣</p><details class="pl"><summary>엔진이 쓴 기획 · 영상 지시문 보기</summary><p><b>스타일</b> B 물성 폭발 · 강아지가 면발 한 가닥을 당기는 순간 면발·토핑 주머니·숨긴 간식이 컵에서 통째로 빠져 강아지 둘레를 도는 회오리가 됨</p><p><b>장소 근거</b> 거실 바닥(소파 앞) — brief_card 「상황: 실내 거실 바닥·소파 위, 간식 놀이 시간 (근거 images/002·005·006 사용 사진)」 · 장소 바뀜 없음</p><p><b>인물</b> 보호자 — 손·크림색 니트 소매·무릎만(컷5) · 얼굴 화면 밖 · 주인공은 강아지(크림색 토이 푸들 — 상세 사진 견종 중 푸들)</p><p><b>효과 근거</b> &quot;면발·토핑·용기 3곳에 간식을 숨겨 강아지가 냄새로 찾아 먹는&quot; + 작동 &quot;강아지가 코와 입으로 면발을 헤치고 토핑 주머니를 뒤져 꺼냄&quot; → 강아지가 당겨 꺼내는 일이 한 번에 크게 일어나 세 곳에 숨긴 간식이 전부 드러남</p><pre>ASSET MAPPING
+Image 1 = product sheet of the plush cup-noodle dog toy. Image 1 is the sole product-geometry and printed-artwork reference for every shot where the product is visible: a soft cup body, a bundle of cord noodles that sits in its rim and can come out whole, and small fabric topping pouches attached to the noodles. Other images supply framing and scale only, not lettering. Do not invent extra printed text.
+Image 2 = the dog, a small toy poodle, exactly as Image 2 in every shot.
+Image 3 = the living-room floor in front of the sofa, exactly as Image 3; the same room in every shot.
 
-<h2>이번에 뺀 것 (어울림 중·하)</h2>
-<section class="box"><ul><li><b>T02 크기 뒤집기</b> — 어울림 중 — B 약함 — 크기 변화가 연결되는 판매 포인트가 &#x27;통통한 참깨&#x27; 정도이고, 상품 자체의 크기 변화로는 장점이 안 드러남.</li><li><b>T06 성질이 공간의 규칙</b> — 어울림 중 — B 약함 — 규칙으로 옮길 성질(황금빛·느린 방울)이 특정 판매 포인트 하나에 딱 붙지 않고, 기름이 공간을 덮는 연출은 느끼함으로 읽힐 수 있음.</li><li><b>T07 착시·시점 공개</b> — 어울림 중 — B 약함 — 착시 재료는 있으나 공개된 정체(깻묵)가 소비자에게 바로 장점으로 읽히지 않음.</li><li><b>T08 불가능한 연쇄</b> — 어울림 중 — B 중간 — 포인트(한 방울만 넣어도 맛있음)는 있으나 연쇄가 길어질수록 제품보다 음식 반응이 주인공이 됨.</li><li><b>T14 내부 구조의 단계적 전개</b> — 어울림 중 — A 약함 — 병 내부에 벌릴 실제 층이 거의 없어 &#x27;참깨 층&#x27; 같은 지어낸 층이 필요함.</li><li><b>X2 빛이 모임</b> — 어울림 중 — B 약함·C 약간 — 어느 판매 포인트도 지목되지 않고, 고급 조명 톤이 발랄한 브랜드와 거리가 있음.</li><li><b>X4 제품 뒤 소재 (고급형)</b> — 어울림 중 — C 약간 — 재료·포인트는 맞지만 &#x27;고급형&#x27; 톤이 브랜드 분위기(발랄·친근)와 맞지 않음.</li><li><b>T16 접점에서 비현실 패턴 번짐</b> — 어울림 중 — C 위험 — 기름이 번지는 연출은 느끼함으로 읽힐 수 있어 패턴 선택에 따라 거부감이 생김.</li><li><b>T19 한 방울이 골조로 접혀 자람</b> — 어울림 중 — B 약함 — 세워지는 형상이 특정 판매 포인트에 붙지 않음.</li><li><b>T20 제품이 꺼낸 접힌 무대</b> — 어울림 중 — A 약함 — 무대를 펼치는 매개체로 &#x27;기름&#x27;이 어색함(라벨이었다면 더 맞음).</li><li><b>T21 제품 그림자가 독립해 움직임</b> — 어울림 하 — 재료(물성이 드러나는 그림자)가 이 불투명 병에 없고, 그림자 동작이 판매 포인트와 연결되지 않음.</li></ul><p class="mut">「중」은 버리지 않고 후보로 둡니다. 다른 제품에서는 「상」일 수 있습니다.</p></section>
+BRIEF
+One tug turns a treat toy into a noodle whirl around the dog. Silly home comedy. Reach the whirl fast; give it the most time and camera energy.
+
+Shot 1 [0-2s] (floor-level medium): The toy stands on the floor, label to camera. The dog bites one noodle cord and tugs; a moment later the whole bundle slips out and starts spinning upward, the dog&#x27;s eyes following.
+Cut to
+Shot 2 [2-4s] (close-up on the cup rim): The noodles keep spinning upward; the topping pouches flap open and small brown treats pop out.
+Cut to
+Shot 3 [4-5s] (medium on the dog): Noodles and treats keep circling the dog&#x27;s head; its eyes follow one treat.
+Cut to
+Shot 4 [5-10s] (low camera inside the whirl): A spiral of noodles, pouches and dozens of treats turns above the cup, twice the dog&#x27;s height. The camera circles inside; treats sweep past the lens. The dog sniffs upward, tail wagging. Then the noodles drop back over the rim as in Image 1.
+Cut to
+Shot 5 [10-13s] (medium close-up, real size): A woman&#x27;s hands in cream knit sleeves hold the real-size toy, about as tall as the dog&#x27;s head and fitting in two cupped hands, before the dog; the dog pushes its nose between the noodles and sniffs.
+[10-13s] Korean narrator says: &quot;간식은 세 곳에, 찾는 건 코로.&quot; Spoken only — no on-screen text, subtitles or captions anywhere in the video.
+Cut to
+Shot 6 [13-15s] (product only, front): The toy alone, label to camera; no person or dog. Leave the top quarter as clean empty background.
+
+Sound: sniffing, fabric flutter, a whoosh swelling at the whirl; no squeaks. Light plucked-string music.
+Keep exactly these shots and timing. Let the model choose lenses, camera moves and micro-acting. Do not force the label front in shots 2-5.
+</pre></details></div></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/REF288-CLOUD.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Arm &amp; Hammer Cloud Control · Out o</figcaption></figure><figure><video src="media/o3tpl/VR274-028.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>[애경산업/스웨이] 잔여 세제 없는 스웨이 식기세척기 액체 캡</figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="howlpot-T01"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><article class="card" id="howlpot-T03">
+<header><span class="no">2</span><div><h3>T03 재질·상태 치환</h3><p class="mut">같은 축과 윤곽을 유지하며 재질이나 상태를 한 번 교대한다.</p></div><span class="bt">1차</span></header>
+<p class="ex"><b>이 제품이라면</b> 0초 김 나는 컵라면에 강아지가 고개를 듦 → 1초 다가가는 순간 국물·면이 코튼 끈·펠트 토핑으로 바뀜 → 강아지가 면발 당겨 간식 꺼냄 → 끝 보호자가 실물 듦<br><span class="mut"><b>보여 줄 장점</b> 사람 음식처럼 생겼지만 영유아 장난감 원단(코튼·라이렉스, d07·d12)으로 된 강아지용 장난감 — &#x27;라면인데 강아지가 놀아도 되는&#x27; 반전</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="pbad">엔진이 멈춤 — 그림 칸 다시(인물 앵커는 &quot;person&quot;:{…} 칸으로 — 문장은 코드가 anchor_sheet.py 틀로 씀): product_sheet 가 포장·인쇄를 지움(no sleeve/no logo/다른 엠블럼) — 시트는 팔리는 그대로(포장·인쇄·엠블럼을 참조 그대로 · 글로 묘사하지 말고 Image N 지목). 벗긴 모습은 product_open 따로</p><details class="pl"><summary>엔진이 쓴 기획 · 영상 지시문 보기</summary><p><b>스타일</b> K 안으로 들어가기 · 겉 봉제가 같은 윤곽의 맑은 유리로 바뀌어 면발 사이·토핑 주머니 속·컵 깊은 곳 세 곳에 숨긴 간식이 그대로 보임(속을 들여다보는 K 를 T03 재질 치환으로)</p><p><b>장소 근거</b> 거실 바닥 — brief_card 상황 「실내 거실 바닥·소파 위, 간식 놀이 시간 (근거 images/002·005·006 사용 사진)」</p><p><b>인물</b> 보호자 — 손·팔만(실내복 소매) · 강아지 — 크림색 토이 푸들(상세 사진 견종)</p><p><b>효과 근거</b> &quot;면발·토핑·용기 3곳에 간식을 숨겨&quot; → 실제로 세 곳에 든 간식이 그 자리 그대로 보임(없는 간식·구조를 더하지 않음)</p><pre>ASSET MAPPING
+Image 1 = product sheet: the plush cup-noodle dog toy. Image 1 is the sole product-geometry and printed-artwork reference for every shot where the product is visible: a soft red plush cup with the stitched front label and a red flap strap at the rim, cream cotton-cord noodles spilling from the rim, and small green, brown and yellow fabric topping pouches attached to the noodles. Other images supply framing and scale only, not lettering. Do not invent extra printed text.
+Image 2 = the dog: one cream toy poodle, same coat and face in every shot.
+Image 3 = the living room: same floor, sofa and window light in every shot.
+
+BRIEF
+Wherever the dog&#x27;s nose touches the plush toy, that part turns into clear sparkling glass of the same shape, revealing hidden dog treats. Playful daytime. Get to the first glass change fast and give the whole glass cup the most time, scale and camera energy.
+
+Shot 1 [0-2s] (floor-level close-up): The dog sniffs the plush toy&#x27;s noodles. A moment later the strands its nose touches turn to clear glass, and small brown treats show between them. The dog&#x27;s eyes follow the treats.
+Cut to
+Shot 2 [2-5s] (close-up): The topping pouches turn to clear glass one after another, a small brown treat inside each. Its eyes follow them.
+Cut to
+Shot 3 [5-10s] (medium to close): The whole red cup turns to clear glass with the same outline; a long brown treat sits deep inside. Sunlight sparkles as the camera circles low and pushes in. The dog noses at the rim. Nothing cracks, bends or flows.
+Cut to
+Shot 4 [10-13s] (floor-level medium, real size): The toy is soft plush again, about as tall as the dog&#x27;s head. The owner&#x27;s right hand sets it down and lets go; face out of frame. The dog buries its nose in the noodles and pulls one topping pouch out with its mouth.
+[10-13s] Korean narrator says: &quot;간식 숨길 곳, 세 군데.&quot;
+Spoken only — no on-screen text, subtitles or captions anywhere in the video.
+Cut to
+Shot 5 [13-15s] (product front): The plush toy alone, label facing camera. Leave the top quarter of the frame as clean empty background.
+
+Sound: soft sniffing, claws on wood, one small glass ring at each change. Light playful music.
+Keep exactly these shots, order and timing. Let the model choose lenses, camera moves and micro-acting within each shot, keeping the toy&#x27;s shape from Image 1.
+</pre></details></div></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/REF288-KAUFAPPLE.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Kaufland · 사과에서 오렌지로</figcaption></figure><figure><video src="media/o3tpl/REF288-LUST.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Lust × Nike · Air Liquid Max</figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="howlpot-T03"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><article class="card" id="howlpot-T04">
+<header><span class="no">3</span><div><h3>T04 안으로 들어갔다 나오기</h3><p class="mut">제품 입구·단면을 통로로 삼고 같은 표지를 따라 실물로 돌아온다.</p></div><span class="bt">1차</span></header>
+<p class="ex"><b>이 제품이라면</b> 0초 바닥 위 닫힌 컵 → 1초 카메라가 입구로 빨려 들어가 면발 정글 속 토핑 주머니·간식을 지나감 → 끈을 따라 나오면 강아지 코끝 → 끝 손에 든 실물<br><span class="mut"><b>보여 줄 장점</b> 용기→면발→토핑 주머니 안에 간식이 층층이 숨은 구조(d00·d08) — 카메라가 들어가 면발 숲 속 간식을 보여 주고 강아지 코로 나옴</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="pbad">엔진이 멈춤 — 그림 칸 다시(인물 앵커는 &quot;person&quot;:{…} 칸으로 — 문장은 코드가 anchor_sheet.py 틀로 씀): product_sheet 가 포장·인쇄를 지움(no sleeve/no logo/다른 엠블럼) — 시트는 팔리는 그대로(포장·인쇄·엠블럼을 참조 그대로 · 글로 묘사하지 말고 Image N 지목). 벗긴 모습은 product_open 따로</p><details class="pl"><summary>엔진이 쓴 기획 · 영상 지시문 보기</summary><p><b>스타일</b> K 안으로 들어가기 · 강아지 코를 따라 카메라가 컵 입구로 들어가면, 안은 면발 사이·토핑 주머니 속·깊은 용기 바닥에 간식이 숨은 세 층의 세계</p><p><b>장소 근거</b> 거실 바닥 — brief_card 「대상/상황」 줄 「실내 거실 바닥·소파 위, 간식 놀이 시간」(사용 사진 images/002·005·006) · 바뀐 장소 = 컵 속 — 제품 자체 속(상세 003.jpg 수납 구조 그림 세 칸)</p><p><b>인물</b> 보호자 — 오른손만(컷5) · 강아지 — 크림색 토이 푸들(상세 사진 견종 중 푸들 · 제품이 소형~중형견용)</p><p><b>효과 근거</b> &quot;작은 간식(1–2cm)은 면발 사이·토핑 주머니 속 · 중간 간식(2.5–4cm)은 용기와 면발 사이 · 긴 간식(10cm~)은 속에 깊은 용기로 쏙&quot; → 컵 속 세 깊이에 숨은 간식이 내려가는 순서대로 보임</p><pre>ASSET MAPPING
+Image 1: product sheet. Image 1 is the sole product-geometry and printed-artwork reference for every shot where the toy is visible. Image 2 supplies place and scale only, not lettering.
+Image 2: the living room floor, place reference for shots 1, 5 and 6.
+
+BRIEF: The camera follows a poodle&#x27;s nose inside a plush cup-noodle treat toy, past treats hidden at three depths. Playful wonder. Get inside fast; give the cup bottom the most time and camera energy.
+
+Shot 1 [0-2s] (floor-level close-up): The toy exactly as Image 1 stands on the floor of Image 2. A cream toy poodle sniffs the rim noodles, eyes on them; a moment later the camera pushes past its nose between the cords.
+Cut to
+Shot 2 [2-5s] (inside the cup): Cotton cords hang like thick rope curtains; small brown treats sit wedged between them, a topping pouch hangs like a tent with a treat peeking out.
+Cut to
+Shot 3 [5-9.5s] (inside, close): A treat is tucked between the inner fabric wall and the cords; at the bottom one long treat stands upright in a beam of light. The camera circles it as cords sway above.
+Cut to
+Shot 4 [9.5-11s] (looking straight up): The round rim and flap strap frame the light; the poodle&#x27;s black nose pokes down through the cords.
+Cut to
+Shot 5 [11-13.5s] (medium, real size): An adult&#x27;s right hand holds the toy; it fits in one hand, about as tall as the poodle&#x27;s head. The poodle pulls a topping pouch out with its mouth, eyes on it.
+[11.5-13s] Korean narrator says: &quot;숨길 곳은 세 군데.&quot;
+Spoken only — no on-screen text, subtitles or captions anywhere in the video.
+Cut to
+Shot 6 [13.5-15s] (eye level): The toy exactly as Image 1 alone, label facing camera. Leave the top quarter as clean empty background.
+
+Sound: soft sniffing and fabric rustle, louder inside the cup; light playful music.
+Keep exactly these shots and timing; let the model choose camera moves and micro-acting within each. No extra printed text. The dog swallows nothing.
+</pre></details></div></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/REF288-WHISKER.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Whisker — Litter-Robot 4 CG Explai</figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="howlpot-T04"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><article class="card" id="howlpot-T08">
+<header><span class="no">4</span><div><h3>T08 불가능한 연쇄</h3><p class="mut">한 물체의 작은 원인이 다른 물체의 불가능한 반응을 잇는다.</p></div><span class="bt">1차</span></header>
+<p class="ex"><b>이 제품이라면</b> 0초 현관 신발 앞 강아지 → 1초 옆 컵의 면발을 당기자 신발끈들이 스르르 풀려 날아가 컵 속 면발이 됨 → 강아지가 면발 속 간식 찾기 → 끝 실물<br><span class="mut"><b>보여 줄 장점</b> Check Point 1 「신발끈을 좋아하는 반려견에게 딱」 — 강아지가 면발을 당기면 현관 신발들의 끈이 줄줄 풀려 컵 속 면발이 되어 버림 → 신발 대신 이걸 물어라</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="psum">시츄가 컵라면 장난감에 코를 한 번 대자 숨긴 간식 냄새가 면발 → 토핑 주머니 → 컵 속에서 차례로 호박빛 리본으로 피어오르고, 마지막 큰 나선을 따라 카메라가 컵 속 긴 간식까지 들어간다</p><details class="pl"><summary>엔진이 쓴 기획 · 영상 지시문 보기</summary><p><b>스타일</b> K 안으로 들어가기 · 숨긴 곳 세 군데가 냄새 리본으로 차례로 답하고, 마지막 리본을 타고 카메라가 컵 입구 면발 사이로 들어가 깊은 용기 속 긴 간식에 닿음</p><p><b>장소 근거</b> 집 거실 바닥 — brief_card 4줄 「상황: 실내 거실 바닥·소파 위, 간식 놀이 시간 (근거 images/002·005·006 사용 사진)」 · 판매 페이지 사용 사진 002(밝은 거실 마루 위 시츄)</p><p><b>인물</b> 보호자 — 화면에 보이는 것은 오른손·손목만(장난감을 잡아 줌) · 크림·탄 시츄 한 마리(판매 페이지 사용 사진 002 견종)</p><p><b>효과 근거</b> &quot;간식을 숨겨 강아지가 냄새로 찾아 먹는&quot; (광고주 포인트 원문) → 숨긴 간식의 냄새가 강아지 코를 그 자리로 이끄는 실제 결과를 색 있는 안개로 보임</p><pre>ASSET MAPPING
+Image 1 = the plush cup-noodle dog toy as sold. Image 1 is the sole product-geometry and printed-artwork reference for every shot where the product is visible: a red fabric cup with a stitched white front label and a flap strap at the rim, cream cotton-cord noodles spilling over the rim, and small green, brown and yellow fabric topping pouches hanging on the noodles. Keep its visible shape, components, colors and material unchanged wherever the product appears. Do not invent extra printed text.
+Image 2 = the living room. Same room, floor and daylight in every shot; Image 2 supplies place only, not the product.
+
+BRIEF
+One sniff from a Shih Tzu sets off a chain: amber-brown ribbons of treat-scent mist rise from three hiding places in turn. Cute, playful. Give the third ribbon the most time, scale and camera energy.
+
+Shot 1 [0-2s] (floor-level close-up): A cream-and-tan Shih Tzu has its nose at the noodles of the upright toy. It sniffs once and a thin amber-brown mist ribbon curls up from the noodles. Its eyes follow the ribbon.
+Cut to
+Shot 2 [2-5s] (close-up): The same ribbon drifts to the green topping pouch, which answers with a thicker ribbon. The dog&#x27;s nose follows to the pouch.
+Cut to
+Shot 3 [5-8s] (low close-up, camera shakes): A thick spiral of amber-brown mist with golden specks bursts up from the cup&#x27;s opening and wraps around the dog&#x27;s face, filling the frame. Its eyes follow it up.
+Cut to
+Shot 4 [8-10s] (camera dives): The camera rides the spiral down between the noodles to the end of a long chew treat standing deep inside the cup.
+Cut to
+Shot 5 [10-13s] (close-up, real size): No mist. An adult&#x27;s right hand holds the toy steady on the floor; it is instant-noodle-cup sized, smaller than the hand. The only changing action is the dog nosing into the noodles.
+Cut to
+Shot 6 [13-15s] (product only): The toy alone, label facing camera; no person or dog. Leave the top quarter as clean empty background.
+
+Sound: sniffing, a soft whoosh per ribbon; light plucked music. No speech, no on-screen text, subtitles or captions.
+Keep these shots, order and timing. Label front only in shots 1 and 6. Let the model choose camera moves and micro-acting, preserving Image 1&#x27;s toy.
+</pre></details></div></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/ON291-ESTEELAUDER.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Estée Lauder Giant Foundation Domi</figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="howlpot-T08"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><article class="card" id="howlpot-T11">
+<header><span class="no">5</span><div><h3>T11 장르 패러디·말장난</h3><p class="mut">익숙한 장르 표지나 한 단어의 다른 뜻이 하나의 불가능한 사건으로 나타난다.</p></div><span class="bt">2차</span></header>
+<p class="ex"><b>이 제품이라면</b> 0초 먹방 방송 화면처럼 강아지 앞 컵라면 → 1초 강아지가 면발을 후루룩 들어 올리자 면발에 매달린 간식이 줄줄 → 끝 보호자가 실물 듦<br><span class="mut"><b>보여 줄 장점</b> 강아지판 &#x27;라면 먹방&#x27; = 코로 면발 사이 간식을 찾아 먹는 노즈워크(d00), &#x27;3분 기다리기&#x27; 대신 PLAY TIME 5~30분(d09~d10) 같은 말장난</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="psum">거실 바닥에서 시츄가 장난감 면발 한 가닥을 입으로 당기자, 면발 다발 전체가 라면 광고처럼 공중으로 솟아 슬로모션으로 걸리고 가닥 사이에 숨긴 간식이 드러난다</p><details class="pl"><summary>엔진이 쓴 기획 · 영상 지시문 보기</summary><p><b>스타일</b> K 안으로 들어가기 · 강아지가 당긴 면발 다발이 공중에 걸린 슬로모션 속으로 카메라가 들어가, 가닥 사이 숨긴 간식과 컵 속 깊이 꽂힌 긴 간식을 지나간다</p><p><b>장소 근거</b> 거실 바닥 — brief_card 「상황: 실내 거실 바닥·소파 위, 간식 놀이 시간 (근거 images/002·005·006 사용 사진)」 · 바뀐 장소 없음</p><p><b>인물</b> 시츄 한 마리(크림·탄색 · 화면에 보이는 그대로) · 보호자 오른손만(컷4)</p><p><b>효과 근거</b> &quot;면발 토핑을 라면 용기에서 완전히 꺼내어 그 위에 작은 간식을 뿌려주고 긴 간식은 면발 사이사이에 꽂아&quot; → 면발을 용기에서 꺼내면 가닥 사이·주머니 속에 숨긴 간식이 드러난다는 실제 쓰는 법을, 라면 광고 슬로모션 크기로 보여 줌</p><pre>ASSET MAPPING
+Image 1 = product sheet of the plush cup-noodle dog toy. Image 1 is the sole product-geometry and printed-artwork reference for every shot where the product is visible: a soft red fabric cup with a stitched white front label, cream cotton-cord noodles coming out of the rim, and small green, yellow and brown fabric topping pouches tied to the noodles. Do not invent extra printed text.
+Image 2 = the living room: framing, floor and light only.
+
+BRIEF
+A parody of a premium instant-ramen commercial&#x27;s slow-motion noodle lift, starring a dog toy. Playful and warm. Get to the lift fast and give the slow-motion noodles the most time, scale and camera energy.
+
+Shot 1 [0-2s] (floor-level medium): On the floor of Image 2, a cream-and-tan Shih Tzu sniffs the toy from Image 1, smaller than an adult hand. A moment later the dog bites one noodle and tugs it up; the whole bundle starts rising out of the cup. Its eyes follow the noodles.
+Cut to
+Shot 2 [2-5s] (low angle): The noodles rise into a tall glossy arch above the dog&#x27;s head, in slow motion. The dog looks up at it.
+Cut to
+Shot 3 [5-10s] (extreme close-up, slow motion): Noodles hang in mid-air, pouches turn, small brown treats tumble from between the strands like ramen garnish. The camera glides down between the strands into the cup, where a long treat stands deep inside.
+Cut to
+Shot 4 [10-13s] (floor-level medium, normal speed): The toy stands with its noodles back in the cup. An adult&#x27;s right hand tucks one treat into the yellow pouch; the dog&#x27;s nose follows the hand.
+[10-12s] Korean narrator says: &quot;면발 사이, 간식 숨었다.&quot;
+Spoken only — no on-screen text, subtitles or captions anywhere in the video.
+Cut to
+Shot 5 [13-15s] (product front): The toy alone, label facing camera, exactly as Image 1. Leave the top quarter as clean empty background.
+
+Sound: quiet room tone, sniffing, treats ticking on wood, a music swell in Shot 3.
+Keep exactly the shots listed above, in this order and timing. Let the model choose lenses, camera moves and micro-acting within each shot, while preserving the toy&#x27;s shape.
+</pre></details></div></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/REF288-PETSAFE.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>PetSafe — ScoopFree Pro / Amazon C</figcaption></figure><figure><video src="media/o3tpl/ON291-NONGSHIM.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Nongshim Fish Roller Coaster</figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="howlpot-T11"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><article class="card" id="howlpot-T12">
+<header><span class="no">6</span><div><h3>T12 인물 상태·시간 변환</h3><p class="mut">제품에 닿는 한 동작으로 인물의 역할이나 주변 시간 상태가 한 번 변한다.</p></div><span class="bt">2차</span></header>
+<p class="ex"><b>이 제품이라면</b> 0초 보채는 강아지 앞 보호자가 간식 넣고 벨크로 &#x27;찍&#x27; → 1초 창밖 해·시계가 빠르게 돎, 강아지는 같은 자리에서 면발 파기 → 보호자는 옆 소파에서 커피 → 끝 실물 들기<br><span class="mut"><b>보여 줄 장점</b> 상급 PLAY TIME 20~30분(d10) — 닫는 순간 주변 시간이 빨리 감기며 강아지는 몰입, 보호자는 쉼(오래 혼자 노는 장난감)</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="psum">거실 바닥에서 푸들이 컵라면 장난감에 코를 박자 장난감 둘레의 시간만 거꾸로 흘러, 숨겨 둔 간식이 면발 사이·토핑 주머니·깊은 용기에서 차례로 떠오르고 카메라가 컵 속으로 파고든다</p><details class="pl"><summary>엔진이 쓴 기획 · 영상 지시문 보기</summary><p><b>스타일</b> K 안으로 들어가기 · 시간이 거꾸로 흐르며 면발이 컵에서 풀려 올라오는 사이 카메라가 컵 입구로 들어가 깊은 용기에 숨긴 긴 간식을 봄</p><p><b>장소 근거</b> 거실 바닥 — brief_card 「상황: 실내 거실 바닥·소파 위, 간식 놀이 시간 (근거 images/002·005·006 사용 사진)」 · 바뀐 장소 없음(5-10초는 같은 장난감 속 접사)</p><p><b>인물</b> 푸들 — 크림색 작은 토이 푸들(화면에 보임) · 보호자 — 바닥에 앉은 다리(컷1)·오른손과 소매(컷4)만 · 직업 설정 없음</p><p><b>효과 근거</b> &quot;면발·토핑·용기 3곳에 간식을 숨겨&quot; → 되감기로 간식이 바로 그 세 자리(면발 사이·노랑 토핑 주머니·깊은 용기)에서만 나와 실제 숨기는 구조를 보여 줌</p><pre>ASSET MAPPING
+Image 1 = product sheet. Image 1 is the sole product-geometry and printed-artwork reference for every shot where the product is visible: a plush cup-shaped dog toy whose fabric cup has a stitched front label and a flap strap at the rim, with cotton-cord noodles coming out of the rim and small fabric topping pouches attached to the noodles, exactly as on Image 1. Real size: an instant-noodle-cup sized toy, smaller than an adult hand span, about as tall as a small poodle&#x27;s head. Do not invent extra printed text.
+Image 2 = the living room, the same room in every floor shot. It supplies place and light only, not product shape.
+
+BRIEF
+A cream toy poodle noses a cup-noodle toy on a living room floor and time around the toy alone runs backward: hidden treats rise out while the dog stays in normal time. Playful. Get to the rewind fast; give the dive into the cup the most time and camera energy.
+
+Shot 1 [0-2s] (low medium shot, floor level): The toy as Image 1, the poodle beside it, the owner&#x27;s crossed legs behind. The poodle pushes its nose into the noodles; a moment later small brown treats slide backward up out of the noodles and hang in the air, its eyes following.
+Cut to
+Shot 2 [2-5s] (medium close): Still in reverse, a treat slips up out of the yellow pouch and the noodles uncoil upward out of the cup. The poodle looks up at them.
+Cut to
+Shot 3 [5-10s] (macro, toy only): The noodles keep uncoiling upward as the camera dives fast into the cup, cords streaming past the lens; a long brown chew rises from the bottom toward it.
+Cut to
+Shot 4 [10-13s] (hand close-up, normal time): The owner&#x27;s right hand tucks a small treat into the yellow pouch; the poodle&#x27;s nose follows, eyes on the treat. The toy is smaller than the hand.
+Cut to
+Shot 5 [13-15s] (front product shot): The toy alone, label to camera, at rest as on Image 1. Leave the top quarter empty background.
+
+Keep exactly these shots and timing; let the model choose lenses, camera moves and micro-acting, keeping the toy&#x27;s shape identical. Label front only in Shots 1 and 5. No narration, dialogue or on-screen text. Sound: cord rustle, sniffing, a rewind whoosh at the dive. Music: light plucked strings.
+</pre></details></div></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/ON292-KUNGFU.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Snickers Mr Bean Kung Fu</figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="howlpot-T12"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><article class="card" id="howlpot-T14">
+<header><span class="no">7</span><div><h3>T14 내부 구조의 단계적 전개</h3><p class="mut">완성품 중심축에서 가려진 층이 순서대로 벌어지고 실물 외형으로 닫힌다.</p></div><span class="bt">2차</span></header>
+<p class="ex"><b>이 제품이라면</b> 0초 닫힌 컵 → 1초 컵이 중심축을 따라 용기·면발층·토핑 주머니·간식으로 공중에 벌어짐(난이도 단계 표시) → 다시 닫혀 실물 → 끝 손에 든 실물<br><span class="mut"><b>보여 줄 장점</b> 3곳에 숨김 + 초·중·상급 단계 구조를 층별로 벌려 그대로 설명 — 가장 정확히 맞음</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="psum">거실 바닥에서 포메라니안이 컵라면 장난감에 코를 대자 장난감이 면발 다발·토핑 주머니·깊은 용기로 한 축을 따라 떠올라 벌어지며 3곳에 숨은 간식을 보여 주고, 다시 원래 모양으로 닫히자 강아지가 코를 박는다.</p><details class="pl"><summary>엔진이 쓴 기획 · 영상 지시문 보기</summary><p><b>스타일</b> K 안으로 들어가기 · 강아지 코가 닿자 컵라면 장난감 속 층(면발 다발·토핑 주머니·깊은 용기)이 한 축으로 위로 벌어지고 카메라가 그 사이를 타고 올라가며 3곳에 숨은 간식을 보여 줌</p><p><b>장소 근거</b> 거실 바닥 — brief_card 「상황: 실내 거실 바닥·소파 위, 간식 놀이 시간 (근거 images/002·005·006 사용 사진)」 · 장소 바뀜 없음</p><p><b>인물</b> 강아지 — 작은 크림색 포메라니안(상세 사진 소형견 중 포메 · 화면에 보이는 것 그대로) · 보호자 — 거실 바닥에 무릎 꿇은 젊은 여성, 어깨~무릎만(얼굴 없음 · 실내복) — 직업·관계 설정 없음</p><p><b>효과 근거</b> &quot;면발·토핑·용기 3곳에 간식을 숨겨&quot; (광고주 포인트 원문) → 층이 벌어지면 3곳마다 실제로 숨긴 간식이 보임(면발 사이 작은 간식 · 주머니 속 간식 · 깊은 용기 바닥 긴 간식)</p><pre>ASSET MAPPING
+Image 1 = product sheet of the plush cup-noodle dog toy as sold. Image 1 is the sole product-geometry and printed-artwork reference for every shot where the product is visible: a fabric cup with a stitched front label and a strap flap at the rim, a bundle of cotton-cord noodles coming out of the rim, and small fabric topping pouches attached to the noodles.
+Image 2 = the living room. Other images supply framing and scale only, not product shape or lettering. Do not invent extra printed text.
+
+BRIEF
+Cute, funny: the toy&#x27;s hidden layers rise apart on one axis, showing hidden treats, then fold back. Get to the first lift fast; give the floating layers the most time, scale and camera energy.
+
+Shot 1 [0-2s] (low medium): Image 2 floor. The toy as Image 1 stands; a small cream Pomeranian noses the rim. A moment later the noodle bundle slides up out of the cup and hovers; the dog&#x27;s eyes follow it.
+Cut to
+Shot 2 [2-5s] (close-up): The bundle loosens into stacked noodle rings and pouches, treats peeking out. The dog lifts its head, eyes on the treats.
+Cut to
+Shot 3 [5-9s] (toy only): The camera rises through the floating layers: open cup with a long treat inside, noodle rings, pouches. Loops sweep past the lens; rustling grows louder.
+Cut to
+Shot 4 [9-11s] (low medium): The layers drop back into the cup, toy exactly as Image 1. The dog&#x27;s eyes follow; it pushes its nose into the noodles.
+Cut to
+Shot 5 [11-13s] (shoulders to knees): A kneeling young woman, face out of frame, holds the toy in her left hand, instant-noodle-cup sized; her right hand slips one treat into a pouch. The dog watches.
+Cut to
+Shot 6 [13-15s] (toy only, front): The toy as Image 1 on the floor, label to camera. Leave the top quarter of the frame as clean empty background.
+
+Sound: sniffing, rustling, light plucked strings. No speech, text or captions.
+Keep exactly the shots listed above, in this order and timing. Let the model choose lenses, camera moves and micro-acting within each shot, while preserving the room, dog and toy.
+</pre></details></div></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/ON292-KIES.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Kies Motorsports BMW Car Assembled</figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="howlpot-T14"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><article class="card" id="howlpot-T20">
+<header><span class="no">8</span><div><h3>T20 제품이 꺼낸 접힌 무대</h3><p class="mut">제품 속 매개체가 나와 탁자·바닥 위 한 구획의 입체 무대를 펼친다. 기존 배경과 실물은 보인다.</p></div><span class="bt">2차</span></header>
+<p class="ex"><b>이 제품이라면</b> 0초 거실 바닥 컵 → 1초 면발이 흘러나와 바닥 한 칸에 면발 미로·토핑 섬으로 된 작은 무대를 펼침, 간식이 곳곳에 → 강아지가 코로 길을 찾음 → 끝 실물<br><span class="mut"><b>보여 줄 장점</b> 면발·토핑이 바닥 위 노즈워크 놀이판(미로)으로 펼쳐지는 것 = 난이도 설정·찾기 놀이</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="mut">다시 기획 중 (장소 근거 규칙 반영)</p></div></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/ON292-DACIA.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Dacia paper pop-up city</figcaption></figure><figure><video src="media/o3tpl/ON292-GOINGWESTWORLD.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>NZ Book Council Going West</figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="howlpot-T20"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><h2>이번에 뺀 것 (어울림 중·하)</h2><section class="box"><ul><li><b>T02 크기 뒤집기</b> — 어울림 중 · B 약함 — 크기 변화가 노즈워크·난이도 장점과 직접 이어지지 않음</li><li><b>T05 제품이 살아 움직이기</b> — 어울림 중 · B·C 약함 — 사용법 왜곡, 면발 촉수 거부감 가능</li><li><b>T06 성질이 공간의 규칙</b> — 어울림 중 · A 약함 — 냄새는 그림 재료가 아니라 면발 모양을 빌려야 함</li><li><b>T07 착시·시점 공개</b> — 어울림 중 · B 약함 — 정체 반전이 기능 장점과 직접 연결되지 않음</li><li><b>T09 공간 전환</b> — 어울림 중 · B 약함 — 공간 변화가 장점을 직접 보여 주지 않음</li><li><b>T10 반복·증식</b> — 어울림 하 · 장점과 무관 — 증식이 제품 기능을 설명하지 않음</li><li><b>T13 평면에서 튀어나오기</b> — 어울림 하 · 장점과 무관 — 표면 표시에 기능 정보가 없음</li><li><b>X1 제품 둘레 리본</b> — 어울림 중 · C 약함 — 끈이 동물 몸을 감는 연출은 위험 연상</li><li><b>X2 빛이 모임</b> — 어울림 하 · 장점과 무관 + 브랜드 톤 어긋남</li><li><b>X3 원단·소재 흐름</b> — 어울림 하 · 재료 없음(의류용 템플릿)</li><li><b>X4 제품 뒤 소재 (고급형)</b> — 어울림 중 · B 약함 — 외형만, 기능 장점 없음</li><li><b>T21 제품 그림자가 독립해 움직임</b> — 어울림 중 · B 약함 — 그림자 연출이 기능을 설명하지 않음</li></ul><p class="mut">「중」은 버리지 않고 후보로 둡니다. 다른 제품에서는 「상」일 수 있습니다.</p></section></div><div class="prod" data-k="lolly" hidden><section class="box item"><img src="media/tpltest/lolly_main.jpg" alt="시험 제품 사진">
+<div><p class="lab">문구·성인 취미 굿즈 · 친구 추천</p><h3>오롤리데이<br>[Note] Memories in a pocket_ver.2</h3><p class="mut"></p><ul><li>친구 추천 · 10번 문구·성인 취미 굿즈(오롤리데이 자사몰)</li></ul>
+<a class="go" href="https://oh-lolly-day.com/product/note-memories-in-a-pocketver2/437/" target="_blank" rel="noopener">판매 페이지 열기 ↗</a></div></section><h2>판매 포인트 <span class="mut">· 판정 에이전트가 상세 그림 8장을 보고 정리</span></h2>
+<section class="box"><ul><li>P1 일상의 조각(영수증·티켓·명함·엽서)을 종이 포켓에 보관 <span class="mut">(상세 텍스트 &#x27;영수증이나 티켓 등을 보관할 수 있는 종이 포켓&#x27; · 대표 사진·d05_1·d05_2·d07 포켓에 티켓·명함 꽂힌 사진)</span></li><li>P2 다용도 — 영수증 모으면 용돈 기입장, 명함 보관함, 여행 노트 <span class="mut">(상세 텍스트 첫 문단)</span></li><li>P3 표지 고무밴드로 내용물이 안 떨어짐 · 두툼해질 것을 감안해 끈을 여유 있게 제작 <span class="mut">(상세 텍스트 · d03_2 금속 아일릿에 꿰인 밴드 클로즈업)</span></li><li>P4 커버 두께 350g→540g 업그레이드로 내지 보호 · 내지 18장→20장 <span class="mut">(상세 텍스트 &#x27;업그레이드 1&#x27; · d05_4 BEFORE/AFTER 측면 비교 사진)</span></li><li>P5 타이틀 레터프레스가 더 선명해짐 <span class="mut">(상세 텍스트 &#x27;업그레이드 2&#x27; · d06 BEFORE/AFTER 표지 비교 · d03_1 음각 클로즈업)</span></li><li>P6 줄이 그어진 내지(Date/Title 칸)로 간단한 메모·기록 가능 <span class="mut">(상세 텍스트 · d02_2·d02_3·d05_1 내지 사진)</span></li><li>P7 인덱스 스티커 1매 포함 — 표지 칸에 카테고리·날짜 기입 <span class="mut">(상세 텍스트 · d04_2 표지 칸에 &#x27;2021 Summer&#x27; 스티커)</span></li><li>P8 색상 2종 — 그린(ver.1과 같음)·블루(신규) <span class="mut">(옵션 01.Green/02.Blue · d01·d02)</span></li><li>P9 슬림한 세로형 크기 커버 92×175mm(내지 85×170mm), 20장 40쪽 <span class="mut">(상세 텍스트·d01_2 스펙. 실제 옷 주머니에 들어가는지는 확인 못 함)</span></li><li>(브랜드) 자사몰 매출 2% 초록우산 기부 · 비해피어 캠페인 <span class="mut">(d08 — 제품 장점이 아니라 브랜드 공통 문구)</span></li></ul></section>
+<p class="mut">어울림 결과: 상 10 · 중 6 · 하 4 → 상만 시험합니다.</p>
+<h2>시험할 템플릿 10개 <span class="mut">· 1차 5판 먼저, 판정 보고 나머지</span></h2><article class="card" id="lolly-T01">
+<header><span class="no">1</span><div><h3>T01 분출·회오리</h3><p class="mut">제품의 입구에서 물성 한 가지가 방향을 유지하며 공간으로 커진다.</p></div><span class="bt">1차</span></header>
+<p class="ex"><b>이 제품이라면</b> 0초 책상 위 고무밴드 걸린 블루 노트 → 1초 밴드가 풀리며 포켓에서 티켓·영수증·명함이 한 방향 회오리로 방을 채움 → 회오리가 다시 포켓으로 빨려 들고 → 손이 실제 크기 노트를 집어 밴드를 탁 건다.<br><span class="mut"><b>보여 줄 장점</b> P1 기억 조각 보관 — 노트 하나에서 그만큼 많은 조각이 나온다는 과장이 곧 &#x27;다 담긴다&#x27;를 보여 줌.</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="mut">다시 기획 중 (장소 근거 규칙 반영)</p></div></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/REF288-BIC.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>BIC Intensity · 광장의 마커 상자</figcaption></figure><figure><video src="media/o3tpl/VR274-037.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>환타 회오리</figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="lolly-T01"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><article class="card" id="lolly-T04">
+<header><span class="no">2</span><div><h3>T04 안으로 들어갔다 나오기</h3><p class="mut">제품 입구·단면을 통로로 삼고 같은 표지를 따라 실물로 돌아온다.</p></div><span class="bt">1차</span></header>
+<p class="ex"><b>이 제품이라면</b> 0초 포켓에 꽂힌 전시 티켓 클로즈업 → 1초 카메라가 티켓 속 전시장으로 빨려 들어감 → 전시장을 지나 다시 티켓 표면으로 빠져나오면 노트 포켓 → 손이 노트를 덮고 밴드를 건다.<br><span class="mut"><b>보여 줄 장점</b> P1 기억 보관 + P2 여행 노트 활용 — 티켓 속 그날로 들어갔다가 그 티켓이 포켓에 꽂힌 채로 돌아옴.</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="mut">다시 기획 중 (장소 근거 규칙 반영)</p></div></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/REF288-WHISKER.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Whisker — Litter-Robot 4 CG Explai</figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="lolly-T04"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><article class="card" id="lolly-T05">
+<header><span class="no">3</span><div><h3>T05 제품이 살아 움직이기</h3><p class="mut">상품의 외곽을 보존한 채 사물 스스로 역할 한 가지를 수행한다.</p></div><span class="bt">1차</span></header>
+<p class="ex"><b>이 제품이라면</b> 0초 영수증이 흩어진 책상 → 1초 노트가 스스로 밴드를 풀고 표지를 펄럭여 영수증을 주워 포켓에 쏙 → 밴드를 스스로 감아 닫음 → 손이 집어 든다.<br><span class="mut"><b>보여 줄 장점</b> P3 고무밴드로 내용물이 안 떨어짐 / P1 보관 — 노트가 흩어진 영수증을 스스로 주워 포켓에 넣고 밴드를 감아 잠금.</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="mut">다시 기획 중 (장소 근거 규칙 반영)</p></div></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/REF288-STABOAT.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>STABILO × Dolce &amp; Gabbana · 밀라노 운하</figcaption></figure><figure><video src="media/o3tpl/ON291-STARPLUSH.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Starbucks Glowing Plushie Stars Bo</figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="lolly-T05"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><article class="card" id="lolly-T09">
+<header><span class="no">4</span><div><h3>T09 공간 전환</h3><p class="mut">제품을 같은 위치에 남기고 한 경계를 넘는 순간 배경 세계가 바뀐다.</p></div><span class="bt">1차</span></header>
+<p class="ex"><b>이 제품이라면</b> 0초 책상 위 노트 → 1초 표지를 넘기는 순간 배경이 바닷가 여행지로 바뀜(노트는 같은 자리) → 다음 장을 넘기면 공연장 → 덮으면 원래 방, 손이 노트를 든다.<br><span class="mut"><b>보여 줄 장점</b> P2 여행 노트·전시 기록 — 장을 넘기는 순간 방이 그날의 여행지·전시장으로 바뀜.</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="mut">다시 기획 중 (장소 근거 규칙 반영)</p></div></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/ON291-REDBULL.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Red Bull MOBILE Snowboarder Collec</figcaption></figure><figure><video src="media/o3tpl/REF288-PETHELLO.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Whisker Litter-Robot · Say Hello</figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="lolly-T09"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><article class="card" id="lolly-T10">
+<header><span class="no">5</span><div><h3>T10 반복·증식</h3><p class="mut">고정 축의 같은 단위를 늘리거나 모아 새로운 하나의 형상을 만든다.</p></div><span class="bt">1차</span></header>
+<p class="ex"><b>이 제품이라면</b> 0초 책상 위 영수증 한 장 → 1초 영수증·티켓이 계속 늘어나 모여 거대한 노트 모양을 만듦 → 그 형상이 접혀 실제 노트 포켓으로 들어감 → 손이 든다.<br><span class="mut"><b>보여 줄 장점</b> P1 일상의 조각을 모은다(상세 문구 &#x27;일상의 여러 가지 조각들, 영감들을 이 특별한 노트에 보관&#x27;) — 조각이 모여 노트 모양이나 &#x27;memories in a pocket&#x27; 글자가 됨.</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="mut">다시 기획 중 (장소 근거 규칙 반영)</p></div></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/ON292-KAUSWITCH.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Kaufland Box Overflowing with Gumm</figcaption></figure><figure><video src="media/o3tpl/REF288-HIGHSZN.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>HIGH SZN · Voltage 케이스 반복</figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="lolly-T10"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><article class="card" id="lolly-T11">
+<header><span class="no">6</span><div><h3>T11 장르 패러디·말장난</h3><p class="mut">익숙한 장르 표지나 한 단어의 다른 뜻이 하나의 불가능한 사건으로 나타난다.</p></div><span class="bt">2차</span></header>
+<p class="ex"><b>이 제품이라면</b> 0초 청바지 뒷주머니 클로즈업 → 1초 주머니에서 놀이공원 장면이 통째로 튀어나옴 → 장면이 티켓 한 장으로 접혀 노트 포켓에 꽂힘 → 손이 표지의 &#x27;memories in a pocket&#x27;을 보여 주며 든다.<br><span class="mut"><b>보여 줄 장점</b> P1 기억 보관 — &#x27;주머니 속 기억&#x27;을 문자 그대로: 주머니에서 그날의 장면이 튀어나오고, 그게 노트 포켓의 티켓으로 정리됨.</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="mut">다시 기획 중 (장소 근거 규칙 반영)</p></div></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/REF288-ADICOURT.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>adidas · 하늘을 나는 테니스 코트</figcaption></figure><figure><video src="media/o3tpl/ON291-NONGSHIM.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Nongshim Fish Roller Coaster</figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="lolly-T11"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><article class="card" id="lolly-T12">
+<header><span class="no">7</span><div><h3>T12 인물 상태·시간 변환</h3><p class="mut">제품에 닿는 한 동작으로 인물의 역할이나 주변 시간 상태가 한 번 변한다.</p></div><span class="bt">2차</span></header>
+<p class="ex"><b>이 제품이라면</b> 0초 저녁 방에서 티켓을 포켓에 꽂음 → 1초 주변이 그날 낮 공연장 앞 줄로 바뀜(인물 옷도 그날) → 펜을 놓으면 원래 방 → 손이 노트를 든다.<br><span class="mut"><b>보여 줄 장점</b> P1·P6 기록 — 꽂는(적는) 순간 주변 시간이 그날로 되돌아감.</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="mut">다시 기획 중 (장소 근거 규칙 반영)</p></div></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/REF288-BETTY.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Snickers — Game (Betty White)</figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="lolly-T12"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><article class="card" id="lolly-T13">
+<header><span class="no">8</span><div><h3>T13 평면에서 튀어나오기</h3><p class="mut">표면의 표시나 인쇄 외곽이 입체로 나와도 원래 표면은 유지된다.</p></div><span class="bt">2차</span></header>
+<p class="ex"><b>이 제품이라면</b> 0초 그린 노트 표지 정면 → 1초 &#x27;memories in a pocket&#x27; 음각 글자가 입체로 솟아 책상 위를 걸어 다님 → 다시 표지로 눌려 들어가 음각이 됨 → 손이 표지를 쓸며 든다.<br><span class="mut"><b>보여 줄 장점</b> P5 &#x27;타이틀 레터프레스가 더 선명해짐&#x27;(업그레이드 2) — 음각 글자가 입체로 솟았다가 다시 표지로 눌려 들어감.</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="mut">다시 기획 중 (장소 근거 규칙 반영)</p></div></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/BF-MAYBELLINE.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Maybelline Sky High Banner 2</figcaption></figure><figure><video src="media/o3tpl/ON291-AUDI.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Audi Instagram Comments and Posts </figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="lolly-T13"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><article class="card" id="lolly-T14">
+<header><span class="no">9</span><div><h3>T14 내부 구조의 단계적 전개</h3><p class="mut">완성품 중심축에서 가려진 층이 순서대로 벌어지고 실물 외형으로 닫힌다.</p></div><span class="bt">2차</span></header>
+<p class="ex"><b>이 제품이라면</b> 0초 밴드 걸린 노트 측면 → 1초 커버·내지·포켓·스티커가 층별로 공중에 벌어짐(커버 두께 강조) → 다시 겹쳐 밴드가 감김 → 손이 든다.<br><span class="mut"><b>보여 줄 장점</b> P4·P6·P7·P3 구성 — 무엇이 들어 있는지를 한 번에 보여 줌.</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="mut">다시 기획 중 (장소 근거 규칙 반영)</p></div></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/ON292-CITIZENFILM.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Citizen Eco-Drive One</figcaption></figure><figure><video src="media/o3tpl/ON292-SONY_BETWEEN.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Sony WH-1000XM6 Product Video</figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="lolly-T14"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><article class="card" id="lolly-T20">
+<header><span class="no">10</span><div><h3>T20 제품이 꺼낸 접힌 무대</h3><p class="mut">제품 속 매개체가 나와 탁자·바닥 위 한 구획의 입체 무대를 펼친다. 기존 배경과 실물은 보인다.</p></div><span class="bt">2차</span></header>
+<p class="ex"><b>이 제품이라면</b> 0초 탁자 위 펼친 노트 → 1초 포켓에서 공연 티켓이 나와 탁자 위에 종이 극장 무대를 펼침(작은 배우가 인사) → 무대가 접혀 티켓으로 돌아가 포켓에 꽂힘 → 손이 노트를 든다.<br><span class="mut"><b>보여 줄 장점</b> P1·P2 기억/여행 기록 — 티켓이 나와 그날의 공연장·전시장을 탁자 위 종이 팝업 무대로 펼침.</span><br><span class="mut">(어울림 판정 에이전트의 예시 · 엔진은 이걸 보지 않고 따로 기획함)</span></p>
+<div class="pair">
+ <div class="col"><p class="lab">우리 결과</p><div class="slot"><span>생성 전</span><small>9:16 · 시댄스 480p · 엔진이 혼자 기획</small></div>
+  <div class="plan"><p class="lab">엔진이 쓴 기획</p><p class="mut">다시 기획 중 (장소 근거 규칙 반영)</p></div></div>
+ <div class="col"><p class="lab">참고 광고</p><div class="refs"><figure><video src="media/o3tpl/ON291-TELSTRA.mp4" muted loop playsinline controls preload="metadata"></video><figcaption>Telstra Wherever You Go</figcaption></figure></div></div>
+</div>
+<div class="auto"><span class="lab">자동 검사</span><span class="ck">1초 효과 —</span><span class="ck">제품 모양 —</span><span class="ck">끝 실제 크기 —</span><span class="ck">손·몸 —</span></div>
+<div class="vote" data-t="lolly-T20"><p class="lab">판정</p>
+ <div class="btns"><button data-v="good">쓸 만함</button><button data-v="meh">애매</button><button data-v="bad">별로</button></div>
+ <input class="why" placeholder="이유 한 줄 (선택)" maxlength="80">
+ <div class="others" hidden><p class="lab">다른 사람 판정</p><p class="mut">아직 없음 — 실제 페이지에서는 내 판정을 누른 뒤에 보입니다.</p></div>
+</div></article><h2>이번에 뺀 것 (어울림 중·하)</h2><section class="box"><ul><li><b>T02 크기 뒤집기</b> — 어울림 중 · B 약함 — 크기 변화가 판매 포인트(작은 크기·많이 담김)와 정확히 이어지지 않음.</li><li><b>T03 재질·상태 치환</b> — 어울림 하 · 장점과의 연결이 억지이고 실물 재질 오해 위험.</li><li><b>T06 성질이 공간의 규칙</b> — 어울림 중 · A 약함 — 제품이 내놓는 뚜렷한 물성(빛·향·색·흐름)이 없음.</li><li><b>T07 착시·시점 공개</b> — 어울림 중 · B 약함 — 착시의 재미는 있으나 판매 포인트가 바로 읽히지 않음.</li><li><b>T08 불가능한 연쇄</b> — 어울림 중 · B 중간 — 연쇄 구조라 &#x27;고정&#x27;이라는 한 포인트를 짧게 보여 주기 어려움.</li><li><b>X1 제품 둘레 리본</b> — 어울림 하 · 재료 없음(제형·향 없음) · 장점과 무관.</li><li><b>X2 빛이 모임</b> — 어울림 중 · C 약간 — 브랜드 톤(밝고 경쾌)과 고급 조명 연출이 맞지 않음.</li><li><b>X3 원단·소재 흐름</b> — 어울림 하 · 재료 없음 — 원단·착용 동작이 없음.</li><li><b>X4 제품 뒤 소재 (고급형)</b> — 어울림 중 · C 약간 — 고급형 연출이 9,800원 경쾌 문구 브랜드 톤과 덜 맞음.</li><li><b>T21 제품 그림자가 독립해 움직임</b> — 어울림 하 · 장점과 무관 — 그림자로는 이 노트의 물성·장점이 안 드러남.</li></ul><p class="mut">「중」은 버리지 않고 후보로 둡니다. 다른 제품에서는 「상」일 수 있습니다.</p></section></div>
 </main>
 <script>
 document.querySelectorAll('.vote').forEach(v=>{const bs=[...v.querySelectorAll('button')];bs.forEach(b=>b.onclick=()=>{bs.forEach(x=>x.classList.toggle('on',x===b));v.querySelector('.others').hidden=false})});
+const pt=[...document.querySelectorAll('.ptab')];pt.forEach(b=>b.onclick=()=>{pt.forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('.prod').forEach(p=>p.hidden=p.dataset.k!==b.dataset.k)});
 </script></body></html>
