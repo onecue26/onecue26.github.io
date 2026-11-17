@@ -185,7 +185,7 @@ One continuous upbeat fresh summer instrumental BGM, edited with the shots. Nati
 <h3>왜 됐나 / 안 됐나</h3><ul class="why"><li>형식(짧은 프롬프트·구간·「모델이 고른다」)은 다른 두 편과 같은데 결과는 무난 — 형식이 답이 아님</li><li>파도는 제품 뒤 장식 · 나머지는 흔한 음용 문법(스케이트·과육·마심·웃음) — 엉뚱한 사건이 없음</li><li>7–13초 마시고 웃는 6초에 새 보상 없음 · 제작 후기: 「주목할 크기」와 「기억할 발상」을 혼동</li><li>오늘 참기름 엔진 판들과 같은 모양</li></ul>
 </article>
 </section>
-<section id="t-frame" hidden><div class="box" style="margin:0 0 12px"><b>이 페이지는 크롬용 사본입니다.</b> 「오더 틀」에서 고친 내용은 이 브라우저에만 저장됩니다 — 고친 뒤 「복사」를 눌러 Claude 에게 붙여 주세요.</div><p class="lead">Dan 이 9-08 옥상 광고 때 Astra 에게 준 오더를 칸별로 나눈 틀입니다. 칸마다 카드를 고르거나 글을 고치면 아래 「완성된 오더」가 바로 바뀝니다. 고친 내용은 이 페이지에 저장되어 Claude 가 그대로 읽습니다. 카드는 지금 우리가 가진 것만 넣었습니다.</p>
+<section id="t-frame" hidden><div class="box" style="margin:0 0 12px"><b>이 페이지는 크롬용 사본입니다.</b> 「오더 틀」에서 고친 내용은 이 브라우저에만 저장됩니다 — 고친 뒤 「복사」를 눌러 Claude 에게 붙여 주세요.</div><p class="lead">Dan 이 9-08 옥상 광고 때 Astra 에게 준 오더를 칸별로 나눈 틀입니다. 처음 상태는 그 오더 원문 그대로입니다. 칸마다 카드를 고르거나 글을 고치면 아래 「완성된 오더」가 바로 바뀝니다. 고친 내용은 이 페이지에 저장되어 Claude 가 그대로 읽습니다. 카드는 지금 우리가 가진 것만 넣었습니다.</p>
 <div class="frame" id="frame">
   <div class="slot"><label for="f-spec">① 규격</label><select id="f-spec"></select></div>
   <div class="slot"><label for="f-product">② 광고 대상</label><input id="f-product" type="text"><span class="hint">「○○ 15초 CF(실사)」의 ○○</span></div>
@@ -193,7 +193,7 @@ One continuous upbeat fresh summer instrumental BGM, edited with the shots. Nati
   <div class="slot"><label for="f-where">④ 어디서</label><input id="f-where" type="text"><span class="hint">판매 페이지의 실제 사용 장면에서</span></div>
   <div class="slot"><label for="f-use">⑤ 제품을 쓰고</label><input id="f-use" type="text"><span class="hint">판매 페이지 사용법 그대로</span></div>
   <div class="slot"><label for="f-ending">⑥ 마무리</label><select id="f-ending"></select></div>
-  <div class="slot wide"><label>⑦ 효과 <span class="hint">지금 있는 카드 6장 · 고른 뒤 아래 글을 고쳐도 됨</span></label>
+  <div class="slot wide"><label>⑦ 효과 <span class="hint">원래 오더는 「물방울」 · 카드를 누르면 그 문장으로 바뀜 · 직접 고쳐도 됨</span></label>
     <div class="cards" id="f-effects"></div>
     <textarea id="f-effect" rows="2"></textarea>
   </div>
@@ -202,15 +202,15 @@ One continuous upbeat fresh summer instrumental BGM, edited with the shots. Nati
   <div class="slot"><label for="f-point">⑨ 포인트</label><input id="f-point" type="text"><span class="hint">판매 페이지 핵심 문구 원문</span></div>
   <div class="slot"><label for="f-tone">⑩ 톤</label><input id="f-tone" type="text" list="tone-list"><datalist id="tone-list"></datalist></div>
   <div class="slot"><label for="f-sound">⑪ 소리</label><select id="f-sound"></select></div>
-  <div class="slot"><label for="f-text">⑫ 글자</label><input id="f-text" type="text"></div>
+  <div class="slot"><label for="f-text">⑫ 글자 <span class="hint">비우면 원래 오더대로 없음</span></label><input id="f-text" type="text" list="text-list"><datalist id="text-list"><option value="화면 글자는 만들지 말 것 — 카피·제품명·엔드카드는 후반 자막으로 얹음"></option></datalist></div>
   <div class="slot"><label for="f-sheets">⑬ 시트</label><input id="f-sheets" type="text"></div>
   <div class="slot"><label for="f-path">⑬ 시트 경로</label><input id="f-path" type="text"></div>
   <div class="slot wide"><label for="f-ref">참고</label><input id="f-ref" type="text"></div>
 </div>
-<div class="box out"><div class="gh"><h3 style="margin:0">완성된 오더</h3><span><button type="button" id="f-copy">복사</button> <button type="button" id="f-reset">예시로 되돌리기</button></span></div>
+<div class="box out"><div class="gh"><h3 style="margin:0">완성된 오더</h3><span><button type="button" id="f-copy">복사</button> <button type="button" id="f-reset">원래 오더로 되돌리기</button></span></div>
 <pre id="f-out"></pre><p class="cap" id="f-state">저장 상태 확인 중…</p></div>
 <h3>효과 카드 상세</h3><div class="goodgrid" id="f-detail"></div>
-<script>window.FRAME_CARDS={"spec": ["시댄스 2.5, 15초 영상, 480p, 9대16 기준", "시댄스 2.5, 15초 영상, 480p, 16대9 기준"], "ending": ["제품 히어로컷(병·캔 단독 정면)", "효과가 가라앉은 장면 속 제품 히어로컷", "주인공이 제품을 카메라 쪽으로 들어 보이며 마무리"], "grammar": [{"name": "3초 훅 → 제품 → 엔드카드", "from": "옥상 오더 · 기본", "order": "3초 훅->제품->엔드카드"}, {"name": "방해 → 보상", "from": "빨대 서핑 (발견 → 「잠깐!」 → 묘기 → 제품)", "order": "3초 훅->방해->보상->제품->엔드카드"}, {"name": "원인 하나 → 큰 결과 → 반응 → 제품", "from": "환타 · 항아리 캔들", "order": "3초 훅(방아쇠 동작)->큰 결과가 가장 길게->사람 반응->제품->엔드카드"}], "tone": ["밝은 여름 고채도", "따뜻한 집밥 고채도", "고급스럽고 차분하게", "몽환적이고 우아하게"], "sound": ["BGM만", "BGM + 끝에 나레이션 한 줄", "BGM + 짧은 대사 한 마디"], "text": "화면 글자는 만들지 말 것 — 카피·제품명·엔드카드는 후반 자막으로 얹음", "sheets": "제품 / 인물 / 장소 (이 순서로 붙임)", "effects": [{"id": "storm", "name": "탄산 폭풍이 공간을 삼킴", "video": "fanta.mp4", "proof": "환타 v6 · 6판째 통과 · Dan 「참 잘 나왔거든」", "order": "제품을 여는 순간 내용물이 흔든 탄산음료를 딴 것처럼 터져 공간 전체를 삼키고, 주인공만 그 한가운데서 태연하게 즐김", "worked": "as if a violently shaken bottle of soda were cracked open … floods the whole office · Get to the pop fast and give the storm the most time, the most scale and the most camera energy", "failed": "wall → 거품 벽 · spherical shockwave → 구슬 · foam → 솜사탕 덩어리 · 「재난처럼 만들지 말 것」 → 폭풍이 작아짐", "fit": "탄산·발포·터지는 내용물"}, {"id": "name", "name": "이름이 현실 — 파도가 덮침", "video": "roof_b.mp4", "proof": "옥상 B판(Astra) · Dan 「생각보다 괜찮은 결과물」", "order": "제품 이름(또는 판매 페이지의 핵심 비유)이 진짜로 나타나 — 제품을 여는 순간 그것이 터져 주인공을 덮치고, 놀람에서 웃음으로", "worked": "a huge wave of sparkling fizz bursts from the can opening and rolls toward her in dramatic slow motion like an ocean wave, cool water and droplets wash over her, her eyes snap open and she laughs", "failed": "파도를 제품 뒤 장식으로만 쓰면 무난(한 모금의 파도 「그냥 무난한 광고」)", "fit": "이름·비유가 눈에 보이는 것(파도·황금·숲 …)"}, {"id": "mini", "name": "미니어처 소동 + 「잠깐!」", "video": "surf.mp4", "proof": "파도 빨대 서핑(Astra) · 1판 통과 · 바이럴 기준 예시", "order": "제품 위에서 손가락만 한 사람이 제품을 놀이터처럼 쓰다가, 주인공이 제품을 집으려 하자 「잠깐!」 하고 막고 마지막 묘기 후 마무리", "worked": "A finger-sized surfer has commandeered a normal PADO can's lid as her private surf break and asks its owner to wait for one last wave · Strong comic timing, one simple interruption and payoff", "failed": "「파도에 맞춰 타지 않음」(Dan) · 미니어처가 물체에 닿는 동작은 자주 망침 · 첫 장면 그림을 먼저 뽑아 붙였음", "fit": "작고 위가 평평한 제품(캔·병뚜껑·컵)"}, {"id": "bloom", "name": "재료가 깨어나 공간이 변함", "video": "candle.mp4", "proof": "항아리 캔들(Claude) · 1판 · Dan 「너무 좋았다」", "order": "제품 속 재료(꽃·원재료)가 깨어나 자라며 방 전체를 바꾸고, 주인공은 그 안에서 조용히 감탄", "worked": "one pressed dried flower lifts out of the wax and unfurls into a living bloom … the garden pours out of the little jar and floods the whole room · Get to the blooming fast and give the room-wide bloom the most time", "failed": "「캔들이라는 단서(심지·불)가 없다」(친구 의견) — 제품이 무엇인지 보이는 동작이 필요", "fit": "꽃·식물·원재료가 보이는 제품"}, {"id": "wrap", "name": "내용물이 리본처럼 몸을 감쌈", "video": "good_lip.mp4", "proof": "라네즈 립마스크 첫 판(Claude 엔진) · Dan 「립마스크는 좋았는데」", "order": "제품 내용물이 리본처럼 솟아 주인공 얼굴(몸)을 감싸 돌다가, 쓰는 순간 그 안으로 빨려 들어감", "worked": "a ring of glossy pink jelly balm ribbons rising out of the little jar and circling her face … the whole ring tilts toward her lips and is drawn into them as a dewy shine", "failed": "「효과가 너무 처음부터 드러나서」(Dan) — 첫 1초는 방아쇠 동작만, 효과는 그 뒤에", "fit": "젤·크림·액체 내용물"}, {"id": "whirl", "name": "회오리 (후보 · 1회)", "video": "good_candle_t1.mp4", "proof": "캔들 꽃잎 회오리 시험 · 친구 「화려한 효과로 꽃향기를 상상할 수 있어서 좋다」 · Dan 평가 없음", "order": "제품에서 재료가 회오리치며 솟아 주인공을 감돌다가 다시 제자리로 돌아감", "worked": "its pressed flowers come alive, whirl out as fresh petals, then settle back into the same design · Give the whirlwind the most time, scale and camera energy", "failed": "제품이 무엇인지(캔들) 알기 어려움", "fit": "향·가루·작은 조각이 있는 제품"}], "example": {"product": "영자씨의 부엌 참기름", "who": "20대 여자", "where": "집 식탁", "use": "갓 지은 흰밥에 참기름을 짜서 비벼 먹고", "name": "영자씨의 부엌 참기름", "point": "한 방울의 황금 · 저온압착", "path": "coordination/meetings/tpltest/brief_test/sesame/", "ref": "판매페이지 https://horsenpig.com/product/detail.html?product_no=183"}};</script><script>(function () {
+<script>window.FRAME_CARDS={"spec": ["시댄스 2.5, 15초 영상, 480p, 16대 9 기준", "시댄스 2.5, 15초 영상, 480p, 9대 16 기준"], "ending": ["제품 히어로컷으로", "효과가 가라앉은 장면 속 제품 히어로컷으로", "주인공이 제품을 카메라 쪽으로 들어 보이며"], "grammar": [{"name": "3초 훅 → 제품 → 엔드카드", "from": "옥상 오더 · 기본", "order": "3초 훅->제품>엔드카드"}, {"name": "방해 → 보상", "from": "빨대 서핑 (발견 → 「잠깐!」 → 묘기 → 제품)", "order": "3초 훅->방해->보상->제품->엔드카드"}, {"name": "원인 하나 → 큰 결과 → 반응 → 제품", "from": "환타 · 항아리 캔들", "order": "3초 훅(방아쇠 동작)->큰 결과가 가장 길게->사람 반응->제품->엔드카드"}], "tone": ["밝은 여름 고체도", "따뜻한 집밥 고채도", "고급스럽고 차분하게", "몽환적이고 우아하게"], "sound": ["", "BGM + 끝에 나레이션 한 줄", "BGM + 짧은 대사 한 마디"], "text": "화면 글자는 만들지 말 것 — 카피·제품명·엔드카드는 후반 자막으로 얹음", "sheets": "제품 / 인물 / 장소 (이 순서로 붙임)", "effects": [{"id": "storm", "name": "탄산 폭풍이 공간을 삼킴", "video": "fanta.mp4", "proof": "환타 v6 · 6판째 통과 · Dan 「참 잘 나왔거든」", "order": "제품을 여는 순간 내용물이 흔든 탄산음료를 딴 것처럼 터져 공간 전체를 삼키고, 주인공만 그 한가운데서 태연하게 즐김", "worked": "as if a violently shaken bottle of soda were cracked open … floods the whole office · Get to the pop fast and give the storm the most time, the most scale and the most camera energy", "failed": "wall → 거품 벽 · spherical shockwave → 구슬 · foam → 솜사탕 덩어리 · 「재난처럼 만들지 말 것」 → 폭풍이 작아짐", "fit": "탄산·발포·터지는 내용물"}, {"id": "name", "name": "이름이 현실 — 파도가 덮침", "video": "roof_b.mp4", "proof": "옥상 B판(Astra) · Dan 「생각보다 괜찮은 결과물」", "order": "제품 이름(또는 판매 페이지의 핵심 비유)이 진짜로 나타나 — 제품을 여는 순간 그것이 터져 주인공을 덮치고, 놀람에서 웃음으로", "worked": "a huge wave of sparkling fizz bursts from the can opening and rolls toward her in dramatic slow motion like an ocean wave, cool water and droplets wash over her, her eyes snap open and she laughs", "failed": "파도를 제품 뒤 장식으로만 쓰면 무난(한 모금의 파도 「그냥 무난한 광고」)", "fit": "이름·비유가 눈에 보이는 것(파도·황금·숲 …)"}, {"id": "mini", "name": "미니어처 소동 + 「잠깐!」", "video": "surf.mp4", "proof": "파도 빨대 서핑(Astra) · 1판 통과 · 바이럴 기준 예시", "order": "제품 위에서 손가락만 한 사람이 제품을 놀이터처럼 쓰다가, 주인공이 제품을 집으려 하자 「잠깐!」 하고 막고 마지막 묘기 후 마무리", "worked": "A finger-sized surfer has commandeered a normal PADO can's lid as her private surf break and asks its owner to wait for one last wave · Strong comic timing, one simple interruption and payoff", "failed": "「파도에 맞춰 타지 않음」(Dan) · 미니어처가 물체에 닿는 동작은 자주 망침 · 첫 장면 그림을 먼저 뽑아 붙였음", "fit": "작고 위가 평평한 제품(캔·병뚜껑·컵)"}, {"id": "bloom", "name": "재료가 깨어나 공간이 변함", "video": "candle.mp4", "proof": "항아리 캔들(Claude) · 1판 · Dan 「너무 좋았다」", "order": "제품 속 재료(꽃·원재료)가 깨어나 자라며 방 전체를 바꾸고, 주인공은 그 안에서 조용히 감탄", "worked": "one pressed dried flower lifts out of the wax and unfurls into a living bloom … the garden pours out of the little jar and floods the whole room · Get to the blooming fast and give the room-wide bloom the most time", "failed": "「캔들이라는 단서(심지·불)가 없다」(친구 의견) — 제품이 무엇인지 보이는 동작이 필요", "fit": "꽃·식물·원재료가 보이는 제품"}, {"id": "wrap", "name": "내용물이 리본처럼 몸을 감쌈", "video": "good_lip.mp4", "proof": "라네즈 립마스크 첫 판(Claude 엔진) · Dan 「립마스크는 좋았는데」", "order": "제품 내용물이 리본처럼 솟아 주인공 얼굴(몸)을 감싸 돌다가, 쓰는 순간 그 안으로 빨려 들어감", "worked": "a ring of glossy pink jelly balm ribbons rising out of the little jar and circling her face … the whole ring tilts toward her lips and is drawn into them as a dewy shine", "failed": "「효과가 너무 처음부터 드러나서」(Dan) — 첫 1초는 방아쇠 동작만, 효과는 그 뒤에", "fit": "젤·크림·액체 내용물"}, {"id": "whirl", "name": "회오리 (후보 · 1회)", "video": "good_candle_t1.mp4", "proof": "캔들 꽃잎 회오리 시험 · 친구 「화려한 효과로 꽃향기를 상상할 수 있어서 좋다」 · Dan 평가 없음", "order": "제품에서 재료가 회오리치며 솟아 주인공을 감돌다가 다시 제자리로 돌아감", "worked": "its pressed flowers come alive, whirl out as fresh petals, then settle back into the same design · Give the whirlwind the most time, scale and camera energy", "failed": "제품이 무엇인지(캔들) 알기 어려움", "fit": "향·가루·작은 조각이 있는 제품"}], "example": {"product": "가상 캔음료", "who": "하윤이", "where": "옥상 풀덱", "use": "캔을 따서 마시고", "effect": "물방울", "name": "PADO", "point": "", "tone": "밝은 여름 고체도", "sheets": "캐릭터 하윤 / PADO 캔 / 배경 옥상", "path": "C:\\DEV\\youtube storage\\260908\\260908_Pado-Astra_test\\input", "ref": ""}, "text_options": ["", "화면 글자는 만들지 말 것 — 카피·제품명·엔드카드는 후반 자막으로 얹음"]};</script><script>(function () {
   var C = window.FRAME_CARDS, ex = C.example;
   var $ = function (id) { return document.getElementById(id); };
   var F = ['spec', 'product', 'who', 'where', 'use', 'ending', 'effect', 'grammar', 'name', 'point', 'tone', 'sound', 'text', 'sheets', 'path', 'ref'];
@@ -219,11 +219,12 @@ One continuous upbeat fresh summer instrumental BGM, edited with the shots. Nati
     sel.innerHTML = '';
     arr.forEach(function (o) { var v = key ? o[key] : o; var op = document.createElement('option'); op.value = v; op.textContent = key ? (o.name + ' — ' + o.from) : v; sel.appendChild(op); });
   }
-  fill($('f-spec'), C.spec); fill($('f-ending'), C.ending); fill($('f-grammar'), C.grammar, 'order'); fill($('f-sound'), C.sound);
+  fill($('f-spec'), C.spec); fill($('f-ending'), C.ending); fill($('f-grammar'), C.grammar, 'order');
+  C.sound.forEach(function (v) { var o = document.createElement('option'); o.value = v; o.textContent = v || '(없음 — 원래 오더처럼 BGM필수만)'; $('f-sound').appendChild(o); });
   C.tone.forEach(function (t) { var o = document.createElement('option'); o.value = t; $('tone-list').appendChild(o); });
   function defaults() {
-    return { spec: C.spec[0], product: ex.product, who: ex.who, where: ex.where, use: ex.use, ending: C.ending[0], effect: '', grammar: C.grammar[0].order,
-      name: ex.name, point: ex.point, tone: C.tone[1], sound: C.sound[0], text: C.text, sheets: C.sheets, path: ex.path, ref: ex.ref, effectId: '' };
+    return { spec: C.spec[0], product: ex.product, who: ex.who, where: ex.where, use: ex.use, ending: C.ending[0], effect: ex.effect, grammar: C.grammar[0].order,
+      name: ex.name, point: ex.point, tone: ex.tone, sound: '', text: '', sheets: ex.sheets, path: ex.path, ref: ex.ref, effectId: '' };
   }
   function cardEl(e) {
     var b = document.createElement('button'); b.type = 'button'; b.className = 'card'; b.dataset.id = e.id;
@@ -240,18 +241,19 @@ One continuous upbeat fresh summer instrumental BGM, edited with the shots. Nati
     $('f-detail').appendChild(d);
   });
   function mark() { document.querySelectorAll('#f-effects .card').forEach(function (b) { b.classList.toggle('on', b.dataset.id === effectId); }); }
+  function josa(w) { var c = w ? w.charCodeAt(w.length - 1) : 0; return (c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28) ? '이' : '가'; }
   function val(k) { return ($('f-' + k).value || '').trim(); }
   function render() {
     var eff = val('effect');
     $('f-out').textContent =
       val('spec') + '\n' +
-      val('product') + ' 15초 CF(실사) - ' + val('who') + '가 ' + val('where') + '에서 ' + val('use') + ' ' + val('ending') + '로 마무리, 제품 히어로컷, ' +
-      (eff ? '효과: ' + eff + ', ' : '') + '카피 타이밍, 광고 문법(' + val('grammar') + '). 제품명은 ' + val('name') + (val('point') ? '(' + val('point') + ')' : '') + '. ' + val('tone') + ', BGM필수\n' +
-      '소리 : ' + val('sound') + '\n' +
-      '글자 : ' + val('text') + '\n' +
+      val('product') + ' 15초 CF(실사) - ' + val('who') + josa(val('who')) + ' ' + val('where') + '에서 ' + val('use') + ' ' + val('ending') + ' 마무리, 제품 히어로컷, ' +
+      (eff ? eff + ', ' : '') + '카피 타이밍, 광고 문법(' + val('grammar') + '). 제품명은 ' + val('name') + (val('point') ? '(' + val('point') + ')' : '') + '. ' + val('tone') + ', BGM필수\n' +
+      (val('sound') ? '소리 : ' + val('sound') + '\n' : '') +
+      (val('text') ? '글자 : ' + val('text') + '\n' : '') +
       '시트 : ' + val('sheets') + '\n' +
-      '시트 경로 : ' + val('path') + '\n' +
-      (val('ref') ? '참고 : ' + val('ref') : '');
+      '시트 경로 : ' + val('path') +
+      (val('ref') ? '\n참고 : ' + val('ref') : '');
   }
   function state() { var s = {}; F.forEach(function (k) { s[k] = $('f-' + k).value; }); s.effectId = effectId; return s; }
   function apply(s) { F.forEach(function (k) { if (s[k] !== undefined) $('f-' + k).value = s[k]; }); effectId = s.effectId || ''; mark(); render(); }
@@ -260,8 +262,8 @@ One continuous upbeat fresh summer instrumental BGM, edited with the shots. Nati
     clearTimeout(timer);
     timer = setTimeout(function () {
       var s = state(); s.saved_at = new Date().toISOString();
-      try { localStorage.setItem('frame_draft', JSON.stringify(s)); } catch (e) {}
-      if (db) { db.doc('frames/draft').set(s).then(function () { $('f-state').textContent = '저장됨 · Claude 가 읽을 수 있음 (' + new Date().toLocaleTimeString() + ')'; }, function () { $('f-state').textContent = '이 기기에만 저장됨 — 공유 저장 권한이 없습니다'; }); }
+      try { localStorage.setItem('frame_draft_v2', JSON.stringify(s)); } catch (e) {}
+      if (db) { db.doc('frames/draft_v2').set(s).then(function () { $('f-state').textContent = '저장됨 · Claude 가 읽을 수 있음 (' + new Date().toLocaleTimeString() + ')'; }, function () { $('f-state').textContent = '이 기기에만 저장됨 — 공유 저장 권한이 없습니다'; }); }
       else { $('f-state').textContent = '이 기기에만 저장됨'; }
     }, 600);
   }
@@ -273,14 +275,14 @@ One continuous upbeat fresh summer instrumental BGM, edited with the shots. Nati
   });
   $('f-reset').addEventListener('click', function () { apply(defaults()); save(); });
   var start = defaults();
-  try { var ls = JSON.parse(localStorage.getItem('frame_draft') || 'null'); if (ls) start = ls; } catch (e) {}
+  try { var ls = JSON.parse(localStorage.getItem('frame_draft_v2') || 'null'); if (ls) start = ls; } catch (e) {}
   apply(start);
   $('f-state').textContent = '이 기기 저장본을 불러왔습니다';
   if (window.claude && window.claude.use) {
     window.claude.use('db').then(function (d) {
       db = d;
       if (!db) { $('f-state').textContent = '이 기기에만 저장됩니다'; return; }
-      db.doc('frames/draft').get().then(function (snap) {
+      db.doc('frames/draft_v2').get().then(function (snap) {
         var s = snap && (snap.data ? snap.data() : snap);
         if (s && s.spec) { apply(s); $('f-state').textContent = '저장본을 불러왔습니다 · 고치면 자동 저장'; }
         else { $('f-state').textContent = '아직 저장본 없음 · 고치면 자동 저장'; }
