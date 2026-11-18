@@ -1,0 +1,1810 @@
+<!doctype html>
+<html lang="ko">
+<head><meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="robots" content="noindex">
+<title>채팅 목업</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+:root{
+  --bg:#181818;--bg-deep:#0f0f0f;--card:#303030;--surface-raised:#3a3a3a;--ink:#f2f2f2;--text-soft:#a8a8a8;--text-muted:#8a8a8a;
+  --line:#ffffff1a;--hairline:#ffffff14;--border-strong:#ffffff24;
+  --accent:#d4f53c;--on-accent:#12140a;--accent-tint:#d4f53c29;--accent-border:#d4f53c80;
+  --rose:#f06f86;--rose-deep:#ff3b5c;--coral:#ff7173;--glass-dark:#18181875;
+  --r-sm:10px;--r-lg:18px;--r-3xl:26px;--r-pill:999px;--shadow-md:0 6px 20px #00000059;
+  --ease-out:cubic-bezier(.22,1,.36,1);--dur:.2s;--overlay-h:54%;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0;background:var(--bg-deep);color:var(--ink);
+  font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  -webkit-font-smoothing:antialiased;overflow:hidden;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0;margin:0}
+button:disabled{cursor:default}
+svg{display:block}
+
+/* ───────── PC 레이아웃 (기본, ≥1024px) ───────── */
+.player{display:grid;grid-template-columns:minmax(0,1fr) clamp(384px,34vw,484px);grid-template-rows:auto minmax(0,1fr);
+  height:100%;max-width:1440px;margin:0 auto;background:var(--bg);position:relative}
+.media{grid-column:1;grid-row:1/3;position:relative;overflow:hidden;background:var(--bg-deep)}
+.backdrop{position:absolute;inset:-10%;background:#000 center/cover no-repeat;filter:blur(36px) brightness(.5) saturate(1.12);transform:scale(1.2);transition:background-image .4s}
+.stage-video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:50% 50%;opacity:0;transition:opacity .35s ease, filter .4s;background:transparent}
+.stage-video.on{opacity:1}
+.media.wip .stage-video.on{filter:brightness(.5) saturate(.7)}
+.stage-scrim{position:absolute;inset:0;pointer-events:none;background:linear-gradient(to bottom,#0000003d 0,transparent 22%,transparent 60%,#00000066 100%);display:none}
+.imagine-vignette{position:absolute;inset:0;pointer-events:none;z-index:1;box-shadow:inset 0 0 140px #f06f8666, inset 0 0 40px #f06f8633;animation:fadeIn .6s both}
+.stage-tag{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:2;display:inline-flex;align-items:center;gap:7px;max-width:88%;
+  background:var(--glass-dark);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--border-strong);
+  color:#fff;font-size:12px;font-weight:600;padding:7px 13px;border-radius:var(--r-pill);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;animation:fadeIn .4s both}
+.stage-tag.rose{border-color:#f06f8699;color:#ffd1da;background:#2a151b99}
+.stage-tag.wip{border-color:#ffffff3a;color:#e6e6e6}
+.stage-tag .dot{width:7px;height:7px;border-radius:50%;background:var(--rose-deep);flex:none;animation:blink 1.2s infinite}
+.stage-tag.wip .dot{background:#ffcf5a}
+.media-controls{position:absolute;right:16px;bottom:16px;z-index:4;display:flex;flex-direction:column;gap:10px;transition:bottom .3s var(--ease-out)}
+.icon-btn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#fff;
+  background:var(--glass-dark);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid #ffffff24;box-shadow:var(--shadow-md);transition:background var(--dur),transform var(--dur)}
+.icon-btn:active{transform:scale(.94)}
+.icon-btn[aria-pressed="true"]{background:var(--accent-tint);border-color:var(--accent-border);color:var(--accent)}
+.icon-btn.peek{display:none}
+.icon-btn .ico-b{display:none}
+.icon-btn[aria-pressed="true"] .ico-a{display:none}
+.icon-btn[aria-pressed="true"] .ico-b{display:block}
+.play-gate{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#00000055;border:0;color:#fff;cursor:pointer;font:inherit;-webkit-tap-highlight-color:transparent}
+.play-gate__ring{width:84px;height:84px;border-radius:50%;background:var(--accent);color:#141414;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 32px #00000080;padding-left:4px;animation:gatePulse 1.6s ease-in-out infinite}
+.play-gate__txt{font-size:14px;font-weight:600;letter-spacing:.02em;text-shadow:0 1px 6px #000}
+@keyframes gatePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.sound-hint{position:absolute;right:68px;bottom:22px;z-index:4;background:var(--glass-dark);backdrop-filter:blur(10px);border:1px solid #ffffff24;color:#fff;font-size:12px;padding:7px 11px;border-radius:var(--r-pill);white-space:nowrap;animation:fadeIn .4s both}
+.sound-hint::after{content:"";position:absolute;right:-5px;top:50%;width:8px;height:8px;background:#232323;border-right:1px solid #ffffff24;border-top:1px solid #ffffff24;transform:translateY(-50%) rotate(45deg)}
+
+.hud{grid-column:2;grid-row:1;display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--hairline);border-left:1px solid var(--hairline);background:var(--bg)}
+.backbtn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--ink);font-size:26px;line-height:1;padding-bottom:3px;background:var(--surface-raised)}
+.hud-text{min-width:0;flex:1}
+.hud-name{font-size:17px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hud-place{font-size:13px;color:var(--text-soft);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hud-demo{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--text-muted);border:1px solid var(--border-strong);border-radius:var(--r-pill);padding:3px 8px;white-space:nowrap}
+
+.overlay{grid-column:2;grid-row:2;display:flex;flex-direction:column;min-height:0;border-left:1px solid var(--hairline);background:var(--bg);transition:transform .3s var(--ease-out)}
+.convo{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:20px 18px 12px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:#ffffff22 transparent}
+.convo>*{animation:riseIn .32s var(--ease-out) both}
+.scene-divider{display:flex;align-items:center;gap:10px;color:var(--text-muted);font-size:11px;font-weight:600;letter-spacing:.04em;margin:6px 0 2px;white-space:nowrap}
+.scene-divider::before,.scene-divider::after{content:"";flex:1;height:1px;background:var(--line)}
+.caption{white-space:pre-line;align-self:flex-start;max-width:100%;font-size:14px;line-height:1.55;color:var(--text-soft);border-left:2px solid var(--border-strong);padding:2px 0 2px 12px;word-break:keep-all;overflow-wrap:anywhere}
+.caption.imagine{border-left-color:var(--rose);color:#f3c9d1}
+.row{display:flex;flex-direction:column;gap:4px;max-width:70%}
+.row.bot{align-self:flex-start}
+.row.user{align-self:flex-end;align-items:flex-end;max-width:78%}
+.who{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--ink)}
+.who .av{width:22px;height:22px;border-radius:50%;background:url("img/avatar.jpg") 50% 14%/cover;flex:none;border:1px solid #ffffff2a}
+.bubble{font-size:15px;line-height:1.5;padding:11px 15px;border-radius:var(--r-lg);word-break:keep-all;overflow-wrap:anywhere;
+  background:var(--card);border:1px solid var(--hairline);color:var(--ink)}
+.bot .bubble{border-bottom-left-radius:6px}
+.user .bubble{background:var(--accent);color:var(--on-accent);border:0;border-bottom-right-radius:6px}
+.bubble.typing{display:inline-flex;gap:5px;align-items:center;padding:14px 16px;min-width:56px}
+.bubble.typing i{width:6px;height:6px;border-radius:50%;background:#ffffff8c;animation:dots 1.1s infinite}
+.bubble.typing i:nth-child(2){animation-delay:.18s}.bubble.typing i:nth-child(3){animation-delay:.36s}
+.end-note{align-self:center;text-align:center;font-size:12px;color:var(--text-muted);line-height:1.6;padding:6px 0}
+
+.dock{padding:0 14px 14px;display:flex;flex-direction:column;gap:8px}
+.suggest-chips{display:flex;flex-direction:column;gap:6px;margin:0 2px}
+.chip{background:#ffffff14;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid #ffffff1f;border-radius:var(--r-lg);padding:10px 14px;font-size:14px;line-height:1.4;text-align:left;color:#fff;animation:riseIn .25s var(--ease-out) both}
+.chip:hover{background:#ffffff1f}
+
+.inputbar{position:relative;display:grid;grid-template-columns:auto auto auto minmax(0,1fr) auto;grid-template-areas:"suggest caption imagine field send";
+  align-items:center;gap:7px;padding:5px 5px 5px 6px;border-radius:var(--r-3xl);border:1px solid #ffffff29;
+  background:var(--glass-dark);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:opacity var(--dur)}
+.inputbar.locked{opacity:.78}
+.pill{min-height:44px;display:inline-flex;align-items:center;gap:4px;padding:0 11px;border-radius:var(--r-pill);background:#ffffff0f;border:1px solid #ffffff24;color:#ffffffb8;font-size:13px;font-weight:600;white-space:nowrap;transition:background var(--dur),border-color var(--dur),color var(--dur),opacity var(--dur)}
+.pill .pill-ico{font-size:13px;opacity:.9}
+.pill[aria-pressed="true"]{background:var(--accent-tint);border-color:var(--accent-border);color:var(--accent)}
+.suggest-btn{grid-area:suggest}.caption-btn{grid-area:caption}
+.imagine-btn{grid-area:imagine;position:relative;opacity:.45}
+.imagine-btn .pill-ico{width:12px;height:12px;border-radius:50%;border:1.5px solid currentColor;display:inline-block}
+.imagine-btn.lit{opacity:1;background:#f06f862b;border-color:var(--rose);color:#ffc5cf;animation:imPulse 1.6s ease-in-out infinite}
+.imagine-btn.lit .pill-ico{background:var(--rose-deep);border-color:var(--rose-deep)}
+.imagine-btn[aria-pressed="true"]{background:#f06f8640;border-color:#ff9bae;color:#fff}
+.imagine-badge{position:absolute;top:-6px;right:-5px;min-width:17px;height:17px;border-radius:9px;background:var(--rose-deep);color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center;padding:0 4px;box-shadow:0 0 0 2px var(--bg)}
+.field{grid-area:field;resize:none;border:0;background:none;color:#fff;font-size:16px;line-height:1.4;padding:10px 4px;outline:0;max-height:96px;min-width:0;width:100%;font-family:inherit}
+.field::placeholder{color:#fff9}
+.field:disabled{color:#ffffffb0}
+.send{grid-area:send;width:42px;height:42px;border-radius:50%;background:var(--accent);display:grid;place-items:center;transition:opacity var(--dur),transform var(--dur)}
+.send:active{transform:scale(.94)}
+.send:disabled{opacity:.38}
+.send-arrow{width:0;height:0;border-style:solid;border-width:7px 0 7px 12px;border-color:transparent transparent transparent var(--on-accent);margin-left:3px}
+
+/* 상상하기 카드 */
+.imagine-card{position:relative;margin:0 2px;padding:14px 16px 12px;border-radius:var(--r-lg);overflow:hidden;
+  background:linear-gradient(135deg,#2b1a21,#1c1618 70%);border:1px solid #f06f8670;box-shadow:0 10px 30px #00000080, 0 0 0 1px #f06f8614;animation:riseIn .3s var(--ease-out) both}
+.ic-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.ic-list{display:flex;flex-direction:column;gap:10px}
+.ic-item{padding:10px 0 0;border-top:1px solid #f06f8626}
+.ic-item:first-child{padding-top:0;border-top:0}
+.ic-item.seen .ic-kicker{color:#c99aa4}
+.ic-row{display:flex;align-items:center;gap:10px}
+.ic-row .ic-body{flex:1;margin:0}
+.ic-item.seen .ic-watch{background:#ffffff1a;box-shadow:none;color:#ffd1da;border:1px solid #f06f8666}
+.ic-note{font-size:12px;color:#ffd77a;margin-top:10px;line-height:1.5}
+.ic-foot{display:flex;justify-content:flex-end;margin-top:10px}
+.arm-toast{position:absolute;left:50%;transform:translateX(-50%);top:58px;z-index:3;background:#2a151be6;border:1px solid #f06f8699;color:#ffd1da;font-size:12px;font-weight:700;padding:7px 13px;border-radius:999px;white-space:nowrap;animation:riseIn .3s var(--ease-out) both;pointer-events:none}
+@media (max-width:1023.98px){.arm-toast{top:calc(env(safe-area-inset-top,0px) + 148px)}}
+.ic-kicker{font-size:12px;font-weight:700;color:#ff9bae;letter-spacing:.02em}
+.age19{font-size:10px;font-weight:800;color:#fff;background:var(--rose-deep);border-radius:5px;padding:2px 5px;line-height:1}
+.ic-wip{font-size:11px;font-weight:600;color:#ffd77a;border:1px solid #ffd77a66;border-radius:var(--r-pill);padding:2px 7px;margin-left:auto}
+.ic-body{font-size:15px;line-height:1.5;color:#fff;word-break:keep-all;margin-bottom:12px}
+.ic-actions{display:flex;gap:8px;align-items:center}
+.ic-watch{flex:none;min-height:38px;padding:0 16px;border-radius:var(--r-pill);background:var(--rose);color:#fff;font-weight:700;font-size:14px;box-shadow:0 4px 14px #f06f8655;transition:transform var(--dur),filter var(--dur)}
+.ic-watch:hover{filter:brightness(1.08)}.ic-watch:active{transform:scale(.96)}
+.ic-skip{min-height:40px;padding:0 14px;border-radius:var(--r-pill);border:1px solid var(--border-strong);color:var(--text-soft);font-size:14px}
+
+/* 시연 조작 */
+.presenter{position:absolute;left:12px;bottom:12px;z-index:9;display:flex;flex-direction:column-reverse;align-items:flex-start;gap:8px}
+.pr-toggle{height:34px;padding:0 12px;border-radius:var(--r-pill);background:var(--glass-dark);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid #ffffff24;color:#ffffffcc;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.pr-toggle b{color:#fff;font-weight:600;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pr-panel{width:236px;padding:12px;border-radius:14px;background:#1e1e1ef0;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid #ffffff24;box-shadow:var(--shadow-md);display:flex;flex-direction:column;gap:8px;font-size:13px;animation:riseIn .2s var(--ease-out) both}
+.pr-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.pr-btn{flex:1;min-height:34px;border-radius:9px;background:#ffffff12;border:1px solid #ffffff1f;color:#fff;font-size:12px;font-weight:600}
+.pr-btn:hover{background:#ffffff1e}
+.pr-panel label{display:flex;align-items:center;gap:8px;color:var(--text-soft);font-size:12px}
+.pr-panel select{flex:1;min-width:0;background:#ffffff12;color:#fff;border:1px solid #ffffff1f;border-radius:8px;padding:6px 8px;font:inherit;font-size:12px}
+.pr-panel input[type=checkbox]{accent-color:var(--rose)}
+.pr-note{font-size:11px;color:var(--text-muted);line-height:1.5}
+
+@keyframes riseIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes dots{0%,80%,100%{transform:translateY(0);opacity:.5}40%{transform:translateY(-4px);opacity:1}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes imPulse{0%{box-shadow:0 0 0 0 #f06f8680}70%{box-shadow:0 0 0 9px #f06f8600}100%{box-shadow:0 0 0 0 #f06f8600}}
+@keyframes shrink{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+
+/* ───────── 모바일 (<1024px): 실제 토모리 모바일 레이아웃 ───────── */
+/* ───────── 시작 화면(표지) ───────── */
+.cover{position:absolute;inset:0;z-index:30;background:var(--bg-deep);overflow:hidden;transition:opacity .45s ease}
+.cover.out{opacity:0;pointer-events:none}
+.cover-bg{position:absolute;inset:-10%;background:center/cover no-repeat;filter:blur(40px) brightness(.42) saturate(1.1);transform:scale(1.2)}
+.cover-art{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:50% 50%}
+.cover-scrim{position:absolute;inset:0;background:linear-gradient(180deg,#00000000 38%,#000000a6 72%,#000000e6 100%)}
+.cover-body{position:absolute;left:0;right:0;bottom:0;padding:0 24px calc(env(safe-area-inset-bottom,0px) + 40px);display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px}
+.cover-kicker{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:.08em;color:var(--text-soft)}
+.cover-title{margin:0;font-size:clamp(30px,4.2vw,46px);font-weight:800;letter-spacing:-.02em;line-height:1.15;color:#fff;text-shadow:0 2px 18px #000000b3;text-wrap:balance;word-break:keep-all;overflow-wrap:normal}
+.cover-sub{margin:0;max-width:34em;font-size:14px;line-height:1.55;color:#e4e4e4;text-shadow:0 1px 8px #000}
+.cover-meta{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;font-size:12px;color:var(--text-soft)}
+.cover-meta span+span::before{content:"·";margin-right:14px;color:var(--text-muted)}
+.cover-start{margin-top:14px;display:inline-flex;align-items:center;gap:10px;height:54px;padding:0 34px 0 26px;border-radius:var(--r-pill);background:var(--accent);color:var(--on-accent);font-size:17px;font-weight:800;letter-spacing:-.01em;box-shadow:0 12px 36px #00000080;transition:transform .15s var(--ease-out),filter .15s}
+.cover-start:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.cover-start:active{transform:translateY(1px) scale(.98)}
+.cover-note{font-size:11px;color:var(--text-muted);margin-top:2px}
+.hud-work{font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px}
+
+@media (max-width:1023.98px){
+  .player{display:block;max-width:none}
+  .cover-art{object-fit:cover;object-position:50% 18%} .cover-bg{display:none} .cover-title{font-size:32px}
+  .media{position:absolute;inset:0}
+  .backdrop{display:none}
+  .stage-video{object-fit:cover;object-position:50% 20%}
+  .stage-scrim{display:block}
+  .stage-tag{top:calc(env(safe-area-inset-top,0px) + 108px);max-width:92%}
+  .hud{position:absolute;top:0;left:0;right:0;z-index:5;padding:calc(env(safe-area-inset-top,0px) + 12px) 14px 12px;border:0;background:none}
+  .backbtn{background:var(--glass-dark);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid #ffffff24;color:#fff}
+  .hud-name{color:#fff;text-shadow:0 1px 6px #0009}
+  .hud-place{color:#ffffffd1;text-shadow:0 1px 6px #0009}
+  .hud-demo{color:#ffffffb8;background:var(--glass-dark);border-color:#ffffff24}
+  .overlay{position:absolute;left:0;right:0;bottom:0;height:var(--overlay-h);z-index:5;border:0;background:none}
+  .player--peek .overlay{transform:translateY(calc(100% + 24px))}
+  .convo{padding:28px 14px 10px;-webkit-mask-image:linear-gradient(to bottom,transparent,#000 14%);mask-image:linear-gradient(to bottom,transparent,#000 14%)}
+  .scene-divider{color:#ffffffb0;text-shadow:0 1px 4px #0008}
+  .scene-divider::before,.scene-divider::after{background:#ffffff33}
+  .caption{max-width:92%;background:var(--glass-dark);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#ffffffd1;border:0;border-radius:var(--r-sm);padding:6px 13px}
+  .caption.imagine{color:#ffd1da;box-shadow:inset 0 0 0 1px #f06f8655}
+  .bubble{background:var(--glass-dark);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:0;color:#fff}
+  .user .bubble{background:var(--accent);color:var(--on-accent)}
+  .who{color:#fff;text-shadow:0 1px 4px #0008}
+  .end-note{color:#ffffffb0;text-shadow:0 1px 4px #0008}
+  .dock{padding:0 12px calc(env(safe-area-inset-bottom,0px) + 12px)}
+  .media-controls{right:12px;bottom:calc(var(--overlay-h) + 12px)}
+  .player--peek .media-controls{bottom:calc(env(safe-area-inset-bottom,0px) + 16px)}
+  .icon-btn.peek{display:grid}
+  .sound-hint{right:64px;bottom:calc(var(--overlay-h) + 18px)}
+  .player--peek .sound-hint{bottom:calc(env(safe-area-inset-bottom,0px) + 22px)}
+  .pill{padding:0 9px;font-size:12px;gap:3px}
+  .field{font-size:16px;padding:10px 2px}
+  .presenter{left:auto;right:12px;top:calc(env(safe-area-inset-top,0px) + 64px);bottom:auto;flex-direction:column;align-items:flex-end}
+  .pr-toggle{height:30px;padding:0 10px;font-size:11px}
+  .pr-toggle b{max-width:96px}
+  .pr-panel{width:220px}
+}
+@media (max-width:380px){ .pill span:not(.pill-ico):not(.imagine-badge){display:none} .pill{padding:0 12px} .imagine-btn .pill-ico{width:13px;height:13px} }
+/* ── 우리 목업 추가분 ── */
+.stage-still{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:50% 50%;opacity:0;transition:opacity .35s ease, filter .4s}
+.stage-still.on{opacity:1}
+.media.wip .stage-still.on{filter:brightness(.62) saturate(.75)}
+.row.other{align-self:flex-start}
+.other .bubble{background:#4a4a4a;border-bottom-left-radius:6px}
+.who{flex-wrap:wrap}.who span:nth-child(2){white-space:nowrap}
+.who .note{font-weight:500;color:var(--text-soft);font-size:11px;flex-basis:100%;margin-left:28px}
+.other .who .note{margin-left:0}
+.caption.narr{border-left-color:var(--accent);color:#e9f5b8}
+.pill:disabled{opacity:.35}
+html,body{overflow-x:hidden}
+@media (max-width:1023.98px){
+  .stage-still{object-fit:cover;object-position:50% 20%}
+  .caption.narr{color:#f1fbd0;box-shadow:inset 2px 0 0 var(--accent)}
+  .other .bubble{background:#3b3b3bcc}
+}
+</style>
+</head>
+<body>
+<div class="player" id="player">
+  <div class="media" id="media">
+    <div class="backdrop" id="backdrop"></div>
+    <video id="vA" class="stage-video" playsinline webkit-playsinline muted preload="auto"></video>
+    <video id="vB" class="stage-video" playsinline webkit-playsinline muted preload="auto"></video>
+    <img id="still" class="stage-still" alt="">
+    <button class="play-gate" id="playGate" hidden aria-label="재생">
+      <span class="play-gate__ring"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+      <span class="play-gate__txt">눌러서 시작</span>
+    </button>
+    <div class="stage-scrim"></div>
+    <div class="imagine-vignette" id="vignette" hidden></div>
+    <div class="stage-tag" id="stageTag" hidden></div>
+    <div class="arm-toast" id="armToast" hidden></div>
+    <div class="sound-hint" id="soundHint" hidden>화면을 한 번 누르면 소리가 켜집니다</div>
+    <div class="media-controls">
+      <button class="icon-btn" id="btnReplay" aria-label="영상 다시 보기" title="다시 보기">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+      </button>
+      <button class="icon-btn peek" id="btnPeek" aria-label="사진 크게 보기" aria-pressed="false" title="사진 크게 보기">
+        <svg class="ico-a" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+        <svg class="ico-b" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+      </button>
+      <button class="icon-btn" id="btnSound" aria-label="소리 켜기/끄기" aria-pressed="false" title="소리">
+        <svg class="ico-a" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+        <svg class="ico-b" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="cover" id="cover">
+    <div class="cover-bg" style="background-image:url(img/cover.jpg)"></div>
+    <img class="cover-art" src="img/cover.jpg" alt="">
+    <div class="cover-scrim"></div>
+    <div class="cover-body">
+      <div class="cover-kicker">토모리 · 캐릭터 스토리 <span class="age19">19</span></div>
+      <h1 class="cover-title" id="coverTitle"></h1>
+      <p class="cover-sub" id="coverSub"></p>
+      <div class="cover-meta" id="coverMeta"></div>
+      <button type="button" class="cover-start" id="btnStart"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>시작하기</button>
+      <div class="cover-note" id="coverNote">소리와 함께 재생됩니다</div>
+    </div>
+  </div>
+
+  <div class="hud">
+    <button class="backbtn" aria-label="뒤로">‹</button>
+    <div class="hud-text">
+      <div class="hud-work" id="hudWork"></div>
+      <div class="hud-name"><span id="hudName"></span> <span id="hudRole" style="font-weight:500;color:var(--text-soft);font-size:13px"></span></div>
+      <div class="hud-place" id="hudPlace"></div>
+    </div>
+    <span class="hud-demo">내부 데모</span>
+  </div>
+
+  <div class="overlay">
+    <div class="convo" id="convo"></div>
+    <div class="dock">
+      <div class="imagine-card" id="imagineCard" hidden>
+        <div class="ic-list" id="icList"></div>
+        <div class="ic-note" id="icNote" hidden>몰입 영상이 끝나고 대화가 열리면 바로 보여 드려요.</div>
+        <div class="ic-foot"><button class="ic-skip" id="icSkip" type="button">닫기</button></div>
+      </div>
+      <div class="suggest-chips" id="chips" hidden></div>
+      <form class="inputbar" id="inputbar" autocomplete="off">
+        <button type="button" class="pill suggest-btn" id="btnSuggest" aria-pressed="false"><span class="pill-ico">✦</span><span>추천</span></button>
+        <button type="button" class="pill caption-btn" id="btnCaption" aria-label="행동·상황 입력" aria-pressed="false"><span class="pill-ico">*</span><span>상황</span></button>
+        <button type="button" class="pill imagine-btn" id="btnImagine" aria-label="상상하기" aria-pressed="false"><span class="pill-ico"></span><span>상상</span><span class="imagine-badge" id="imagineBadge" hidden>1</span></button>
+        <textarea class="field" id="field" rows="1" placeholder="메시지를 입력하세요"></textarea>
+        <button type="submit" class="send" id="btnSend" aria-label="보내기"><span class="send-arrow"></span></button>
+      </form>
+    </div>
+  </div>
+
+  <div class="presenter" id="presenter">
+    <button class="pr-toggle" id="prToggle" aria-expanded="false">⚙ 시연 <b id="prStep">준비</b></button>
+    <div class="pr-panel" id="prPanel" hidden>
+      <div class="pr-row"><button class="pr-btn" id="prPause">⏸ 일시정지</button><button class="pr-btn" id="prNext">⏭ 다음 단계</button><button class="pr-btn" id="prRestart">↺ 처음부터</button></div>
+      <label>바로 가기 <select id="prJump"></select></label>
+      <label>속도 <select id="prSpeed"><option value="1">1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></label>
+      <label><input type="checkbox" id="prAuto"> 상상하기 자동 선택 (손 안 대고 시연)</label>
+      <div class="pr-note" id="prNote">각본 칸에서 저절로 만든 목업입니다(mock_build.py). 「제작 중」 표시 = 확정 영상이 없어 프리비즈·컷 배경·콘티로 대신한 자리.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ───────────── 데이터: mock_build.py 가 각본 칸에서 만든 단계 목록 ───────────── */
+const DATA = {
+ "meta": {
+  "cid": "s_jiwoo1116",
+  "title": "헬스장 PT, 트레이너가 내 직장 상사의 여친일 때",
+  "name": "채지우",
+  "first": "지우",
+  "age": "26세",
+  "role": "회사 앞 헬스장 정식 트레이너",
+  "until": "S2",
+  "sub": "지우는 회사 앞 헬스장 트레이너라, 팔목을 잡는 회원에게도 웃으며 고개를 숙여야 한다. 그날 아침 옆에서 운동하던 내가 회원의 팔을 떼어 내고 그녀 앞을 막아섰다.",
+  "built": "2026-11-18 17:55 KST",
+  "with_review": false
+ },
+ "steps": [
+  {
+   "id": "S0_cutA",
+   "label": "프롤로그 · 컷 A",
+   "type": "prologue",
+   "scene": "S0",
+   "key": "p1",
+   "divider": "프롤로그",
+   "place": "지난주 목요일 아침 7시 · 헬스장 프리웨이트 존",
+   "media": "S0_p1",
+   "dur": 15.042,
+   "events": [
+    {
+     "t": 0.4,
+     "k": "c",
+     "text": "근무복의 지우가 능글맞은 50대 진상 회원(배 나온 몸 · 얼굴 보임)에게 웃으며 운동을 설명하고 「이렇게 열 세트 하시면 됩니다」라고 말한다."
+    },
+    {
+     "t": 1.6,
+     "k": "b0",
+     "text": "이렇게 열 세트 하시면 됩니다."
+    },
+    {
+     "t": 3.88,
+     "k": "c",
+     "text": "회원이 갑자기 그녀 손목을 잡는다 — 잡는 순간 지우는 웃음이 사라지며 놀라서 회원을 쳐다본다(트레이너 손목을 잡으면 안 되는 상황이라). 회원은 손목을 잡은 채 「아이, 선생님. 끝나고 저녁이나 해요」라고 말한다."
+    },
+    {
+     "t": 5.08,
+     "k": "o",
+     "text": "아이, 선생님. 끝나고 저녁이나 해요.",
+     "name": "회원",
+     "note": "손목을 잡은 뒤"
+    },
+    {
+     "t": 7.35,
+     "k": "c",
+     "text": "그때 카메라 쪽 뒤에서 주인공(뒷모습만, 얼굴 안 보임)이 걸어 들어와 회원의 팔을 잡아 그녀 손목에서 떼어 내고, 그녀와 회원 사이를 몸으로 막아선다."
+    },
+    {
+     "t": 10.83,
+     "k": "c",
+     "text": "회원은 불만 섞인 표정으로 주인공을 쳐다보고, 지우는 안도한 표정으로 주인공을 바라본다."
+    }
+   ],
+   "after": [
+    [
+     "n",
+     "지우는 회사 앞 헬스장 트레이너다. 이곳 트레이너 월급은 회원 수에서 나온다."
+    ],
+    [
+     "u",
+     "괜찮으세요?"
+    ],
+    [
+     "b",
+     "아… 감사합니다."
+    ]
+   ],
+   "src": {
+    "what": "pro.cutA.what",
+    "line": "pro.cutA.line",
+    "chat": "pro.cutA.chat",
+    "caption": "pro.cutA.caption",
+    "place": "pro.cutA.place"
+   }
+  },
+  {
+   "id": "S0_cutB",
+   "label": "프롤로그 · 컷 B",
+   "type": "prologue",
+   "scene": "S0",
+   "key": "p2",
+   "divider": null,
+   "place": "같은 날 저녁 · 헬스장 직원 휴게실",
+   "media": "S0_p2",
+   "dur": 9.042,
+   "events": [
+    {
+     "t": 0.4,
+     "k": "c",
+     "text": "지우 폰 화면 위에 빨개진 팔목 사진과 「오늘 회원이 팔목 잡았어」 말풍선이 이미 올라가 있다."
+    },
+    {
+     "t": 6.51,
+     "k": "c",
+     "text": "그때 준호의 답장 「그러니까 그만두라니까」가 뜬다. 답장이 뜨자 화면 위 그녀 엄지가 답을 치려다 멈춘다(걱정해 주는 말 대신 그만두라는 답이 와서). 준호 얼굴·식사 자리는 나오지 않는다."
+    }
+   ],
+   "after": [
+    [
+     "n",
+     "남자친구는 엄마 친구의 아들이다. 사귄 지 1년 반, 양가가 다 아는 사이다."
+    ]
+   ],
+   "src": {
+    "what": "pro.cutB.what",
+    "caption": "pro.cutB.caption",
+    "place": "pro.cutB.place"
+   }
+  },
+  {
+   "id": "S0_cutC",
+   "label": "프롤로그 · 컷 C",
+   "type": "prologue",
+   "scene": "S0",
+   "key": "p3",
+   "divider": null,
+   "place": "다음 날 금요일 아침 · 카운터(지금)",
+   "media": "S0_p3",
+   "dur": 17.042,
+   "events": [
+    {
+     "t": 0.4,
+     "k": "c",
+     "text": "같은 근무복을 입은 지우가 카운터 옆에 서 있고, 카메라가 그녀의 발끝에서 얼굴까지 올라간다."
+    },
+    {
+     "t": 6.33,
+     "k": "c",
+     "text": "그녀가 카운터 바인더 속 내 회원 관리 카드 구석에 연필로 작은 하트를 그린다. 화면에는 카드와 그녀 손만 보인다."
+    },
+    {
+     "t": 12.27,
+     "k": "c",
+     "text": "이어 그녀가 지우 폰을 들어 올리고, 다시 얼굴이 보인다 — 웃음을 참는 얼굴(팔목 잡힌 다음 날이라 그를 떠올리고 있어서). 폰은 카메라 쪽으로 뒷면만 보인다."
+    }
+   ],
+   "after": [
+    [
+     "b",
+     "도와주셔서 진짜 고마웠어요. 월요일 아침, 무료 PT 한 번 해 드릴까요?"
+    ]
+   ],
+   "src": {
+    "what": "pro.cutC.what",
+    "chat": "pro.cutC.chat",
+    "place": "pro.cutC.place"
+   }
+  },
+  {
+   "id": "S1_entry",
+   "label": "씬1 · 진입",
+   "type": "entry",
+   "scene": "S1",
+   "key": "entry",
+   "media": "S1_entry",
+   "dur": 10.042,
+   "loop": false,
+   "arm": [
+    "S1_img_e"
+   ],
+   "src": {
+    "what": "s1.entry.what",
+    "line": "s1.entry.line",
+    "reason": "s1.entry.reason",
+    "loc": "s1.entry.loc"
+   },
+   "divider": "씬 1 · 월요일 아침 7시 · 헬스장 PT 존(그녀가 넣어 준 무료 PT)",
+   "place": "이번 주 월요일 아침 7시 · 헬스장 PT 존",
+   "newScene": true,
+   "events": [
+    {
+     "t": 0.4,
+     "k": "c",
+     "text": "운동 매트 옆에서 회원 기록지가 끼워진 클립보드을 가슴에 안고 서 있던 지우(앞단추 크롭 폴로·바이커 쇼츠)가 들어오는 나를 보고 꾸벅 인사하며 「어서 오세요, 회원님」이라고 말한다."
+    },
+    {
+     "t": 1.0,
+     "k": "b0",
+     "text": "어서 오세요, 회원님."
+    },
+    {
+     "t": 3.4,
+     "k": "c",
+     "text": "고개를 든 지우는 첫 인사가 쑥스러워 회원 기록지가 끼워진 클립보드로 입가를 살짝 가리고, 머쓱하게 웃으며 「아, 어색하다」라고 말한다."
+    },
+    {
+     "t": 4.0,
+     "k": "b0",
+     "text": "아, 어색하다.",
+     "note": "회원 기록지가 끼워진 클립보드로 입가를 가리며"
+    }
+   ],
+   "after": [],
+   "note": "자기가 넣어 준 무료 PT에 내가 실제로 나타나 첫인사를 하는 순간"
+  },
+  {
+   "id": "S1_idle1_full",
+   "label": "씬1 · idle 1 전신",
+   "type": "idle",
+   "scene": "S1",
+   "key": "idle1_full",
+   "media": "S1_idle1_full",
+   "dur": 8.042,
+   "loop": true,
+   "arm": [],
+   "src": {
+    "what": "s1.idle1_full.what",
+    "chat": "s1.idle1_full.chat",
+    "reason": "s1.idle1_full.reason"
+   },
+   "chat": [
+    [
+     "t",
+     1.0
+    ],
+    [
+     "c",
+     "지우가 회원 기록지가 끼워진 클립보드을 넘겨 보다가 펜 끝으로 턱을 톡톡 친다."
+    ],
+    [
+     "c",
+     "그러다 내 쪽을 힐끔 보고, 쑥스러워서 바로 시선을 내린다."
+    ],
+    [
+     "b",
+     "팔목 잡혔을 때 도와주셨었죠. 아직도 생각나요."
+    ],
+    [
+     "w",
+     2500
+    ]
+   ],
+   "events": [],
+   "note": "클립보드를 넘기다 나를 힐끔 본 순간, 그날 회원에게 팔목을 잡혔을 때 내가 도와준 일이 떠올라 쑥스러워진다. 이 채팅은 그 일 얘기만 한다"
+  },
+  {
+   "id": "S1_idle1_close",
+   "label": "씬1 · idle 1 클로즈업",
+   "type": "idle",
+   "scene": "S1",
+   "key": "idle1_close",
+   "media": "S1_idle1_close",
+   "dur": 8.042,
+   "loop": true,
+   "arm": [],
+   "src": {
+    "what": "s1.idle1_close.what",
+    "chat": "s1.idle1_close.chat",
+    "reason": "s1.idle1_close.reason"
+   },
+   "chat": [
+    [
+     "t",
+     1.0
+    ],
+    [
+     "c",
+     "지우가 회원 기록지가 끼워진 클립보드을 가슴에 안은 채 포니테일 끝을 손가락에 감았다 놓는다."
+    ],
+    [
+     "c",
+     "이어 렌즈를 보며 장난스럽게 웃는다."
+    ],
+    [
+     "b",
+     "PT는 처음 하시는 거 같으니, 오늘은 자세를 제대로 봐 드려도 될까요?"
+    ],
+    [
+     "w",
+     2500
+    ]
+   ],
+   "events": [],
+   "note": "내가 PT 는 처음인 것 같아서, 오늘은 자세부터 제대로 봐 주겠다고 웃으며 제안한다"
+  },
+  {
+   "id": "S1_imm1",
+   "label": "씬1 · 몰입 1",
+   "type": "imm",
+   "scene": "S1",
+   "key": "imm1",
+   "media": "S1_imm1",
+   "dur": 12.042,
+   "loop": false,
+   "arm": [
+    "S1_img_m1a",
+    "S1_img_m1b"
+   ],
+   "src": {
+    "what": "s1.imm1.what",
+    "line": "s1.imm1.line",
+    "reason": "s1.imm1.reason"
+   },
+   "events": [
+    {
+     "t": 0.3,
+     "k": "c",
+     "text": "운동 매트 위에서 내가 힙힌지를 하고, 지우가 바로 옆에 붙어 선다. 지우는 손을 대기 전에 내 얼굴을 보며 끄덕임을 기다리고, 설레는 웃음으로 「자, 봐 드릴게요」라고 말한다."
+    },
+    {
+     "t": 0.9,
+     "k": "b0",
+     "text": "자, 봐 드릴게요."
+    },
+    {
+     "t": 2.9,
+     "k": "c",
+     "text": "지우가 손가락을 내 골반 앞 접히는 곳에 대고 뒤로 밀며 「허리 말고 엉덩이 뒤로 빼요」라고 말한다."
+    },
+    {
+     "t": 3.5,
+     "k": "b0",
+     "text": "허리 말고 엉덩이 뒤로 빼요.",
+     "note": "골반 앞을 밀며"
+    },
+    {
+     "t": 8.67,
+     "k": "c",
+     "text": "지우가 자세를 보려고 같이 숙이며 표정이 집중으로 바뀐다. 접히면서 시선이 내려간 내 눈 아래로 폴로 앞섶이 들어온다."
+    }
+   ],
+   "after": [],
+   "note": "앞 채팅의 제안에 어떤 답이 오든, 설레는 웃음으로 바로 내 골반에 손가락을 대며 수업을 시작한다. 지난 일은 다시 꺼내지 않고 운동 지시만 한다"
+  },
+  {
+   "id": "S1_idle2_full",
+   "label": "씬1 · idle 2 전신",
+   "type": "idle",
+   "scene": "S1",
+   "key": "idle2_full",
+   "media": "S1_idle2_full",
+   "dur": 8.042,
+   "loop": true,
+   "arm": [],
+   "src": {
+    "what": "s1.idle2_full.what",
+    "chat": "s1.idle2_full.chat",
+    "reason": "s1.idle2_full.reason"
+   },
+   "chat": [
+    [
+     "t",
+     1.0
+    ],
+    [
+     "c",
+     "지우가 나에게 잘했다는 듯 엄지를 척 들어 보인다."
+    ],
+    [
+     "c",
+     "이어 회원 기록지가 끼워진 클립보드에 체크한다."
+    ],
+    [
+     "b",
+     "와, 생각보다 잘하시네요."
+    ],
+    [
+     "w",
+     2500
+    ]
+   ],
+   "events": [],
+   "note": "방금 힙힌지를 제대로 따라 한 걸 보고 엄지를 든다"
+  },
+  {
+   "id": "S1_idle2_close",
+   "label": "씬1 · idle 2 클로즈업",
+   "type": "idle",
+   "scene": "S1",
+   "key": "idle2_close",
+   "media": "S1_idle2_close",
+   "dur": 5.042,
+   "loop": true,
+   "arm": [],
+   "src": {
+    "what": "s1.idle2_close.what",
+    "chat": "s1.idle2_close.chat",
+    "reason": "s1.idle2_close.reason"
+   },
+   "chat": [
+    [
+     "t",
+     1.0
+    ],
+    [
+     "c",
+     "지우가 이제 덤벨을 할 차례라는 듯 랙 맨 아래 칸 쪽으로 고개를 까딱하며 눈썹을 올린다."
+    ],
+    [
+     "b",
+     "이번엔 무게 들고 해 볼까요? 제가 먼저 보여 드릴게요."
+    ],
+    [
+     "w",
+     2500
+    ]
+   ],
+   "events": [],
+   "note": "맨손 동작을 통과해 다음 단계로, 랙 맨 아래 덤벨을 턱으로 가리킨다"
+  },
+  {
+   "id": "S1_imm2",
+   "label": "씬1 · 몰입 2",
+   "type": "imm",
+   "scene": "S1",
+   "key": "imm2",
+   "media": "S1_imm2",
+   "dur": 12.042,
+   "loop": false,
+   "arm": [
+    "S1_img_m2a",
+    "S1_img_m2b"
+   ],
+   "src": {
+    "what": "s1.imm2.what",
+    "line": "s1.imm2.line",
+    "reason": "s1.imm2.reason"
+   },
+   "events": [
+    {
+     "t": 0.3,
+     "k": "c",
+     "text": "지우가 랙 맨 아래 칸에서 덤벨 한 쌍을 집어 들고 「잘 보세요」라고 말한다."
+    },
+    {
+     "t": 0.9,
+     "k": "b0",
+     "text": "잘 보세요."
+    },
+    {
+     "t": 2.4,
+     "k": "c",
+     "text": "지우가 루마니안 데드리프트 시범을 한 번 보이며 「엉덩이 뒤로… 이렇게요」라고 말한다. 바이커 쇼츠 위로 엉덩이와 허벅지 뒤 라인이, 반팔 아래로 팔뚝 근육선이 드러난다."
+    },
+    {
+     "t": 3.0,
+     "k": "b0",
+     "text": "엉덩이 뒤로… 이렇게요.",
+     "note": "시범하며"
+    },
+    {
+     "t": 8.67,
+     "k": "c",
+     "text": "몸을 세우며 돌아보던 지우가 내 시선을 알아챈다. 내가 자세보다 몸을 보고 있었다는 걸 알아채서, 웃음을 참으며 몸을 마저 세운다."
+    }
+   ],
+   "after": [],
+   "note": "앞에서 말한 대로 덤벨을 들고 시범을 보이는 그 동작 중"
+  },
+  {
+   "id": "S1_teaser",
+   "label": "씬1 · 예고",
+   "type": "teaser",
+   "scene": "S1",
+   "key": "teaser",
+   "media": "S1_teaser",
+   "dur": 12.042,
+   "loop": false,
+   "arm": [
+    "S1_img_t"
+   ],
+   "src": {
+    "what": "s1.teaser.what",
+    "reason": "s1.teaser.reason"
+   },
+   "events": [
+    {
+     "t": 0.4,
+     "k": "c",
+     "text": "벤치 위 내 폰이 울리고, 화면에 발신자 「박준호 부장님」이 뜬다. 이때 화면에는 폰만 보이고 지우는 아직 화면 밖(옆에 서 있어 그녀 눈에도 화면이 보인다)."
+    },
+    {
+     "t": 4.54,
+     "k": "c",
+     "text": "나는 덤벨을 든 채 다른 손으로 스피커를 누르고, 폰에서 남자 목소리(준호 · 얼굴 없음)로 「어, 나 박 부장이야. 아홉 시 회의 자료 챙겼지?」가 흘러나온다."
+    },
+    {
+     "t": 8.67,
+     "k": "c",
+     "text": "그 목소리가 자기 남자친구 목소리라서, 지우가 화면 옆에서 비스듬히 몸을 기울여 들어오며, 말없이 놀란 얼굴로 폰 화면과 내 얼굴을 번갈아 본다(화면에 들어올 때부터 놀란 얼굴)."
+    }
+   ],
+   "after": [],
+   "note": "내 폰 발신자 화면에 남자친구 이름이 뜨고, 스피커에서 「나 박 부장이야」 하는 그 목소리를 들은 직후라, 놀라도 통화 중이라 말은 못 하고 얼굴만 굳는다"
+  },
+  {
+   "id": "S2_entry",
+   "label": "씬2 · 진입",
+   "type": "entry",
+   "scene": "S2",
+   "key": "entry",
+   "media": "S2_entry",
+   "dur": 13.042,
+   "loop": false,
+   "arm": [
+    "S2_img_e"
+   ],
+   "src": {
+    "what": "s2.entry.what",
+    "line": "s2.entry.line",
+    "reason": "s2.entry.reason",
+    "loc": "s2.entry.loc"
+   },
+   "divider": "씬 2 · 목요일 아침 7시 40분 · 인바디실 옆 스트레칭 라운지",
+   "place": "사흘 뒤 목요일 아침 7시 40분 · 인바디실 옆 스트레칭 라운지",
+   "newScene": true,
+   "events": [
+    {
+     "t": 0.4,
+     "k": "c",
+     "text": "스퀘어넥 크롭 탑과 몸에 붙는 레깅스를 입은 지우가 결과지를 들고 걸어와 무릎 높이 테이블에 가볍게 내려놓는다."
+    },
+    {
+     "t": 5.4,
+     "k": "c",
+     "text": "테이블 건너편에 선 채로 렌즈를 보며 내 옆자리를 권하듯 「결과지 나왔어요. 같이 앉아서 보실까요?」라고 말한다. 어색함을 감추고 밝게 웃는다(무슨 일이 있은 뒤 처음 마주한 자리라서)."
+    },
+    {
+     "t": 6.0,
+     "k": "b0",
+     "text": "결과지 나왔어요. 같이 앉아서 보실까요?"
+    }
+   ],
+   "after": [],
+   "note": "인바디 결과지를 들고 와 테이블에 내려놓으며 옆자리를 권한다"
+  },
+  {
+   "id": "S2_idle1_full",
+   "label": "씬2 · idle 1 전신",
+   "type": "idle",
+   "scene": "S2",
+   "key": "idle1_full",
+   "media": "S2_idle1_full",
+   "dur": 8.042,
+   "loop": true,
+   "arm": [],
+   "src": {
+    "what": "s2.idle1_full.what",
+    "chat": "s2.idle1_full.chat",
+    "reason": "s2.idle1_full.reason"
+   },
+   "chat": [
+    [
+     "t",
+     1.0
+    ],
+    [
+     "c",
+     "지우가 내 옆 소파에 앉아 무릎 위 결과지를 내려다보며 펜을 돌린다."
+    ],
+    [
+     "c",
+     "내 쪽을 봤다가 입술을 깨문다(할 말을 고르는 중이라서)."
+    ],
+    [
+     "b",
+     "월요일 스피커 전화 목소리, 제 남자친구였어요. 진짜 놀랐어요."
+    ],
+    [
+     "w",
+     2500
+    ]
+   ],
+   "events": [],
+   "note": "결과지를 앞에 두고 둘만 앉자, 월요일 전화 이후 처음 마주한 자리라 그 일부터 짚는다"
+  },
+  {
+   "id": "S2_idle1_close",
+   "label": "씬2 · idle 1 클로즈업",
+   "type": "idle",
+   "scene": "S2",
+   "key": "idle1_close",
+   "media": "S2_idle1_close",
+   "dur": 8.042,
+   "loop": true,
+   "arm": [],
+   "src": {
+    "what": "s2.idle1_close.what",
+    "chat": "s2.idle1_close.chat",
+    "reason": "s2.idle1_close.reason"
+   },
+   "chat": [
+    [
+     "t",
+     1.0
+    ],
+    [
+     "c",
+     "지우가 렌즈를 보며 고개를 한쪽으로 살짝 기울이고 귀엽게 웃는다(대답을 기다리는 얼굴이라서)."
+    ],
+    [
+     "c",
+     "옆머리를 귀 뒤로 넘기며 매만지다가 다시 렌즈를 사랑스럽게 바라본다(PT 계속 오실 거냐고 묻는 마음이라서)."
+    ],
+    [
+     "b",
+     "세상 좁네요. 그래도 PT는 계속 오실 거죠?"
+    ],
+    [
+     "w",
+     2500
+    ]
+   ],
+   "events": [],
+   "note": "남자친구 얘기를 꺼낸 뒤 어색함을 털려고 수업 얘기로 가볍게 확인한다"
+  },
+  {
+   "id": "S2_imm1",
+   "label": "씬2 · 몰입 1",
+   "type": "imm",
+   "scene": "S2",
+   "key": "imm1",
+   "media": "S2_imm1",
+   "dur": 13.042,
+   "loop": false,
+   "arm": [
+    "S2_img_m1a",
+    "S2_img_m1b"
+   ],
+   "src": {
+    "what": "s2.imm1.what",
+    "line": "s2.imm1.line",
+    "reason": "s2.imm1.reason"
+   },
+   "events": [
+    {
+     "t": 2.4,
+     "k": "c",
+     "text": "지우가 테이블 위 결과지를 짚으려고 앞으로 기울며 한 손으로 내 무릎을 짚고 「일단 오늘 것부터요. 여기, 근육량 좋으시네요.」라고 말한다."
+    },
+    {
+     "t": 3.0,
+     "k": "b0",
+     "text": "일단 오늘 것부터요. 여기, 근육량 좋으시네요."
+    },
+    {
+     "t": 5.89,
+     "k": "c",
+     "text": "기운 탓에 크롭 탑 목선 앞이 벌어져 옆에서 내려다보는 내 눈에 가슴골이 들어온다."
+    },
+    {
+     "t": 9.39,
+     "k": "c",
+     "text": "지우는 내 시선을 알아채고도 한 박자 그대로 있다가 웃는다(보는 걸 알면서 굳이 피하지 않아서)."
+    }
+   ],
+   "after": [],
+   "note": "계속 오냐는 물음을 스스로 넘기며 결과지를 짚으러 몸을 기울인다"
+  },
+  {
+   "id": "S2_idle2_full",
+   "label": "씬2 · idle 2 전신",
+   "type": "idle",
+   "scene": "S2",
+   "key": "idle2_full",
+   "media": "S2_idle2_full",
+   "dur": 8.042,
+   "loop": true,
+   "arm": [],
+   "src": {
+    "what": "s2.idle2_full.what",
+    "chat": "s2.idle2_full.chat",
+    "reason": "s2.idle2_full.reason"
+   },
+   "chat": [
+    [
+     "t",
+     1.0
+    ],
+    [
+     "c",
+     "지우가 운동 매트 위에 무릎을 꿇고 앉아 렌즈를 본다(지우 폰은 화면을 아래로 엎어 무릎 옆 매트 위에)."
+    ],
+    [
+     "c",
+     "고개를 살짝 숙였다 들며 미안한 듯 웃는다(나를 기다리게 해서 미안해서)."
+    ],
+    [
+     "b",
+     "폰 봐서 죄송해요. 남자친구가 답 늦냐길래, 수업 중이라 했어요."
+    ],
+    [
+     "w",
+     2500
+    ]
+   ],
+   "events": [],
+   "note": "내 수업 중에 남자친구 문자가 와서 답장하느라 수업을 잠깐 멈췄다. 미안해서 사과하고, 무슨 문자였는지만 짧게 덧붙인다. 속마음(찔림)은 말하지 않는다"
+  },
+  {
+   "id": "S2_idle2_close",
+   "label": "씬2 · idle 2 클로즈업",
+   "type": "idle",
+   "scene": "S2",
+   "key": "idle2_close",
+   "media": "S2_idle2_close",
+   "dur": 9.042,
+   "loop": true,
+   "arm": [],
+   "src": {
+    "what": "s2.idle2_close.what",
+    "chat": "s2.idle2_close.chat",
+    "reason": "s2.idle2_close.reason"
+   },
+   "chat": [
+    [
+     "t",
+     1.0
+    ],
+    [
+     "c",
+     "지우가 렌즈를 보다가 입술을 살짝 삐죽인다(남자친구 생각이 나서 서운해서)."
+    ],
+    [
+     "c",
+     "이내 머쓱하게 웃는다."
+    ],
+    [
+     "b",
+     "남자친구가 토요일 저녁 약속을 혼자 잡았어요. 좀 서운하네요."
+    ],
+    [
+     "w",
+     2500
+    ]
+   ],
+   "events": [],
+   "note": "남자친구가 토요일 약속을 혼자 잡은 게 서운해서, 렌즈를 보다가 입이 삐죽 나온다"
+  },
+  {
+   "id": "S2_imm2",
+   "label": "씬2 · 몰입 2",
+   "type": "imm",
+   "scene": "S2",
+   "key": "imm2",
+   "media": "S2_imm2",
+   "dur": 15.042,
+   "loop": false,
+   "arm": [
+    "S2_img_m2a",
+    "S2_img_m2b"
+   ],
+   "src": {
+    "what": "s2.imm2.what",
+    "line": "s2.imm2.line",
+    "reason": "s2.imm2.reason"
+   },
+   "events": [
+    {
+     "t": 0.3,
+     "k": "c",
+     "text": "지우가 지우 폰을 내려놓으며 「아, 제 얘기만 했네요. 왼쪽 다리부터 해 볼까요?」라고 말한다."
+    },
+    {
+     "t": 0.9,
+     "k": "b0",
+     "text": "아, 제 얘기만 했네요. 왼쪽 다리부터 해 볼까요?"
+    },
+    {
+     "t": 3.81,
+     "k": "c",
+     "text": "운동 매트에 옆으로 누워 클램쉘 자세를 잡는다 — 무릎을 굽히고 두 발을 붙인다. 몸 방향 = 등이 카메라 쪽, 머리는 화면 왼쪽(소파 쪽), 무릎은 카메라 반대쪽. 엎드리지 않고 옆으로 누움 — 어깨와 골반이 위아래로 포개지고, 위쪽 무릎만 천장 쪽으로 열린다."
+    },
+    {
+     "t": 7.32,
+     "k": "c",
+     "text": "윗무릎만 들어 올렸다 내린다 — 허리선을 따라 골반 옆선·둥근 엉덩이·탄탄한 허벅지가 드러난다."
+    },
+    {
+     "t": 10.83,
+     "k": "c",
+     "text": "고개를 들어 나를 보는 눈은 순하다(드러난 몸선과 달리 운동만 생각하는 얼굴이라 · 반전)."
+    }
+   ],
+   "after": [],
+   "note": "하소연을 끊고 폰을 내려놓으며 결과지에서 본 좌우 차이 운동으로 돌아간다"
+  },
+  {
+   "id": "S2_teaser",
+   "label": "씬2 · 예고",
+   "type": "teaser",
+   "scene": "S2",
+   "key": "teaser",
+   "media": "S2_teaser",
+   "dur": 13.042,
+   "loop": false,
+   "arm": [
+    "S2_img_t"
+   ],
+   "src": {
+    "what": "s2.teaser.what",
+    "line": "s2.teaser.line",
+    "reason": "s2.teaser.reason"
+   },
+   "events": [
+    {
+     "t": 0.4,
+     "k": "c",
+     "text": "지우가 운동 매트에서 일어나 앉아 수건으로 목을 닦는다."
+    },
+    {
+     "t": 2.4,
+     "k": "c",
+     "text": "수건을 내리고 렌즈를 보며 고개를 살짝 기울인 채 망설이다가 「저… 혹시 토요일 아침에 같이 운동하실래요?」라고 묻는다."
+    },
+    {
+     "t": 3.0,
+     "k": "b0",
+     "text": "저… 혹시 토요일 아침에 같이 운동하실래요?"
+    },
+    {
+     "t": 9.39,
+     "k": "c",
+     "text": "말을 꺼낸 뒤 웃는다(망설이던 말을 해 버려서)."
+    }
+   ],
+   "after": [],
+   "note": "수업이 끝나 목을 닦다가, 서운했던 토요일 저녁 얘기 끝에 자기가 매주 하는 토요일 아침 운동에 나를 부른다. 망설임이 「저… 혹시」에 묻어난다"
+  },
+  {
+   "id": "END",
+   "label": "데모 끝",
+   "type": "end",
+   "note": "다음 씬 3: 토요일 아침 · 광나루 한강공원 자전거길 입구 옆 잔디 → 씬 4: 일요일 오후 2시 → 밤 · 그녀의 자취방. "
+  }
+ ],
+ "media": {
+  "S0_p1": {
+   "stage": "480p",
+   "kind": "video",
+   "wip": false,
+   "file": "r1033_v480_s0_p1_e1_j1852.mp4",
+   "missing": [],
+   "id": "S0_p1",
+   "cell": "our.S0.p1",
+   "dur": 15.042
+  },
+  "S0_p2": {
+   "stage": "480p",
+   "kind": "video",
+   "wip": false,
+   "file": "r873_v480_s0_p2_e1_j1656.mp4",
+   "missing": [],
+   "id": "S0_p2",
+   "cell": "our.S0.p2",
+   "dur": 9.042
+  },
+  "S0_p3": {
+   "stage": "480p",
+   "kind": "video",
+   "wip": false,
+   "file": "r964_v480_s0_p3_e1_j1765.mp4",
+   "missing": [],
+   "id": "S0_p3",
+   "cell": "our.S0.p3",
+   "dur": 17.042
+  },
+  "S1_entry": {
+   "stage": "480p",
+   "kind": "video",
+   "wip": false,
+   "file": "r1020_v480_s1_entry_e1_j1839.mp4",
+   "missing": [],
+   "id": "S1_entry",
+   "cell": "our.S1.entry",
+   "dur": 10.042
+  },
+  "S1_idle1_full": {
+   "stage": "480p",
+   "kind": "video",
+   "wip": false,
+   "file": "r978_v480_s1_idle1_full_e1_j1787.mp4",
+   "missing": [],
+   "id": "S1_idle1_full",
+   "cell": "our.S1.idle1_full",
+   "dur": 8.042
+  },
+  "S1_idle1_close": {
+   "stage": "480p",
+   "kind": "video",
+   "wip": false,
+   "file": "r989_v480_s1_idle1_close_e1_j1801.mp4",
+   "missing": [],
+   "id": "S1_idle1_close",
+   "cell": "our.S1.idle1_close",
+   "dur": 8.042
+  },
+  "S1_imm1": {
+   "stage": "480p",
+   "kind": "video",
+   "wip": false,
+   "file": "r1026_v480_s1_imm1_e1_j1845.mp4",
+   "missing": [],
+   "id": "S1_imm1",
+   "cell": "our.S1.imm1",
+   "dur": 12.042
+  },
+  "S1_idle2_full": {
+   "stage": "480p",
+   "kind": "video",
+   "wip": false,
+   "file": "r983_v480_s1_idle2_full_e1_j1793.mp4",
+   "missing": [],
+   "id": "S1_idle2_full",
+   "cell": "our.S1.idle2_full",
+   "dur": 8.042
+  },
+  "S1_idle2_close": {
+   "stage": "480p",
+   "kind": "video",
+   "wip": false,
+   "file": "r994_v480_s1_idle2_close_e1_j1807.mp4",
+   "missing": [],
+   "id": "S1_idle2_close",
+   "cell": "our.S1.idle2_close",
+   "dur": 5.042
+  },
+  "S1_imm2": {
+   "stage": "480p",
+   "kind": "video",
+   "wip": false,
+   "file": "r1034_v480_s1_imm2_e1_j1853.mp4",
+   "missing": [],
+   "id": "S1_imm2",
+   "cell": "our.S1.imm2",
+   "dur": 12.042
+  },
+  "S1_teaser": {
+   "stage": "480p",
+   "kind": "video",
+   "wip": false,
+   "file": "r1035_v480_s1_teaser_e1_j1854.mp4",
+   "missing": [],
+   "id": "S1_teaser",
+   "cell": "our.S1.teaser",
+   "dur": 12.042
+  },
+  "S2_entry": {
+   "stage": "480p",
+   "kind": "video",
+   "wip": false,
+   "file": "r1062_v480_s2_entry_e1_j1882.mp4",
+   "missing": [],
+   "id": "S2_entry",
+   "cell": "our.S2.entry",
+   "dur": 13.042
+  },
+  "S2_idle1_full": {
+   "stage": "480p",
+   "kind": "video",
+   "wip": false,
+   "file": "r1050_v480_s2_idle1_full_e1_j1869.mp4",
+   "missing": [],
+   "id": "S2_idle1_full",
+   "cell": "our.S2.idle1_full",
+   "dur": 8.042
+  },
+  "S2_idle1_close": {
+   "stage": "480p",
+   "kind": "video",
+   "wip": false,
+   "file": "r1060_v480_s2_idle1_close_e1_j1880.mp4",
+   "missing": [],
+   "id": "S2_idle1_close",
+   "cell": "our.S2.idle1_close",
+   "dur": 8.042
+  },
+  "S2_imm1": {
+   "stage": "480p",
+   "kind": "video",
+   "wip": false,
+   "file": "r1041_v480_s2_imm1_e1_j1860.mp4",
+   "missing": [],
+   "id": "S2_imm1",
+   "cell": "our.S2.imm1",
+   "dur": 13.042
+  },
+  "S2_idle2_full": {
+   "stage": "480p",
+   "kind": "video",
+   "wip": false,
+   "file": "r1052_v480_s2_idle2_full_e1_j1871.mp4",
+   "missing": [],
+   "id": "S2_idle2_full",
+   "cell": "our.S2.idle2_full",
+   "dur": 8.042
+  },
+  "S2_idle2_close": {
+   "stage": "480p",
+   "kind": "video",
+   "wip": false,
+   "file": "r1057_v480_s2_idle2_close_e1_j1876.mp4",
+   "missing": [],
+   "id": "S2_idle2_close",
+   "cell": "our.S2.idle2_close",
+   "dur": 9.042
+  },
+  "S2_imm2": {
+   "stage": "480p",
+   "kind": "video",
+   "wip": false,
+   "file": "r1058_v480_s2_imm2_e1_j1878.mp4",
+   "missing": [],
+   "id": "S2_imm2",
+   "cell": "our.S2.imm2",
+   "dur": 15.042
+  },
+  "S2_teaser": {
+   "stage": "480p",
+   "kind": "video",
+   "wip": false,
+   "file": "r1045_v480_s2_teaser_e1_j1864.mp4",
+   "missing": [],
+   "id": "S2_teaser",
+   "cell": "our.S2.teaser",
+   "dur": 13.042
+  }
+ },
+ "imagine": {
+  "S1_img_e": {
+   "part": "진입",
+   "title": "씬 1 진입 상상",
+   "narr": "(각본에 한국어 상상 문구 칸 없음 — 영문 영상 프롬프트만 있음)",
+   "clip": null,
+   "wip": "영상 없음",
+   "after": "entry",
+   "src": "s1.img_e"
+  },
+  "S1_img_m1a": {
+   "part": "몰입 1-a",
+   "title": "씬 1 몰입 1-a 상상",
+   "narr": "(각본에 한국어 상상 문구 칸 없음 — 영문 영상 프롬프트만 있음)",
+   "clip": null,
+   "wip": "영상 없음",
+   "after": "imm1",
+   "src": "s1.img_m1a"
+  },
+  "S1_img_m1b": {
+   "part": "몰입 1-b",
+   "title": "씬 1 몰입 1-b 상상",
+   "narr": "(각본에 한국어 상상 문구 칸 없음 — 영문 영상 프롬프트만 있음)",
+   "clip": null,
+   "wip": "영상 없음",
+   "after": "imm1",
+   "src": "s1.img_m1b"
+  },
+  "S1_img_m2a": {
+   "part": "몰입 2-a",
+   "title": "씬 1 몰입 2-a 상상",
+   "narr": "(각본에 한국어 상상 문구 칸 없음 — 영문 영상 프롬프트만 있음)",
+   "clip": null,
+   "wip": "영상 없음",
+   "after": "imm2",
+   "src": "s1.img_m2a"
+  },
+  "S1_img_m2b": {
+   "part": "몰입 2-b",
+   "title": "씬 1 몰입 2-b 상상",
+   "narr": "(각본에 한국어 상상 문구 칸 없음 — 영문 영상 프롬프트만 있음)",
+   "clip": null,
+   "wip": "영상 없음",
+   "after": "imm2",
+   "src": "s1.img_m2b"
+  },
+  "S1_img_t": {
+   "part": "예고",
+   "title": "씬 1 예고 상상",
+   "narr": "(각본에 한국어 상상 문구 칸 없음 — 영문 영상 프롬프트만 있음)",
+   "clip": null,
+   "wip": "영상 없음",
+   "after": "teaser",
+   "src": "s1.img_t"
+  },
+  "S2_img_e": {
+   "part": "진입",
+   "title": "씬 2 진입 상상",
+   "narr": "(각본에 한국어 상상 문구 칸 없음 — 영문 영상 프롬프트만 있음)",
+   "clip": null,
+   "wip": "영상 없음",
+   "after": "entry",
+   "src": "s2.img_e"
+  },
+  "S2_img_m1a": {
+   "part": "몰입 1-a",
+   "title": "씬 2 몰입 1-a 상상",
+   "narr": "(각본에 한국어 상상 문구 칸 없음 — 영문 영상 프롬프트만 있음)",
+   "clip": null,
+   "wip": "영상 없음",
+   "after": "imm1",
+   "src": "s2.img_m1a"
+  },
+  "S2_img_m1b": {
+   "part": "몰입 1-b",
+   "title": "씬 2 몰입 1-b 상상",
+   "narr": "(각본에 한국어 상상 문구 칸 없음 — 영문 영상 프롬프트만 있음)",
+   "clip": null,
+   "wip": "영상 없음",
+   "after": "imm1",
+   "src": "s2.img_m1b"
+  },
+  "S2_img_m2a": {
+   "part": "몰입 2-a",
+   "title": "씬 2 몰입 2-a 상상",
+   "narr": "(각본에 한국어 상상 문구 칸 없음 — 영문 영상 프롬프트만 있음)",
+   "clip": null,
+   "wip": "영상 없음",
+   "after": "imm2",
+   "src": "s2.img_m2a"
+  },
+  "S2_img_m2b": {
+   "part": "몰입 2-b",
+   "title": "씬 2 몰입 2-b 상상",
+   "narr": "(각본에 한국어 상상 문구 칸 없음 — 영문 영상 프롬프트만 있음)",
+   "clip": null,
+   "wip": "영상 없음",
+   "after": "imm2",
+   "src": "s2.img_m2b"
+  },
+  "S2_img_t": {
+   "part": "예고",
+   "title": "씬 2 예고 상상",
+   "narr": "(각본에 한국어 상상 문구 칸 없음 — 영문 영상 프롬프트만 있음)",
+   "clip": null,
+   "wip": "영상 없음",
+   "after": "teaser",
+   "src": "s2.img_t"
+  }
+ },
+ "rules": {
+  "pick": [
+   [
+    "ok_video:1080",
+    "1080",
+    "video",
+    false
+   ],
+   [
+    "ok_video:480",
+    "480p",
+    "video",
+    false
+   ],
+   [
+    "review:480",
+    "480p 확인 전",
+    "video",
+    false
+   ],
+   [
+    "ok_board",
+    "콘티 그림",
+    "still",
+    true
+   ],
+   [
+    "ok_previz",
+    "프리비즈",
+    "video",
+    true
+   ],
+   [
+    "ok_anchor",
+    "컷 배경 사진",
+    "still",
+    true
+   ]
+  ],
+  "user_alias": [
+   "나",
+   "주인공"
+  ],
+  "line_to": "bubble_on_video",
+  "chat_to": "chat_after",
+  "pro_caption_at": "after"
+ }
+};
+const META = DATA.meta, STEPS = DATA.steps, MEDIA = DATA.media, IMAGINE = DATA.imagine;
+const V = id => 'v/' + id + '.mp4', P = id => 'img/' + id + '.jpg';
+
+/* ───────────── 상태 ───────────── */
+const $ = id => document.getElementById(id);
+const S = { soundOn:false, paused:false, speed:1, auto:false, runId:0, step:0, skip:false, imagineReq:null, inImagine:false, imagineOK:false, armed:[], watched:{} };
+const vA=$('vA'), vB=$('vB'), stillEl=$('still'); let curV=vB, nxtV=vA;
+const convo=$('convo'), field=$('field'), btnSend=$('btnSend'), btnImagine=$('btnImagine'), badge=$('imagineBadge'), card=$('imagineCard'), icList=$('icList');
+let autoTimers=[];
+/* 지금 화면: 영상이면 video 요소, 사진(제작 중)이면 가상 시계 — atTime·waitEnd 가 둘 다 같은 식으로 읽음 */
+const clock={kind:'video', t:0, dur:0, loop:false, ended:false};
+setInterval(()=>{ if(clock.kind!=='still'||S.paused||clock.ended) return; clock.t+=0.05*S.speed; if(clock.t>=clock.dur){ if(clock.loop) clock.t=0; else { clock.t=clock.dur; clock.ended=true; } } },50);
+const nowT=()=>clock.kind==='still'?clock.t:curV.currentTime;
+const isEnded=()=>clock.kind==='still'?clock.ended:(curV.ended||(curV.duration&&curV.currentTime>=curV.duration-0.08));
+
+class Interrupt extends Error{ constructor(k){ super(k); this.kind=k; } }
+function sleep(ms){
+  const id=S.runId; let left=ms;
+  return new Promise((res,rej)=>{
+    const tick=()=>{
+      if(S.runId!==id) return rej(new Interrupt('cancel'));
+      if(S.skip){ S.skip=false; return rej(new Interrupt('skip')); }
+      if(S.imagineReq && !S.inImagine && S.imagineOK) return rej(new Interrupt('imagine'));
+      if(!S.paused) left -= 50*S.speed;
+      if(left<=0) return res();
+      setTimeout(tick,50);
+    };
+    tick();
+  });
+}
+async function waitEnd(maxMs){ const t0=performance.now(); while(true){ if(isEnded()) return; if(performance.now()-t0>maxMs) return; await sleep(100); } }
+
+/* ───────────── 화면(영상/사진) ───────────── */
+async function showMedia(id,{loop=false,wip=null}={}){
+  const m=MEDIA[id]||{kind:'none',stage:'없음',wip:true};
+  const isWip = wip!==null ? wip : !!m.wip;
+  $('media').classList.toggle('wip', isWip);
+  if(isWip && !S.inImagine) baseTag('제작 중 · '+(m.kind==='none'?'결과 없음':m.stage),'wip'); else if(!S.inImagine) baseTag(null);
+  if(m.kind==='video'){
+    const v=nxtV;
+    v.loop=loop; v.muted=!S.soundOn; v.playbackRate=S.speed; v.poster=P(id);
+    if(v.getAttribute('data-name')!==id){ v.src=V(id); v.setAttribute('data-name',id); v.load(); } else v.currentTime=0;
+    await new Promise(res=>{ let done=false; const f=()=>{ if(done) return; done=true; v.removeEventListener('canplay',f); res(); }; v.addEventListener('canplay',f); if(v.readyState>=3) f(); setTimeout(f,2500); });
+    const p=v.play(); if(p) p.catch(e=>{ if(e && e.name==='AbortError') return; if(!S.paused) showGate(); });
+    $('backdrop').style.backgroundImage=`url("${P(id)}")`;
+    v.classList.add('on'); curV.classList.remove('on'); stillEl.classList.remove('on');
+    const old=curV; setTimeout(()=>{ if(old!==curV) old.pause(); },400);
+    [curV,nxtV]=[v,curV]; clock.kind='video';
+    if(S.paused) v.pause();
+    await waitPlaying(v);
+  }else{
+    const st=STEPS.find(s=>s.media===id); const dur=(st&&st.dur)||8;
+    if(m.kind==='still'){ stillEl.src=P(id); $('backdrop').style.backgroundImage=`url("${P(id)}")`; }
+    else { stillEl.removeAttribute('src'); $('backdrop').style.backgroundImage='none'; }
+    stillEl.classList.add('on'); vA.classList.remove('on'); vB.classList.remove('on'); setTimeout(()=>{ vA.pause(); vB.pause(); },400);
+    Object.assign(clock,{kind:'still',t:0,dur:dur,loop:loop,ended:false});
+  }
+}
+function waitPlaying(v){
+  const id=S.runId; let waited=0;
+  return new Promise((res,rej)=>{
+    const tick=()=>{
+      if(S.runId!==id) return rej(new Interrupt('cancel'));
+      if(S.skip){ S.skip=false; return rej(new Interrupt('skip')); }
+      if(!v.paused && v.currentTime>0.03) return res();
+      if(!S.paused){ waited+=50; if(waited>8000) return res(); }
+      setTimeout(tick,50);
+    };
+    tick();
+  });
+}
+function atTime(sec){
+  const id=S.runId; let last=nowT();
+  return new Promise((res,rej)=>{
+    const tick=()=>{
+      if(S.runId!==id) return rej(new Interrupt('cancel'));
+      if(S.skip){ S.skip=false; return rej(new Interrupt('skip')); }
+      if(S.imagineReq && !S.inImagine && S.imagineOK) return rej(new Interrupt('imagine'));
+      const t=nowT();
+      if(t>=sec || isEnded() || t<last-0.5) return res();
+      last=t; setTimeout(tick,50);
+    };
+    tick();
+  });
+}
+function preload(id){ const m=MEDIA[id]; if(!m||m.kind!=='video') return; setTimeout(()=>{ if(nxtV.getAttribute('data-name')!==id){ nxtV.src=V(id); nxtV.setAttribute('data-name',id); nxtV.load(); } },600); }
+function stageTag(text,kind){ const t=$('stageTag'); if(!text){ t.hidden=true; return; } t.className='stage-tag '+(kind||''); t.innerHTML=(kind?'<span class="dot"></span>':'')+'<span></span>'; t.lastChild.textContent=text; t.hidden=false; }
+function baseTag(text,kind){ S.baseTag=text?{text,kind}:null; stageTag(text,kind); }
+function restoreTag(){ if(S.baseTag) stageTag(S.baseTag.text,S.baseTag.kind); else stageTag(null); }
+
+/* ───────────── 대화 UI ───────────── */
+function scrollDown(){ requestAnimationFrame(()=>{ convo.scrollTop=convo.scrollHeight; }); }
+function divider(t){ const d=document.createElement('div'); d.className='scene-divider'; d.textContent=t; convo.appendChild(d); scrollDown(); }
+function caption(t,cls){ const c=document.createElement('div'); c.className='caption'+(cls===true?' imagine':cls?' '+cls:''); c.textContent=t; convo.appendChild(c); scrollDown(); return c; }
+function botRow(note){ const r=document.createElement('div'); r.className='row bot'; r.innerHTML='<div class="who"><span class="av"></span><span></span><span class="note"></span></div>'; r.querySelector('.who span:nth-child(2)').textContent=META.first; if(note) r.querySelector('.note').textContent='('+note+')'; convo.appendChild(r); return r; }
+function botBubble(t,note){ const r=botRow(note); const b=document.createElement('div'); b.className='bubble'; b.textContent=t; r.appendChild(b); scrollDown(); return r; }
+function userBubble(t){ const r=document.createElement('div'); r.className='row user'; const b=document.createElement('div'); b.className='bubble'; b.textContent=t; r.appendChild(b); convo.appendChild(r); scrollDown(); return r; }
+function otherBubble(name,t,note){ const r=document.createElement('div'); r.className='row other'; r.innerHTML='<div class="who"><span></span><span class="note"></span></div><div class="bubble"></div>'; r.querySelector('.who span').textContent=name||'?'; if(note) r.querySelector('.note').textContent='('+note+')'; r.querySelector('.bubble').textContent=t; convo.appendChild(r); scrollDown(); return r; }
+let typingRow=null;
+function typingOn(){ typingOff(); typingRow=botRow(); const b=document.createElement('div'); b.className='bubble typing'; b.innerHTML='<i></i><i></i><i></i>'; typingRow.appendChild(b); scrollDown(); }
+function typingOff(){ if(typingRow){ typingRow.remove(); typingRow=null; } }
+function lockComposer(ph){ $('inputbar').classList.add('locked'); field.disabled=true; field.value=''; field.placeholder=ph||'…'; btnSend.disabled=true; $('chips').hidden=true; $('btnSuggest').setAttribute('aria-pressed','false'); }
+function unlockComposer(){ $('inputbar').classList.remove('locked'); field.disabled=false; field.placeholder='메시지를 입력하세요'; btnSend.disabled=false; }
+
+/* 대본 한 줄: u=나(입력창 타이핑→전송) b=그녀(입력 중… 뒤) b0=그녀 즉시 o=다른 사람 c=지문 n=나레이션(지문 줄) w=대기ms t=영상 시각 */
+async function doLine(l){
+  const [k,t]=l;
+  if(k==='u'){
+    typingOff(); unlockComposer(); field.value=''; await sleep(500);
+    for(const ch of t){ field.value+=ch; field.scrollTop=field.scrollHeight; await sleep(ch===' '?90:55+Math.random()*45); }
+    await sleep(650); userBubble(t); field.value=''; await sleep(500);
+  }else if(k==='b0'){ botBubble(t); }
+  else if(k==='b'){ typingOn(); await sleep(1300+Math.min(1800,t.length*45)); typingOff(); botBubble(t); await sleep(900+Math.min(2600,t.length*40)); }
+  else if(k==='o'){ otherBubble(l[2],t); await sleep(900+Math.min(2600,t.length*40)); }
+  else if(k==='c'){ caption(t); await sleep(1500+Math.min(5200,t.length*48)); }
+  else if(k==='n'){ caption(t,'narr'); await sleep(1800+Math.min(5200,t.length*55)); }
+  else if(k==='w'){ await sleep(t); }
+  else if(k==='t'){ await atTime(t); }
+}
+async function runChat(lines,{idleMedia}={}){
+  for(let i=0;i<lines.length;i++){
+    try{ await doLine(lines[i]); }
+    catch(e){ if(e.kind==='imagine'){ typingOff(); field.value=''; await playImagine(idleMedia); i--; continue; } throw e; }
+  }
+}
+/* 영상 위 사건: 각본 line = 그 시각 말풍선, what = 박자별 지문 */
+function renderEvent(ev){
+  if(ev.k==='c') caption(ev.text);
+  else if(ev.k==='b0') botBubble(ev.text,ev.note);
+  else if(ev.k==='u0') userBubble(ev.text);
+  else if(ev.k==='o') otherBubble(ev.name,ev.text,ev.note);
+}
+async function playEvents(st){
+  for(const ev of (st.events||[])){ await atTime(ev.t); renderEvent(ev); }
+  if(st.arm && st.arm.length){ await atTime(Math.max(0,(st.dur||8)-1.5)); st.arm.forEach(armImagine); }
+}
+async function idleStart(id,next){ await showMedia(id,{loop:true}); if(next) preload(next); unlockComposer(); S.imagineOK=true; if(S.imagineReq) await playImagine(id); }
+async function immStart(id,next){ S.imagineOK=false; clearImagine(); lockComposer('그녀를 바라보는 중…'); await showMedia(id); if(next) preload(next); }
+
+/* ───────────── 상상하기 ───────────── */
+function armImagine(key){
+  if(S.armed.includes(key)||!IMAGINE[key]) return;
+  S.armed.push(key);
+  btnImagine.classList.add('lit'); badge.textContent=S.armed.length; badge.hidden=false;
+  renderCard(); flashArm(key);
+  autoTimers.forEach(clearTimeout); autoTimers=[];
+  if(S.auto){
+    autoTimers.push(setTimeout(()=>{ if(S.armed.includes(key)) openCard(); },2200/S.speed));
+    autoTimers.push(setTimeout(()=>{ if(S.armed.includes(key) && !card.hidden) requestImagine(key); },4800/S.speed));
+  }
+}
+function clearImagine(){ S.armed=[]; S.imagineReq=null; btnImagine.classList.remove('lit'); btnImagine.setAttribute('aria-pressed','false'); badge.hidden=true; card.hidden=true; icList.innerHTML=''; autoTimers.forEach(clearTimeout); autoTimers=[]; $('armToast').hidden=true; }
+function flashArm(key){ const d=IMAGINE[key]; const t=$('armToast'); t.textContent='상상하기 열림 · '+d.part; t.hidden=false; clearTimeout(S.toastTimer); S.toastTimer=setTimeout(()=>{ t.hidden=true; },3200/S.speed); }
+function renderCard(){
+  icList.innerHTML='';
+  S.armed.forEach((key,i)=>{
+    const d=IMAGINE[key]; const it=document.createElement('div'); it.className='ic-item'+(S.watched[key]?' seen':'');
+    it.innerHTML='<div class="ic-head"><span class="ic-kicker"></span><span class="age19">19</span><span class="ic-wip" hidden></span></div><div class="ic-row"><div class="ic-body"></div><button class="ic-watch" type="button"></button></div>';
+    it.querySelector('.ic-kicker').textContent='상상하기 '+(i+1)+' · '+d.part;
+    const w=it.querySelector('.ic-wip'); if(d.wip){ w.textContent='영상 제작 중'; w.hidden=false; }
+    it.querySelector('.ic-body').textContent=d.title;
+    const b=it.querySelector('.ic-watch'); b.textContent=S.watched[key]?'다시 보기':'보기'; b.addEventListener('click',()=>requestImagine(key));
+    icList.appendChild(it);
+  });
+}
+function openCard(){ if(!S.armed.length) return; renderCard(); card.hidden=false; btnImagine.setAttribute('aria-pressed','true'); $('chips').hidden=true; $('icNote').hidden=S.imagineOK; scrollDown(); }
+function closeCard(){ card.hidden=true; btnImagine.setAttribute('aria-pressed','false'); }
+function requestImagine(key){
+  if(!S.armed.includes(key)) return;
+  S.imagineReq=key; closeCard();
+  if(!S.imagineOK){ const t=$('armToast'); t.textContent='몰입이 끝나면 바로 보여 드릴게요'; t.hidden=false; clearTimeout(S.toastTimer); S.toastTimer=setTimeout(()=>{ t.hidden=true; },2600/S.speed); }
+}
+async function playImagine(idleMedia){
+  const key=S.imagineReq; S.imagineReq=null; S.inImagine=true; const d=IMAGINE[key];
+  closeCard(); lockComposer('상상하는 중…'); typingOff(); $('armToast').hidden=true;
+  try{
+    $('vignette').hidden=false;
+    if(d.clip){ stageTag('상상하기 · '+d.title,'rose'); await showMedia(d.clip,{loop:false,wip:false}); caption(d.narr,true); await waitEnd(16000); }
+    else{ stageTag('상상하기 영상 제작 중 · '+d.part,'wip'); await showMedia(idleMedia,{loop:true,wip:true}); caption(d.narr,true); await sleep(6500); }
+    S.watched[key]=true; renderCard();
+    $('vignette').hidden=true; S.inImagine=false;
+    await showMedia(idleMedia,{loop:true});
+  }finally{ S.inImagine=false; $('vignette').hidden=true; restoreTag(); unlockComposer(); }
+}
+
+/* ───────────── 단계 실행: 단계 종류별 하나의 함수(친구 목업의 run 함수를 각본 데이터로) ───────────── */
+function nextMedia(i){ for(let j=i+1;j<STEPS.length;j++) if(STEPS[j].media) return STEPS[j].media; return null; }
+async function runStep(st,i){
+  const nx=nextMedia(i);
+  if(st.type==='prologue'){
+    S.imagineOK=false; clearImagine(); lockComposer('프롤로그 재생 중…');
+    if(st.divider){ convo.innerHTML=''; divider(st.divider); }
+    await showMedia(st.media); preload(nx);
+    await playEvents(st); await waitEnd((st.dur+4)*1000);
+    await runChat(st.after||[],{idleMedia:st.media});
+  }else if(st.type==='entry'){
+    S.imagineOK=false; clearImagine(); lockComposer('그녀가 말하는 중…');
+    if(st.divider) divider(st.divider);
+    await showMedia(st.media); preload(nx);
+    await playEvents(st); await waitEnd((st.dur+4)*1000);
+    await runChat(st.after||[],{idleMedia:st.media});
+  }else if(st.type==='imm'){
+    await immStart(st.media,nx);
+    if(st.divider) divider(st.divider);
+    await playEvents(st); await waitEnd((st.dur+4)*1000);
+    await runChat(st.after||[],{idleMedia:st.media});
+  }else if(st.type==='idle'){
+    if(st.divider) divider(st.divider);
+    await idleStart(st.media,nx);
+    await runChat(st.chat||[],{idleMedia:st.media});
+  }else if(st.type==='teaser'){
+    S.imagineOK=false; lockComposer('…'); await showMedia(st.media); preload(nx);
+    await playEvents(st); await waitEnd((st.dur+4)*1000);
+    await runChat(st.after||[],{idleMedia:st.media});
+    if(S.armed.length){ S.imagineOK=true; await runChat([['w',6000]],{idleMedia:st.media}); S.imagineOK=false; }
+  }else if(st.type==='end'){
+    divider('데모 끝');
+    const n=document.createElement('div'); n.className='end-note'; n.textContent=(st.note||'')+'오른쪽 위 ⚙ 시연에서 처음부터 다시 볼 수 있습니다.'; convo.appendChild(n); scrollDown();
+    lockComposer('데모가 끝났습니다'); S.imagineOK=false; baseTag(null); await sleep(3600e5);
+  }
+}
+async function runFrom(i){
+  const id=++S.runId; S.imagineReq=null; S.inImagine=false; S.imagineOK=false; S.skip=false; typingOff(); baseTag(null); $('vignette').hidden=true; $('media').classList.remove('wip');
+  for(let j=0;j<=i;j++){ if(STEPS[j].place) $('hudPlace').textContent=STEPS[j].place; }
+  for(let k=i;k<STEPS.length;k++){
+    if(S.runId!==id) return;
+    S.step=k; const st=STEPS[k]; $('prStep').textContent=st.label; $('prJump').value=k;
+    if(st.place) $('hudPlace').textContent=st.place;
+    try{ await runStep(st,k); }
+    catch(e){
+      if(e.kind==='skip'){ typingOff(); S.inImagine=false; S.imagineReq=null; $('vignette').hidden=true; baseTag(null); $('media').classList.remove('wip'); continue; }
+      if(e.kind==='cancel') return;
+      if(e.kind==='imagine'){ S.imagineReq=null; continue; }
+      console.error(e);
+    }
+  }
+}
+
+/* ───────────── 조작 ───────────── */
+function setSound(on){ S.soundOn=on; vA.muted=!on; vB.muted=!on; $('btnSound').setAttribute('aria-pressed',on?'true':'false'); $('soundHint').hidden=true; if(on&&clock.kind==='video'){ const p=curV.play(); if(p) p.catch(()=>{}); } }
+$('btnSound').addEventListener('click',e=>{ e.stopPropagation(); setSound(!S.soundOn); S.userMuted=!S.soundOn; });
+$('btnReplay').addEventListener('click',()=>{ if(clock.kind==='still'){ clock.t=0; clock.ended=false; return; } curV.currentTime=0; const p=curV.play(); if(p) p.catch(()=>{}); });
+$('btnPeek').addEventListener('click',()=>{ const on=!$('player').classList.contains('player--peek'); $('player').classList.toggle('player--peek',on); $('btnPeek').setAttribute('aria-pressed',on?'true':'false'); $('btnPeek').setAttribute('aria-label',on?'대화 보기':'사진 크게 보기'); });
+$('btnImagine').addEventListener('click',()=>{ if(!S.armed.length) return; if(card.hidden) openCard(); else closeCard(); });
+$('icSkip').addEventListener('click',closeCard);
+/* 추천 칩: 각본에 칸이 없어서 비활성(칸이 생기면 DATA.chips 로) */
+const CHIPS = DATA.chips || null;
+if(!CHIPS){ $('btnSuggest').disabled=true; $('btnSuggest').title='각본에 추천(선택지) 문구 칸이 없습니다'; }
+$('btnCaption').addEventListener('click',()=>{ const b=$('btnCaption'), on=b.getAttribute('aria-pressed')!=='true'; b.setAttribute('aria-pressed',on?'true':'false'); if(!field.disabled) field.placeholder=on?'*상황을 입력하세요*':'메시지를 입력하세요'; });
+$('inputbar').addEventListener('submit',e=>{
+  e.preventDefault(); const t=field.value.trim(); if(!t||field.disabled) return; field.value=''; userBubble(t);
+  const id=S.runId; typingOn(); setTimeout(()=>{ if(S.runId!==id) return; typingOff(); const n=document.createElement('div'); n.className='end-note'; n.textContent='(데모: 자유 입력 답장은 각본에 없습니다)'; convo.appendChild(n); scrollDown(); },1200);
+});
+field.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); $('inputbar').requestSubmit(); } });
+
+STEPS.forEach((s,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=s.label+(s.media&&MEDIA[s.media]&&MEDIA[s.media].wip?' · 제작 중':''); $('prJump').appendChild(o); });
+$('prToggle').addEventListener('click',()=>{ const p=$('prPanel'); p.hidden=!p.hidden; $('prToggle').setAttribute('aria-expanded',p.hidden?'false':'true'); });
+$('prPause').addEventListener('click',()=>{ S.paused=!S.paused; $('prPause').textContent=S.paused?'▶ 재생':'⏸ 일시정지'; if(clock.kind!=='video') return; if(S.paused) curV.pause(); else { const p=curV.play(); if(p) p.catch(()=>{}); } });
+$('prNext').addEventListener('click',()=>{ S.skip=true; });
+$('prRestart').addEventListener('click',()=>{ runFrom(0); });
+$('prJump').addEventListener('change',e=>{ const k=+e.target.value; if(k===0){ runFrom(0); return; } convo.innerHTML=''; clearImagine(); runFrom(k); });
+$('prSpeed').addEventListener('change',e=>{ S.speed=+e.target.value; vA.playbackRate=S.speed; vB.playbackRate=S.speed; });
+$('prAuto').addEventListener('change',e=>{ S.auto=e.target.checked; if(S.auto && S.armed.length){ const k=S.armed[S.armed.length-1]; openCard(); autoTimers.push(setTimeout(()=>{ if(!card.hidden) requestImagine(k); },2600/S.speed)); } });
+
+/* 재생 게이트(친구 목업 그대로) */
+function showGate(){ if(S.gateDone) return; $('playGate').hidden=false; $('soundHint').hidden=true; if(!S.paused){ S.paused=true; S.gatePause=true; } }
+function hideGate(){ $('playGate').hidden=true; if(S.gatePause){ S.gatePause=false; S.paused=false; } }
+$('playGate').addEventListener('click',e=>{ e.stopPropagation(); S.gateDone=true; hideGate(); if(!S.userMuted) setSound(true); else if(clock.kind==='video'){ const p=curV.play(); if(p) p.catch(()=>{}); } });
+const tryPlay=(v,ms)=>Promise.race([v.play(), new Promise(res=>setTimeout(()=>res('pending'),ms))]).then(r=>r==='pending'?'pending':'ok', e=>(e&&e.name)||'err');
+const FIRST_VIDEO = (STEPS.find(s=>s.media && MEDIA[s.media] && MEDIA[s.media].kind==='video')||{}).media;
+async function boot(){
+  if(!FIRST_VIDEO){ setSound(false); $('soundHint').hidden=false; setTimeout(()=>{ $('soundHint').hidden=true; },9000); runFrom(0); return; }
+  vA.src=V(FIRST_VIDEO); vA.setAttribute('data-name',FIRST_VIDEO); vA.load();
+  vA.muted=false; const r1=await tryPlay(vA,1500);
+  const ok = r1!=='NotAllowedError' && r1!=='err';
+  try{ vA.pause(); vA.currentTime=0; }catch(e){}
+  setSound(ok);
+  if(!ok){
+    const unlock=()=>{ S.gateDone=true; hideGate(); if(!S.userMuted) setSound(true); document.removeEventListener('pointerdown',unlock,true); document.removeEventListener('keydown',unlock,true); };
+    document.addEventListener('pointerdown',unlock,true); document.addEventListener('keydown',unlock,true);
+    vA.muted=true; const r2=await tryPlay(vA,1500);
+    try{ vA.pause(); vA.currentTime=0; }catch(e){}
+    if(r2==='NotAllowedError'||r2==='err') showGate();
+    else { $('soundHint').hidden=false; setTimeout(()=>{ $('soundHint').hidden=true; },9000); }
+  }
+  runFrom(0);
+}
+for(const v of [vA,vB]) v.addEventListener('playing',()=>{ if(!S.gateDone && !$('playGate').hidden){ S.gateDone=true; hideGate(); } });
+let gateChecks=0; const gateTimer=setInterval(()=>{
+  if(S.gateDone || ++gateChecks>20){ clearInterval(gateTimer); return; }
+  if(clock.kind==='video' && curV.readyState>=3 && curV.paused && !S.paused && curV.currentTime<0.3 && curV.classList.contains('on')) showGate();
+},1000);
+
+/* 표지·HUD: 각본 칸에서 */
+document.title = META.title + ' · ' + META.name + ' 채팅 목업';
+$('coverTitle').textContent=META.title; $('coverSub').textContent=META.sub;
+{ const nImg=Object.keys(IMAGINE).filter(k=>STEPS.some(s=>(s.arm||[]).includes(k))).length; const wipN=STEPS.filter(s=>s.media&&MEDIA[s.media]&&MEDIA[s.media].wip).length;
+  [META.name+(META.age?' · '+META.age.replace('세',''):''), '프롤로그·씬 1'+(META.until==='S1'?'':'~'+META.until.slice(1))+' 데모', '상상하기 '+nImg+'칸'+(Object.values(IMAGINE).some(d=>d.clip)?'':'(영상 없음)'), '제작 중 '+wipN+'/'+STEPS.filter(s=>s.media).length+'자리', '내부 데모']
+  .forEach(t=>{ const s=document.createElement('span'); s.textContent=t; $('coverMeta').appendChild(s); }); }
+$('hudWork').textContent=META.title; $('hudName').textContent=META.first; $('hudRole').textContent=META.role;
+function startFromCover(){ const c=$('cover'); if(c.classList.contains('out')) return; c.classList.add('out'); setTimeout(()=>{ c.hidden=true; },500); boot(); }
+$('btnStart').addEventListener('click',startFromCover);
+if(FIRST_VIDEO){ vA.src=V(FIRST_VIDEO); vA.setAttribute('data-name',FIRST_VIDEO); vA.load(); }
+</script>
+</body>
+</html>
