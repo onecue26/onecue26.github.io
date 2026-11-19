@@ -1,6 +1,6 @@
 'use strict';
 (() => {
- const root=document.querySelector('#hook-library'),hooks=window.ORDER_HOOKS||[];
+ const root=document.querySelector('#hook-library'),hooks=(window.ORDER_HOOKS||[]).filter(h=>h.adEvidenceVerified===true&&(h.evidence||[]).length>0&&(h.evidence||[]).every(e=>{const s=window.ORDER_REFERENCE_SOURCES?.[e.url];return s?.adClassification==='confirmed_ad'&&s.catalogueIdentityMatch!==false;}));
  if(!root)return;
  const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const clip=e=>{try{const u=new URL(e.clip,location.href),base=new URL('order-test-media/',location.href);return u.origin===base.origin&&u.pathname.startsWith(base.pathname)?u.href:'';}catch{return '';}};

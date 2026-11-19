@@ -8,7 +8,7 @@
   const facts = [['category','제품 종류'],['benefit','핵심 효용'],['ingredients','성분 / 소재'],['feature','차별점'],['usage','사용 방법'],['size','용량 / 규격'],['price','가격 / 구성'],['caution','주의 / 금지 표현']];
   const kinds = {product:'제품',person:'인물',place:'장소'};
   const editable = ['title','product','brand','description','url','audience','point','copy','tone','person','place','notes','facts','selected_hook','selection_mode','order','anchor_prompts'];
-  const hooks = Array.isArray(window.ORDER_HOOKS) ? window.ORDER_HOOKS : [];
+  const hooks = Array.isArray(window.ORDER_HOOKS) ? window.ORDER_HOOKS.filter(h=>h.adEvidenceVerified===true&&(h.evidence||[]).length>0&&(h.evidence||[]).every(e=>{const s=window.ORDER_REFERENCE_SOURCES?.[e.url];return s?.adClassification==='confirmed_ad'&&s.catalogueIdentityMatch!==false;})) : [];
   const state = {connected:false,health:{},endpoint:'http://127.0.0.1:8767',key:'',cases:Array.from({length:4},(_,i)=>({title:`소재 ${i+1}`,facts:{},assets:[],drafts:[],selection_mode:'recommended'})),index:0,dirty:new Set(),version:new Map(),saving:new Map(),busy:new Map(),picked:new Map(),blobs:new Map(),loadingBlobs:new Set(),page:40,ranking:[],random:[],connection:0};
   let saveTimer;
   const current = () => state.cases[state.index];
