@@ -159,15 +159,19 @@
   ];
   function match(h) {
     const c=current();
-    const input=normalized([c.product,c.brand,c.description,c.point,...Object.values(c.facts||{}).map(text)].join(' '));
+    const input=normalized([c.product,c.brand,c.description,c.point,...['category','ingredients','feature','usage'].map(k=>text(c.facts?.[k]))].join(' '));
     const hookText=normalized([h.title,h.summary,h.trigger,h.effect,...list(h.productSignals)].join(' '));
-    const stop=new Set(['있는','제품','작은','보이는','사람','같은','여러','큰다','함께','주변','자체','따라','처럼']);
+    const stop=new Set(['있는','제품','작은','보이는','사람','같은','여러','큰다','함께','주변','자체','따라','처럼','효과','공간','판매','시점','가능','필요','발원점']);
     const tokens=[...new Set(list(h.productSignals).join(' ').split(/[\s/·,()]+/).filter(t=>t.length>=2&&!stop.has(t)))];
     const exact=tokens.filter(t=>input.includes(normalized(t)));
     const related=materialTraits.filter(t=>t.pattern.test(input)&&t.words.some(w=>hookText.includes(w)));
-    const score=Math.min(100,exact.length*12+related.length*9);
+    const raw=exact.length*12+related.length*9;
+    const unsupported=h.evidenceStatus==='author_proposal'?9:0;
+    const difficulty=h.difficulty==='어려움'?3:0;
+    const requiresCarbonation=/탄산|발포/.test(list(h.productSignals).join(' '))&&!/탄산|발포|사이다|콜라|스파클링/.test(input)?9:0;
+    const score=Math.max(0,Math.min(100,raw-unsupported-difficulty-requiresCarbonation));
     const reasons=[...exact.slice(0,2).map(t=>'입력의 '+t),...related.slice(0,2).map(t=>t.label)];
-    return {score,reason:reasons.length?reasons.join(' · ')+'과 연결':'직접 연결 근거가 적음 · 선택 후 아이디어 검토'};
+    return {score,reason:(reasons.length?reasons.join(' · ')+'과 연결':'직접 연결 근거가 적음 · 선택 후 아이디어 검토')+(unsupported?' · 원작 근거 없는 제안 -9':'')+(difficulty?' · 구현 어려움 -3':'')+(requiresCarbonation?' · 탄산/발포 입력 없음 -9':'')};
   }
   function rankHooks() {state.ranking=hooks.map(h=>({h,score:match(h).score})).sort((a,b)=>b.score-a.score||String(a.h.id).localeCompare(String(b.h.id)));}
   function shuffle() {state.random=[...hooks];for(let i=state.random.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[state.random[i],state.random[j]]=[state.random[j],state.random[i]];}}
