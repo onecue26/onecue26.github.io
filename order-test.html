@@ -7,11 +7,11 @@
   <title>ORDER / STUDIO — 소재 워크벤치</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="order-test.css?v=examples-list-1119">
-  <script src="order-test-hooks.js" defer></script>
-  <script src="order-test-library.js?v=library-1119" defer></script>
-  <script src="order-test-examples.js?v=examples-list-1119" defer></script>
-  <script src="order-test.js?v=examples-list-1119" defer></script>
+  <link rel="stylesheet" href="order-test.css?v=full-1119">
+  <script src="order-test-reference-sources.js?v=full-1119" defer></script><script src="order-test-reference-player.js?v=full-1119" defer></script><script src="order-test-hooks.js" defer></script>
+  <script src="order-test-library.js?v=full-1119" defer></script>
+  <script src="order-test-examples.js?v=full-1119" defer></script>
+  <script src="order-test.js?v=full-1119" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -61,7 +61,7 @@ Do not render any on-screen text, subtitles, captions, slogans, titles, generate
 
 Let the model choose the number of cuts, lenses and shot sizes within each beat, but follow the timeline&#x27;s pacing and the camera energy given at the storm and the gulp, while preserving the fast &#x27;tok&#x27; hook, the long, huge, camera-shaking orange carbonation storm, the slow-motion deadpan gulp at its calm center, the contrast where only he comes alive with a satisfied smile while the colleagues recover naturally, the bottle staying in his hand until the final hero shot, and the exact product identity from Image 1.
 </pre></details><details><summary>확인한 자료</summary><ul class="example-sources"><li><code>reference_library\productions\004_fanta_soda_storm\video_v6_prompt.txt</code></li><li><code>reference_library/productions/004_fanta_soda_storm/README.md</code></li><li><code>coordination/meetings/build_refstudy.py</code></li></ul><p class="hint">당시 자료는 참고용으로 보존했습니다. 현재 새 작업에 과거 조건·문자·히어로컷을 무조건 적용하지 않으며, 이 탭은 생성 요청을 보내지 않습니다.</p></details></article></section>
-    <section id="hook-library" class="panel library-panel" aria-labelledby="library-heading"><p class="eyebrow">HOOK / EFFECT LIBRARY</p><h2 id="library-heading">훅·이펙트 전체 목록</h2><p id="library-total" class="hint"></p><p class="hint">원리와 변형은 별도 표시합니다. 영상 연결은 참고 장면이 있다는 뜻이며, 새 제품에서의 생성 성공을 보장하지 않습니다. 목록은 서버 연결 없이도 볼 수 있습니다.</p><div class="library-filters"><label>이름·원리·소재 검색<input id="library-search" type="search" placeholder="예: 회오리, 액체, 미니어처"></label><label>분류<select id="library-kind"><option value="">원리 + 변형 전체</option><option value="principle">기본 원리만</option><option value="variant">변형만</option></select></label><label>영상<select id="library-proof"><option value="">전체</option><option value="clip">영상 연결 있음</option><option value="idea">영상 없는 후보</option></select></label></div><p id="library-count" role="status"></p><div class="library-scroll" tabindex="0" role="region" aria-label="훅 50개 비교 목록"><table class="library-table"><thead><tr><th scope="col">번호</th><th scope="col">이름 · 계열</th><th scope="col">원리 · 적용 예시</th><th scope="col">적합 소재 · 조건</th><th scope="col">영상 · 난이도</th></tr></thead><tbody id="library-rows"></tbody></table></div><p class="hint">표 안을 스크롤하면 전체 항목을 볼 수 있습니다. 실제 소재에 적용할 때는 아래 ‘시작을 바꾸는 훅’에서 선택합니다.</p></section>
+    <section id="hook-library" class="panel library-panel" aria-labelledby="library-heading"><p class="eyebrow">HOOK / EFFECT LIBRARY</p><h2 id="library-heading">훅·이펙트 전체 목록</h2><p id="library-total" class="hint"></p><p class="hint">원리와 변형은 별도 표시합니다. 전체 영상과 훅 발췌를 구분합니다. 영상 연결은 참고 장면이 있다는 뜻이며, 새 제품에서의 생성 성공을 보장하지 않습니다. 목록은 서버 연결 없이도 볼 수 있습니다.</p><div class="library-filters"><label>이름·원리·소재 검색<input id="library-search" type="search" placeholder="예: 회오리, 액체, 미니어처"></label><label>분류<select id="library-kind"><option value="">원리 + 변형 전체</option><option value="principle">기본 원리만</option><option value="variant">변형만</option></select></label><label>영상<select id="library-proof"><option value="">전체</option><option value="clip">영상 연결 있음</option><option value="idea">영상 없는 후보</option></select></label></div><p id="library-count" role="status"></p><div class="library-scroll" tabindex="0" role="region" aria-label="훅 50개 비교 목록"><table class="library-table"><thead><tr><th scope="col">번호</th><th scope="col">이름 · 계열</th><th scope="col">원리 · 적용 예시</th><th scope="col">적합 소재 · 조건</th><th scope="col">영상 · 난이도</th></tr></thead><tbody id="library-rows"></tbody></table></div><p class="hint">표 안을 스크롤하면 전체 항목을 볼 수 있습니다. 실제 소재에 적용할 때는 아래 ‘시작을 바꾸는 훅’에서 선택합니다.</p></section>
     <div id="notice" role="status" aria-live="polite" class="notice">브리지를 연결하면 소재를 불러오고 편집할 수 있습니다. 우측 상단의 연결 설정을 열어 주세요.</div>
     <nav id="case-tabs" class="case-tabs" aria-label="독립 테스트 소재"></nav>
     <div class="desk-heading"><div><h2 id="case-heading">소재 1</h2></div><div class="save-area"><span id="save-state" role="status">연결 대기</span><button id="save" data-mutate>변경 저장</button></div></div>
