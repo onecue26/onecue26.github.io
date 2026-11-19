@@ -66,7 +66,7 @@
     updateSaveState();
   }
   function changed() {
-    const c=current(); if(!state.connected||!c.id)return;
+    renderOrderFrame(); const c=current(); if(!state.connected||!c.id)return;
     state.dirty.add(c.id);state.version.set(c.id,(state.version.get(c.id)||0)+1);
     updateSaveState();renderTabs();clearTimeout(saveTimer);
     saveTimer=setTimeout(()=>save(c).catch(e=>notice(`저장 실패: ${message(e)} 입력 내용은 현재 화면에 유지됩니다. 변경 저장을 눌러 다시 시도하세요.`,true)),1100);
@@ -91,7 +91,7 @@
     $$('[data-field]').forEach(el=>el.value=c[el.dataset.field]||'');
     $('#facts-fields').innerHTML=facts.map(([key,label])=>`<label>${label}<input data-fact="${key}" value="${esc(text(c.facts?.[key]))}" placeholder="확인 후 입력"></label>`).join('');
     $('#order-editor').value=c.order||'';
-    renderResearch();renderAssets();renderAnchors();renderDrafts();rankHooks();renderHooks();updateControls();
+    renderResearch();renderAssets();renderAnchors();renderDrafts();rankHooks();renderHooks();renderOrderFrame();updateControls();
   }
   function renderResearch() {
     const r=current().research;
@@ -202,19 +202,35 @@
     throw new Error(`작업 확인 시간이 초과됐습니다. 중복 요청 전 서버 상태를 확인하세요. 작업 ID: ${taskId}`);
   }
   async function copy(value) {if(!value){notice('복사할 내용이 없습니다.',true);return;}try{await navigator.clipboard.writeText(value);notice('클립보드에 복사했습니다.');}catch{notice('클립보드 접근이 차단됐습니다. 텍스트를 선택해 직접 복사하세요.',true);}}
+  function orderSegments() {
+    const c=current(),h=hooks.find(h=>String(h.id)===String(c.selected_hook));
+    const f=value=>({value}),v=(label,value)=>({label,value:value||`[${label} 입력 필요]`});
+    return [
+      [f('시댄스 2.5, 15초 영상, 480p, 9대16 기준')],
+      [v('브랜드·제품',[c.brand,c.product].filter(Boolean).join(' ')),f(' 15초 CF(실사) - '),v('인물',c.person),f(', '),v('장소',c.place),f(', '),v('사용 동작',text(c.facts?.usage).trim()||h?.trigger),f('. 제품 히어로컷으로 마무리.')],
+      [v('훅 이름',h?.title),f(': '),v('효과',h?.effect||h?.summary),f('. 광고 문법(3초 훅→제품→엔드카드).')],
+      [f('제품명: '),v('제품명',c.product),f(', 브랜드: '),v('브랜드',c.brand),f('. 톤: '),v('톤',c.tone),f('. BGM필수.')],
+      [f('시트: 제품/인물/장소 (첨부 순서 동일). 제품 외형·표기 유지.')],
+      [f('글자 후반 합성. '),v('카피',c.copy?`“${c.copy}”`:'지정 카피 없음 · 임의 카피 생성 금지')]
+    ];
+  }
+  function renderOrderFrame() {
+    const rows=orderSegments();
+    $('#order-frame-preview').innerHTML=rows.map(row=>`<p>${row.map(part=>`<span class="frame-part ${part.label?'variable':'fixed'}"><small>${esc(part.label?'변경 · '+part.label:'고정')}</small>${esc(part.value)}</span>`).join('')}</p>`).join('');
+    $('#frame-sync').textContent=current().order?'입력·훅에 따른 조립 미리보기입니다. 아래 저장 오더는 직접 편집할 수 있으며, 다시 만들기를 눌러야 새 입력이 반영됩니다.':'입력과 훅 선택이 이 자리에 반영됩니다. 오더 생성 시 아래 편집기에 같은 문장이 들어갑니다.';
+  }
   function composeOrder() {
     const c=current(),h=hooks.find(h=>String(h.id)===String(c.selected_hook));
     if(!c.product?.trim())throw new Error('제품명을 먼저 입력하세요.');
     if(!h)throw new Error('사용할 훅을 먼저 선택하세요.');
-    const product=`${c.brand?c.brand+' ':''}${c.product}`;
-    const person=c.person||'[인물 지정 필요]',place=c.place||'[장소 지정 필요]';
-    const action=text(c.facts?.usage).trim()||h.trigger||'[사용동작 지정 필요]';
-    const lines=['시댄스2.5,15초영상,480p,9대16 기준',`${product} 15초CF(실사)-${person}, ${place}, ${action}. 제품히어로컷으로 마무리.`,`${h.title}: ${h.effect||h.summary||''}. 광고문법(3초훅→제품→엔드카드).`,`제품명: ${c.product}${c.brand?`, 브랜드: ${c.brand}`:''}. 톤: ${c.tone||'[톤 지정 필요]'}. BGM필수.`, '시트: 제품/인물/장소 (첨부 순서 동일). 제품 외형·표기 유지.',`글자 후반 합성${c.copy?`: “${c.copy}”`:'. 임의 카피 생성 금지.'}`,c.point?`핵심 소구: ${c.point}`:'',c.audience?`타깃: ${c.audience}`:'',c.description?`제품 설명: ${c.description}`:''];
+    const lines=orderSegments().map(row=>row.map(part=>part.value).join(''));
+    if(c.point)lines.push(`핵심 소구: ${c.point}`);
+    if(c.audience)lines.push(`타깃: ${c.audience}`);
+    if(c.description)lines.push(`제품 설명: ${c.description}`);
     const known=facts.filter(([key])=>key!=='usage'&&text(c.facts?.[key]).trim()).map(([key,label])=>`${label}: ${text(c.facts[key])}`);
     if(known.length)lines.push(`확인 사실: ${known.join(' / ')}`);
-    lines.push('미확인 효능·수치는 만들지 말고 영상 프롬프트 초안만 작성.');
     if(c.notes)lines.push(`추가 지시: ${c.notes}`);
-    if(h.reaction)lines.splice(3,0,`인물 반응: ${h.reaction}`);
+    lines.push('미확인 효능·수치는 만들지 말고 영상 프롬프트 초안만 작성.');
     c.order=lines.filter(Boolean).join('\n');$('#order-editor').value=c.order;changed();
   }
   function prepareAnchors() {
