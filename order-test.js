@@ -23,7 +23,7 @@
   async function api(path, body, method, binary=false) {
     const controller=new AbortController(); const timeout=setTimeout(()=>controller.abort(),45000);
     try {
-      const response=await fetch(urlFor(path), {method:method || (body===undefined?'GET':'POST'),headers:{Authorization:`Bearer ${state.key}`,...(body===undefined?{}:{'Content-Type':'application/json'})},body:body===undefined?undefined:JSON.stringify(body),signal:controller.signal,cache:'no-store',credentials:'omit',redirect:'error',referrerPolicy:'no-referrer'});
+      const response=await fetch(urlFor(path), {method:method || (body===undefined?'GET':'POST'),headers:{Authorization:`Bearer ${state.key}`,...(body===undefined?{}:{'Content-Type':'application/json'})},body:body===undefined?undefined:JSON.stringify(body),signal:controller.signal,cache:'no-store',credentials:'omit',targetAddressSpace:'loopback',redirect:'error',referrerPolicy:'no-referrer'});
       if(!response.ok) {
         let detail; try {detail=await response.json();} catch {}
         if(response.status===401) {state.connected=false; updateControls(); renderHealth();}
@@ -286,5 +286,16 @@
   const fragment=new URLSearchParams(location.hash.slice(1));
   if(fragment.has('bridge')||fragment.has('key')) {state.endpoint=fragment.get('bridge')||state.endpoint;state.key=fragment.get('key')||'';try{history.replaceState(null,'',location.pathname+location.search);}catch{}}
   else if(stored?.endpoint&&stored?.key){state.endpoint=stored.endpoint;state.key=stored.key;$('#remember').checked=true;}
-  renderCase();renderHealth();openSettings();if(state.key)connect();
+  renderCase();renderHealth();openSettings();
+  async function reconnectIfAllowed() {
+    if(!state.key)return;
+    let permission='prompt';
+    try { permission=(await navigator.permissions.query({name:'loopback-network'})).state; } catch {}
+    const onThisPC=location.protocol==='http:'&&['127.0.0.1','localhost'].includes(location.hostname);
+    if(permission==='granted'||onThisPC)connect();
+    else $('#connection-feedback').textContent=permission==='denied'
+      ?'브라우저 주소창의 사이트 설정에서 루프백 네트워크 접근을 허용한 뒤 연결 확인을 눌러 주세요.'
+      :'연결 확인을 누르고, 이 PC의 작업 서버 접근을 묻는 브라우저 알림에서 허용해 주세요.';
+  }
+  reconnectIfAllowed();
 })();
