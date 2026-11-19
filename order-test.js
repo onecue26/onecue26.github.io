@@ -1,0 +1,290 @@
+'use strict';
+(() => {
+  const $ = s => document.querySelector(s);
+  const $$ = s => [...document.querySelectorAll(s)];
+  const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const text = v => typeof v === 'string' ? v : v == null ? '' : JSON.stringify(v, null, 2);
+  const list = v => Array.isArray(v) ? v : v ? [v] : [];
+  const facts = [['category','제품 종류'],['benefit','핵심 효용'],['ingredients','성분 / 소재'],['feature','차별점'],['usage','사용 방법'],['size','용량 / 규격'],['price','가격 / 구성'],['caution','주의 / 금지 표현']];
+  const kinds = {product:'제품',person:'인물',place:'장소'};
+  const editable = ['title','product','brand','description','url','audience','point','copy','tone','person','place','notes','facts','selected_hook','selection_mode','order','anchor_prompts'];
+  const hooks = Array.isArray(window.ORDER_HOOKS) ? window.ORDER_HOOKS : [];
+  const state = {connected:false,health:{},endpoint:'http://127.0.0.1:8767',key:'',cases:Array.from({length:4},(_,i)=>({title:`소재 ${i+1}`,facts:{},assets:[],drafts:[],selection_mode:'recommended'})),index:0,dirty:new Set(),version:new Map(),saving:new Map(),busy:new Map(),picked:new Map(),blobs:new Map(),loadingBlobs:new Set(),page:40,ranking:[],random:[],connection:0};
+  let saveTimer;
+  const current = () => state.cases[state.index];
+  const notice = (message, error=false) => { $('#notice').textContent=message; $('#notice').classList.toggle('error',error); };
+  const message = error => error?.message || String(error);
+  function urlFor(path) {
+    const base = new URL(state.endpoint);
+    const target = new URL(path, base);
+    if(target.origin!==base.origin || !target.pathname.startsWith('/api/')) throw new Error('브리지 외부의 비공개 파일 주소는 열 수 없습니다.');
+    return target.href;
+  }
+  async function api(path, body, method, binary=false) {
+    const controller=new AbortController(); const timeout=setTimeout(()=>controller.abort(),45000);
+    try {
+      const response=await fetch(urlFor(path), {method:method || (body===undefined?'GET':'POST'),headers:{Authorization:`Bearer ${state.key}`,...(body===undefined?{}:{'Content-Type':'application/json'})},body:body===undefined?undefined:JSON.stringify(body),signal:controller.signal,cache:'no-store',credentials:'omit',redirect:'error',referrerPolicy:'no-referrer'});
+      if(!response.ok) {
+        let detail; try {detail=await response.json();} catch {}
+        if(response.status===401) {state.connected=false; updateControls(); renderHealth();}
+        throw new Error(detail?.error || `요청 실패 (HTTP ${response.status})`);
+      }
+      return binary ? response.blob() : response.json();
+    } catch(e) {
+      if(e.name==='AbortError') throw new Error('서버 응답 시간이 초과됐습니다. 연결 상태를 확인한 뒤 다시 시도하세요.');
+      if(e instanceof TypeError) throw new Error('로컬 서버에 연결할 수 없습니다. 이 PC의 127.0.0.1:8767 서버 실행, 연결 주소, 브라우저의 로컬 네트워크 접근 권한을 확인하세요. HTTPS 페이지에서는 브라우저의 혼합 콘텐츠 정책으로 차단될 수 있습니다.');
+      throw e;
+    } finally {clearTimeout(timeout);}
+  }
+  function cleanBlobs() {for(const url of state.blobs.values()) URL.revokeObjectURL(url);state.blobs.clear();state.loadingBlobs.clear();}
+  function renderTabs() {
+    $('#case-tabs').innerHTML=state.cases.map((c,i)=>`<button type="button" data-case="${i}" class="${i===state.index?'active':''}" aria-current="${i===state.index?'page':'false'}"><b>0${i+1}</b><span>${esc(c.title||`소재 ${i+1}`)}${state.dirty.has(c.id)?' ·':''}</span></button>`).join('');
+    $('#case-heading').textContent=current().title||`소재 ${state.index+1}`;
+  }
+  function renderHealth() {
+    const h=state.health;
+    $('#health').textContent=!state.connected?'● 연결 안 됨':`● 로컬 연결 · 사진용 GPT ${h.gptConnected?'브라우저 감지':'연결 필요'} · Codex ${h.codexAvailable?'사용 가능':'확인 필요'}`;
+    $('#health').title='서버 상태 응답 기준. GPT 제작 세션 모델: gpt-6-astra';
+  }
+  function updateSaveState() {
+    const c=current();
+    $('#save-state').textContent=!state.connected?'연결 대기':state.saving.has(c.id)?'저장 중…':state.dirty.has(c.id)?'저장되지 않은 변경':'저장됨';
+  }
+  function updateControls() {
+    const c=current(), busy=state.busy.has(c.id), enabled=state.connected&&!!c.id;
+    $('#brief-fields').disabled=!enabled;$('#facts-fields').disabled=!enabled;
+    $('#order-editor').disabled=!enabled;
+    $$('[data-mutate]').forEach(el=>{el.disabled=!enabled||busy;});
+    $$('#anchors textarea').forEach(el=>el.disabled=!enabled||busy);
+    $$('#assets select, #assets input').forEach(el=>el.disabled=!enabled||busy);
+    $$('[data-select-hook]').forEach(el=>el.disabled=!enabled||busy);
+    $$('[data-mode]').forEach(el=>el.disabled=!enabled||busy);
+    $$('#anchors button').forEach(el=>{el.disabled=!enabled||busy||!state.health.gptConnected;el.title=state.health.gptConnected?'':'사진 생성용 GPT 브라우저 연결이 필요합니다.';});
+    $('#draft').disabled=!enabled||busy||!state.health.codexAvailable;
+    $('#draft').title=state.health.codexAvailable?'GPT 제작 세션으로 프롬프트 초안 요청':'프롬프트 초안용 Codex CLI 연결이 필요합니다.';
+    $('#task-state').textContent=state.busy.get(c.id)||'';$('#task-state').classList.toggle('busy',busy);
+    updateSaveState();
+  }
+  function changed() {
+    const c=current(); if(!state.connected||!c.id)return;
+    state.dirty.add(c.id);state.version.set(c.id,(state.version.get(c.id)||0)+1);
+    updateSaveState();renderTabs();clearTimeout(saveTimer);
+    saveTimer=setTimeout(()=>save(c).catch(e=>notice(`저장 실패: ${message(e)} 입력 내용은 현재 화면에 유지됩니다. 변경 저장을 눌러 다시 시도하세요.`,true)),1100);
+  }
+  async function save(c=current()) {
+    if(!state.connected)throw new Error('먼저 브리지를 연결하세요.');
+    if(state.saving.has(c.id)) {await state.saving.get(c.id);if(state.dirty.has(c.id))return save(c);return;}
+    if(!state.dirty.has(c.id))return;
+    const version=state.version.get(c.id); const payload={};
+    for(const key of editable)if(c[key]!==undefined)payload[key]=c[key];
+    const pending=api(`/api/cases/${c.id}`,payload,'PUT');state.saving.set(c.id,pending);updateSaveState();
+    try {await pending;if(version===state.version.get(c.id))state.dirty.delete(c.id);}
+    finally {state.saving.delete(c.id);updateSaveState();renderTabs();}
+  }
+  async function refresh(c) {
+    const fresh=await api(`/api/cases/${c.id}`);
+    for(const key of ['assets','drafts','research'])c[key]=fresh[key]|| (key==='research'?null:[]);
+    if(current().id===c.id){renderAssets();renderResearch();renderDrafts();}
+  }
+  function renderCase() {
+    const c=current(); renderTabs();
+    $$('[data-field]').forEach(el=>el.value=c[el.dataset.field]||'');
+    $('#facts-fields').innerHTML=facts.map(([key,label])=>`<label>${label}<input data-fact="${key}" value="${esc(text(c.facts?.[key]))}" placeholder="확인 후 입력"></label>`).join('');
+    $('#order-editor').value=c.order||'';
+    renderResearch();renderAssets();renderAnchors();renderDrafts();rankHooks();renderHooks();updateControls();
+  }
+  function renderResearch() {
+    const r=current().research;
+    if(!r){$('#research-content').textContent='아직 수집한 정보가 없습니다.';return;}
+    $('#research-content').innerHTML=`<p>수집 상태: ${esc(r.status||'완료')}</p>${esc(r.text||'')}<pre>${esc(text(r.facts||{}))}</pre>${list(r.sources).map(s=>{const u=s.url||s;return safePublic(u)?`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(s.title||u)}</a>`:'';}).join('')}`;
+  }
+  function selectedAssets(c=current()) {
+    if(!state.picked.has(c.id)) {
+      const picks={}; for(const kind of Object.keys(kinds)) {const asset=list(c.assets).find(a=>a.kind===kind);if(asset)picks[kind]=asset.id;}
+      state.picked.set(c.id,picks);
+    }
+    return state.picked.get(c.id);
+  }
+  function renderAssets() {
+    const c=current(),picks=selectedAssets(c);
+    for(const kind of Object.keys(kinds))if(!list(c.assets).some(a=>a.id===picks[kind]&&a.kind===kind))delete picks[kind];
+    $('#assets').innerHTML=list(c.assets).length?c.assets.map(a=>`<div class="asset"><img data-asset="${esc(a.id)}" alt="${esc(a.filename||'등록 사진')}" ${state.blobs.has(a.id)?`src="${esc(state.blobs.get(a.id))}"`:''}><p title="${esc(a.filename)}">${esc(a.filename||a.id)}</p><select data-role="${esc(a.id)}" aria-label="${esc(a.filename)} 역할"><option value="">역할 미지정</option>${Object.entries(kinds).map(([key,label])=>`<option value="${key}" ${a.kind===key?'selected':''}>${label}</option>`).join('')}</select>${a.kind?`<label class="check"><input type="radio" name="pick-${esc(a.kind)}" data-pick="${esc(a.id)}" data-kind="${esc(a.kind)}" ${picks[a.kind]===a.id?'checked':''}>${kinds[a.kind]||'사진'} 전달 선택</label>`:''}</div>`).join(''):'<p class="empty">등록한 사진이 없습니다.<br>실제 제품사진부터 올려 주세요.</p>';
+    for(const a of list(c.assets))loadAsset(a);
+    updateControls();
+  }
+  async function loadAsset(a) {
+    if(!a.url||state.blobs.has(a.id)||state.loadingBlobs.has(a.id)||!state.connected)return;
+    const connection=state.connection;state.loadingBlobs.add(a.id);
+    try {const blob=await api(a.url,undefined,undefined,true);if(connection!==state.connection)return;const url=URL.createObjectURL(blob);state.blobs.set(a.id,url);$$('[data-asset]').filter(el=>el.dataset.asset===a.id).forEach(el=>el.src=url);}
+    catch(e){if(connection===state.connection)notice(`사진 불러오기 실패: ${message(e)}`,true);}
+    finally {state.loadingBlobs.delete(a.id);}
+  }
+  function renderAnchors() {
+    const c=current();
+    $('#anchors').innerHTML=`<p class="hint">${state.health.gptConnected?'사진용 GPT 브라우저 감지 · 생성 요청 때 로그인 상태를 확인합니다.':'GPT 브라우저 연결 필요 · 사진 생성은 연결 확인 후 사용할 수 있습니다. 기존 사진 업로드와 역할 지정은 가능합니다.'}</p>`+Object.entries(kinds).map(([key,label])=>`<div class="anchor"><div class="anchor-head"><h3>${label} 앵커</h3><span>구독 GPT</span></div><label class="sr-only" for="anchor-${key}">${label} 앵커 생성 요청</label><textarea id="anchor-${key}" data-anchor="${key}" rows="3" placeholder="${label} 사진을 어떻게 만들까요?${key==='product'?' 제품 원본사진 첨부 필수':''}">${esc(c.anchor_prompts?.[key]||'')}</textarea><button data-generate="${key}" data-mutate>구독 GPT로 만들기 · ${label}</button></div>`).join('');
+  }
+  const safePublic = value => {try{return ['http:','https:'].includes(new URL(value).protocol);}catch{return false;}};
+  function normalized(v) {return text(v).toLocaleLowerCase().normalize('NFKC');}
+  function renderHooks() {
+    const c=current(),mode=c.selection_mode||'recommended';
+    $$('[data-mode]').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.mode===mode)));
+    $('#mode-description').textContent=mode==='recommended'?'입력한 제품 단어와 재질·사용 동작을 바탕으로 정렬합니다. 연결 이유를 확인하고 선택하세요.':mode==='random'?'전체 카탈로그에서 무작위로 섞습니다. 점수와 관계없이 노출되며 낮은 점수의 훅도 포함됩니다. 실제 적합성을 검토하세요.':'이름·원리·카테고리를 검색해 직접 선택하세요. 점수는 제품 단어와 재질의 연결 정도입니다.';
+    $('#refresh-hooks').textContent=mode==='random'?'전체에서 다시 섞기':'추천 점수 새로 계산';
+    const query=normalized($('#hook-search').value),family=$('#family-filter').value,category=$('#category-filter').value;
+    if(mode==='random'&&!state.random.length)shuffle();
+    const ordered=mode==='recommended'?state.ranking.map(r=>r.h):mode==='random'?state.random:hooks;
+    const found=ordered.filter(h=>(!query||normalized([h.title,h.summary,h.trigger,h.effect,...list(h.productSignals)].join(' ')).includes(query))&&(!family||h.family===family)&&(!category||list(h.categories).includes(category)));
+    $('#hook-count').textContent=`${hooks.length}개 훅`;
+    $('#match-count').textContent=`${found.length}개 중 ${Math.min(state.page,found.length)}개 표시`;
+    const chosen=hooks.find(h=>String(h.id)===String(c.selected_hook));
+    $('#selected-hook').innerHTML=chosen?`<strong>선택: ${esc(chosen.title)}</strong><br>${esc(chosen.trigger||chosen.summary||'')}<br><small>${esc(match(chosen).reason)}</small>`:'선택한 훅이 없습니다. 카드를 검토한 후 선택하세요.';
+    $('#hooks').innerHTML=found.slice(0,state.page).map(h=>{
+      const score=match(h), evidence=list(h.evidence),hasClip=evidence.some(e=>clipUrl(e.clip));
+      return `<article class="hook-card ${String(c.selected_hook)===String(h.id)?'selected':''}"><div class="meta"><span>${esc(h.family||'미분류')} · ${h.kind==='variant'?'변형':'원리'}</span><span>${esc(h.difficulty||'')}</span></div><h3>${esc(h.title)}</h3><p>${esc(h.summary||'')}</p><p><b>시작</b> ${esc(h.trigger||'')}<br><b>효과</b> ${esc(h.effect||'')}<br><b>반응</b> ${esc(h.reaction||'')}</p><p class="score">${score.score}점 · ${esc(score.reason)}</p><p>${hasClip?'영상 근거 있음 · 부분 관찰, 효과 전체를 입증하지 않음':'영상 미확인 · 효과 검증 근거로 사용하지 마세요.'}</p><p class="hint">관찰: ${esc(evidence[0]?.observed||'관찰 기록 없음')}<br>근거 상태: ${esc(h.evidenceStatus||'미확인')}${h.variantOf?` · 원리: ${esc(h.variantOf)}`:''}</p>${list(h.limitations).length?`<p class="hint">한계: ${esc(list(h.limitations).join(' / '))}</p>`:''}<details><summary>관찰 내용 · 영상 · 예시 (${evidence.length})</summary><p>예시: ${esc(h.example||'등록되지 않음')}</p>${evidence.map(e=>`<div class="evidence"><b>${esc(e.title||'영상 근거')}</b><p>관찰: ${esc(e.observed||'구체적인 관찰 내용 미확인')}</p><p>첫 1초: ${e.firstSecond===true?'관찰됨':e.firstSecond===false?'효과 미관찰':'미확인'}</p>${clipUrl(e.clip)?`<video controls playsinline preload="none" data-clip="${esc(clipUrl(e.clip))}" aria-label="${esc(e.title||'훅 근거 영상')}"></video>`:'<p>연결 가능한 영상 없음</p>'}${safePublic(e.url)?`<a href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">원본 출처 ↗</a>`:''}</div>`).join('')}</details><button data-select-hook="${esc(h.id)}" class="${String(c.selected_hook)===String(h.id)?'lime':'quiet'}">${String(c.selected_hook)===String(h.id)?'선택됨 ✓':'이 훅 선택'}</button></article>`;
+    }).join('')||`<p class="empty">${hooks.length?'검색 조건에 맞는 훅이 없습니다.':'카탈로그를 불러오지 못했습니다. order-test-hooks.js 파일을 확인하고 새로고침하세요.'}</p>`;
+    $('#more-hooks').hidden=found.length<=state.page;updateControls();
+  }
+  const materialTraits = [
+    {pattern:/참기름|소스|오일|시럽|음료|주스|탄산|커피|샴푸|세제|향수/, words:['액체','흐름','방울','분출'],label:'액체의 흐름'},
+    {pattern:/탄산|사이다|콜라|발포|스파클링/, words:['기포','폭풍','분출','팽창'],label:'탄산·발포'},
+    {pattern:/참기름|소스|노즐|스퀴즈|펌프|짜서|짜는/,words:['노즐','입구','방울','줄기'],label:'입구에서 나오는 재료'},
+    {pattern:/크림|젤|밤|립마스크|보습|로션|에센스/,words:['젤','리본','감싸','피부','막'],label:'젤·크림의 질감'},
+    {pattern:/종이|노트|문구|수첩|책|페이지|카드/,words:['종이','접힘','페이지','펼쳐','무대'],label:'종이·접히는 면'},
+    {pattern:/반려|강아지|고양이|노즈워크|펫/,words:['동물','반응','장난감','살아','놀이'],label:'반려동물의 놀이'},
+    {pattern:/향|꽃|캔들|식물|허브|아로마/,words:['향','꽃','재료','자라','공간'],label:'향과 식물 재료'},
+    {pattern:/과자|스낵|칩|쿠키|바삭|깨|곡물|가루/,words:['조각','증식','가루','씨앗','연쇄'],label:'작은 알갱이·조각'},
+    {pattern:/옷|의류|원단|가방|천|패브릭|수건/,words:['원단','천','흐르','감싸','윤곽'],label:'움직이는 원단'},
+    {pattern:/램프|조명|LED|빛|전구/,words:['빛','그림자','광점','반사'],label:'제품의 빛'},
+    {pattern:/청소|정리|수납|주방|가전|기계|블렌더/,words:['연쇄','분리','골조','조립','안쪽'],label:'제품의 구조·작동'}
+  ];
+  function match(h) {
+    const c=current();
+    const input=normalized([c.product,c.brand,c.description,c.point,...Object.values(c.facts||{}).map(text)].join(' '));
+    const hookText=normalized([h.title,h.summary,h.trigger,h.effect,...list(h.productSignals)].join(' '));
+    const stop=new Set(['있는','제품','작은','보이는','사람','같은','여러','큰다','함께','주변','자체','따라','처럼']);
+    const tokens=[...new Set(list(h.productSignals).join(' ').split(/[\s/·,()]+/).filter(t=>t.length>=2&&!stop.has(t)))];
+    const exact=tokens.filter(t=>input.includes(normalized(t)));
+    const related=materialTraits.filter(t=>t.pattern.test(input)&&t.words.some(w=>hookText.includes(w)));
+    const score=Math.min(100,exact.length*12+related.length*9);
+    const reasons=[...exact.slice(0,2).map(t=>'입력의 '+t),...related.slice(0,2).map(t=>t.label)];
+    return {score,reason:reasons.length?reasons.join(' · ')+'과 연결':'직접 연결 근거가 적음 · 선택 후 아이디어 검토'};
+  }
+  function rankHooks() {state.ranking=hooks.map(h=>({h,score:match(h).score})).sort((a,b)=>b.score-a.score||String(a.h.id).localeCompare(String(b.h.id)));}
+  function shuffle() {state.random=[...hooks];for(let i=state.random.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[state.random[i],state.random[j]]=[state.random[j],state.random[i]];}}
+  function clipUrl(value) {
+    if(typeof value!=='string'||!value)return '';
+    try {const url=new URL(value,location.href);const root=new URL('order-test-media/',location.href);if(url.origin!==root.origin||!url.pathname.startsWith(root.pathname))return '';return url.href;}catch{return '';}
+  }
+  function renderDrafts() {
+    $('#drafts').innerHTML=list(current().drafts).slice().reverse().map((d,i)=>`<article class="draft"><h3>GPT 영상 프롬프트 ${list(current().drafts).length-i}</h3><small>gpt-6-astra · ${esc(d.created_at||'')} ${d.session_id?`· 세션 ${esc(d.session_id)}`:''}</small><pre>${esc(text(d.prompt))}</pre>${d.rationale_ko?`<p>${esc(text(d.rationale_ko))}</p>`:''}${d.image_order?`<p>이미지 순서: ${esc(text(d.image_order))}</p>`:''}<button class="quiet" data-copy-draft="${list(current().drafts).length-1-i}">프롬프트 복사</button></article>`).join('');
+  }
+  async function operation(label,fn,c=current()) {
+    if(state.busy.has(c.id))return;
+    state.busy.set(c.id,label);updateControls();
+    try {await save(c);await fn(c);notice('완료했습니다. 결과를 확인하세요.');}
+    catch(e){notice(`${label} 실패: ${message(e)}`,true);}
+    finally {state.busy.delete(c.id);updateControls();}
+  }
+  async function task(c,action,payload) {
+    const connection=state.connection;
+    const started=await api(`/api/cases/${c.id}/${action}`,payload);
+    if(!started.task_id)throw new Error('서버가 작업 ID를 반환하지 않았습니다.');
+    const taskId=started.task_id;
+    for(let i=0;i<1200;i++) {
+      if(connection!==state.connection)throw new Error(`연결이 바뀌어 작업 확인을 중단했습니다. 작업 ID: ${taskId}`);
+      const t=await api(`/api/tasks/${encodeURIComponent(taskId)}`);
+      if(t.status==='failed')throw new Error(t.error||'작업 실패');
+      if(t.status==='completed'){await refresh(c);return t.result;}
+      if(!['queued','running'].includes(t.status))throw new Error(`알 수 없는 작업 상태: ${t.status}`);
+      state.busy.set(c.id,`${action==='draft'?'GPT 영상 프롬프트':action==='collect'?'제품 정보 수집':'GPT 앵커 생성'} · ${t.status==='queued'?'대기 중':'진행 중'} · ${taskId.slice(0,8)}`);updateControls();
+      await new Promise(resolve=>setTimeout(resolve,1500));
+    }
+    throw new Error(`작업 확인 시간이 초과됐습니다. 중복 요청 전 서버 상태를 확인하세요. 작업 ID: ${taskId}`);
+  }
+  async function copy(value) {if(!value){notice('복사할 내용이 없습니다.',true);return;}try{await navigator.clipboard.writeText(value);notice('클립보드에 복사했습니다.');}catch{notice('클립보드 접근이 차단됐습니다. 텍스트를 선택해 직접 복사하세요.',true);}}
+  function composeOrder() {
+    const c=current(),h=hooks.find(h=>String(h.id)===String(c.selected_hook));
+    if(!c.product?.trim())throw new Error('제품명을 먼저 입력하세요.');
+    if(!h)throw new Error('사용할 훅을 먼저 선택하세요.');
+    const product=`${c.brand?c.brand+' ':''}${c.product}`;
+    const person=c.person||'[인물 지정 필요]',place=c.place||'[장소 지정 필요]';
+    const action=text(c.facts?.usage).trim()||h.trigger||'[사용동작 지정 필요]';
+    const lines=['시댄스2.5,15초영상,480p,9대16 기준',`${product} 15초CF(실사)-${person}, ${place}, ${action}. 제품히어로컷으로 마무리.`,`${h.title}: ${h.effect||h.summary||''}. 광고문법(3초훅→제품→엔드카드).`,`제품명: ${c.product}${c.brand?`, 브랜드: ${c.brand}`:''}. 톤: ${c.tone||'[톤 지정 필요]'}. BGM필수.`, '시트: 제품/인물/장소 (첨부 순서 동일). 제품 외형·표기 유지.',`글자 후반 합성${c.copy?`: “${c.copy}”`:'. 임의 카피 생성 금지.'}`,c.point?`핵심 소구: ${c.point}`:'',c.audience?`타깃: ${c.audience}`:'',c.description?`제품 설명: ${c.description}`:''];
+    const known=facts.filter(([key])=>key!=='usage'&&text(c.facts?.[key]).trim()).map(([key,label])=>`${label}: ${text(c.facts[key])}`);
+    if(known.length)lines.push(`확인 사실: ${known.join(' / ')}`);
+    lines.push('미확인 효능·수치는 만들지 말고 영상 프롬프트 초안만 작성.');
+    if(c.notes)lines.push(`추가 지시: ${c.notes}`);
+    if(h.reaction)lines.splice(3,0,`인물 반응: ${h.reaction}`);
+    c.order=lines.filter(Boolean).join('\n');$('#order-editor').value=c.order;changed();
+  }
+  function prepareAnchors() {
+    const c=current();c.anchor_prompts||={};
+    const product=c.product||'첨부한 제품';
+    const prompts={product:`첨부한 ${product} 원본사진을 기준으로 제품 기준 시트를 만들어 줘. 원본과 동일한 외형·비율·제품색·재질·포장·라벨을 유지하고 라벨 글자를 다시 쓰거나 디자인을 바꾸지 마. 원본에서 관찰 가능한 각도만 시트로 정리하고 미보이는 뒷면이나 구조는 발명하지 마. ${c.description?`제품 정보: ${c.description}. `:''}제품 식별이 쉬운 중립적인 빛과 배경.`};
+    if(c.person?.trim())prompts.person=`${product}의 ${text(c.facts?.usage)||c.point||c.description||'실제 사용'} 맥락에 맞는 매력적인 성인 인물 기준 시트. 인물 지시: ${c.person}. ${c.audience?`타깃 맥락: ${c.audience}. `:''}의상은 입력한 인물 지시와 사용 맥락에 맞추고, 지시하지 않은 성별을 임의로 확정하지 마. ${c.place?`장소 맥락: ${c.place}. `:''}${c.tone?`톤: ${c.tone}. `:''}동일 인물·동일 의상으로 3면도 형식: 머리 없는 전신 정면 / 전신 후면 / 얼굴. 각 칸이 잘리지 않도록 정리.`;
+    if(c.place?.trim())prompts.place=`${product} 광고의 장소 기준 사진. 장소 지시: ${c.place}. ${c.facts?.usage?`실제 사용동작: ${text(c.facts.usage)}. `:'제품을 실제로 사용하는 동선과 놓을 자리를 확보. '}${c.person?`인물 사용 맥락: ${c.person}. `:''}${c.tone?`톤: ${c.tone}. `:''}첨부 제품 원본의 색을 기준으로 조화를 맞추고 제품색 자체는 바꾸지 마. 9:16 세로 구도, 제품과 사용동작이 들어갈 영역 및 후반 카피를 위한 빈 영역을 안정적으로 확보. 입력하지 않은 장소·설비를 임의로 기본 설정하지 마.`;
+    let count=0;
+    for(const [kind,prompt] of Object.entries(prompts))if(!c.anchor_prompts[kind]?.trim()){c.anchor_prompts[kind]=prompt;count++;const input=$(`#anchor-${kind}`);if(input)input.value=prompt;}
+    if(count)changed();
+    const missing=[!c.person?.trim()?'인물':'',!c.place?.trim()?'장소':''].filter(Boolean);
+    notice(`${count}개 빈 앵커 요청 칸에 문장을 준비했습니다. 수정 후 각 생성 버튼을 눌러 주세요.${missing.length?` ${missing.join('·')} 입력 후 해당 앵커 문장을 준비할 수 있습니다.`:''}`);
+  }
+  function openSettings() {$('#bridge-url').value=state.endpoint;$('#bridge-key').value=state.key;if(!$('#settings').open)$('#settings').showModal();}
+  async function connect(event) {
+    event?.preventDefault();$('#connect').disabled=true;$('#connection-feedback').textContent='로컬 서버와 GPT 연결 상태를 확인 중…';
+    if(state.dirty.size){$('#connection-feedback').textContent='저장되지 않은 변경이 있습니다. 설정을 닫고 현재 브리지에 저장한 뒤 연결을 변경하세요.';$('#connect').disabled=false;return;}
+    try {
+      const url=new URL($('#bridge-url').value.trim());
+      if(!['http:','https:'].includes(url.protocol)||url.username||url.password||url.search||url.hash||!['','/'].includes(url.pathname))throw new Error('브리지의 기본 주소만 입력하세요. 예: http://127.0.0.1:8767');
+      state.connection++;state.connected=false;state.endpoint=url.origin;state.key=$('#bridge-key').value.trim();if(!state.key)throw new Error('연결 키를 입력하세요.');
+      const health=await api('/api/status');state.health=health;
+      let response=await api('/api/cases');if(!Array.isArray(response.cases))throw new Error('소재 목록 응답 형식을 확인하세요.');
+      const cases=response.cases.sort((a,b)=>(a.created_at||'').localeCompare(b.created_at||''));
+      while(cases.length<4)cases.push(await api('/api/cases',{title:`소재 ${cases.length+1}`}));
+      cleanBlobs();state.picked.clear();state.cases=cases.slice(0,4);state.index=0;state.connected=true;
+      let storageWarning='';try {if($('#remember').checked)localStorage.setItem('order-test-bridge',JSON.stringify({endpoint:state.endpoint,key:state.key}));else localStorage.removeItem('order-test-bridge');}catch{storageWarning=' 이 브라우저는 연결 설정 저장을 허용하지 않습니다.';}
+      renderCase();renderHealth();$('#settings').close();
+      notice(`이 PC의 로컬 서버에 연결했습니다. 클라우드 DB 연결 없음. ${health.gptConnected?'GPT 제작 세션 연결됨.':'GPT 브라우저 연결이 필요합니다. 서버 담당자가 GPT_SUB9340 브라우저 세션에 로그인한 뒤 연결 설정에서 다시 확인하세요.'}${health.codexAvailable?'':' Codex 실행 상태도 확인이 필요합니다.'}${storageWarning}`);
+    }catch(e){state.connected=false;renderHealth();updateControls();$('#connection-feedback').textContent=message(e);notice(message(e),true);}
+    finally {$('#connect').disabled=false;}
+  }
+  $('#settings-open').addEventListener('click',openSettings);$('#settings-close').addEventListener('click',()=>$('#settings').close());$('#connection-form').addEventListener('submit',connect);
+  $('#disconnect').addEventListener('click',()=>{
+    if(state.dirty.size){$('#connection-feedback').textContent='저장되지 않은 변경이 있습니다. 먼저 변경 저장을 눌러 주세요.';return;}
+    state.connection++;state.connected=false;state.key='';state.health={};cleanBlobs();try{localStorage.removeItem('order-test-bridge');}catch{}$('#bridge-key').value='';$('#remember').checked=false;renderHealth();updateControls();$('#connection-feedback').textContent='연결을 해제하고 저장 키를 삭제했습니다.';notice('연결이 해제됐습니다. 소재 데이터는 로컬 서버에 보관됩니다.');
+  });
+  $('#case-tabs').addEventListener('click',e=>{const button=e.target.closest('[data-case]');if(!button)return;state.index=Number(button.dataset.case);renderCase();});
+  $('#brief-fields').addEventListener('input',e=>{const key=e.target.dataset.field;if(!key)return;current()[key]=e.target.value;changed();});
+  $('#facts-fields').addEventListener('input',e=>{const key=e.target.dataset.fact;if(!key)return;current().facts||={};current().facts[key]=e.target.value;changed();});
+  $('#order-editor').addEventListener('input',e=>{current().order=e.target.value;changed();});
+  $('#anchors').addEventListener('input',e=>{const kind=e.target.dataset.anchor;if(!kind)return;current().anchor_prompts||={};current().anchor_prompts[kind]=e.target.value;changed();});
+  $('#save').addEventListener('click',async()=>{try{await save();notice('변경 내용을 저장했습니다.');}catch(e){notice(`저장 실패: ${message(e)}`,true);}});
+  $('#collect').addEventListener('click',()=>operation('정보 수집',async c=>{if(!safePublic(c.url))throw new Error('공개 판매페이지 URL을 입력하세요.');await task(c,'collect',{url:c.url});if(current().id===c.id)$('#research-panel').open=true;}));
+  $('#apply-facts').addEventListener('click',()=>{const c=current(), incoming=c.research?.facts||c.research;if(!incoming){notice('적용할 수집 사실이 없습니다.',true);return;}c.facts||={};let n=0;for(const [from,to] of [['title','product'],['description','description']]){const v=incoming[from]||c.research?.[from];if(!text(c[to]).trim()&&v){c[to]=text(v);const input=document.querySelector('[data-field="'+to+'"]');if(input)input.value=c[to];n++;}}for(const [key] of facts)if(!text(c.facts[key]).trim()&&incoming[key]!=null){c.facts[key]=text(incoming[key]);n++;}$$('[data-fact]').forEach(el=>el.value=text(c.facts[el.dataset.fact]));if(n)changed();notice(`${n}개의 빈 입력칸에 적용했습니다. 수집 근거를 검토하세요.`);});
+  $('#upload-button').addEventListener('click',()=>$('#upload-input').click());
+  $('#prepare-anchors').addEventListener('click',prepareAnchors);
+  $('#upload-input').addEventListener('change',e=>{const files=[...e.target.files];e.target.value='';if(!files.length)return;operation('사진 업로드',async c=>{let done=0;try{for(const file of files){if(!['image/png','image/jpeg','image/webp','image/gif'].includes(file.type))throw new Error(`${file.name}: PNG/JPEG/WebP/GIF 사진만 지원합니다.`);if(file.size>16*1024*1024)throw new Error(`${file.name}: 사진은 16MB 이하로 올려 주세요.`);const data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=()=>reject(new Error('사진 읽기 실패'));reader.readAsDataURL(file);});await api(`/api/cases/${c.id}/upload`,{filename:file.name,data});done++;}}finally{await refresh(c);if(done)notice(`${done}장 업로드 완료. 역할을 지정하세요.`);}});});
+  $('#assets').addEventListener('change',e=>{if(e.target.dataset.role){const id=e.target.dataset.role,kind=e.target.value||null;operation('사진 역할 지정',async c=>{await api(`/api/cases/${c.id}/assign`,{id,kind});if(kind)selectedAssets(c)[kind]=id;await refresh(c);});}if(e.target.dataset.pick){selectedAssets()[e.target.dataset.kind]=e.target.dataset.pick;notice('GPT 전달 사진을 선택했습니다. 이 선택은 현재 브라우저 세션에 유지됩니다.');}});
+  $('#anchors').addEventListener('click',e=>{const button=e.target.closest('[data-generate]');if(!button)return;const kind=button.dataset.generate;operation('GPT 앵커 생성',async c=>{if(!state.health.gptConnected)throw new Error('GPT 브라우저 연결이 필요합니다.');const prompt=c.anchor_prompts?.[kind]?.trim();if(!prompt)throw new Error(`${kinds[kind]} 앵커 요청 문장을 입력하세요.`);const picks=selectedAssets(c);const attachment_ids=kind==='product'?(picks.product?[picks.product]:[]):Object.values(picks);if(kind==='product'&&!attachment_ids.length)throw new Error('제품 원본사진을 업로드하고 제품 역할로 지정·선택하세요.');const result=await task(c,'anchors',{kind,prompt,attachment_ids});if(result?.asset){selectedAssets(c)[kind]=result.asset.id;if(current().id===c.id)renderAssets();}});});
+  $('#modes').addEventListener('click',e=>{const button=e.target.closest('[data-mode]');if(!button||button.disabled)return;current().selection_mode=button.dataset.mode;if(button.dataset.mode==='random')shuffle();rankHooks();renderHooks();changed();});
+  $('#hook-search').addEventListener('input',()=>{state.page=40;renderHooks();});$('#family-filter').addEventListener('change',()=>{state.page=40;renderHooks();});$('#category-filter').addEventListener('change',()=>{state.page=40;renderHooks();});
+  $('#refresh-hooks').addEventListener('click',()=>{rankHooks();if(current().selection_mode==='random')shuffle();renderHooks();});$('#more-hooks').addEventListener('click',()=>{state.page+=40;renderHooks();});
+  $('#hooks').addEventListener('click',e=>{const button=e.target.closest('[data-select-hook]');if(!button||button.disabled)return;current().selected_hook=button.dataset.selectHook;renderHooks();changed();});
+  $('#hooks').addEventListener('toggle',e=>{if(e.target.open)e.target.querySelectorAll('video[data-clip]').forEach(v=>{if(!v.src)v.src=v.dataset.clip;});},true);
+  $('#build-order').addEventListener('click',()=>{if(current().order?.trim())$('#replace-dialog').showModal();else try{composeOrder();}catch(e){notice(message(e),true);}});
+  $('#replace-dialog').addEventListener('close',()=>{if($('#replace-dialog').returnValue==='replace')try{composeOrder();}catch(e){notice(message(e),true);}});
+  $('#copy-order').addEventListener('click',()=>copy(current().order));
+  $('#draft').addEventListener('click',()=>operation('GPT 초안 요청',async c=>{if(!state.health.codexAvailable)throw new Error('프롬프트 초안용 Codex CLI 연결이 필요합니다.');if(!c.order?.trim())throw new Error('제작 오더를 먼저 작성하세요.');const picks=selectedAssets(c);const ids=Object.keys(kinds).map(k=>picks[k]);if(ids.some(id=>!id)||new Set(ids).size!==3)throw new Error('제품·인물·장소 사진을 한 장씩 지정하고 전달 선택하세요.');await task(c,'draft',{order:c.order,asset_ids:ids,model:'gpt-6-astra'});}));
+  $('#drafts').addEventListener('click',e=>{const b=e.target.closest('[data-copy-draft]');if(b)copy(text(current().drafts[Number(b.dataset.copyDraft)]?.prompt));});
+  window.addEventListener('beforeunload',e=>{if(state.dirty.size||state.busy.size){e.preventDefault();e.returnValue='';}});
+  for(const [selector,key] of [['#family-filter','family'],['#category-filter','categories']]) {
+    const values=[...new Set(hooks.flatMap(h=>list(h[key])))].filter(v=>typeof v==='string').sort((a,b)=>a.localeCompare(b,'ko'));
+    $(selector).insertAdjacentHTML('beforeend',values.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join(''));
+  }
+  let stored;
+  try{stored=JSON.parse(localStorage.getItem('order-test-bridge')||'null');}catch{}
+  const fragment=new URLSearchParams(location.hash.slice(1));
+  if(fragment.has('bridge')||fragment.has('key')) {state.endpoint=fragment.get('bridge')||state.endpoint;state.key=fragment.get('key')||'';try{history.replaceState(null,'',location.pathname+location.search);}catch{}}
+  else if(stored?.endpoint&&stored?.key){state.endpoint=stored.endpoint;state.key=stored.key;$('#remember').checked=true;}
+  renderCase();renderHealth();openSettings();if(state.key)connect();
+})();
