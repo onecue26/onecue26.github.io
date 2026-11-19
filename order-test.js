@@ -307,7 +307,7 @@
   const fragment=new URLSearchParams(location.hash.slice(1));
   if(fragment.has('bridge')||fragment.has('key')) {state.endpoint=fragment.get('bridge')||state.endpoint;state.key=fragment.get('key')||'';try{history.replaceState(null,'',location.pathname+location.search);}catch{}}
   else if(stored?.endpoint&&stored?.key){state.endpoint=stored.endpoint;state.key=stored.key;$('#remember').checked=true;}
-  renderCase();renderHealth();openSettings();
+  renderCase();renderHealth();$('#bridge-url').value=state.endpoint;$('#bridge-key').value=state.key;
   async function reconnectIfAllowed() {
     if(!state.key)return;
     let permission='prompt';
