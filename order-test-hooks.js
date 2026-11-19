@@ -1,3 +1,4 @@
+window.ORDER_AD_AUDIT = {"checkedAt": "2026-11-19", "policy": "브랜드 공식·제작사/대행사 의뢰·공식 광고상 출품 자료로 광고 정체성 확인. 브랜드명/영상존재/효과관찰만으로 승인하지 않음. 동일 작품 연결 보류는 추천에서 제외. 자체 제작 사례는 대표 탭에 별도 보존.", "counts": {"originalCards": 50, "eligibleCards": 17, "excludedCards": 33, "sourceCount": 52, "sourceClasses": {"own_reference": 1, "confirmed_ad": 20, "unverified": 30, "other_promotional": 1}, "usableSources": 19}, "sources": [{"sourceUrl": "https://onecue26.github.io/works-media/onecue-fanta.mp4", "classification": "own_reference", "reason_ko": "Dan이 지정한 자체 제작 광고 참고입니다. 외부 브랜드의 공식 의뢰·집행 확인 자료와 구분하여 대표 틀 탭에만 보존합니다.", "verificationUrls": [], "advertiser": "", "creator": "", "evidenceQuote": "", "adIdentityVerified": false, "effectReplayChecked": false, "externalCommissionVerified": false, "title": "환타 회오리"}, {"sourceUrl": "https://www.youtube.com/watch?v=7j6vkkBeYP0", "classification": "confirmed_ad", "reason_ko": "후속 공개 요청에서 YouTube oEmbed와 watch 페이지 모두 HTTP 200을 받았다. 정확한 ID 7j6vkkBeYP0의 oEmbed는 기존 제목, author_name=애경산업, author_url=@aekyung_Industrial을 반환한다. watch 원문은 채널 ID UCHf-1mEV4ZMke3bjRMw5fpQ 및 제품 구매 유도 설명을 담고, 공개 채널 설명은 애경산업 공식 채널임을 명시한다. 브랜드 공식 제품 판촉 영상으로 확인하며 별도 외부 제작 의뢰 관계는 미확인이다. 앞선 웹 도구 접근 실패를 근거로 했던 미확인 판정을 수정한다. 효과 일치·시작 시점·영상 전체는 재검증하지 않았다.", "verificationUrls": ["https://www.youtube.com/watch?v=7j6vkkBeYP0", "https://www.youtube.com/oembed?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D7j6vkkBeYP0&format=json", "https://www.youtube.com/@aekyung_Industrial", "https://www.youtube.com/channel/UCHf-1mEV4ZMke3bjRMw5fpQ"], "advertiser": "애경산업 / 스웨이", "creator": "애경산업 (공식 게시자; 별도 제작사 미확인)", "evidenceQuote": "이제는 액체 캡슐 세제를 써 보세요!", "title": "[애경산업/스웨이] 잔여 세제 없는 스웨이 식기세척기 액체 캡슐 세제💛", "effectReplayChecked": false}, {"sourceUrl": "https://www.instagram.com/reel/DCW_iVXJDp0/", "classification": "unverified", "reason_ko": "Instagram 원문 접근 실패 및 정확한 reel ID 검색 무결과. 내부 Glade 제목이나 FOOH 모음집의 브랜드 표기만으로 정식 의뢰/캠페인으로 올리지 않았다. 효과 일치·시작 시점·영상 전체는 이번 감사에서 재검증하지 않았다.", "verificationUrls": ["https://www.instagram.com/reel/DCW_iVXJDp0/"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "Glade · 방향제", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/4403-adidas-giant-shoe-skateboards-city-fooh-ad", "classification": "unverified", "reason_ko": "FOOH의 Adidas·BLUE Ltd./Byron utto 크레딧과 작품 설명은 확인했다. 연결 Instagram 원문은 열리지 않았고, 해당 대형 신발 영상의 브랜드 발주를 밝히는 1차 제작 문서를 확인하지 못했다. 브랜드 표기나 수상 후보 선정만으로 의뢰 광고로 확정하지 않는다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/4403-adidas-giant-shoe-skateboards-city-fooh-ad"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "Adidas Giant Shoe Skateboards Through City", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/4822-young-emperors-giant-book-drops-at-perrotin-store-fooh-ad", "classification": "unverified", "reason_ko": "Young Emperors 공식 채널의 동일 날짜·시간 Perrotin 서명회 홍보 제목과 Perrotin의 서명회 협업 페이지를 확인했다. 실제 행사 홍보 맥락은 뒷받침되지만 이 FOOH 작품의 별도 발주·브랜드 캠페인 제작 관계까지는 확인되지 않았다. 저자 자체 홍보와 발주 광고를 합치지 않고 보류한다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/4822-young-emperors-giant-book-drops-at-perrotin-store-fooh-ad", "https://www.youtube.com/watch?v=8vmiGb6aVTI", "https://storeparis.perrotin.com/blogs/perrotin-store-paris/perrotin-store-by-young-emperors"], "advertiser": null, "creator": "Young Emperors (공식 게시 주체; 별도 영상 제작진 미확인)", "evidenceQuote": "Join us at Perrotin for the signing of our book", "title": "Young Emperors · The Alphabet of Influence", "effectReplayChecked": false}, {"sourceUrl": "https://fivestonestudios.com/work/litter-robot-lr4", "classification": "confirmed_ad", "reason_ko": "제작사 Fivestone Studios의 해당 프로젝트 원문에서 Whisker와의 협업 및 Litter Robot 4 제품 설명용 CG 제작을 명시한다. 제품 설계자·엔지니어 협업과 소비자 대상 제품 설명 목적도 기재되어 브랜드 의뢰 제품 홍보물로 판정한다. 유료 매체 집행 여부까지 확인한 것은 아니다. 광고 정체성만 판정했으며 HK004의 시점 이동 효과나 발췌본 동일성은 재검수하지 않았다.", "verificationUrls": ["https://fivestonestudios.com/work/litter-robot-lr4"], "advertiser": "Whisker", "creator": "Fivestone Studios", "evidenceQuote": "partner with Whisker to produce CG elements for an explainer", "adIdentityVerified": true, "effectReplayChecked": false, "title": "Whisker — Litter-Robot 4 CG Explainer"}, {"sourceUrl": "https://fooh.com/library/4942-salomon-giant-shoe-glides-through-city-fooh-ad", "classification": "unverified", "reason_ko": "FOOH에는 Salomon Minami Aoyama 개점 홍보로 설명돼 있다. 연결 Instagram 원문 접근 실패 후에도 이 거대 신발 영상 자체의 공식 게시 주체·제작 의뢰를 검증할 1차 근거를 확보하지 못했다. 매장 개점 사실만으로 이 영상의 광고성을 확정하지 않는다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/4942-salomon-giant-shoe-glides-through-city-fooh-ad"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "Salomon — 도심을 미끄러지는 신발", "effectReplayChecked": false}, {"sourceUrl": "https://www.youtube.com/watch?v=U7IDt1g-DcE", "classification": "confirmed_ad", "reason_ko": "동일 ID 원문의 검색 인덱스에서 에이전시 GIGIL TV 게시자와 Danes Cheese 광고 설명 및 #GIGILWork 표기를 확인했다. 직접 플레이어 가져오기는 실패했고 해당 원문의 검색 노출 설명을 근거로 판정했다. 효과 일치·시작 시점·영상 전체는 이번 감사에서 재검증하지 않았다.", "verificationUrls": ["https://www.youtube.com/watch?v=U7IDt1g-DcE"], "advertiser": "Danes Cheese", "creator": "GIGIL", "evidenceQuote": "#GIGILWork", "title": "'Origin' | GIGIL for Danes Cheese", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/3988-stabilo-giant-highlighter-red-flower-trail-fooh-ad", "classification": "unverified", "reason_ko": "FOOH의 Wildflower 제품 설명과 브랜드의 Wildflower 출시 보도자료는 확인했다. 제품 출시 보도자료는 이 주차장 꽃길 영상의 의뢰 또는 공식 집행 증거가 아니다. 원본 Instagram은 접근하지 못해 해당 작품은 미확인으로 남긴다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/3988-stabilo-giant-highlighter-red-flower-trail-fooh-ad", "https://cdn-live.be-stabilo.com/media/d8/b4/13/1753879789/PR_STABILO_BOSS_ORIGINAL_NatureCOLORS_Wildflower_EN.pdf?ts=1758547923"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "STABILO — Red Highlighter Flower Trail", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/5183-amazon-giant-items-in-the-city-fooh-ad", "classification": "unverified", "reason_ko": "FOOH는 Prime Day 6월 23~26일 홍보로 설명하지만 연결 Instagram 게시물의 계정·브랜드 승인 관계를 확인하지 못했다. 아마존 로고와 날짜가 있다는 집계 설명만으로 해당 영상의 발주를 확정하지 않는다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/5183-amazon-giant-items-in-the-city-fooh-ad"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "Amazon Giant Items in the City", "effectReplayChecked": false}, {"sourceUrl": "https://www.youtube.com/watch?v=aO36w66KoPQ", "classification": "unverified", "reason_ko": "원문 접근 실패 및 정확한 ID의 게시자·캠페인 연결 미확인. 오뚜기 공식 보도자료는 여학생·남학생·외국인 TVCF 3편을 설명하므로 카탈로그 포장지 공개 영상과 동일 작품이라고 단정할 수 없다. 효과 일치·시작 시점·영상 전체는 이번 감사에서 재검증하지 않았다.", "verificationUrls": ["https://www.youtube.com/watch?v=aO36w66KoPQ", "https://www.otoki.com/pr/news-detail?idx=1068"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "오뚜기 한강라면", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/4836-estee-lauder-giant-foundation-domino-fooh-ad", "classification": "unverified", "reason_ko": "FOOH는 One Agency Media의 Double Wear 파운데이션 도미노 영상으로 소개한다. 제작사 관계자의 공개 LinkedIn에는 Estée Lauder와의 Double Wear Concealer 의뢰가 나오지만 제품과 장면이 다른 작업이다. 그 협업 이력을 이 파운데이션 도미노 작품의 발주 증거로 전용하지 않았다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/4836-estee-lauder-giant-foundation-domino-fooh-ad", "https://uk.linkedin.com/in/georgetrotman"], "advertiser": null, "creator": null, "evidenceQuote": "Estee Lauder wanted to showcase their Double Wear Concealer", "title": "Estée Lauder Giant Foundation Domino", "effectReplayChecked": false}, {"sourceUrl": "https://www.youtube.com/watch?v=cDcMJPNH7hk", "classification": "confirmed_ad", "reason_ko": "동일 ID 검색 인덱스에서 Verified SKITTLES 채널과 Gummies Fuego 판촉 설명을 확인했고 Mars가 제공한 보도자료가 FUEG-HOLE creative campaign을 명시한다. 직접 플레이어는 접근 실패. 효과 일치·시작 시점·영상 전체는 이번 감사에서 재검증하지 않았다.", "verificationUrls": ["https://www.youtube.com/watch?v=cDcMJPNH7hk", "https://www.prnewswire.com/news-releases/skittles-teams-up-with-mr-fantasy-to-help-fans-track-down-the-real-life-fueg-hole-that-sparked-skittles-gummies-fuego-302735862.html", "https://termsandconditions.mars.com/articles/2026-skittles-fueg-hole-promotion-official-rules"], "advertiser": "SKITTLES / Mars", "creator": null, "evidenceQuote": "First introduced in SKITTLES' latest creative campaign", "title": "Stare into the Fueg-hole — Skittles Gummies Fuego", "effectReplayChecked": false}, {"sourceUrl": "https://www.instagram.com/reel/C6RRUZJoYJ7/", "classification": "unverified", "reason_ko": "Instagram 원문 접근 실패 및 정확한 ID 검색 무결과. 내부 Sephora/Milk 제목과 관찰만으로 브랜드 의뢰를 확인할 수 없어 광고주·제작자를 추정하지 않았다. 효과 일치·시작 시점·영상 전체는 이번 감사에서 재검증하지 않았다.", "verificationUrls": ["https://www.instagram.com/reel/C6RRUZJoYJ7/"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "Sephora Makeup Tint Filling Store in NYC", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/4573-lego-blocks-cover-building-facade-fooh-ad", "classification": "unverified", "reason_ko": "FOOH의 LEGO 로고·2026년 신년 메시지 설명과 Instagram 원본 링크는 확인했다. 원문은 접근 실패했으며 이 마드리드 건물 변환 영상이 LEGO가 발주하거나 공식 승인한 제작물이라는 1차 기록을 확보하지 못했다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/4573-lego-blocks-cover-building-facade-fooh-ad"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "LEGO Blocks Cover Building Facade", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/4899-pronto-shoes-giant-shoe-launches-from-egypt-to-dubai-fooh-ad", "classification": "unverified", "reason_ko": "FOOH에는 Pronto Shoes/LoPronto 및 Mosab Sharef 크레딧과 두바이 확장 홍보 설명이 있다. 해당 작품의 원본 Instagram은 열리지 않았고, 제작자 또는 브랜드의 발주·캠페인 설명은 확인되지 않았다. 집계 크레딧은 발주 확정 근거로 사용하지 않았다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/4899-pronto-shoes-giant-shoe-launches-from-egypt-to-dubai-fooh-ad"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "Pronto — 이집트의 신발 발사", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/4604-adidas-giant-tennis-ball-airlifts-court-fooh-ad", "classification": "unverified", "reason_ko": "FOOH는 Adidas 로고가 있는 멜버른 공중 테니스 코트를 광고로 소개한다. 연결 원본을 읽지 못했고 이 영상 자체의 브랜드 의뢰·공식 캠페인 편입을 밝히는 1차 자료는 확인하지 못했다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/4604-adidas-giant-tennis-ball-airlifts-court-fooh-ad"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "adidas · 하늘을 나는 테니스 코트", "effectReplayChecked": false}, {"sourceUrl": "https://www.youtube.com/watch?v=5syJjBQ_k6o", "classification": "confirmed_ad", "reason_ko": "동일 ID를 Betty White Snickers 광고로 연결하는 공개 인용과 Mars Chocolate North America의 2010 Super Bowl 광고 캠페인 보도자료를 교차 확인했다. 원본 YouTube는 접근 실패. 효과 일치·시작 시점·영상 전체는 이번 감사에서 재검증하지 않았다.", "verificationUrls": ["https://www.youtube.com/watch?v=5syJjBQ_k6o", "https://retailwire.com/super-bowl-commercials/", "https://www.prnewswire.com/news-releases/snickersr-kicks-off-new-advertising-campaign-at-super-bowl-xliv-82931857.html"], "advertiser": "SNICKERS / Mars Chocolate North America", "creator": null, "evidenceQuote": "Betty White and Abe Vigoda Join SNICKERS Team", "title": "Snickers — Game (Betty White)", "effectReplayChecked": false}, {"sourceUrl": "https://www.youtube.com/watch?v=qIVDxL2lgN4", "classification": "confirmed_ad", "reason_ko": "동일 ID의 Mr Bean Kung Fu 광고 크레딧과 참여 크리에이터 Arthur Tsang의 프로젝트 기록을 교차 확인했다. 참여자는 Mars China/UK 공동 투자와 AMV BBDO 공동 제작을 명시한다. 원본 플레이어는 접근 실패. 효과 일치·시작 시점·영상 전체는 이번 감사에서 재검증하지 않았다.", "verificationUrls": ["https://www.youtube.com/watch?v=qIVDxL2lgN4", "https://www.adstasher.com/2014/10/snickers-mr-bean-tv-advert-kung-fu.html", "https://www.afatsang.com/snickers-house-of-flying-bean"], "advertiser": "SNICKERS / Mars China / Mars UK", "creator": "AMV BBDO / Arthur Tsang (참여자 기록)", "evidenceQuote": "a joint investment between Mars China and Mars UK", "title": "Snickers Mr Bean Kung Fu", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/2493-dreame-vacuum-cleaner-sweeps-from-billboard-fooh-ad", "classification": "unverified", "reason_ko": "FOOH는 Warsaw의 Z30 AquaCycle 출시 영상으로 설명한다. FREMDWORLD 공식 사이트에서 Dreame 고객 관계는 확인되지만 정확한 작품은 특정되지 않는다. 별도 FOOH 항목 4218의 유사 영상 크레딧도 이 URL 2493과 동일한 발주물이라는 확증이 아니므로 보류했다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/2493-dreame-vacuum-cleaner-sweeps-from-billboard-fooh-ad", "https://fremdworld.com/", "https://fooh.com/library/4218-dreame-vacuum-billboard-comes-alive-fooh-ad"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "Dreame Z30 AquaCycle — Billboard Takeover", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/4442-esr-giant-phone-case-falls-ground-fooh-ad", "classification": "unverified", "reason_ko": "FOOH 자체가 제작자를 Who we think created this로 추정 표기한다. 연결 Instagram 원문을 확인하지 못했고, 제작자·브랜드 양측의 해당 작품 발주 확인도 확보하지 못했다. 제품 보호를 묘사한 CGI라는 점과 실제 발주 광고 여부를 구분한다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/4442-esr-giant-phone-case-falls-ground-fooh-ad"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "ESR — 케이스가 파사드에서 돌출", "effectReplayChecked": false}, {"sourceUrl": "https://www.youtube.com/watch?v=ikhlTRhu3IU", "classification": "confirmed_ad", "reason_ko": "동일 ID의 원문 검색 인덱스에서 Verified Sony Corporation - Official 게시자와 제품 홍보 설명을 확인했다. 직접 페이지에서도 같은 제목이 확인되나 본문은 제한됐다. 효과 일치·시작 시점·영상 전체는 이번 감사에서 재검증하지 않았다.", "verificationUrls": ["https://www.youtube.com/watch?v=ikhlTRhu3IU"], "advertiser": "Sony", "creator": "Sony Corporation - Official (게시자; 제작사 미확인)", "evidenceQuote": "Sony Noise Cancelling Headphones WH-1000XM6 Product Video | Sony Official", "title": "Sony WH-1000XM6 Product Video", "effectReplayChecked": false}, {"sourceUrl": "https://player.vimeo.com/video/176625804", "classification": "confirmed_ad", "reason_ko": "공개 Vimeo oEmbed는 video_id=176625804, title=CITIZEN Eco-Drive One, author_name=Analog, author_url=vimeo.com/analogstudio, duration=60을 반환했다. 일반 GET으로 읽은 Analog 공식 Citizen Ultra Thin/Eco-Drive One 페이지는 같은 Vimeo ID 176625804를 iframe에 직접 삽입한다. HTML 엔티티를 해석한 본문은 Ogilvy & Mather Tokyo가 60초 Citizen 상업광고를 의뢰했다고 명시한다. 따라서 정확한 Vimeo ID와 실제 의뢰를 연결했다. 앞선 웹 도구 차단은 원본 부재나 비광고의 증거가 아니었다. 효과 일치·시작 시점·영상 전체는 재검증하지 않았다.", "verificationUrls": ["https://player.vimeo.com/video/176625804", "https://vimeo.com/176625804", "https://vimeo.com/api/oembed.json?url=https%3A%2F%2Fvimeo.com%2F176625804", "https://analogstudio.co.uk/work/citizen-ultra"], "advertiser": "CITIZEN", "creator": "Analog (감독·VFX) / Ogilvy & Mather Tokyo (에이전시)", "evidenceQuote": "We were commissioned by Ogilvy & Mather Tokyo", "title": "Citizen Eco-Drive One", "effectReplayChecked": false}, {"sourceUrl": "https://www.instagram.com/reel/DTUtlnHiC-v/", "classification": "unverified", "reason_ko": "원문 접근 실패 및 정확한 ID 검색 무결과. 유사한 Product Assembly 튜토리얼은 다른 reel ID이므로 동일 작품이라고 볼 수 없다. 브랜드 판촉 의뢰 또는 spec/demo인지 단정하지 않았다. 효과 일치·시작 시점·영상 전체는 이번 감사에서 재검증하지 않았다.", "verificationUrls": ["https://www.instagram.com/reel/DTUtlnHiC-v/"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "The Product Assembly Effect", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/4122-renova-red-cloth-glides-seoul-fooh-ad", "classification": "confirmed_ad", "reason_ko": "캠페인 집행 파트너 Vistar Media의 공식 사례가 Renova와 SuperHeroes/JIMMY의 글로벌 홍보 프로젝트 및 참여 작가 camylbuena를 명시한다. 참여 대행사가 게재한 LBB 발표는 서울을 포함한 제작 도시와 브랜드 프로젝트 의뢰를 추가로 명시한다. 이 FOOH의 서울 Renova 작업을 해당 브랜드 캠페인으로 확인하며 개별 컷의 움직임은 별도 판정하지 않았다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/4122-renova-red-cloth-glides-seoul-fooh-ad", "https://www.vistarmedia.com/blog/social-media-outdoors-renova", "https://lbbonline.com/news/superheroes-brings-renovas-distinctive-toilet-paper-to-life-with-bold-and-playful-global-campaign?edition=germany"], "advertiser": "Renova", "creator": "SuperHeroes / JIMMY; camylbuena (FOOH 개별 작가 표기, 캠페인 참여는 파트너 자료로 확인)", "evidenceQuote": "To promote Renova globally, SuperHeroes teamed up with their digital street art studio JIMMY", "title": "Renova Giant Red Cloth Glides Through Seoul", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/2082-kappa-sport-white-fabric-flies-above-the-city-fooh-ad", "classification": "unverified", "reason_ko": "FOOH는 ACF Fiorentina Away Kombat Pro 2025 홍보라고 설명한다. 브랜드·클럽의 유니폼 출시 맥락과 이 흰 천 CGI 영상의 제작 발주는 별개다. 동일 영상의 원본 Instagram과 1차 제작 사례를 검증하지 못해 광고 확정은 보류했다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/2082-kappa-sport-white-fabric-flies-above-the-city-fooh-ad"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "Kappa Sport White Fabric Flies Above the City", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/5132-celsius-can-lights-up-stadium-field-fooh-ad", "classification": "unverified", "reason_ko": "Celsius 공식 채널의 Electric Vibe Commercial과 캠페인 제작 크레딧 자료는 존재한다. 그러나 경기장에 캔이 내려오는 이 FOOH URL과 공식 광고가 동일 편집본이라는 연결은 확인되지 않았다. 같은 제품명만으로 해당 집계 영상을 의뢰 광고로 승격하지 않았다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/5132-celsius-can-lights-up-stadium-field-fooh-ad", "https://www.youtube.com/watch?v=UrqAObrvOiA", "https://lbbonline.com/work/172123?edition=canada"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "Celsius Can Lights Up Stadium Field", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/462-acne-studios-scarf-turns-pink-ribbon-seoul-fooh-ad", "classification": "unverified", "reason_ko": "FOOH에는 Acne Studios 청담점의 홀리데이 스카프 홍보로 기록돼 있다. 원본 Instagram은 접근 실패했고 이 서울 스카프 작품의 브랜드 발주를 확인할 독립적인 1차 제작 문서를 찾지 못했다. 실제 브랜드 상품이 등장한다는 이유만으로 확정하지 않는다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/462-acne-studios-scarf-turns-pink-ribbon-seoul-fooh-ad"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "Acne Studios Pink Scarf Floating Ribbon in Seoul", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/178-roemerquelle-waterfalls-building-fooh-ad", "classification": "unverified", "reason_ko": "FOOH가 Römerquelle Prickelnd 광고로 소개하는 내용은 확인했으나 연결 Instagram 원문은 열리지 않았다. 해당 건물 폭포 영상의 공식 브랜드 게시나 제작 의뢰를 밝히는 1차 자료를 확보하지 못했다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/178-roemerquelle-waterfalls-building-fooh-ad"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "Römerquelle Emerges in Waterfalls at a Building", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/894-esika-perfume-and-pink-petals-inside-the-train-fooh-ad", "classification": "unverified", "reason_ko": "FOOH 공개 색인에서 Medellín 열차·Dream 향수 출시 홍보 설명을 확인했다. 페이지 직접 열기는 시간 초과였고 이 열차 영상의 브랜드 의뢰·제작자 공식 사례를 확인하지 못했다. 색인의 광고 호칭을 발주 증거로 취급하지 않는다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/894-esika-perfume-and-pink-petals-inside-the-train-fooh-ad"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "Esika Perfume and Pink Petals Inside the Train", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/4891-kaufland-apple-turns-into-orange-in-air-fooh-ad", "classification": "unverified", "reason_ko": "FOOH에 Kaufland의 RICHTIG FRISCH 메시지가 기록돼 있으나 제작자는 추정 표기다. 원본 Instagram에 접근하지 못했고 m_editat의 해당 영상 브랜드 발주를 확인할 1차 자료를 확보하지 못했다. 로고가 있는 영상과 확정 광고를 분리한다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/4891-kaufland-apple-turns-into-orange-in-air-fooh-ad"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "Kaufland · 사과에서 오렌지로", "effectReplayChecked": false}, {"sourceUrl": "https://www.collider.com.au/studio/telstra-wherever-you-go-popup", "classification": "other_promotional", "reason_ko": "제작사 Collider 원문이 Bear Meets Eagle On Fire의 의뢰 및 Telstra 브랜드 방향을 사내 직원에게 홍보하는 목적을 명시한다. 의뢰받은 브랜드 홍보물임은 확인되지만 직원 전용 내부 브랜드 필름이므로 other_promotional로 분리하며 기본 소비자 광고 분류에 포함하지 않는다. 광고·홍보물 정체성 판단과 영상 효과 일치는 별개이고 영상 재생·효과 재검수는 하지 않았다.", "verificationUrls": ["https://www.collider.com.au/studio/telstra-wherever-you-go-popup"], "advertiser": "Telstra", "creator": "Collider Studio; agency: Bear Meets Eagle On Fire", "evidenceQuote": "We were commissioned by agency Bear Meets Eagle On Fire", "adIdentityVerified": false, "effectReplayChecked": false, "promotionalCommissionVerified": true, "audienceScope": "internal_employees_only", "title": "Telstra Wherever You Go"}, {"sourceUrl": "https://www.youtube.com/watch?v=FOxaG6eTA5o", "classification": "unverified", "reason_ko": "Aardman 공식 Commercials에 Dacia Simple is Smart가 존재하고 공개 보도가 종이 팝업 도시 광고를 설명한다. 그러나 대상 YouTube ID는 접근 실패·정확한 ID 검색 무결과라 공식 프로젝트의 동일 업로드인지 연결하지 못했다. 캠페인 존재와 대상 URL의 동일성을 구별해 보류했다. 효과 일치·시작 시점·영상 전체는 이번 감사에서 재검증하지 않았다.", "verificationUrls": ["https://www.youtube.com/watch?v=FOxaG6eTA5o", "https://www.aardman.com/short-form-commercials/dacia-simple-is-smart/", "https://www.adstasher.com/2017/10/take-drive-through-paper-pop-up-city-in.html"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "Dacia paper pop-up city", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/2468-crocs-gift-box-unfolds-at-plaza-in-korea-fooh-ad", "classification": "confirmed_ad", "reason_ko": "WE-AR 공식 포트폴리오가 동일 광화문 대형 선물 상자 프로젝트를 Crocs를 위해 제작했다고 명시하고, 명절 프로모션 brief와 제작 목적을 설명한다. FOOH의 작품명·도시·언박싱 소재가 이 고객 사례와 일치하므로 의뢰된 브랜드 홍보로 확인했다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/2468-crocs-gift-box-unfolds-at-plaza-in-korea-fooh-ad", "https://we-ar.kr/portfolio/crocs"], "advertiser": "Crocs", "creator": "WE-AR (아트 GW.Park / 기획 YH.Jung)", "evidenceQuote": "Giant Crocs Unboxing는 Crocs를 위해 제작한 프로젝트입니다.", "title": "Crocs Gift Box Unfolds at Plaza in Korea", "effectReplayChecked": false}, {"sourceUrl": "https://www.youtube.com/watch?v=6hvJHN_Djdo", "classification": "unverified", "reason_ko": "공개 포럼은 동일 ID를 Platinum Egoiste 광고로 부르지만 브랜드·에이전시·제작사 일차 자료로 의뢰를 연결하지 못했다. CHANEL 제품 페이지는 제품 존재만 확인하며 영상 의뢰 증거는 아니다. 원본 접근 실패. 효과 일치·시작 시점·영상 전체는 이번 감사에서 재검증하지 않았다.", "verificationUrls": ["https://www.youtube.com/watch?v=6hvJHN_Djdo", "https://basenotes.com/threads/chanel-egoiste-tv-spot.202951/", "https://www.chanel.com/us/fragrance/platinum-egoiste/c/7x2x26/"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "Chanel Platinum Égoïste", "effectReplayChecked": false}, {"sourceUrl": "https://www.youtube.com/watch?v=Hd_2Y29_FLU", "classification": "confirmed_ad", "reason_ko": "동일 ID를 Disney Side 영상으로 연결하는 공개 인용과 제작 에이전시 Grand Visual의 의뢰 brief 및 social video 납품 목적을 교차 확인했다. 과거 Disney 블로그 주소는 홈페이지로 이동해 본문 근거로 쓰지 않았다. 효과 일치·시작 시점·영상 전체는 이번 감사에서 재검증하지 않았다.", "verificationUrls": ["https://www.youtube.com/watch?v=Hd_2Y29_FLU", "https://grandvisual.com/work/my-disney-side/", "https://kerinmarketing.com/2015/12/04/most-shared-ads-of-2015/"], "advertiser": "Disney Parks", "creator": "Grand Visual", "evidenceQuote": "Disney wanted to create a digital OOH experience", "title": "Disney Parks Disney Side Shadows", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/3990-stabilo-giant-highlighter-stabilo-hq-fooh-ad", "classification": "unverified", "reason_ko": "FOOH의 본사 앞 Wildflower 영상 설명과 STABILO 공식 출시 보도자료는 확인했다. 공식 신제품 출시가 이 특정 FOOH 작품의 의뢰를 입증하지는 않는다. 해당 작품의 브랜드 공식 게시나 제작 의뢰 원문을 확인하지 못해 보류했다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/3990-stabilo-giant-highlighter-stabilo-hq-fooh-ad", "https://www.fooh.com/library/3990-stabilo-giant-highlighter-stabilo-hq-fooh-ad", "https://cdn-live.be-stabilo.com/media/d8/b4/13/1753879789/PR_STABILO_BOSS_ORIGINAL_NatureCOLORS_Wildflower_EN.pdf?ts=1758547923"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "STABILO Giant Highlighter at HQ", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/238-honor-smartphone-bridge-design-fooh-ad", "classification": "unverified", "reason_ko": "FOOH 설명 및 공개 보도에서 HONOR/Porsche Design 제품 출시 맥락은 확인되지만, 원본 브랜드 게시와 제작사의 해당 Yangpu Bridge 작품 발주를 직접 검증하지 못했다. 2차 보도만으로 commissioned 기준을 충족한 것으로 처리하지 않았다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/238-honor-smartphone-bridge-design-fooh-ad"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "HONOR Foldable Phone Over Yangpu Bridge", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/4835-lust-floating-black-liquid-transforms-into-shoe-fooh-ad", "classification": "unverified", "reason_ko": "FOOH는 Darinka Rivas가 등장하는 Lust/Nike Air Liquid Max 드롭 홍보로 소개한다. 원본 Instagram은 열리지 않았고 Lust·Nike 또는 제작사의 해당 영상 제작 의뢰를 확인할 1차 문서는 확보하지 못했다. 판매 제품을 묘사한다는 사실만으로 광고를 확정하지 않는다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/4835-lust-floating-black-liquid-transforms-into-shoe-fooh-ad"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "Lust × Nike · Air Liquid Max", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/2095-lego-astronaut-grabbed-by-hand-from-billboard-fooh-ad", "classification": "unverified", "reason_ko": "FOOH는 LEGO 어린이날 프로모션이라고 설명하지만 제작자 크레딧이 비어 있다. 원본 Instagram에 접근하지 못했고 해당 우주인 영상의 LEGO 발주·공식 캠페인 승인을 밝히는 1차 기록을 확보하지 못했다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/2095-lego-astronaut-grabbed-by-hand-from-billboard-fooh-ad"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "LEGO Astronaut Grabbed by Hand in Billboard", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/95-jacquemus-hand-bag-on-wheels-in-paris-fooh-ad", "classification": "confirmed_ad", "reason_ko": "이 작품 제작자 Ian Padgham의 공개 인터뷰가 Jacquemus가 가방을 이용한 영상을 요청했고 시안을 승인한 과정을 직접 설명한다. 집계 사이트의 브랜드 표기와 별도로 확인한 제작 당사자 증언이므로 의뢰 광고로 판정한다. 인터뷰는 제작자 본인의 1차 진술이며 영상 자체를 다시 재생한 검수는 아니다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/95-jacquemus-hand-bag-on-wheels-in-paris-fooh-ad", "https://www.papermag.com/jacquemus-purse-cars"], "advertiser": "Jacquemus", "creator": "Ian Padgham / Origiful", "evidenceQuote": "When they asked for a video involving their bag I modeled it in 3D", "title": "Jacquemus Driving Bags Rolling in Paris", "effectReplayChecked": false}, {"sourceUrl": "https://adamwalkerfilm.com/projects/sumo-citrus/", "classification": "confirmed_ad", "reason_ko": "제작사 Adam Walker Film 원문에 AGENCY: Collier Creative, BRAND: Sumo Citrus가 기재되고 30초 TVC 제작 과업 및 소셜 축약본·스틸 제작이 명시된다. 제품 홍보와 안티불링 캠페인을 결합한 브랜드 광고로 확인한다. HK036의 과일 의인화 효과나 연결 발췌본은 재생·대조하지 않았다.", "verificationUrls": ["https://adamwalkerfilm.com/projects/sumo-citrus/"], "advertiser": "Sumo Citrus", "creator": "Adam Walker Film; agency: Collier Creative", "evidenceQuote": "For this project AWF was tasked with developing a 30 second TVC", "adIdentityVerified": true, "effectReplayChecked": false, "title": "Sumo Citrus · 과일 캐릭터"}, {"sourceUrl": "https://www.madcgi.com/projects/ghibli-fooh-campaign", "classification": "confirmed_ad", "reason_ko": "FOOH 집계 사이트가 아니라 제작사 MAD CGI의 프로젝트 원문을 확인했다. Ghibli 가죽제품 브랜드의 소셜 콘텐츠 요구와 이를 위한 FOOH 캠페인 제작을 직접 서술하므로 브랜드 홍보 제작 건으로 판정한다. 제작사 진술에 근거하며 계약서·브랜드 측 교차 확인이나 성과 수치 검증은 하지 않았다. 해당 원문은 미디어 구매 없이 확산시키려는 목적을 설명한다. HK038의 탑 직조 효과는 영상으로 재확인하지 않았다.", "verificationUrls": ["https://www.madcgi.com/projects/ghibli-fooh-campaign"], "advertiser": "Ghibli (leather goods)", "creator": "MAD CGI", "evidenceQuote": "MAD CGI produced a FOOH campaign", "adIdentityVerified": true, "effectReplayChecked": false, "title": "Ghibli — 피사의 사탑을 감싸는 직조"}, {"sourceUrl": "https://www.youtube.com/watch?v=1ZCo-ZXB16g", "classification": "confirmed_ad", "reason_ko": "동일 ID의 The One Club for Creativity 원문 검색 설명은 CR-V 광고 캠페인을 명시하고, 공식 출품 기록이 Client Honda와 mcgarrybowen/Gorgeous 크레딧을 제공한다. 직접 플레이어는 429 제한. 효과 일치·시작 시점·영상 전체는 이번 감사에서 재검증하지 않았다.", "verificationUrls": ["https://www.youtube.com/watch?v=1ZCo-ZXB16g", "https://www.oneclub.org/awards/theoneshow/-award/20694/honda-illusions/"], "advertiser": "Honda", "creator": "mcgarrybowen London / Gorgeous", "evidenceQuote": "Client Honda", "title": "Honda Illusions", "effectReplayChecked": false}, {"sourceUrl": "https://www.youtube.com/watch?v=IeY1k-OBNns", "classification": "confirmed_ad", "reason_ko": "동일 ID 검색 인덱스의 Ariston Aqualtis Underwater World TV Commercial 제목과 제작사 Filmmaster의 작품 설명·크레딧을 교차 확인했다. 대상 URL은 재게시 영상일 수 있어 공식 업로드라고 주장하지 않는다. 효과 일치·시작 시점·영상 전체는 이번 감사에서 재검증하지 않았다.", "verificationUrls": ["https://www.youtube.com/watch?v=IeY1k-OBNns", "https://www.filmmaster.com/ariston-aqualtis-underwater-world"], "advertiser": "Ariston", "creator": "Filmmaster / Leo Burnett Italia / Dario Piana", "evidenceQuote": "The Extraordinary Commercial of Ariston Aqualtis", "title": "Ariston Aqualtis — Underwater World", "effectReplayChecked": false}, {"sourceUrl": "https://www.dandad.org/work/d-ad-awards-archive/chain", "classification": "confirmed_ad", "reason_ko": "공식 D&AD 기록으로 Chain의 광고 정체성은 확인했습니다. 다만 기존 카탈로그 제목 shadowstudy 및 로컬 발췌가 같은 작품인지 불일치가 남아 있어 기본 근거 연결은 보류합니다.", "verificationUrls": ["https://www.dandad.org/work/d-ad-awards-archive/chain", "https://www.hatads.org.uk/catalogue/record/5acae702-f013-48c0-ac43-0fd2daf91da2"], "advertiser": "Guinness Brewing Company (광고 기록상)", "creator": "Blink; director: Doug Foster (History of Advertising Trust 기록상)", "evidenceQuote": "Guinness Bewing GB", "adIdentityVerified": true, "effectReplayChecked": false, "catalogueIdentityMatch": false, "catalogueIdentityReason_ko": "HK042의 로컬 제목 shadowstudy와 공식 출품명 Chain이 불일치하며, 로컬 발췌 영상의 동일성이 확인되지 않았다. 광고 정체성 확인과 별개로 HK042는 계속 제외 대상이다.", "title": "shadowstudy"}, {"sourceUrl": "https://fooh.com/library/2489-doritos-chip-portal-reveals-packs-of-chips-fooh-ad", "classification": "unverified", "reason_ko": "FOOH는 Doritos의 현지 맛 제품 홍보로 설명하고 Aimo를 추정 제작자로 표기한다. 원본 Instagram은 접근 실패했다. 브랜드·제작사 1차 자료로 해당 포털 영상의 의뢰 관계를 확인하지 못해 보류했다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/2489-doritos-chip-portal-reveals-packs-of-chips-fooh-ad"], "advertiser": null, "creator": null, "evidenceQuote": "", "title": "Doritos Chip Portal Reveals Packs of Chips", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/1273-lego-eiffel-tower-covered-with-lego-bricks-fooh-ad", "classification": "unverified", "reason_ko": "The Sun Project 공식 포트폴리오에 LEGO - TOUR EIFFEL 프로젝트가 있음을 확인했다. 그러나 목록 연도는 2024이고 FOOH는 2025년 136주년 영상으로 설명한다. 포트폴리오 항목과 이 특정 URL의 동일성 및 해당 버전의 브랜드 발주를 문서만으로 확정할 수 없어 보류했다. 개인작이라는 단정도 하지 않았다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/1273-lego-eiffel-tower-covered-with-lego-bricks-fooh-ad", "https://thesunproject.fr/fr/creations/fooh/"], "advertiser": null, "creator": "The Sun Project (LEGO - TOUR EIFFEL 포트폴리오 확인; 이 버전 동일성 보류)", "evidenceQuote": "LEGO - TOUR EIFFEL, 2024", "title": "LEGO — 에펠탑 블록 증식", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/1733-oysho-massive-tennis-ball-turns-into-smaller-balls-fooh-ad", "classification": "confirmed_ad", "reason_ko": "KOSMO 공식 고객 사례 OYSHO III는 Valladolid를 명시하고 Oysho가 Premier Padel 후원·네이밍 파트너십 홍보를 원해 mixed-reality 시리즈를 제작했다고 설명한다. Slink 공식 사례도 같은 후원 발표 목적과 KOSMO 협업을 명시한다. 도시·브랜드·행사를 대조해 브랜드 캠페인 작품으로 판정했으며, 큰 공이 작은 공으로 바뀌는 동작은 이번에 재생 검수하지 않았다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/1733-oysho-massive-tennis-ball-turns-into-smaller-balls-fooh-ad", "https://www.kosmocgi.com/work/fooh/oysho-iii", "https://slinkagence.com/work/oysho-fooh-padel"], "advertiser": "OYSHO", "creator": "KOSMO / Slink (공식 캠페인 제작·협업 사례)", "evidenceQuote": "Oysho wanted to celebrate its sponsorship and naming partnership with the Premier Padel League through a dynamic series of mixed …", "title": "OYSHO Community · 테니스공 증식", "effectReplayChecked": false}, {"sourceUrl": "https://fooh.com/library/5134-missoni-scarf-extends-beyond-frame-fooh-ad", "classification": "unverified", "reason_ko": "FOOH는 ses.tudio 작품으로 크레딧한다. 제작자 공개 LinkedIn에는 Missoni 협업과 캠페인 제작을 밝힌 진술이 있으나 이 Amalfi 스카프 편과 동일한 작품인지 확인하지 못했다. 다른 공개 색인에는 해당 게시물의 ConceptDesign 표기도 있어, 일반 협업 이력을 이 영상의 발주 확정으로 쓰거나 반대로 스펙으로 단정하지 않았다. 이번 판정은 광고의 의뢰·공식 홍보 정체성에 관한 문서 감사이며 영상 효과·동작·첫 1초 타이밍은 재검수하지 않았다.", "verificationUrls": ["https://fooh.com/library/5134-missoni-scarf-extends-beyond-frame-fooh-ad", "https://tr.linkedin.com/in/sesil-bulgan-7a32b5204"], "advertiser": null, "creator": "Cecile Bulgan Studio / ses.tudio (FOOH 크레딧; 해당 편 발주 미확인)", "evidenceQuote": "We are proud to officially announce our collaboration with Missoni.", "title": "Missoni Scarf Extends Beyond Frame", "effectReplayChecked": false}, {"sourceUrl": "https://www.youtube.com/watch?v=F_jyXJTlrH0", "classification": "confirmed_ad", "reason_ko": "동일 ID를 Going West로 연결하는 공개 인용과 제작사 Andersen M의 Client/TVC 기록을 확인했다. 제작자의 대학 연구 기록도 독서 장려 목적으로 의뢰받았음을 명시한다. 제품 판매가 아닌 기관 홍보 의뢰 캠페인이다. 효과 일치·시작 시점·영상 전체는 이번 감사에서 재검증하지 않았다.", "verificationUrls": ["https://www.youtube.com/watch?v=F_jyXJTlrH0", "https://andersenm.com/animations/going-west", "https://research.brighton.ac.uk/p/en/research-outputs/going-west", "https://www.utne.com/arts/animation-new-zealand-book-council-5811/"], "advertiser": "New Zealand Book Council", "creator": "Andersen M / Colenso BBDO", "evidenceQuote": "Client: Colenso BBDO / New Zealand Book Council", "title": "NZ Book Council Going West", "effectReplayChecked": false}, {"sourceUrl": "https://www.ogilvy.com/work/shadows", "classification": "confirmed_ad", "reason_ko": "대행사 Ogilvy의 공식 Our Work 원문이 Coca-Cola Shadows 캠페인과 병 110주년 홍보, 옥외 집행을 명시하며 UK 팀을 표시한다. 의뢰 브랜드 홍보 캠페인으로 판정한다. 광고 캠페인의 정체성 확인이며 HK050의 그림자 효과·인물화 여부 또는 연결 발췌본을 재생·대조한 검수는 아니다.", "verificationUrls": ["https://www.ogilvy.com/work/shadows"], "advertiser": "Coca-Cola", "creator": "Ogilvy UK", "evidenceQuote": "Coca-Cola launched “Shadows,” a visually compelling campaign.", "adIdentityVerified": true, "effectReplayChecked": false, "title": "Shadows - Coca-Cola | Our Work | Ogilvy"}], "excludedCards": [{"id": "HK002", "title": "기준물 옆 초대형 제품", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://www.instagram.com/reel/DCW_iVXJDp0/", "unverified"], ["https://fooh.com/library/4403-adidas-giant-shoe-skateboards-city-fooh-ad", "unverified"]]}, {"id": "HK003", "title": "같은 자리 재질 바꾸기", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://fooh.com/library/4822-young-emperors-giant-book-drops-at-perrotin-store-fooh-ad", "unverified"]]}, {"id": "HK006", "title": "제품 자취가 공간의 규칙", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://fooh.com/library/3988-stabilo-giant-highlighter-red-flower-trail-fooh-ad", "unverified"], ["https://fooh.com/library/5183-amazon-giant-items-in-the-city-fooh-ad", "unverified"]]}, {"id": "HK007", "title": "물러나며 정체 공개", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://www.youtube.com/watch?v=aO36w66KoPQ", "unverified"]]}, {"id": "HK008", "title": "작은 원인 큰 연쇄", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://fooh.com/library/4836-estee-lauder-giant-foundation-domino-fooh-ad", "unverified"]]}, {"id": "HK010", "title": "같은 단위가 공간 채우기", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://www.instagram.com/reel/C6RRUZJoYJ7/", "unverified"], ["https://fooh.com/library/4573-lego-blocks-cover-building-facade-fooh-ad", "unverified"]]}, {"id": "HK011", "title": "제품을 다른 장르의 주인공으로", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://fooh.com/library/4899-pronto-shoes-giant-shoe-launches-from-egypt-to-dubai-fooh-ad", "unverified"], ["https://fooh.com/library/4604-adidas-giant-tennis-ball-airlifts-court-fooh-ad", "unverified"]]}, {"id": "HK013", "title": "평면 경계 밖으로 돌출", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://fooh.com/library/2493-dreame-vacuum-cleaner-sweeps-from-billboard-fooh-ad", "unverified"], ["https://fooh.com/library/4442-esr-giant-phone-case-falls-ground-fooh-ad", "unverified"]]}, {"id": "HK016", "title": "제품 모서리를 훑는 빛", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://fooh.com/library/5132-celsius-can-lights-up-stadium-field-fooh-ad", "unverified"]]}, {"id": "HK017", "title": "긴 원단이 흐르며 윤곽 공개", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://fooh.com/library/462-acne-studios-scarf-turns-pink-ribbon-seoul-fooh-ad", "unverified"]]}, {"id": "HK018", "title": "고정 제품 뒤로 소재 지나가기", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://fooh.com/library/178-roemerquelle-waterfalls-building-fooh-ad", "unverified"], ["https://fooh.com/library/894-esika-perfume-and-pink-petals-inside-the-train-fooh-ad", "unverified"]]}, {"id": "HK019", "title": "접점에서 지도 무늬 번짐", "reason_ko": "확인된 외부 광고 근거가 없는 창작 아이디어·자체 제작 기록", "sourceStatuses": []}, {"id": "HK020", "title": "같은 위치 다른 물체 매치 컷", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://fooh.com/library/4891-kaufland-apple-turns-into-orange-in-air-fooh-ad", "unverified"]]}, {"id": "HK021", "title": "한 방울이 접혀 골조 자람", "reason_ko": "확인된 외부 광고 근거가 없는 창작 아이디어·자체 제작 기록", "sourceStatuses": []}, {"id": "HK024", "title": "공간 전체를 삼키는 탄산 폭풍", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://onecue26.github.io/works-media/onecue-fanta.mp4", "own_reference"]]}, {"id": "HK025", "title": "제품 이름이 실제 파도로", "reason_ko": "확인된 외부 광고 근거가 없는 창작 아이디어·자체 제작 기록", "sourceStatuses": []}, {"id": "HK026", "title": "제품 위 미니어처의 방해와 묘기", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [[null, "unverified"]]}, {"id": "HK027", "title": "재료가 깨어나 방 전체 정원으로", "reason_ko": "확인된 외부 광고 근거가 없는 창작 아이디어·자체 제작 기록", "sourceStatuses": []}, {"id": "HK028", "title": "젤 리본이 얼굴을 돌다 흡수", "reason_ko": "확인된 외부 광고 근거가 없는 창작 아이디어·자체 제작 기록", "sourceStatuses": []}, {"id": "HK029", "title": "재료 회오리가 원래 배열로 복귀", "reason_ko": "확인된 외부 광고 근거가 없는 창작 아이디어·자체 제작 기록", "sourceStatuses": []}, {"id": "HK030", "title": "거대한 제품을 도시에 설치", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://fooh.com/library/3990-stabilo-giant-highlighter-stabilo-hq-fooh-ad", "unverified"], ["https://www.instagram.com/reel/DCW_iVXJDp0/", "unverified"]]}, {"id": "HK031", "title": "초대형 제품이 도시 시설 역할", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://fooh.com/library/238-honor-smartphone-bridge-design-fooh-ad", "unverified"]]}, {"id": "HK032", "title": "딱딱한 종이가 액체로 풀림", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://fooh.com/library/4822-young-emperors-giant-book-drops-at-perrotin-store-fooh-ad", "unverified"]]}, {"id": "HK033", "title": "액체가 모여 완성품으로", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://fooh.com/library/4835-lust-floating-black-liquid-transforms-into-shoe-fooh-ad", "unverified"]]}, {"id": "HK034", "title": "제품이 흔적 남기며 비행", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://fooh.com/library/2095-lego-astronaut-grabbed-by-hand-from-billboard-fooh-ad", "unverified"]]}, {"id": "HK037", "title": "펜의 선이 꽃길로 이어짐", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://fooh.com/library/3988-stabilo-giant-highlighter-red-flower-trail-fooh-ad", "unverified"]]}, {"id": "HK039", "title": "풍경에서 포장 인쇄로 공개", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://www.youtube.com/watch?v=aO36w66KoPQ", "unverified"]]}, {"id": "HK042", "title": "액체 기포 속으로 한 방향 진입", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://www.dandad.org/work/d-ad-awards-archive/chain", "confirmed_ad"]]}, {"id": "HK043", "title": "제품 자체가 통과문으로 바뀜", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://fooh.com/library/2489-doritos-chip-portal-reveals-packs-of-chips-fooh-ad", "unverified"]]}, {"id": "HK044", "title": "반복 제품이 위에서 낙하해 쌓임", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://www.instagram.com/reel/C6RRUZJoYJ7/", "unverified"]]}, {"id": "HK045", "title": "작은 블록이 큰 외형 채우기", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://fooh.com/library/1273-lego-eiffel-tower-covered-with-lego-bricks-fooh-ad", "unverified"], ["https://fooh.com/library/4573-lego-blocks-cover-building-facade-fooh-ad", "unverified"]]}, {"id": "HK047", "title": "운동화 우주선 발사", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://fooh.com/library/4899-pronto-shoes-giant-shoe-launches-from-egypt-to-dubai-fooh-ad", "unverified"]]}, {"id": "HK048", "title": "광고 속 천이 경계 밖으로 흐름", "reason_ko": "확인된 외부 광고 근거가 없거나 원문과의 동일 작품 연결이 확인되지 않음", "sourceStatuses": [["https://fooh.com/library/5134-missoni-scarf-extends-beyond-frame-fooh-ad", "unverified"]]}]};
 window.ORDER_HOOKS = [
   {
     "id": "HK001",
@@ -28,13 +29,6 @@ window.ORDER_HOOKS = [
     "difficulty": "어려움",
     "evidence": [
       {
-        "title": "환타 회오리",
-        "url": "https://onecue26.github.io/works-media/onecue-fanta.mp4",
-        "observed": "0·0.5·0.95초는 성인과 환타 병이 보이며 큰 분출은 아직 없다.",
-        "firstSecond": false,
-        "clip": "order-test-media/715cf22e972b78569b43.mp4"
-      },
-      {
         "title": "[애경산업/스웨이] 잔여 세제 없는 스웨이 식기세척기 액체 캡슐 세제💛",
         "url": "https://www.youtube.com/watch?v=7j6vkkBeYP0",
         "observed": "식기세척기 안 거대한 파도가 첫 화면을 덮는다.",
@@ -63,131 +57,10 @@ window.ORDER_HOOKS = [
     "limitations": [
       "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
       "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
-  },
-  {
-    "id": "HK002",
-    "title": "기준물 옆 초대형 제품",
-    "family": "크기 뒤집기",
-    "summary": "일상 크기 기준과 제품 비율을 어긋나게 하는 기본 원리. 거대 설치물·도시 시설 역할·축소 인물을 구분한다.",
-    "trigger": "일상 거리에서 제품을 발견함",
-    "effect": "사람과 건물을 정상 크기로 남겨 제품의 비정상적인 크기를 즉시 읽게 한다.",
-    "reaction": "작아 보이는 사람이 올려다봄",
-    "productSignals": [
-      "한눈에 아는 모양",
-      "사람과 크기 비교",
-      "큰 외곽선"
     ],
-    "categories": [
-      "식품·음료",
-      "생활·주방",
-      "화장품·바디케어",
-      "문구·성인 취미 굿즈",
-      "의류·패션잡화",
-      "신선식품·농산물",
-      "소형가전·디지털 주변기기",
-      "스포츠·아웃도어 소품",
-      "유아·아동 교육용품",
-      "반려동물 생활소품"
-    ],
-    "example": "행인이 지나가는 광장에 집보다 큰 방향제 병을 둔다.",
-    "difficulty": "보통",
-    "evidence": [
-      {
-        "title": "Glade · 방향제",
-        "url": "https://www.instagram.com/reel/DCW_iVXJDp0/",
-        "observed": "첫 화면부터 거대한 글레이드 병이 건물 밖에 떠 있다.",
-        "firstSecond": true,
-        "clip": "order-test-media/606ae400a16307264b02.mp4"
-      },
-      {
-        "title": "Adidas Giant Shoe Skateboards Through City",
-        "url": "https://fooh.com/library/4403-adidas-giant-shoe-skateboards-city-fooh-ad",
-        "observed": "0~0.95초, 횡단보도와 보행자를 기준으로 건물 여러 층 높이의 운동화가 크레인 줄 아래 매달려 있다.",
-        "firstSecond": true,
-        "clip": "order-test-media/a8d0528db49c5a36db8c.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:T02",
-      "task290:combo:002",
-      "task290:combo:022",
-      "task290:combo:042",
-      "task290:combo:062",
-      "task290:combo:082",
-      "task290:combo:102",
-      "task290:combo:122",
-      "task290:combo:142",
-      "task290:combo:162",
-      "task290:combo:182",
-      "task290:ref:B278-DCW_iVXJDp0",
-      "task290:ref:REF288-ADIDAS"
-    ],
-    "kind": "principle",
-    "variantOf": null,
-    "evidenceStatus": "observed_motion",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
-  },
-  {
-    "id": "HK003",
-    "title": "같은 자리 재질 바꾸기",
-    "family": "재질·상태 치환",
-    "summary": "외곽·위치·색의 연결을 유지하며 재질이나 상태를 교대하는 기본 원리. 녹아 퍼짐과 응집해 완성됨을 변형으로 분리한다.",
-    "trigger": "표면이 내려앉거나 한 점에서 변하기 시작함",
-    "effect": "물체의 위치와 색 연결을 남기고 단단한 표면을 액체 등 다른 상태로 바꾼다.",
-    "reaction": "손을 멈추고 바뀐 재질을 확인함",
-    "productSignals": [
-      "변화 전후 같은 색",
-      "또렷한 외곽선",
-      "눈에 띄는 재질"
-    ],
-    "categories": [
-      "식품·음료",
-      "생활·주방",
-      "화장품·바디케어",
-      "문구·성인 취미 굿즈",
-      "의류·패션잡화",
-      "신선식품·농산물",
-      "소형가전·디지털 주변기기",
-      "스포츠·아웃도어 소품",
-      "유아·아동 교육용품",
-      "반려동물 생활소품"
-    ],
-    "example": "종이 공예 책의 빨간 표지가 같은 자리에서 붉은 액체로 퍼진다.",
-    "difficulty": "어려움",
-    "evidence": [
-      {
-        "title": "Young Emperors · The Alphabet of Influence",
-        "url": "https://fooh.com/library/4822-young-emperors-giant-book-drops-at-perrotin-store-fooh-ad",
-        "observed": "효과 시작 원본 약 9초. 서점 앞의 빨간 책 표지가 내려앉으며 같은 빨간색의 액체처럼 바닥에 퍼진다. 제품 판매와 사인회 홍보를 겸한 소재다.",
-        "firstSecond": false,
-        "clip": "order-test-media/43eabb90f45b77616469.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:T03",
-      "task290:combo:003",
-      "task290:combo:034",
-      "task290:combo:043",
-      "task290:combo:063",
-      "task290:combo:083",
-      "task290:combo:103",
-      "task290:combo:123",
-      "task290:combo:143",
-      "task290:combo:163",
-      "task290:combo:183",
-      "task290:ref:REF288-BOOK"
-    ],
-    "kind": "principle",
-    "variantOf": null,
-    "evidenceStatus": "observed_motion",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
+    "adEvidenceVerified": true,
+    "excludedEvidenceCount": 1,
+    "adAuditNote": "원본의 광고 정체성 확인. 새 제품 적용 예시·반응은 저자 제안이며, 이번 검수에서 효과 영상 재생 검증은 반복하지 않았습니다."
   },
   {
     "id": "HK004",
@@ -245,7 +118,10 @@ window.ORDER_HOOKS = [
     "limitations": [
       "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
       "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
+    ],
+    "adEvidenceVerified": true,
+    "excludedEvidenceCount": 0,
+    "adAuditNote": "원본의 광고 정체성 확인. 새 제품 적용 예시·반응은 저자 제안이며, 이번 검수에서 효과 영상 재생 검증은 반복하지 않았습니다."
   },
   {
     "id": "HK005",
@@ -276,13 +152,6 @@ window.ORDER_HOOKS = [
     "difficulty": "어려움",
     "evidence": [
       {
-        "title": "Salomon — 도심을 미끄러지는 신발",
-        "url": "https://fooh.com/library/4942-salomon-giant-shoe-glides-through-city-fooh-ad",
-        "observed": "효과 시작 약 7초 · 원본 첫 1초 미충족. 신발이 외곽을 유지한 채 사람이 신지 않은 상태로 도심 차도와 상점 앞을 스스로 미끄러진다.",
-        "firstSecond": false,
-        "clip": "order-test-media/3592bc2ab965bf06b755.mp4"
-      },
-      {
         "title": "'Origin' | GIGIL for Danes Cheese",
         "url": "https://www.youtube.com/watch?v=U7IDt1g-DcE",
         "observed": "0·0.95초부터 사람 얼굴이 있는 거대한 치즈가 카트를 민다.",
@@ -311,189 +180,10 @@ window.ORDER_HOOKS = [
     "limitations": [
       "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
       "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
-  },
-  {
-    "id": "HK006",
-    "title": "제품 자취가 공간의 규칙",
-    "family": "성질이 공간의 규칙",
-    "summary": "제품이 남기는 선이나 색이 주변 길과 표면을 같은 방향으로 바꾼다.",
-    "trigger": "펜이나 제품이 한 방향으로 지나감",
-    "effect": "제품이 남기는 선이나 색이 주변 길과 표면을 같은 방향으로 바꾼다.",
-    "reaction": "변화가 이어지는 길을 따라 시선이 이동함",
-    "productSignals": [
-      "고유한 색",
-      "선이 생기는 접점",
-      "지나간 경로"
     ],
-    "categories": [
-      "식품·음료",
-      "생활·주방",
-      "화장품·바디케어",
-      "문구·성인 취미 굿즈",
-      "의류·패션잡화",
-      "신선식품·농산물",
-      "소형가전·디지털 주변기기",
-      "스포츠·아웃도어 소품",
-      "유아·아동 교육용품",
-      "반려동물 생활소품"
-    ],
-    "example": "붉은 형광펜이 지나간 주차장 바닥에 같은 색 꽃길이 생긴다.",
-    "difficulty": "어려움",
-    "evidence": [
-      {
-        "title": "STABILO — Red Highlighter Flower Trail",
-        "url": "https://fooh.com/library/3988-stabilo-giant-highlighter-red-flower-trail-fooh-ad",
-        "observed": "원본 첫 1초 확인. 붉은 펜이 지나간 방향을 따라 주차장 바닥에 같은 색 꽃의 띠가 길게 이어진다.",
-        "firstSecond": true,
-        "clip": "order-test-media/3f3b610b949e1910eb52.mp4"
-      },
-      {
-        "title": "Amazon Giant Items in the City",
-        "url": "https://fooh.com/library/5183-amazon-giant-items-in-the-city-fooh-ad",
-        "observed": "달리는 제품이 지나간 위치에 빨간 흔적이 길게 생기고 이후 같은 색 획이 도시 바닥의 날짜 표지를 이룬다.",
-        "firstSecond": false,
-        "clip": "order-test-media/7e03ac24280f90fe483f.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:T06",
-      "task290:combo:016",
-      "task290:combo:036",
-      "task290:combo:045",
-      "task290:combo:065",
-      "task290:combo:085",
-      "task290:combo:105",
-      "task290:combo:125",
-      "task290:combo:145",
-      "task290:combo:165",
-      "task290:combo:185",
-      "task290:ref:REF288-STABILORED",
-      "task290:ref:ON292-AMAZONLIP"
-    ],
-    "kind": "principle",
-    "variantOf": null,
-    "evidenceStatus": "observed_motion",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
-  },
-  {
-    "id": "HK007",
-    "title": "물러나며 정체 공개",
-    "family": "착시·시점 공개",
-    "summary": "시점 이동으로 처음 화면의 정체를 뒤집는 기본 원리. 인쇄 공개·평면 착시·제품 내부 공개를 구분한다.",
-    "trigger": "가까운 장면에서 카메라가 물러남",
-    "effect": "실제 풍경처럼 보이던 화면이 카메라 이동 뒤 제품의 일부로 드러난다.",
-    "reaction": "처음 본 장면을 다시 이해함",
-    "productSignals": [
-      "큰 인쇄 그림",
-      "확대해도 읽히는 윤곽",
-      "드러낼 전체 형태"
-    ],
-    "categories": [
-      "식품·음료",
-      "생활·주방",
-      "화장품·바디케어",
-      "문구·성인 취미 굿즈",
-      "의류·패션잡화",
-      "신선식품·농산물",
-      "소형가전·디지털 주변기기",
-      "스포츠·아웃도어 소품",
-      "유아·아동 교육용품",
-      "반려동물 생활소품"
-    ],
-    "example": "라면 봉지의 야경 그림을 실제 강변처럼 보여 주다 봉지 전체를 공개한다.",
-    "difficulty": "보통",
-    "evidence": [
-      {
-        "title": "오뚜기 한강라면",
-        "url": "https://www.youtube.com/watch?v=aO36w66KoPQ",
-        "observed": "효과 시작 약 7초 · 원본 첫 1초 미충족. 한강 야경처럼 보이던 수평선과 불꽃이 화면이 물러나면서 봉지 앞면 그림으로 드러난다.",
-        "firstSecond": false,
-        "clip": "order-test-media/e3483817d76b6970be71.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:T07",
-      "task290:combo:005",
-      "task290:combo:024",
-      "task290:combo:054",
-      "task290:combo:074",
-      "task290:combo:094",
-      "task290:combo:114",
-      "task290:combo:134",
-      "task290:combo:154",
-      "task290:combo:174",
-      "task290:combo:194",
-      "task290:ref:REF288-OTT"
-    ],
-    "kind": "principle",
-    "variantOf": null,
-    "evidenceStatus": "observed_motion",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
-  },
-  {
-    "id": "HK008",
-    "title": "작은 원인 큰 연쇄",
-    "family": "불가능한 연쇄",
-    "summary": "한 제품의 작은 움직임이 다음 물체로 차례로 전달된다.",
-    "trigger": "첫 물체를 살짝 건드림",
-    "effect": "한 제품의 작은 움직임이 다음 물체로 차례로 전달된다.",
-    "reaction": "연쇄가 끝날 곳을 기대하며 지켜봄",
-    "productSignals": [
-      "같은 단위 여러 개",
-      "닿는 순서",
-      "명확한 첫 원인"
-    ],
-    "categories": [
-      "식품·음료",
-      "생활·주방",
-      "화장품·바디케어",
-      "문구·성인 취미 굿즈",
-      "의류·패션잡화",
-      "신선식품·농산물",
-      "소형가전·디지털 주변기기",
-      "스포츠·아웃도어 소품",
-      "유아·아동 교육용품",
-      "반려동물 생활소품"
-    ],
-    "example": "향수 병 하나가 기울자 일렬로 선 병들이 도미노처럼 차례로 기운다.",
-    "difficulty": "어려움",
-    "evidence": [
-      {
-        "title": "Estée Lauder Giant Foundation Domino",
-        "url": "https://fooh.com/library/4836-estee-lauder-giant-foundation-domino-fooh-ad",
-        "observed": "첫초에는 교량과 일렬로 선 용기들이 보인다. 3.4초 이후 표본에 병들이 차례로 기울어지는 연쇄가 뚜렷하다.",
-        "firstSecond": false,
-        "clip": "order-test-media/19d568870e9d606fdb4c.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:T08",
-      "task290:combo:017",
-      "task290:combo:037",
-      "task290:combo:055",
-      "task290:combo:075",
-      "task290:combo:095",
-      "task290:combo:115",
-      "task290:combo:135",
-      "task290:combo:155",
-      "task290:combo:175",
-      "task290:combo:195",
-      "task290:ref:ON291-ESTEELAUDER"
-    ],
-    "kind": "principle",
-    "variantOf": null,
-    "evidenceStatus": "observed_motion",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
+    "adEvidenceVerified": true,
+    "excludedEvidenceCount": 1,
+    "adAuditNote": "원본의 광고 정체성 확인. 새 제품 적용 예시·반응은 저자 제안이며, 이번 검수에서 효과 영상 재생 검증은 반복하지 않았습니다."
   },
   {
     "id": "HK009",
@@ -551,139 +241,10 @@ window.ORDER_HOOKS = [
     "limitations": [
       "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
       "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
-  },
-  {
-    "id": "HK010",
-    "title": "같은 단위가 공간 채우기",
-    "family": "반복·증식",
-    "summary": "같은 단위의 수와 배열을 바꾸는 기본 원리. 낙하 누적·부품 조립·큰 하나의 분산은 별도 변형이다.",
-    "trigger": "같은 단위가 쏟아지거나 나타남",
-    "effect": "동일한 제품이나 부품을 여러 개 모아 한 영역을 채운다.",
-    "reaction": "양이 늘어나는 장면에 압도됨",
-    "productSignals": [
-      "반복되는 모양",
-      "같은 크기 단위",
-      "채울 빈 공간"
     ],
-    "categories": [
-      "식품·음료",
-      "생활·주방",
-      "화장품·바디케어",
-      "문구·성인 취미 굿즈",
-      "의류·패션잡화",
-      "신선식품·농산물",
-      "소형가전·디지털 주변기기",
-      "스포츠·아웃도어 소품",
-      "유아·아동 교육용품",
-      "반려동물 생활소품"
-    ],
-    "example": "분홍 틴트 스틱들이 쇼윈도 안으로 떨어져 창 안을 채운다.",
-    "difficulty": "어려움",
-    "evidence": [
-      {
-        "title": "Sephora Makeup Tint Filling Store in NYC",
-        "url": "https://www.instagram.com/reel/C6RRUZJoYJ7/",
-        "observed": "0초 검정 화면 뒤 0.5초에 같은 형태의 분홍색 Milk 메이크업 틴트 스틱들이 쇼윈도 안에서 한꺼번에 떨어진다. 1초에는 화면을 채우기 시작한다.",
-        "firstSecond": true,
-        "clip": "order-test-media/8ee65d8e50b8b5b76ebe.mp4"
-      },
-      {
-        "title": "LEGO Blocks Cover Building Facade",
-        "url": "https://fooh.com/library/4573-lego-blocks-cover-building-facade-fooh-ad",
-        "observed": "같은 규격의 조립 블록이 건물의 면을 채우며 누적된다.",
-        "firstSecond": false,
-        "clip": "order-test-media/993c91a708606f8f63d9.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:T10",
-      "task290:combo:007",
-      "task290:combo:026",
-      "task290:combo:047",
-      "task290:combo:067",
-      "task290:combo:087",
-      "task290:combo:107",
-      "task290:combo:127",
-      "task290:combo:147",
-      "task290:combo:167",
-      "task290:combo:187",
-      "task290:ref:BF-MILK",
-      "task290:ref:ON292-LEGOBRICKS"
-    ],
-    "kind": "principle",
-    "variantOf": null,
-    "evidenceStatus": "observed_motion",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
-  },
-  {
-    "id": "HK011",
-    "title": "제품을 다른 장르의 주인공으로",
-    "family": "장르 패러디·말장난",
-    "summary": "익숙한 장르의 역할을 제품에 옮기는 기본 원리. 발사 장르와 이름의 문자화는 별도 변형이다.",
-    "trigger": "받침대나 레일에서 출발함",
-    "effect": "일상 제품을 로켓이나 탈것 같은 익숙한 장르의 역할에 놓는다.",
-    "reaction": "익숙한 장르와 제품의 어긋남에 웃음",
-    "productSignals": [
-      "한눈에 아는 장르 단서",
-      "제품의 고유 형태",
-      "한 가지 역할"
-    ],
-    "categories": [
-      "식품·음료",
-      "생활·주방",
-      "화장품·바디케어",
-      "문구·성인 취미 굿즈",
-      "의류·패션잡화",
-      "신선식품·농산물",
-      "소형가전·디지털 주변기기",
-      "스포츠·아웃도어 소품",
-      "유아·아동 교육용품",
-      "반려동물 생활소품"
-    ],
-    "example": "운동화를 로켓 받침대 위에서 발사해 우주선 출발처럼 보여 준다.",
-    "difficulty": "어려움",
-    "evidence": [
-      {
-        "title": "Pronto — 이집트의 신발 발사",
-        "url": "https://fooh.com/library/4899-pronto-shoes-giant-shoe-launches-from-egypt-to-dubai-fooh-ad",
-        "observed": "효과 시작 약 5초 · 원본 첫 1초 이후. 운동화를 우주선처럼 받침대에서 발사한다. 분사와 먼지가 발사 장르의 표지로 쓰인다.",
-        "firstSecond": false,
-        "clip": "order-test-media/6989fba5a5aed092ccae.mp4"
-      },
-      {
-        "title": "adidas · 하늘을 나는 테니스 코트",
-        "url": "https://fooh.com/library/4604-adidas-giant-tennis-ball-airlifts-court-fooh-ad",
-        "observed": "원본 첫 1초 확인. 첫 화면에서 테니스공과 그 아래 매달린 코트가 도시에 떠 있다. 테니스공이 열기구처럼 코트를 운반하는 장르 전용이다.",
-        "firstSecond": true,
-        "clip": "order-test-media/785b4654f83721b619aa.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:T11",
-      "task290:combo:008",
-      "task290:combo:027",
-      "task290:combo:048",
-      "task290:combo:068",
-      "task290:combo:088",
-      "task290:combo:108",
-      "task290:combo:128",
-      "task290:combo:148",
-      "task290:combo:168",
-      "task290:combo:188",
-      "task290:ref:REF288-PRONTO",
-      "task290:ref:REF288-ADICOURT"
-    ],
-    "kind": "principle",
-    "variantOf": null,
-    "evidenceStatus": "observed_motion",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
+    "adEvidenceVerified": true,
+    "excludedEvidenceCount": 0,
+    "adAuditNote": "원본의 광고 정체성 확인. 새 제품 적용 예시·반응은 저자 제안이며, 이번 검수에서 효과 영상 재생 검증은 반복하지 않았습니다."
   },
   {
     "id": "HK012",
@@ -747,73 +308,10 @@ window.ORDER_HOOKS = [
     "limitations": [
       "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
       "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
-  },
-  {
-    "id": "HK013",
-    "title": "평면 경계 밖으로 돌출",
-    "family": "평면에서 튀어나오기",
-    "summary": "그림이나 화면의 물체가 입체로 나오고 원래 바탕은 남는다.",
-    "trigger": "표면의 윤곽이 프레임 밖으로 넘어옴",
-    "effect": "그림이나 화면의 물체가 입체로 나오고 원래 바탕은 남는다.",
-    "reaction": "사람이 화면 밖으로 나온 물체를 봄",
-    "productSignals": [
-      "인쇄나 화면",
-      "남아 있는 바탕",
-      "넘어갈 테두리"
     ],
-    "categories": [
-      "식품·음료",
-      "생활·주방",
-      "화장품·바디케어",
-      "문구·성인 취미 굿즈",
-      "의류·패션잡화",
-      "신선식품·농산물",
-      "소형가전·디지털 주변기기",
-      "스포츠·아웃도어 소품",
-      "유아·아동 교육용품",
-      "반려동물 생활소품"
-    ],
-    "example": "벽 광고판의 청소기가 바탕을 남긴 채 입체로 튀어나온다.",
-    "difficulty": "어려움",
-    "evidence": [
-      {
-        "title": "Dreame Z30 AquaCycle — Billboard Takeover",
-        "url": "https://fooh.com/library/2493-dreame-vacuum-cleaner-sweeps-from-billboard-fooh-ad",
-        "observed": "효과 시작 약 11.3초 · 원본 첫 1초 미충족. 벽 광고판의 청소기 윤곽이 가장자리를 넘어 입체로 떠오른다. 광고판 바탕은 남는다.",
-        "firstSecond": false,
-        "clip": "order-test-media/82f4167d1f18e0132960.mp4"
-      },
-      {
-        "title": "ESR — 케이스가 파사드에서 돌출",
-        "url": "https://fooh.com/library/4442-esr-giant-phone-case-falls-ground-fooh-ad",
-        "observed": "효과 시작 약 6.2초 · 원본 첫 1초 미충족. 유리 파사드에 붙어 보이던 케이스가 같은 윤곽을 유지한 채 창 바깥으로 돌출한다. 건물 면은 남는다.",
-        "firstSecond": false,
-        "clip": "order-test-media/dd728a746769d42bb5e4.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:T13",
-      "task290:combo:009",
-      "task290:combo:028",
-      "task290:combo:049",
-      "task290:combo:069",
-      "task290:combo:089",
-      "task290:combo:109",
-      "task290:combo:129",
-      "task290:combo:149",
-      "task290:combo:169",
-      "task290:combo:189",
-      "task290:ref:REF288-DREAME",
-      "task290:ref:REF288-ESR"
-    ],
-    "kind": "principle",
-    "variantOf": null,
-    "evidenceStatus": "observed_motion",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
+    "adEvidenceVerified": true,
+    "excludedEvidenceCount": 0,
+    "adAuditNote": "원본의 광고 정체성 확인. 새 제품 적용 예시·반응은 저자 제안이며, 이번 검수에서 효과 영상 재생 검증은 반복하지 않았습니다."
   },
   {
     "id": "HK014",
@@ -856,13 +354,6 @@ window.ORDER_HOOKS = [
         "observed": "시계 실물의 원형 유리·금속 링·기어 층을 같은 축에 서로 떨어뜨려 세워 놓고 각각의 구조를 보여 준다. 부품 공개 장치는 10초 이전에 시작했을 수 있다.",
         "firstSecond": false,
         "clip": "order-test-media/51fab1d0a4bcebec10ec.mp4"
-      },
-      {
-        "title": "The Product Assembly Effect",
-        "url": "https://www.instagram.com/reel/DTUtlnHiC-v/",
-        "observed": "첫 화면의 손에 든 카메라가 0.95초에도 여러 층으로 벌어져 보인다.",
-        "firstSecond": true,
-        "clip": "order-test-media/dc0ee506a74851095e81.mp4"
       }
     ],
     "sourceIds": [
@@ -887,7 +378,10 @@ window.ORDER_HOOKS = [
     "limitations": [
       "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
       "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
+    ],
+    "adEvidenceVerified": true,
+    "excludedEvidenceCount": 1,
+    "adAuditNote": "원본의 광고 정체성 확인. 새 제품 적용 예시·반응은 저자 제안이며, 이번 검수에서 효과 영상 재생 검증은 반복하지 않았습니다."
   },
   {
     "id": "HK015",
@@ -922,13 +416,6 @@ window.ORDER_HOOKS = [
         "observed": "붉은 소재 띠가 타워 둘레를 크게 한 바퀴 감는 듯 흐른다. 별개 대상의 둘레를 감는 방향 참고. 둘레를 감는 경로만 참고한다. 제품 노즐 발원과 제품 내부 복귀는 확인하지 않았다.",
         "firstSecond": false,
         "clip": "order-test-media/3d2743042e442b4f8113.mp4"
-      },
-      {
-        "title": "Kappa Sport White Fabric Flies Above the City",
-        "url": "https://fooh.com/library/2082-kappa-sport-white-fabric-flies-above-the-city-fooh-ad",
-        "observed": "하얀 원단이 건축물 외곽을 스쳐 가고 이후 뒤 공간으로 큰 곡선을 그린다. 실물 소재의 원형 경로 참고. 둘레를 감는 경로만 참고한다. 제품 노즐 발원과 제품 내부 복귀는 확인하지 않았다.",
-        "firstSecond": false,
-        "clip": "order-test-media/2864c37697cb0914c7c1.mp4"
       }
     ],
     "sourceIds": [
@@ -951,294 +438,10 @@ window.ORDER_HOOKS = [
     "limitations": [
       "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
       "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
-  },
-  {
-    "id": "HK016",
-    "title": "제품 모서리를 훑는 빛",
-    "family": "빛이 모임",
-    "summary": "좁은 빛이 제품의 한 가장자리를 따라 움직여 외곽을 드러낸다.",
-    "trigger": "어두운 곳에서 빛 한 줄이 이동함",
-    "effect": "좁은 빛이 제품의 한 가장자리를 따라 움직여 외곽을 드러낸다.",
-    "reaction": "제품의 반짝이는 지점에 시선이 모임",
-    "productSignals": [
-      "반사하는 표면",
-      "또렷한 모서리",
-      "어두운 배경"
     ],
-    "categories": [
-      "식품·음료",
-      "생활·주방",
-      "화장품·바디케어",
-      "문구·성인 취미 굿즈",
-      "의류·패션잡화",
-      "신선식품·농산물",
-      "소형가전·디지털 주변기기",
-      "스포츠·아웃도어 소품",
-      "유아·아동 교육용품",
-      "반려동물 생활소품"
-    ],
-    "example": "스테인리스 보틀 가장자리를 얇은 빛이 따라가며 곡선을 드러낸다.",
-    "difficulty": "보통",
-    "evidence": [
-      {
-        "title": "Celsius Can Lights Up Stadium Field",
-        "url": "https://fooh.com/library/5132-celsius-can-lights-up-stadium-field-fooh-ad",
-        "observed": "캔 글자 가장자리의 얇은 빛이 한쪽 곡선을 따라 이동하고 8초대에 발광점으로 읽힌다. 제품 한 지점에 광원을 모아 보이게 하는 참고.",
-        "firstSecond": false,
-        "clip": "order-test-media/c6e0a4d5acbdd73af459.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:X2",
-      "task290:combo:010",
-      "task290:combo:030",
-      "task290:combo:051",
-      "task290:combo:071",
-      "task290:combo:091",
-      "task290:combo:111",
-      "task290:combo:131",
-      "task290:combo:151",
-      "task290:combo:171",
-      "task290:combo:191",
-      "task290:ref:ON292-OPTICFIELD"
-    ],
-    "kind": "principle",
-    "variantOf": null,
-    "evidenceStatus": "observed_motion",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다.",
-      "주변 빛 전체가 제품으로 끌려오는 장치는 근거 부족. 관찰된 모서리 광선 이동만 채택했다."
-    ]
-  },
-  {
-    "id": "HK017",
-    "title": "긴 원단이 흐르며 윤곽 공개",
-    "family": "원단·소재 흐름",
-    "summary": "원단 자체의 큰 곡선이 펼쳐지며 소재의 폭과 움직임을 보여 준다.",
-    "trigger": "천 한쪽이 움직이거나 스스로 방향을 바꿈",
-    "effect": "원단 자체의 큰 곡선이 펼쳐지며 소재의 폭과 움직임을 보여 준다.",
-    "reaction": "사람이 흐르는 원단을 따라봄",
-    "productSignals": [
-      "길고 유연한 천",
-      "보이는 직조",
-      "크게 휘는 여유 공간"
-    ],
-    "categories": [
-      "생활·주방",
-      "화장품·바디케어",
-      "문구·성인 취미 굿즈",
-      "의류·패션잡화",
-      "신선식품·농산물",
-      "소형가전·디지털 주변기기",
-      "스포츠·아웃도어 소품",
-      "유아·아동 교육용품",
-      "반려동물 생활소품"
-    ],
-    "example": "스카프가 진열장 안에서 스스로 방향을 바꾸며 큰 곡선을 그린다.",
-    "difficulty": "어려움",
-    "evidence": [
-      {
-        "title": "Acne Studios Pink Scarf Floating Ribbon in Seoul",
-        "url": "https://fooh.com/library/462-acne-studios-scarf-turns-pink-ribbon-seoul-fooh-ad",
-        "observed": "첫초에 유리 뒤 제품 스카프가 스스로 방향을 바꾸어 큰 분홍색 곡선을 그린다. 같은 원단이 펼쳐지고 유리 밖으로 이어지는 방식이며 특정 착용 동작의 검증은 아니다.",
-        "firstSecond": true,
-        "clip": "order-test-media/7b474aeeedfee5a805cb.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:X3",
-      "task290:combo:031",
-      "task290:combo:058",
-      "task290:combo:078",
-      "task290:combo:098",
-      "task290:combo:118",
-      "task290:combo:138",
-      "task290:combo:158",
-      "task290:combo:178",
-      "task290:combo:198",
-      "task290:ref:ON291-ACNE"
-    ],
-    "kind": "principle",
-    "variantOf": null,
-    "evidenceStatus": "observed_motion",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
-  },
-  {
-    "id": "HK018",
-    "title": "고정 제품 뒤로 소재 지나가기",
-    "family": "제품 뒤 소재 (고급형)",
-    "summary": "제품 윤곽을 고정하고 뒤쪽의 물이나 꽃잎만 크게 흘린다.",
-    "trigger": "배경 소재가 화면 옆에서 들어옴",
-    "effect": "제품 윤곽을 고정하고 뒤쪽의 물이나 꽃잎만 크게 흘린다.",
-    "reaction": "관객의 시선이 소재를 거쳐 제품에 멎음",
-    "productSignals": [
-      "뚜렷한 제품 외곽",
-      "연상되는 소재 하나",
-      "제품 뒤 빈 공간"
-    ],
-    "categories": [
-      "식품·음료",
-      "생활·주방",
-      "화장품·바디케어",
-      "문구·성인 취미 굿즈",
-      "의류·패션잡화",
-      "신선식품·농산물",
-      "소형가전·디지털 주변기기",
-      "스포츠·아웃도어 소품",
-      "유아·아동 교육용품",
-      "반려동물 생활소품"
-    ],
-    "example": "초록 세제 병은 그대로 두고 뒤에서 큰 물막이 흐르게 한다.",
-    "difficulty": "보통",
-    "evidence": [
-      {
-        "title": "Römerquelle Emerges in Waterfalls at a Building",
-        "url": "https://fooh.com/library/178-roemerquelle-waterfalls-building-fooh-ad",
-        "observed": "초록 용기가 윤곽을 유지하고 바로 뒤 배경에 큰 물막이 나란히 흐른다. 이 발췌 시작 전에 시작했을 수 있다.",
-        "firstSecond": false,
-        "clip": "order-test-media/39821f623fdbd3c709bf.mp4"
-      },
-      {
-        "title": "Esika Perfume and Pink Petals Inside the Train",
-        "url": "https://fooh.com/library/894-esika-perfume-and-pink-petals-inside-the-train-fooh-ad",
-        "observed": "향수 병 윤곽은 중앙에 선명하게 남고 분홍 입자만 배경 깊이에서 흘러가는 장면. 실제 향수병 발원은 미관찰.",
-        "firstSecond": false,
-        "clip": "order-test-media/f6b9a55a47d6bbdfc554.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:X4",
-      "task290:combo:011",
-      "task290:combo:032",
-      "task290:combo:052",
-      "task290:combo:072",
-      "task290:combo:092",
-      "task290:combo:112",
-      "task290:combo:132",
-      "task290:combo:152",
-      "task290:combo:172",
-      "task290:combo:192",
-      "task290:ref:ON292-ROEMER",
-      "task290:ref:ON292-ESIKAWIND"
-    ],
-    "kind": "principle",
-    "variantOf": null,
-    "evidenceStatus": "observed_motion",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
-  },
-  {
-    "id": "HK019",
-    "title": "접점에서 지도 무늬 번짐",
-    "family": "접점에서 비현실 패턴 번짐",
-    "summary": "한 방울이 닿은 점에서 비현실적인 등고선 무늬가 표면 바깥까지 번진다.",
-    "trigger": "밝은 그릇에 소스 한 방울이 닿음",
-    "effect": "한 방울이 닿은 점에서 비현실적인 등고선 무늬가 표면 바깥까지 번진다.",
-    "reaction": "번지는 경계를 따라 손을 멈추고 봄",
-    "productSignals": [
-      "방울이 닿는 점",
-      "밝은 평면",
-      "퍼지는 경계"
-    ],
-    "categories": [
-      "식품·음료"
-    ],
-    "example": "붉은 소스 한 방울이 그릇에 닿아 탁자까지 등고선 지도로 번진다.",
-    "difficulty": "어려움",
-    "evidence": [],
-    "sourceIds": [
-      "task290:template:T16",
-      "task290:combo:012"
-    ],
-    "kind": "principle",
-    "variantOf": null,
-    "evidenceStatus": "author_proposal",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다.",
-      "T16에 연결된 META-992188786634143은 접점에서 퍼지는 경계가 불명확하여 효과 근거에서 제외했다."
-    ]
-  },
-  {
-    "id": "HK020",
-    "title": "같은 위치 다른 물체 매치 컷",
-    "family": "동일 위치 불가능 매치 컷",
-    "summary": "손과 기준 위치는 이어 두고 컷 사이 물체의 종류를 바꾼다.",
-    "trigger": "물체를 던지고 받는 순간 자름",
-    "effect": "손과 기준 위치는 이어 두고 컷 사이 물체의 종류를 바꾼다.",
-    "reaction": "받은 물체를 다시 보며 의아해함",
-    "productSignals": [
-      "비슷한 윤곽",
-      "같은 손 위치",
-      "이어지는 동작"
-    ],
-    "categories": [
-      "식품·음료"
-    ],
-    "example": "손에 떨어지던 초록 사과가 컷 뒤 같은 자리의 오렌지로 바뀐다.",
-    "difficulty": "보통",
-    "evidence": [
-      {
-        "title": "Kaufland · 사과에서 오렌지로",
-        "url": "https://fooh.com/library/4891-kaufland-apple-turns-into-orange-in-air-fooh-ad",
-        "observed": "효과 시작 약 5초. 던져진 초록 사과를 손이 받는 흐름에서 같은 손 위치의 과일이 오렌지로 바뀐다.",
-        "firstSecond": false,
-        "clip": "order-test-media/9b40100c115cf3ff27b3.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:T18",
-      "task290:combo:013",
-      "task290:ref:REF288-KAUFAPPLE"
-    ],
-    "kind": "principle",
-    "variantOf": null,
-    "evidenceStatus": "observed_motion",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
-  },
-  {
-    "id": "HK021",
-    "title": "한 방울이 접혀 골조 자람",
-    "family": "한 방울이 골조로 접혀 자람",
-    "summary": "액체 한 방울이 공중에서 단단한 마디로 꺾이며 다리 골조를 만든다.",
-    "trigger": "병에서 방울 하나가 떨어짐",
-    "effect": "액체 한 방울이 공중에서 단단한 마디로 꺾이며 다리 골조를 만든다.",
-    "reaction": "사람이 만들어지는 골조를 올려다봄",
-    "productSignals": [
-      "방울의 발원점",
-      "단순한 아치",
-      "실물과 분리된 효과 공간"
-    ],
-    "categories": [
-      "식품·음료",
-      "생활·주방"
-    ],
-    "example": "소스병에서 나온 방울이 공중에서 다섯 마디로 접혀 작은 다리를 세운다.",
-    "difficulty": "어려움",
-    "evidence": [],
-    "sourceIds": [
-      "task290:template:T19",
-      "task290:combo:019",
-      "task290:combo:040"
-    ],
-    "kind": "principle",
-    "variantOf": null,
-    "evidenceStatus": "author_proposal",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다.",
-      "T19 두 후보 모두 reference_gap. 한 방울이 접혀 골조가 되는 관찰 영상 없음."
-    ]
+    "adEvidenceVerified": true,
+    "excludedEvidenceCount": 1,
+    "adAuditNote": "원본의 광고 정체성 확인. 새 제품 적용 예시·반응은 저자 제안이며, 이번 검수에서 효과 영상 재생 검증은 반복하지 않았습니다."
   },
   {
     "id": "HK022",
@@ -1269,20 +472,6 @@ window.ORDER_HOOKS = [
     "difficulty": "어려움",
     "evidence": [
       {
-        "title": "Telstra Wherever You Go",
-        "url": "https://www.collider.com.au/studio/telstra-wherever-you-go-popup",
-        "observed": "0.94초에 손이 빈 종이 덮개를 들기 시작한다. 접혀 있던 입체 도시가 제품 경계에서 일어서는 것은 1.65초 표본부터 확인된다.",
-        "firstSecond": false,
-        "clip": "order-test-media/caa9a883c8d41e6acf82.mp4"
-      },
-      {
-        "title": "Dacia paper pop-up city",
-        "url": "https://www.youtube.com/watch?v=FOxaG6eTA5o",
-        "observed": "평면 종이 무대에서 접힌 흰 건물과 도로 구조가 서서 입체 마을을 만든다. 차량 제품이 무대를 직접 꺼내는 버전은 아니다.",
-        "firstSecond": false,
-        "clip": "order-test-media/8a3f46ac8db1d6294d60.mp4"
-      },
-      {
         "title": "Crocs Gift Box Unfolds at Plaza in Korea",
         "url": "https://fooh.com/library/2468-crocs-gift-box-unfolds-at-plaza-in-korea-fooh-ad",
         "observed": "광장에 놓인 초록 상자의 판이 순서대로 눕고 작은 제품 전시 무대까지 한 덩어리로 열린다.",
@@ -1312,7 +501,10 @@ window.ORDER_HOOKS = [
     "limitations": [
       "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
       "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
+    ],
+    "adEvidenceVerified": true,
+    "excludedEvidenceCount": 2,
+    "adAuditNote": "원본의 광고 정체성 확인. 새 제품 적용 예시·반응은 저자 제안이며, 이번 검수에서 효과 영상 재생 검증은 반복하지 않았습니다."
   },
   {
     "id": "HK023",
@@ -1342,13 +534,6 @@ window.ORDER_HOOKS = [
     "difficulty": "어려움",
     "evidence": [
       {
-        "title": "Chanel Platinum Égoïste",
-        "url": "https://www.youtube.com/watch?v=6hvJHN_Djdo",
-        "observed": "성인 옆 벽의 그림자가 몸과 별개의 자세를 취한다. 실물 제품 그림자 대신 그림자가 독립된 연기자가 되는 방식 참고. 인물 그림자 참고이며 제품 그림자의 독립 동작은 저자 적용 제안이다.",
-        "firstSecond": false,
-        "clip": "order-test-media/2ee701c6701b1ad48f27.mp4"
-      },
-      {
         "title": "Disney Parks Disney Side Shadows",
         "url": "https://www.youtube.com/watch?v=Hd_2Y29_FLU",
         "observed": "가게 앞 사람과 다른 모습의 투영 그림자가 옆 화면에서 따로 동작한다. 실물 제품 그림자가 아닌 독립 움직임 장치의 참고다. 인물 그림자 참고이며 제품 그림자의 독립 동작은 저자 적용 제안이다.",
@@ -1377,505 +562,10 @@ window.ORDER_HOOKS = [
       "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
       "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다.",
       "인물 그림자와 제품 그림자를 구분한다. 병 그림자 잔상은 변형 HK050에 별도 분리했다."
-    ]
-  },
-  {
-    "id": "HK024",
-    "title": "공간 전체를 삼키는 탄산 폭풍",
-    "family": "분출·회오리",
-    "summary": "작은 분출에 머물지 않고 탄산 흐름이 방 전체를 채운다.",
-    "trigger": "음료를 여는 순간 압력이 풀림",
-    "effect": "작은 분출에 머물지 않고 탄산 흐름이 방 전체를 채운다.",
-    "reaction": "주인공은 폭풍 가운데 태연하게 즐김",
-    "productSignals": [
-      "탄산이나 발포",
-      "열리는 입구",
-      "방 전체의 깊이"
     ],
-    "categories": [
-      "식품·음료",
-      "문구·성인 취미 굿즈",
-      "스포츠·아웃도어 소품"
-    ],
-    "example": "탄산음료를 따자 주황빛 폭풍이 사무실을 채우고 주인공은 한가운데서 마신다.",
-    "difficulty": "어려움",
-    "evidence": [
-      {
-        "title": "환타 회오리",
-        "url": "https://onecue26.github.io/works-media/onecue-fanta.mp4",
-        "observed": "0·0.5·0.95초는 성인과 환타 병이 보이며 큰 분출은 아직 없다. 사무실 전체 침수와 태연한 인물 반응은 frame_cards 기록 범위이며 이 발췌만으로 전 과정을 확증하지 않는다.",
-        "firstSecond": false,
-        "clip": "order-test-media/715cf22e972b78569b43.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:T01",
-      "task290:combo:001",
-      "task290:combo:061",
-      "task290:combo:141",
-      "task290:ref:VR274-037",
-      "frame_cards:effects:storm",
-      "good_list:fanta"
-    ],
-    "kind": "variant",
-    "variantOf": "HK001",
-    "evidenceStatus": "partial_motion_and_recorded_result",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다.",
-      "평가 기록: Dan 기준 예시 · 「우리 환타 만들때도 한번 참조해봐. 그건 참 잘나왓거든?」(10-19)",
-      "허용된 자료가 가리키는 refstudy/fanta.mp4 파일은 존재하지 않아 해당 이름을 evidence 경로로 만들지 않았다.",
-      "환타 회오리 원본 효과는 약 2초 이후이며 첫 1초 성공 사례로 표시하지 않는다."
-    ]
-  },
-  {
-    "id": "HK025",
-    "title": "제품 이름이 실제 파도로",
-    "family": "장르 패러디·말장난",
-    "summary": "이름이나 핵심 비유를 눈앞의 사건으로 바꾸어 인물에게 닿게 한다.",
-    "trigger": "이름과 연결되는 제품을 엶",
-    "effect": "이름이나 핵심 비유를 눈앞의 사건으로 바꾸어 인물에게 닿게 한다.",
-    "reaction": "주인공이 놀랐다가 웃음",
-    "productSignals": [
-      "눈에 보이는 이름이나 비유",
-      "인물과 효과의 접점"
-    ],
-    "categories": [
-      "식품·음료",
-      "생활·주방",
-      "화장품·바디케어",
-      "문구·성인 취미 굿즈",
-      "의류·패션잡화",
-      "신선식품·농산물",
-      "소형가전·디지털 주변기기",
-      "스포츠·아웃도어 소품",
-      "유아·아동 교육용품",
-      "반려동물 생활소품"
-    ],
-    "example": "파도라는 이름의 캔음료를 따자 탄산 파도가 주인공을 덮친다.",
-    "difficulty": "어려움",
-    "evidence": [],
-    "sourceIds": [
-      "task290:template:T11",
-      "frame_cards:effects:name",
-      "good_list:han"
-    ],
-    "kind": "variant",
-    "variantOf": "HK011",
-    "evidenceStatus": "recorded_result_no_local_video",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다.",
-      "평가 기록: 중간 · 참고 예시로 지목 · 「그냥 무난한 광고같음」(09-14) · 「빨대서핑말고 롤러장도 한번봐바」 · 「파도 광고 내가 말한건 두개였어. 서핑이랑 롤ㄹ러장.」(10-16)",
-      "허용된 자료가 가리키는 refstudy/han.mp4 파일은 존재하지 않아 해당 이름을 evidence 경로로 만들지 않았다.",
-      "파도가 인물을 덮치는 근거는 frame_cards:name의 옥상 B판 기록이다. good_list:han은 무난하다는 평가를 받은 다른 버전이므로 성공 근거로 합치지 않는다."
-    ]
-  },
-  {
-    "id": "HK026",
-    "title": "제품 위 미니어처의 방해와 묘기",
-    "family": "크기 뒤집기",
-    "summary": "정상 크기 제품 위 작은 인물이 놀다가 사용자를 막고 마지막 묘기를 한다.",
-    "trigger": "사용자가 제품을 집으려 손을 뻗음",
-    "effect": "정상 크기 제품 위 작은 인물이 놀다가 사용자를 막고 마지막 묘기를 한다.",
-    "reaction": "작은 인물이 잠깐 멈추라 하고 사용자는 기다림",
-    "productSignals": [
-      "작고 평평한 윗면",
-      "손과 비교되는 크기",
-      "미니어처가 설 자리"
-    ],
-    "categories": [
-      "식품·음료"
-    ],
-    "example": "캔 뚜껑의 손가락만 한 서퍼가 캔을 잡으려는 사람을 막고 마지막 파도를 탄다.",
-    "difficulty": "어려움",
-    "evidence": [
-      {
-        "title": "파도캔 · 빨대 위 서핑",
-        "url": null,
-        "observed": "0·0.65·0.95초에 캔 안 빨대 위에서 미니 서퍼가 파도를 탄다. 확인 범위는 캔 위 축소 서퍼의 크기 대비이며, 방해 대사와 마지막 묘기는 frame_cards·good_list 기록에만 있다.",
-        "firstSecond": true,
-        "clip": "order-test-media/84e901e7a94ada5d10f9.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:T02",
-      "task290:combo:002",
-      "task290:ref:OWN-PADO",
-      "frame_cards:effects:mini",
-      "good_list:surf"
-    ],
-    "kind": "variant",
-    "variantOf": "HK002",
-    "evidenceStatus": "partial_motion_and_recorded_result",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다.",
-      "평가 기록: Dan 기준 예시 · 「환타나 파도 서핑처럼 눈에 보이는게 낫지않을까? 바이럴이 되려면 눈에 확들어와야해」(11-05) · 「사실 음료에 회오리와 미니아쳐 전부 잘됏엇잖아. 근데 사실 이게 뽑기 개념이라 잘나왓을수도잇거든.」(11-12)",
-      "허용된 자료가 가리키는 refstudy/surf.mp4 파일은 존재하지 않아 해당 이름을 evidence 경로로 만들지 않았다.",
-      "OWN-PADO의 실제 영상 경로는 축소 서퍼 부분 근거이며 방해·보상 전체의 직접 영상 검증으로 계산하지 않는다."
-    ]
-  },
-  {
-    "id": "HK027",
-    "title": "재료가 깨어나 방 전체 정원으로",
-    "family": "성질이 공간의 규칙",
-    "summary": "제품 속 식물 재료가 살아나 자라며 방의 환경까지 바꾼다.",
-    "trigger": "마지막 꽃잎을 놓거나 재료를 건드림",
-    "effect": "제품 속 식물 재료가 살아나 자라며 방의 환경까지 바꾼다.",
-    "reaction": "인물이 조용히 감탄하며 주변을 둘러봄",
-    "productSignals": [
-      "꽃이나 식물 재료",
-      "재료가 보이는 입구",
-      "제품을 알아볼 단서"
-    ],
-    "categories": [
-      "식품·음료",
-      "생활·주방",
-      "화장품·바디케어",
-      "문구·성인 취미 굿즈",
-      "의류·패션잡화",
-      "신선식품·농산물",
-      "소형가전·디지털 주변기기",
-      "스포츠·아웃도어 소품",
-      "유아·아동 교육용품",
-      "반려동물 생활소품"
-    ],
-    "example": "압화 캔들의 꽃이 살아나 항아리에서 정원이 흘러나오며 방을 채운다.",
-    "difficulty": "어려움",
-    "evidence": [],
-    "sourceIds": [
-      "task290:template:T06",
-      "frame_cards:effects:bloom",
-      "good_list:candle"
-    ],
-    "kind": "variant",
-    "variantOf": "HK006",
-    "evidenceStatus": "recorded_result_no_local_video",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다.",
-      "평가 기록: 높음 · 「오 이번꺼 나쁘지않앗는데 내가 좀더 확인해볼께」(11-01) · 「난 개인적으로 이거랑 별개로 항아리 너무 좋앗거든 항아리캔들 해서 주변에 숲같은거 쫙도는거」(11-09)",
-      "허용된 자료가 가리키는 refstudy/candle.mp4 파일은 존재하지 않아 해당 이름을 evidence 경로로 만들지 않았다."
-    ]
-  },
-  {
-    "id": "HK028",
-    "title": "젤 리본이 얼굴을 돌다 흡수",
-    "family": "제품 둘레 리본",
-    "summary": "제품에서 나온 젤 띠가 얼굴을 감돌다 사용 순간 입술 쪽으로 모인다.",
-    "trigger": "젤을 덜거나 입술에 바름",
-    "effect": "제품에서 나온 젤 띠가 얼굴을 감돌다 사용 순간 입술 쪽으로 모인다.",
-    "reaction": "주인공이 부드럽게 받아들이며 만족함",
-    "productSignals": [
-      "젤이나 크림",
-      "윤기 있는 내용물",
-      "사용 부위가 명확함"
-    ],
-    "categories": [
-      "생활·주방",
-      "화장품·바디케어",
-      "문구·성인 취미 굿즈",
-      "의류·패션잡화",
-      "신선식품·농산물",
-      "소형가전·디지털 주변기기",
-      "스포츠·아웃도어 소품",
-      "유아·아동 교육용품",
-      "반려동물 생활소품"
-    ],
-    "example": "립마스크의 분홍 젤 리본이 얼굴을 돌다가 입술에 바르는 순간 모여든다.",
-    "difficulty": "어려움",
-    "evidence": [],
-    "sourceIds": [
-      "task290:template:X1",
-      "frame_cards:effects:wrap",
-      "good_list:lip"
-    ],
-    "kind": "variant",
-    "variantOf": "HK015",
-    "evidenceStatus": "recorded_result_no_local_video",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다.",
-      "평가 기록: 높음 · 「립마스크는 좋앗는데. 480p라 글자깨지는건 어쩔수없는거아닌가?」(11-11 22:42) · 「아까 립마스크 나쁘지않앗는데 첨에한거. 단지 효과가 너무 첨부터 드러나서그렇지」(11-12 00:12)",
-      "허용된 자료가 가리키는 refstudy/good_lip.mp4 파일은 존재하지 않아 해당 이름을 evidence 경로로 만들지 않았다."
-    ]
-  },
-  {
-    "id": "HK029",
-    "title": "재료 회오리가 원래 배열로 복귀",
-    "family": "분출·회오리",
-    "summary": "작은 재료들이 소용돌이로 솟아 인물을 감돌고 정확한 원래 배열로 내려앉는다.",
-    "trigger": "캔들 위 마지막 압화를 놓음",
-    "effect": "작은 재료들이 소용돌이로 솟아 인물을 감돌고 정확한 원래 배열로 내려앉는다.",
-    "reaction": "인물이 날아오른 꽃잎을 따라보고 미소 지음",
-    "productSignals": [
-      "작은 꽃잎이나 조각",
-      "돌아갈 원래 배열",
-      "보이는 제품 윗면"
-    ],
-    "categories": [
-      "식품·음료",
-      "생활·주방",
-      "화장품·바디케어",
-      "문구·성인 취미 굿즈",
-      "의류·패션잡화",
-      "신선식품·농산물",
-      "소형가전·디지털 주변기기",
-      "스포츠·아웃도어 소품",
-      "유아·아동 교육용품",
-      "반려동물 생활소품"
-    ],
-    "example": "캔들 압화가 회오리로 솟았다가 같은 꽃 배치로 왁스 위에 돌아온다.",
-    "difficulty": "어려움",
-    "evidence": [],
-    "sourceIds": [
-      "task290:template:T01",
-      "frame_cards:effects:whirl",
-      "good_list:candle_t1"
-    ],
-    "kind": "variant",
-    "variantOf": "HK001",
-    "evidenceStatus": "recorded_result_no_local_video",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다.",
-      "평가 기록: 친구 의견 · (친구 의견, Dan 이 붙여 넣음) 「화려한 효과로 꽃향기를 상상할 수 있어서 좋습니다. 다만 제품이 '캔들'이라는걸 알기 어려워요. 심지가 안보이고…」(11-12)",
-      "허용된 자료가 가리키는 refstudy/good_candle_t1.mp4 파일은 존재하지 않아 해당 이름을 evidence 경로로 만들지 않았다.",
-      "친구 의견이며 Dan 본인의 호평으로 계산하지 않는다."
-    ]
-  },
-  {
-    "id": "HK030",
-    "title": "거대한 제품을 도시에 설치",
-    "family": "크기 뒤집기",
-    "summary": "제품을 실제 거리의 설치물처럼 두고 주변 행인과 크기를 비교한다.",
-    "trigger": "일상 풍경 안에서 큰 제품을 발견함",
-    "effect": "제품을 실제 거리의 설치물처럼 두고 주변 행인과 크기를 비교한다.",
-    "reaction": "행인이 올려다보며 멈춤",
-    "productSignals": [
-      "판매 포장 형태",
-      "건물과의 크기 차이",
-      "도시 배경"
-    ],
-    "categories": [
-      "생활·주방",
-      "문구·성인 취미 굿즈",
-      "소형가전·디지털 주변기기",
-      "유아·아동 교육용품",
-      "반려동물 생활소품"
-    ],
-    "example": "큰 형광펜이 가로수와 건물 옆 공중에 떠 있게 한다.",
-    "difficulty": "보통",
-    "evidence": [
-      {
-        "title": "STABILO Giant Highlighter at HQ",
-        "url": "https://fooh.com/library/3990-stabilo-giant-highlighter-stabilo-hq-fooh-ad",
-        "observed": "0~0.95초, 건물 외벽과 가로수 옆에 사람 키보다 크게 보이는 보라색 형광펜이 떠 있다.",
-        "firstSecond": true,
-        "clip": "order-test-media/bdebfe32d7ae245e404a.mp4"
-      },
-      {
-        "title": "Glade · 방향제",
-        "url": "https://www.instagram.com/reel/DCW_iVXJDp0/",
-        "observed": "첫 화면부터 거대한 글레이드 병이 건물 밖에 떠 있다.",
-        "firstSecond": true,
-        "clip": "order-test-media/606ae400a16307264b02.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:T02",
-      "task290:combo:022",
-      "task290:combo:062",
-      "task290:combo:122",
-      "task290:combo:162",
-      "task290:combo:182",
-      "task290:ref:REF288-STABILO",
-      "task290:ref:B278-DCW_iVXJDp0"
-    ],
-    "kind": "variant",
-    "variantOf": "HK002",
-    "evidenceStatus": "observed_motion",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
-  },
-  {
-    "id": "HK031",
-    "title": "초대형 제품이 도시 시설 역할",
-    "family": "크기 뒤집기",
-    "summary": "제품의 구조를 지붕이나 도시 시설의 형태로 확장해 실제 장소와 겹친다.",
-    "trigger": "제품의 두 면을 펼침",
-    "effect": "제품의 구조를 지붕이나 도시 시설의 형태로 확장해 실제 장소와 겹친다.",
-    "reaction": "아래를 지나는 차량과 사람이 규모를 보여 줌",
-    "productSignals": [
-      "접히는 두 면",
-      "시설로 읽히는 구조",
-      "작은 기준물"
-    ],
-    "categories": [
-      "생활·주방",
-      "소형가전·디지털 주변기기",
-      "스포츠·아웃도어 소품"
-    ],
-    "example": "접힌 휴대전화의 두 화면이 도로 위의 거대한 지붕처럼 놓인다.",
-    "difficulty": "어려움",
-    "evidence": [
-      {
-        "title": "HONOR Foldable Phone Over Yangpu Bridge",
-        "url": "https://fooh.com/library/238-honor-smartphone-bridge-design-fooh-ad",
-        "observed": "0.95초, 접힌 폴더블 기기의 두 면이 차량이 오가는 양푸대교 차로 위를 지붕처럼 덮는다.",
-        "firstSecond": true,
-        "clip": "order-test-media/66c139802cc5f4c661c3.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:T02",
-      "task290:combo:022",
-      "task290:combo:122",
-      "task290:combo:142",
-      "task290:ref:REF288-HONOR"
-    ],
-    "kind": "variant",
-    "variantOf": "HK002",
-    "evidenceStatus": "observed_motion",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
-  },
-  {
-    "id": "HK032",
-    "title": "딱딱한 종이가 액체로 풀림",
-    "family": "재질·상태 치환",
-    "summary": "기존 표면이 내려앉으며 같은 색 액체로 바닥에 퍼진다.",
-    "trigger": "표지의 윗부분이 무너지듯 내려옴",
-    "effect": "기존 표면이 내려앉으며 같은 색 액체로 바닥에 퍼진다.",
-    "reaction": "흐르는 바닥을 내려다봄",
-    "productSignals": [
-      "강한 단색",
-      "단단한 표면",
-      "같은 색의 변형 결과"
-    ],
-    "categories": [
-      "문구·성인 취미 굿즈",
-      "의류·패션잡화",
-      "신선식품·농산물"
-    ],
-    "example": "서점 앞 빨간 책 표지가 붉은 액체로 바뀌어 바닥에 펼쳐진다.",
-    "difficulty": "어려움",
-    "evidence": [
-      {
-        "title": "Young Emperors · The Alphabet of Influence",
-        "url": "https://fooh.com/library/4822-young-emperors-giant-book-drops-at-perrotin-store-fooh-ad",
-        "observed": "효과 시작 원본 약 9초. 서점 앞의 빨간 책 표지가 내려앉으며 같은 빨간색의 액체처럼 바닥에 퍼진다. 제품 판매와 사인회 홍보를 겸한 소재다.",
-        "firstSecond": false,
-        "clip": "order-test-media/43eabb90f45b77616469.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:T03",
-      "task290:combo:063",
-      "task290:combo:083",
-      "task290:combo:103",
-      "task290:ref:REF288-BOOK"
-    ],
-    "kind": "variant",
-    "variantOf": "HK003",
-    "evidenceStatus": "observed_motion",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
-  },
-  {
-    "id": "HK033",
-    "title": "액체가 모여 완성품으로",
-    "family": "재질·상태 치환",
-    "summary": "주변 액체가 한 점으로 모이고 윤곽이 굳어 제품이 된다.",
-    "trigger": "검은 액체가 손 방향으로 모임",
-    "effect": "주변 액체가 한 점으로 모이고 윤곽이 굳어 제품이 된다.",
-    "reaction": "손 앞에서 완성된 제품을 확인함",
-    "productSignals": [
-      "뭉칠 수 있는 재료",
-      "실물과 같은 색",
-      "선명한 최종 형태"
-    ],
-    "categories": [
-      "문구·성인 취미 굿즈",
-      "의류·패션잡화",
-      "반려동물 생활소품"
-    ],
-    "example": "검은 액체가 손 쪽으로 모여 검정과 초록 운동화 한 짝으로 바뀐다.",
-    "difficulty": "어려움",
-    "evidence": [
-      {
-        "title": "Lust × Nike · Air Liquid Max",
-        "url": "https://fooh.com/library/4835-lust-floating-black-liquid-transforms-into-shoe-fooh-ad",
-        "observed": "효과 시작 약 2.1초. 인물 주위의 검은 액체가 손 쪽으로 모이고, 같은 어두운 덩어리가 검정·초록 운동화로 바뀐다.",
-        "firstSecond": false,
-        "clip": "order-test-media/0d572a704da2954040c8.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:T03",
-      "task290:combo:063",
-      "task290:combo:083",
-      "task290:combo:183",
-      "task290:ref:REF288-LUST"
-    ],
-    "kind": "variant",
-    "variantOf": "HK003",
-    "evidenceStatus": "observed_motion",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
-  },
-  {
-    "id": "HK034",
-    "title": "제품이 흔적 남기며 비행",
-    "family": "제품이 살아 움직이기",
-    "summary": "제품이 손에서 떨어져 자세를 바꾸고 이동 자취를 남긴다.",
-    "trigger": "손이 제품을 놓음",
-    "effect": "제품이 손에서 떨어져 자세를 바꾸고 이동 자취를 남긴다.",
-    "reaction": "사용자가 날아가는 방향을 따라봄",
-    "productSignals": [
-      "하나로 읽히는 실루엣",
-      "비행 방향",
-      "발 뒤에 남을 작은 흔적"
-    ],
-    "categories": [
-      "식품·음료",
-      "문구·성인 취미 굿즈",
-      "유아·아동 교육용품"
-    ],
-    "example": "조립 우주인이 손에서 떠나 블록 흔적을 남기며 날아간다.",
-    "difficulty": "어려움",
-    "evidence": [
-      {
-        "title": "LEGO Astronaut Grabbed by Hand in Billboard",
-        "url": "https://fooh.com/library/2095-lego-astronaut-grabbed-by-hand-from-billboard-fooh-ad",
-        "observed": "0초에 손과 닿아 있던 조립 우주인이 0.5~0.95초에 손에서 떨어져 자세를 기울이고 발 뒤에 블록 흔적을 남기며 날아간다.",
-        "firstSecond": true,
-        "clip": "order-test-media/a08995c2a33113822f87.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:T05",
-      "task290:combo:004",
-      "task290:combo:064",
-      "task290:combo:164",
-      "task290:ref:REF288-LEGOASTRO"
-    ],
-    "kind": "variant",
-    "variantOf": "HK005",
-    "evidenceStatus": "observed_motion",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
+    "adEvidenceVerified": true,
+    "excludedEvidenceCount": 1,
+    "adAuditNote": "원본의 광고 정체성 확인. 새 제품 적용 예시·반응은 저자 제안이며, 이번 검수에서 효과 영상 재생 검증은 반복하지 않았습니다."
   },
   {
     "id": "HK035",
@@ -1919,7 +609,10 @@ window.ORDER_HOOKS = [
     "limitations": [
       "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
       "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
+    ],
+    "adEvidenceVerified": true,
+    "excludedEvidenceCount": 0,
+    "adAuditNote": "원본의 광고 정체성 확인. 새 제품 적용 예시·반응은 저자 제안이며, 이번 검수에서 효과 영상 재생 검증은 반복하지 않았습니다."
   },
   {
     "id": "HK036",
@@ -1959,51 +652,10 @@ window.ORDER_HOOKS = [
     "limitations": [
       "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
       "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
-  },
-  {
-    "id": "HK037",
-    "title": "펜의 선이 꽃길로 이어짐",
-    "family": "성질이 공간의 규칙",
-    "summary": "펜이 지나간 경로와 같은 색의 꽃 무리가 한 방향으로 길게 생긴다.",
-    "trigger": "펜촉이 바닥을 지나감",
-    "effect": "펜이 지나간 경로와 같은 색의 꽃 무리가 한 방향으로 길게 생긴다.",
-    "reaction": "사람이 선의 끝을 따라봄",
-    "productSignals": [
-      "선이 생기는 도구",
-      "고유한 색",
-      "지나갈 경로"
     ],
-    "categories": [
-      "식품·음료",
-      "생활·주방",
-      "문구·성인 취미 굿즈"
-    ],
-    "example": "붉은 펜의 획을 따라 주차장에 붉은 꽃 띠가 생긴다.",
-    "difficulty": "어려움",
-    "evidence": [
-      {
-        "title": "STABILO — Red Highlighter Flower Trail",
-        "url": "https://fooh.com/library/3988-stabilo-giant-highlighter-red-flower-trail-fooh-ad",
-        "observed": "원본 첫 1초 확인. 붉은 펜이 지나간 방향을 따라 주차장 바닥에 같은 색 꽃의 띠가 길게 이어진다.",
-        "firstSecond": true,
-        "clip": "order-test-media/3f3b610b949e1910eb52.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:T06",
-      "task290:combo:016",
-      "task290:combo:036",
-      "task290:combo:065",
-      "task290:ref:REF288-STABILORED"
-    ],
-    "kind": "variant",
-    "variantOf": "HK006",
-    "evidenceStatus": "observed_motion",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
+    "adEvidenceVerified": true,
+    "excludedEvidenceCount": 0,
+    "adAuditNote": "원본의 광고 정체성 확인. 새 제품 적용 예시·반응은 저자 제안이며, 이번 검수에서 효과 영상 재생 검증은 반복하지 않았습니다."
   },
   {
     "id": "HK038",
@@ -2043,51 +695,10 @@ window.ORDER_HOOKS = [
     "limitations": [
       "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
       "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
-  },
-  {
-    "id": "HK039",
-    "title": "풍경에서 포장 인쇄로 공개",
-    "family": "착시·시점 공개",
-    "summary": "처음의 풍경을 그대로 보존한 채 카메라가 빠져 포장 그림임을 보여 준다.",
-    "trigger": "풍경 접사에서 카메라가 후퇴함",
-    "effect": "처음의 풍경을 그대로 보존한 채 카메라가 빠져 포장 그림임을 보여 준다.",
-    "reaction": "풍경의 정체를 알아차림",
-    "productSignals": [
-      "넓은 포장 그림",
-      "풍경처럼 읽히는 인쇄",
-      "제품 외곽"
     ],
-    "categories": [
-      "식품·음료",
-      "문구·성인 취미 굿즈",
-      "유아·아동 교육용품"
-    ],
-    "example": "강변 불꽃 야경을 보여 주다 라면 봉지 앞면 그림이었음을 드러낸다.",
-    "difficulty": "보통",
-    "evidence": [
-      {
-        "title": "오뚜기 한강라면",
-        "url": "https://www.youtube.com/watch?v=aO36w66KoPQ",
-        "observed": "효과 시작 약 7초 · 원본 첫 1초 미충족. 한강 야경처럼 보이던 수평선과 불꽃이 화면이 물러나면서 봉지 앞면 그림으로 드러난다.",
-        "firstSecond": false,
-        "clip": "order-test-media/e3483817d76b6970be71.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:T07",
-      "task290:combo:005",
-      "task290:combo:074",
-      "task290:combo:174",
-      "task290:ref:REF288-OTT"
-    ],
-    "kind": "variant",
-    "variantOf": "HK007",
-    "evidenceStatus": "observed_motion",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
+    "adEvidenceVerified": true,
+    "excludedEvidenceCount": 0,
+    "adAuditNote": "원본의 광고 정체성 확인. 새 제품 적용 예시·반응은 저자 제안이며, 이번 검수에서 효과 영상 재생 검증은 반복하지 않았습니다."
   },
   {
     "id": "HK040",
@@ -2131,7 +742,10 @@ window.ORDER_HOOKS = [
     "limitations": [
       "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
       "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
+    ],
+    "adEvidenceVerified": true,
+    "excludedEvidenceCount": 0,
+    "adAuditNote": "원본의 광고 정체성 확인. 새 제품 적용 예시·반응은 저자 제안이며, 이번 검수에서 효과 영상 재생 검증은 반복하지 않았습니다."
   },
   {
     "id": "HK041",
@@ -2175,191 +789,10 @@ window.ORDER_HOOKS = [
     "limitations": [
       "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
       "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
-  },
-  {
-    "id": "HK042",
-    "title": "액체 기포 속으로 한 방향 진입",
-    "family": "안으로 들어갔다 나오기",
-    "summary": "표면 접사에서 액체 안쪽의 기포 세계로 카메라가 들어간다.",
-    "trigger": "유리잔의 거품으로 접근함",
-    "effect": "표면 접사에서 액체 안쪽의 기포 세계로 카메라가 들어간다.",
-    "reaction": "관객이 보이지 않던 미세한 세계를 발견함",
-    "productSignals": [
-      "기포가 보이는 액체",
-      "투명한 잔",
-      "확대할 결"
     ],
-    "categories": [
-      "소형가전·디지털 주변기기",
-      "스포츠·아웃도어 소품",
-      "유아·아동 교육용품"
-    ],
-    "example": "흑맥주 거품 접사에서 같은 액체 안 기포 사이로 들어간다.",
-    "difficulty": "어려움",
-    "evidence": [
-      {
-        "title": "shadowstudy",
-        "url": "https://www.dandad.org/work/d-ad-awards-archive/chain",
-        "observed": "유리잔과 거품 접사 뒤 같은 어두운 액체 안쪽의 기포 세계로 진입한다. 8초 구간에서는 안으로 들어가는 단계가 확인된다.",
-        "firstSecond": false,
-        "clip": "order-test-media/c6c61e4135d1bd018f1e.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:T04",
-      "task290:combo:133",
-      "task290:combo:153",
-      "task290:combo:173",
-      "task290:ref:ON292-SHADOWSTUDY"
-    ],
-    "kind": "variant",
-    "variantOf": "HK004",
-    "evidenceStatus": "observed_motion",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
-  },
-  {
-    "id": "HK043",
-    "title": "제품 자체가 통과문으로 바뀜",
-    "family": "공간 전환",
-    "summary": "제품의 외곽이 검은 개구부로 바뀌고 그 안에서 다른 제품들이 나온다.",
-    "trigger": "제품 중앙이 다른 공간으로 열림",
-    "effect": "제품의 외곽이 검은 개구부로 바뀌고 그 안에서 다른 제품들이 나온다.",
-    "reaction": "나오는 포장들을 바라봄",
-    "productSignals": [
-      "인식되는 외곽선",
-      "통과할 제품 크기",
-      "남길 경계"
-    ],
-    "categories": [
-      "식품·음료"
-    ],
-    "example": "삼각 칩이 검은 통로로 변하고 안에서 과자 봉지들이 빠져나온다.",
-    "difficulty": "어려움",
-    "evidence": [
-      {
-        "title": "Doritos Chip Portal Reveals Packs of Chips",
-        "url": "https://fooh.com/library/2489-doritos-chip-portal-reveals-packs-of-chips-fooh-ad",
-        "observed": "삼각 칩이 성격이 다른 검은 개구부로 바뀌자 안에서 포장들이 통과해 나온다. 제품 자체가 경계가 되는 참고. 왕복 카메라 장치는 미확인.",
-        "firstSecond": false,
-        "clip": "order-test-media/545a1d22023c43d3cbe1.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:T09",
-      "task290:combo:006",
-      "task290:ref:ON292-DORITOSDOOR"
-    ],
-    "kind": "variant",
-    "variantOf": "HK009",
-    "evidenceStatus": "observed_motion",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
-  },
-  {
-    "id": "HK044",
-    "title": "반복 제품이 위에서 낙하해 쌓임",
-    "family": "반복·증식",
-    "summary": "동일 제품이 위에서 연달아 떨어지며 빈 영역을 채운다.",
-    "trigger": "윗공간에서 첫 제품이 떨어짐",
-    "effect": "동일 제품이 위에서 연달아 떨어지며 빈 영역을 채운다.",
-    "reaction": "관객이 쌓이는 양을 지켜봄",
-    "productSignals": [
-      "동일한 포장",
-      "낙하할 여유 공간",
-      "쌓일 바닥"
-    ],
-    "categories": [
-      "식품·음료",
-      "화장품·바디케어",
-      "의류·패션잡화"
-    ],
-    "example": "분홍 틴트 스틱이 쇼윈도로 우수수 떨어져 창 안을 채운다.",
-    "difficulty": "어려움",
-    "evidence": [
-      {
-        "title": "Sephora Makeup Tint Filling Store in NYC",
-        "url": "https://www.instagram.com/reel/C6RRUZJoYJ7/",
-        "observed": "0초 검정 화면 뒤 0.5초에 같은 형태의 분홍색 Milk 메이크업 틴트 스틱들이 쇼윈도 안에서 한꺼번에 떨어진다. 1초에는 화면을 채우기 시작한다.",
-        "firstSecond": true,
-        "clip": "order-test-media/8ee65d8e50b8b5b76ebe.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:T10",
-      "task290:combo:007",
-      "task290:combo:047",
-      "task290:combo:087",
-      "task290:ref:BF-MILK"
-    ],
-    "kind": "variant",
-    "variantOf": "HK010",
-    "evidenceStatus": "observed_motion",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
-  },
-  {
-    "id": "HK045",
-    "title": "작은 블록이 큰 외형 채우기",
-    "family": "반복·증식",
-    "summary": "같은 규격 부품이 기존 구조의 실루엣을 따라 쌓여 면을 완성한다.",
-    "trigger": "첫 부품이 구조물 아래쪽에 붙음",
-    "effect": "같은 규격 부품이 기존 구조의 실루엣을 따라 쌓여 면을 완성한다.",
-    "reaction": "완성되는 전체 모양을 알아봄",
-    "productSignals": [
-      "규격이 같은 블록",
-      "알아볼 전체 윤곽",
-      "차례로 채울 면"
-    ],
-    "categories": [
-      "의류·패션잡화",
-      "소형가전·디지털 주변기기",
-      "스포츠·아웃도어 소품",
-      "유아·아동 교육용품",
-      "반려동물 생활소품"
-    ],
-    "example": "조립 블록이 탑 다리부터 올라가며 기존 탑의 실루엣을 채운다.",
-    "difficulty": "어려움",
-    "evidence": [
-      {
-        "title": "LEGO — 에펠탑 블록 증식",
-        "url": "https://fooh.com/library/1273-lego-eiffel-tower-covered-with-lego-bricks-fooh-ad",
-        "observed": "효과 시작 약 7초 · 원본 첫 1초 미충족. 같은 크기의 여러 색 조립 블록이 탑 다리부터 기존 구조의 실루엣을 따라 면을 채운다.",
-        "firstSecond": false,
-        "clip": "order-test-media/f87e8ff79db975775c50.mp4"
-      },
-      {
-        "title": "LEGO Blocks Cover Building Facade",
-        "url": "https://fooh.com/library/4573-lego-blocks-cover-building-facade-fooh-ad",
-        "observed": "같은 규격의 조립 블록이 건물의 면을 채우며 누적된다.",
-        "firstSecond": false,
-        "clip": "order-test-media/993c91a708606f8f63d9.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:T10",
-      "task290:combo:087",
-      "task290:combo:127",
-      "task290:combo:147",
-      "task290:combo:167",
-      "task290:combo:187",
-      "task290:ref:REF288-LEGOEIFFEL",
-      "task290:ref:ON292-LEGOBRICKS"
-    ],
-    "kind": "variant",
-    "variantOf": "HK010",
-    "evidenceStatus": "observed_motion",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
+    "adEvidenceVerified": true,
+    "excludedEvidenceCount": 0,
+    "adAuditNote": "원본의 광고 정체성 확인. 새 제품 적용 예시·반응은 저자 제안이며, 이번 검수에서 효과 영상 재생 검증은 반복하지 않았습니다."
   },
   {
     "id": "HK046",
@@ -2403,91 +836,10 @@ window.ORDER_HOOKS = [
     "limitations": [
       "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
       "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
-  },
-  {
-    "id": "HK047",
-    "title": "운동화 우주선 발사",
-    "family": "장르 패러디·말장난",
-    "summary": "제품을 로켓 발사 장면의 주인공으로 삼고 분사와 먼지로 장르를 읽게 한다.",
-    "trigger": "받침대에서 운동화가 솟음",
-    "effect": "제품을 로켓 발사 장면의 주인공으로 삼고 분사와 먼지로 장르를 읽게 한다.",
-    "reaction": "사람이 위를 올려다보며 출발을 지켜봄",
-    "productSignals": [
-      "앞뒤가 분명한 제품",
-      "발사 받침대",
-      "장르를 보여 줄 연기"
     ],
-    "categories": [
-      "화장품·바디케어",
-      "의류·패션잡화",
-      "스포츠·아웃도어 소품"
-    ],
-    "example": "운동화를 받침대 위에서 발사하며 뒤쪽 분사와 먼지를 보여 준다.",
-    "difficulty": "어려움",
-    "evidence": [
-      {
-        "title": "Pronto — 이집트의 신발 발사",
-        "url": "https://fooh.com/library/4899-pronto-shoes-giant-shoe-launches-from-egypt-to-dubai-fooh-ad",
-        "observed": "효과 시작 약 5초 · 원본 첫 1초 이후. 운동화를 우주선처럼 받침대에서 발사한다. 분사와 먼지가 발사 장르의 표지로 쓰인다.",
-        "firstSecond": false,
-        "clip": "order-test-media/6989fba5a5aed092ccae.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:T11",
-      "task290:combo:048",
-      "task290:combo:088",
-      "task290:combo:148",
-      "task290:ref:REF288-PRONTO"
-    ],
-    "kind": "variant",
-    "variantOf": "HK011",
-    "evidenceStatus": "observed_motion",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
-  },
-  {
-    "id": "HK048",
-    "title": "광고 속 천이 경계 밖으로 흐름",
-    "family": "평면에서 튀어나오기",
-    "summary": "화면 속 모델과 배경은 남고 긴 원단만 프레임을 넘어 실제 거리로 흐른다.",
-    "trigger": "광고 속 스카프가 아래로 늘어짐",
-    "effect": "화면 속 모델과 배경은 남고 긴 원단만 프레임을 넘어 실제 거리로 흐른다.",
-    "reaction": "행인이 화면과 거리의 연결을 발견함",
-    "productSignals": [
-      "긴 원단",
-      "모델이 있는 평면 광고",
-      "남아 있는 프레임"
-    ],
-    "categories": [
-      "의류·패션잡화"
-    ],
-    "example": "건물 패션 광고의 스카프가 프레임 아래를 넘어 거리 밖으로 흘러나온다.",
-    "difficulty": "어려움",
-    "evidence": [
-      {
-        "title": "Missoni Scarf Extends Beyond Frame",
-        "url": "https://fooh.com/library/5134-missoni-scarf-extends-beyond-frame-fooh-ad",
-        "observed": "첫 화면부터 패션 이미지 안의 스카프가 프레임 아래 경계를 넘어 건물 밖으로 흐른다. 건물 프레임과 모델 이미지는 남아 있고 0.48·0.94초에 원단 변화를 볼 수 있다.",
-        "firstSecond": true,
-        "clip": "order-test-media/5064fcc586c521f29726.mp4"
-      }
-    ],
-    "sourceIds": [
-      "task290:template:T13",
-      "task290:combo:089",
-      "task290:ref:ON291-MISSONI"
-    ],
-    "kind": "variant",
-    "variantOf": "HK013",
-    "evidenceStatus": "observed_motion",
-    "limitations": [
-      "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
-      "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
+    "adEvidenceVerified": true,
+    "excludedEvidenceCount": 0,
+    "adAuditNote": "원본의 광고 정체성 확인. 새 제품 적용 예시·반응은 저자 제안이며, 이번 검수에서 효과 영상 재생 검증은 반복하지 않았습니다."
   },
   {
     "id": "HK049",
@@ -2531,7 +883,10 @@ window.ORDER_HOOKS = [
     "limitations": [
       "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
       "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
+    ],
+    "adEvidenceVerified": true,
+    "excludedEvidenceCount": 0,
+    "adAuditNote": "원본의 광고 정체성 확인. 새 제품 적용 예시·반응은 저자 제안이며, 이번 검수에서 효과 영상 재생 검증은 반복하지 않았습니다."
   },
   {
     "id": "HK050",
@@ -2575,6 +930,9 @@ window.ORDER_HOOKS = [
     "limitations": [
       "example과 reaction은 주문 적용을 위한 저자 연출안이며 실제 제품 성능·실제 관객 반응의 검증이 아니다.",
       "영상은 다시 재생하지 않았으며 지정 자료의 기존 관찰 기록을 재사용했다."
-    ]
+    ],
+    "adEvidenceVerified": true,
+    "excludedEvidenceCount": 0,
+    "adAuditNote": "원본의 광고 정체성 확인. 새 제품 적용 예시·반응은 저자 제안이며, 이번 검수에서 효과 영상 재생 검증은 반복하지 않았습니다."
   }
 ];
