@@ -7,9 +7,9 @@
   const list = v => Array.isArray(v) ? v : v ? [v] : [];
   const facts = [['category','제품 종류'],['benefit','핵심 효용'],['ingredients','성분 / 소재'],['feature','차별점'],['usage','사용 방법'],['size','용량 / 규격'],['price','가격 / 구성'],['caution','주의 / 금지 표현']];
   const kinds = {product:'제품',person:'인물',place:'장소'};
-  const editable = ['title','product','brand','description','url','audience','point','copy','tone','person','place','notes','facts','selected_hook','selection_mode','order','anchor_prompts'];
+  const editable = ['title','product','brand','description','url','audience','point','copy','tone','person','place','reaction','ending','notes','facts','selected_hook','selection_mode','order','anchor_prompts'];
   const hooks = Array.isArray(window.ORDER_HOOKS) ? window.ORDER_HOOKS.filter(h=>h.adEvidenceVerified===true&&(h.evidence||[]).length>0&&(h.evidence||[]).every(e=>{const s=window.ORDER_REFERENCE_SOURCES?.[e.url];return s?.adClassification==='confirmed_ad'&&s.catalogueIdentityMatch!==false;})) : [];
-  const state = {connected:false,health:{},endpoint:'http://127.0.0.1:8767',key:'',cases:Array.from({length:4},(_,i)=>({title:`소재 ${i+1}`,facts:{},assets:[],drafts:[],selection_mode:'recommended'})),index:0,dirty:new Set(),version:new Map(),saving:new Map(),busy:new Map(),picked:new Map(),blobs:new Map(),loadingBlobs:new Set(),page:40,ranking:[],random:[],connection:0};
+  const state = {connected:false,health:{},endpoint:'http://127.0.0.1:8767',key:'',cases:Array.from({length:4},(_,i)=>({title:`소재 ${i+1}`,facts:{},assets:[],drafts:[],productions:[],selection_mode:'recommended'})),index:0,dirty:new Set(),version:new Map(),saving:new Map(),busy:new Map(),picked:new Map(),blobs:new Map(),loadingBlobs:new Set(),page:40,ranking:[],random:[],connection:0};
   let saveTimer;
   const current = () => state.cases[state.index];
   const notice = (message, error=false) => { $('#notice').textContent=message; $('#notice').classList.toggle('error',error); };
@@ -43,8 +43,8 @@
   }
   function renderHealth() {
     const h=state.health;
-    $('#health').textContent=!state.connected?'● 연결 안 됨':`● 로컬 연결 · 사진용 GPT ${h.gptConnected?'브라우저 감지':'연결 필요'} · Codex ${h.codexAvailable?'사용 가능':'확인 필요'}`;
-    $('#health').title='서버 상태 응답 기준. GPT 제작 세션 모델: gpt-6-astra';
+    $('#health').textContent=!state.connected?'● 연결 안 됨':`● 로컬 연결 · 사진용 GPT ${h.gptConnected?'브라우저 감지':'연결 필요'} · 아스트라 준비 ${h.astraDirectReady===true?'가능':'연결 필요'}`;
+    $('#health').title=h.astraStatus||'제작 준비와 구방식 프롬프트 요청의 연결 상태는 별개입니다.'; $('#astra-connection-status').textContent=state.connected?(h.astraStatus||'아스트라 자동 전달 연결 확인 필요'):'로컬 연결 후 아스트라 전달 상태를 확인합니다.';
   }
   function updateSaveState() {
     const c=current();
@@ -61,7 +61,9 @@
     $$('[data-mode]').forEach(el=>el.disabled=!enabled||busy);
     $$('#anchors button').forEach(el=>{el.disabled=!enabled||busy||!state.health.gptConnected;el.title=state.health.gptConnected?'':'사진 생성용 GPT 브라우저 연결이 필요합니다.';});
     $('#draft').disabled=!enabled||busy||!state.health.codexAvailable;
-    $('#draft').title=state.health.codexAvailable?'GPT 제작 세션으로 프롬프트 초안 요청':'프롬프트 초안용 Codex CLI 연결이 필요합니다.';
+    $('#draft').title=state.health.codexAvailable?'구방식: 문자 프롬프트만 반환하며 아스트라 직접 제작 준비와 별개입니다.':'구방식 프롬프트 연결이 필요합니다.';
+    $('#astra-prepare').disabled=!enabled||busy||state.health.astraDirectReady!==true;
+    $('#astra-prepare').title=state.health.astraDirectReady===true?'오더·사진을 별도 아스트라 세션으로 전달해 준비합니다. 영상 제출은 하지 않습니다.':'아스트라 제작 준비 연결이 필요합니다. 연결 확인을 다시 실행하세요.';
     $('#task-state').textContent=state.busy.get(c.id)||'';$('#task-state').classList.toggle('busy',busy);
     updateSaveState();
   }
@@ -83,8 +85,8 @@
   }
   async function refresh(c) {
     const fresh=await api(`/api/cases/${c.id}`);
-    for(const key of ['assets','drafts','research'])c[key]=fresh[key]|| (key==='research'?null:[]);
-    if(current().id===c.id){renderAssets();renderResearch();renderDrafts();}
+    for(const key of ['assets','drafts','productions','research'])c[key]=fresh[key]|| (key==='research'?null:[]);
+    if(current().id===c.id){renderAssets();renderResearch();renderDrafts();renderTabs();}
   }
   function renderCase() {
     const c=current(); renderTabs();
@@ -186,7 +188,32 @@
     try {const url=new URL(value,location.href);const root=new URL('order-test-media/',location.href);if(url.origin!==root.origin||!url.pathname.startsWith(root.pathname))return '';return url.href;}catch{return '';}
   }
   function renderDrafts() {
-    $('#drafts').innerHTML=list(current().drafts).slice().reverse().map((d,i)=>`<article class="draft"><h3>GPT 영상 프롬프트 ${list(current().drafts).length-i}</h3><small>gpt-6-astra · ${esc(d.created_at||'')} ${d.session_id?`· 세션 ${esc(d.session_id)}`:''}</small><pre>${esc(text(d.prompt))}</pre>${d.rationale_ko?`<p>${esc(text(d.rationale_ko))}</p>`:''}${d.image_order?`<p>이미지 순서: ${esc(text(d.image_order))}</p>`:''}<button class="quiet" data-copy-draft="${list(current().drafts).length-1-i}">프롬프트 복사</button></article>`).join('');
+    renderProductions();
+    $('#drafts').innerHTML=list(current().drafts).slice().reverse().map((d,i)=>`<article class="draft"><h3>프롬프트만 받은 기록 · 구방식 ${list(current().drafts).length-i}</h3><small>gpt-6-astra · ${esc(d.created_at||'')} ${d.session_id?`· 세션 ${esc(d.session_id)}`:''}</small><pre>${esc(text(d.prompt))}</pre>${d.rationale_ko?`<p>${esc(text(d.rationale_ko))}</p>`:''}${d.image_order?`<p>이미지 순서: ${esc(text(d.image_order))}</p>`:''}<button class="quiet" data-copy-draft="${list(current().drafts).length-1-i}">프롬프트 복사</button></article>`).join('');
+  }
+  function renderProductions() {
+    const records=list(current().productions);
+    $('#productions').innerHTML=records.slice().reverse().map((entry,i)=>{
+      const result=entry?.result&&typeof entry.result==='object'?entry.result:entry;
+      const prepared=result?.mode==='prepare'&&result?.status==='prepared'&&result?.submitted_count===0;
+      const count=Number.isInteger(result?.submitted_count)?String(result.submitted_count):'미확인';
+      return `<article class="draft"><h3>아스트라 제작 준비 ${records.length-i} · ${prepared?'준비됨':esc(result?.status||entry?.status||'상태 확인 필요')}</h3><p>${prepared?'영상 제출 0회 · 실제 유료 생성은 Dan 새 승인 필요':`기록상 제출 수: ${esc(count)} · 준비 완료 여부를 확인하세요.`}</p>${result?.prompt?`<pre>${esc(text(result.prompt))}</pre><button class="quiet" data-copy-production="${records.length-1-i}">준비 프롬프트 복사</button>`:''}${result?.rationale_ko?`<p>${esc(text(result.rationale_ko))}</p>`:''}${result?.error||entry?.error?`<p>${esc(text(result?.error||entry?.error))}</p>`:''}<details><summary>준비 기록 · 연결 정보</summary><p>세션: ${esc(text(result?.thread_id)||'미확인')}<br>턴: ${esc(text(result?.turn_id)||'미확인')}<br>모드: ${esc(text(result?.mode)||'미확인')}<br>상태: ${esc(text(result?.status)||entry?.status||'미확인')}<br>제출 수: ${esc(count)}</p><small>${esc(entry?.created_at||result?.created_at||'')}</small></details></article>`;
+    }).join('')||'<p class="empty">아직 아스트라 제작 준비 기록이 없습니다. 구방식 프롬프트 기록과 별도로 보관됩니다.</p>';
+  }
+  function astraPreparePayload(c) {
+    if(state.health.astraDirectReady!==true)throw new Error('아스트라 제작 준비 연결이 필요합니다.');
+    if(!text(c.product).trim())throw new Error('제품명을 먼저 입력하세요.');
+    const h=hooks.find(h=>String(h.id)===String(c.selected_hook));
+    if(!h)throw new Error('제품에 사용할 확인된 훅을 선택하세요. 보류된 훅으로는 준비할 수 없습니다. 저장 오더는 유지됩니다.');
+    if(!text(h.trigger).trim()||!text(h.effect).trim())throw new Error('선택한 훅의 시작 동작과 효과를 확인하세요.');
+    if(!text(c.order).trim())throw new Error('제작 오더를 먼저 작성하세요.');
+    const usage=text(c.facts?.usage).trim();
+    if(!usage)throw new Error('제품의 실제 사용 동작을 사용 방법 칸에 입력하세요.');
+    if(!text(c.reaction).trim())throw new Error('반응을 입력하세요.');
+    if(!text(c.ending).trim())throw new Error('마무리를 입력하세요.');
+    const picks=selectedAssets(c),asset_ids=Object.keys(kinds).map(kind=>picks[kind]);
+    if(asset_ids.some((id,i)=>!id||!list(c.assets).some(a=>a.id===id&&a.kind===Object.keys(kinds)[i]))||new Set(asset_ids).size!==3)throw new Error('제품·인물·장소 사진을 한 장씩 지정하고 전달 선택하세요.');
+    return {order:c.order,asset_ids,frame:{opening:text(h.trigger).trim(),action:[usage,text(h.effect).trim()].join(' / '),reaction:c.reaction,ending:c.ending}};
   }
   async function operation(label,fn,c=current()) {
     if(state.busy.has(c.id))return;
@@ -203,10 +230,10 @@
     for(let i=0;i<1200;i++) {
       if(connection!==state.connection)throw new Error(`연결이 바뀌어 작업 확인을 중단했습니다. 작업 ID: ${taskId}`);
       const t=await api(`/api/tasks/${encodeURIComponent(taskId)}`);
-      if(t.status==='failed')throw new Error(t.error||'작업 실패');
+      if(t.status==='failed'){if(action==='astra_prepare')try{await refresh(c);}catch{}throw new Error(t.error||'작업 실패');}
       if(t.status==='completed'){await refresh(c);return t.result;}
       if(!['queued','running'].includes(t.status))throw new Error(`알 수 없는 작업 상태: ${t.status}`);
-      state.busy.set(c.id,`${action==='draft'?'GPT 영상 프롬프트':action==='collect'?'제품 정보 수집':'GPT 앵커 생성'} · ${t.status==='queued'?'대기 중':'진행 중'} · ${taskId.slice(0,8)}`);updateControls();
+      state.busy.set(c.id,`${action==='astra_prepare'?'아스트라 제작 준비 · 생성 없음':action==='draft'?'프롬프트만 받기 · 구방식':action==='collect'?'제품 정보 수집':'GPT 앵커 생성'} · ${t.status==='queued'?'대기 중':'진행 중'} · ${taskId.slice(0,8)}`);updateControls();
       await new Promise(resolve=>setTimeout(resolve,1500));
     }
     throw new Error(`작업 확인 시간이 초과됐습니다. 중복 요청 전 서버 상태를 확인하세요. 작업 ID: ${taskId}`);
@@ -217,8 +244,9 @@
     const f=value=>({value}),v=(label,value)=>({label,value:value||`[${label} 입력 필요]`});
     return [
       [f('시댄스 2.5, 15초 영상, 480p, 9대16 기준')],
-      [v('브랜드·제품',[c.brand,c.product].filter(Boolean).join(' ')),f(' 15초 CF(실사) - '),v('인물',c.person),f(', '),v('장소',c.place),f(', '),v('사용 동작',text(c.facts?.usage).trim()||h?.trigger),f('. 제품 히어로컷으로 마무리.')],
-      [v('훅 이름',h?.title),f(': '),v('효과',h?.orderEffect||h?.effect||h?.summary),f('. 광고 문법(3초 훅→제품→엔드카드).')],
+      [v('브랜드·제품',[c.brand,c.product].filter(Boolean).join(' ')),f(' 15초 CF(실사) - '),v('인물',c.person),f(', '),v('장소',c.place),f(', '),v('사용 동작',text(c.facts?.usage).trim()||h?.trigger),f('.')],
+      [v('훅 이름',h?.title),f(': '),v('효과',h?.orderEffect||h?.effect||h?.summary),f('.')],
+      [f('반응: '),v('반응',c.reaction),f('. 마무리: '),v('마무리',c.ending),f('. 광고 문법(훅→사용·효과→반응→마무리).')],
       [f('제품명: '),v('제품명',c.product),f(', 브랜드: '),v('브랜드',c.brand),f('. 톤: '),v('톤',c.tone),f('. BGM필수.')],
       [f('시트: 제품/인물/장소 (첨부 순서 동일). 제품 외형·표기 유지.')],
       [f('글자 후반 합성. '),v('카피',c.copy?`“${c.copy}”`:'지정 카피 없음 · 임의 카피 생성 금지')]
@@ -240,7 +268,7 @@
     const known=facts.filter(([key])=>key!=='usage'&&text(c.facts?.[key]).trim()).map(([key,label])=>`${label}: ${text(c.facts[key])}`);
     if(known.length)lines.push(`확인 사실: ${known.join(' / ')}`);
     if(c.notes)lines.push(`추가 지시: ${c.notes}`);
-    lines.push('미확인 효능·수치는 만들지 말고 영상 프롬프트 초안만 작성.');
+    lines.push('미확인 효능·수치는 만들지 말 것. 실제 영상 생성·제출은 Dan의 새 승인 뒤에만 진행.');
     c.order=lines.filter(Boolean).join('\n');$('#order-editor').value=c.order;changed();
   }
   function prepareAnchors() {
@@ -270,7 +298,7 @@
       cleanBlobs();state.picked.clear();state.cases=cases.slice(0,4);state.index=0;state.connected=true;
       let storageWarning='';try {if($('#remember').checked)localStorage.setItem('order-test-bridge',JSON.stringify({endpoint:state.endpoint,key:state.key}));else localStorage.removeItem('order-test-bridge');}catch{storageWarning=' 이 브라우저는 연결 설정 저장을 허용하지 않습니다.';}
       renderCase();renderHealth();$('#settings').close();
-      notice(`이 PC의 로컬 서버에 연결했습니다. 클라우드 DB 연결 없음. ${health.gptConnected?'GPT 제작 세션 연결됨.':'GPT 브라우저 연결이 필요합니다. 서버 담당자가 GPT_SUB9340 브라우저 세션에 로그인한 뒤 연결 설정에서 다시 확인하세요.'}${health.codexAvailable?'':' Codex 실행 상태도 확인이 필요합니다.'}${storageWarning}`);
+      notice(`이 PC의 로컬 서버에 연결했습니다. 클라우드 DB 연결 없음. ${health.gptConnected?'사진용 GPT 브라우저 감지됨.':'사진용 GPT 브라우저 연결이 필요합니다. 서버 담당자가 GPT_SUB9340 브라우저 세션에 로그인한 뒤 연결 설정에서 다시 확인하세요.'}${health.codexAvailable?'':' Codex 실행 상태도 확인이 필요합니다.'}${storageWarning}`);
     }catch(e){state.connected=false;renderHealth();updateControls();$('#connection-feedback').textContent=message(e);notice(message(e),true);}
     finally {$('#connect').disabled=false;}
   }
@@ -300,7 +328,20 @@
   $('#build-order').addEventListener('click',()=>{if(current().order?.trim())$('#replace-dialog').showModal();else try{composeOrder();}catch(e){notice(message(e),true);}});
   $('#replace-dialog').addEventListener('close',()=>{if($('#replace-dialog').returnValue==='replace')try{composeOrder();}catch(e){notice(message(e),true);}});
   $('#copy-order').addEventListener('click',()=>copy(current().order));
-  $('#draft').addEventListener('click',()=>operation('GPT 초안 요청',async c=>{if(!state.health.codexAvailable)throw new Error('프롬프트 초안용 Codex CLI 연결이 필요합니다.');if(!c.order?.trim())throw new Error('제작 오더를 먼저 작성하세요.');if(c.selected_hook&&!hooks.some(h=>String(h.id)===String(c.selected_hook)))throw new Error('기존에 선택한 훅은 광고 근거 확인을 통과하지 못해 분리됐습니다. 확인된 훅을 다시 선택해 주세요. 저장한 오더는 보존됩니다.');const picks=selectedAssets(c);const ids=Object.keys(kinds).map(k=>picks[k]);if(ids.some(id=>!id)||new Set(ids).size!==3)throw new Error('제품·인물·장소 사진을 한 장씩 지정하고 전달 선택하세요.');await task(c,'draft',{order:c.order,asset_ids:ids,model:'gpt-6-astra'});}));
+  $('#astra-prepare').addEventListener('click',()=>{
+    const c=current();
+    try {astraPreparePayload(c);} catch(e){notice(message(e),true);return;}
+    operation('아스트라 제작 준비',async c=>{
+      const result=await task(c,'astra_prepare',astraPreparePayload(c));
+      if(!result||result.mode!=='prepare'||result.status!=='prepared'||result.submitted_count!==0||!result.thread_id||!result.turn_id||!text(result.prompt).trim())throw new Error('제작 준비 응답의 모드·상태·제출 수 또는 준비 내용을 확인할 수 없습니다. 준비 기록을 검토하세요.');
+      // The server persists productions; use that history, adding only a missing immediate result.
+      c.productions=list(c.productions);
+      if(!c.productions.some(entry=>{const p=entry?.result||entry;return p?.thread_id===result.thread_id&&p?.turn_id===result.turn_id;}))c.productions.push(result);
+      if(current().id===c.id)renderDrafts();
+    },c);
+  });
+  $('#productions').addEventListener('click',e=>{const button=e.target.closest('[data-copy-production]');if(!button)return;const entry=list(current().productions)[Number(button.dataset.copyProduction)];copy(text((entry?.result||entry)?.prompt));});
+  $('#draft').addEventListener('click',()=>operation('프롬프트만 받기 · 구방식',async c=>{if(!state.health.codexAvailable)throw new Error('프롬프트 초안용 Codex CLI 연결이 필요합니다.');if(!c.order?.trim())throw new Error('제작 오더를 먼저 작성하세요.');if(c.selected_hook&&!hooks.some(h=>String(h.id)===String(c.selected_hook)))throw new Error('기존에 선택한 훅은 광고 근거 확인을 통과하지 못해 분리됐습니다. 확인된 훅을 다시 선택해 주세요. 저장한 오더는 보존됩니다.');const picks=selectedAssets(c);const ids=Object.keys(kinds).map(k=>picks[k]);if(ids.some(id=>!id)||new Set(ids).size!==3)throw new Error('제품·인물·장소 사진을 한 장씩 지정하고 전달 선택하세요.');await task(c,'draft',{order:c.order,asset_ids:ids,model:'gpt-6-astra'});}));
   $('#drafts').addEventListener('click',e=>{const b=e.target.closest('[data-copy-draft]');if(b)copy(text(current().drafts[Number(b.dataset.copyDraft)]?.prompt));});
   window.addEventListener('beforeunload',e=>{if(state.dirty.size||state.busy.size){e.preventDefault();e.returnValue='';}});
   for(const [selector,key] of [['#family-filter','family'],['#category-filter','categories']]) {
