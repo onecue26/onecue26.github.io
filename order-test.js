@@ -7,7 +7,7 @@
   const list = v => Array.isArray(v) ? v : v ? [v] : [];
   const facts = [['category','제품 종류'],['benefit','핵심 효용'],['ingredients','성분 / 소재'],['feature','차별점'],['usage','사용 방법'],['size','용량 / 규격'],['price','가격 / 구성'],['caution','주의 / 금지 표현']];
   const kinds = {product:'제품',person:'인물',place:'장소'};
-  const editable = ['title','product','brand','description','url','audience','point','copy','tone','person','place','reaction','ending','notes','facts','selected_hook','selection_mode','order','anchor_prompts'];
+  const editable = ['title','product','brand','description','url','audience','point','product_change','hook_link','copy','tone','person','place','reaction','ending','notes','facts','selected_hook','selection_mode','order','anchor_prompts'];
   const hooks = Array.isArray(window.ORDER_HOOKS) ? window.ORDER_HOOKS.filter(h=>h.adEvidenceVerified===true&&(h.evidence||[]).length>0&&(h.evidence||[]).every(e=>{const s=window.ORDER_REFERENCE_SOURCES?.[e.url];return s?.adClassification==='confirmed_ad'&&s.catalogueIdentityMatch!==false;})) : [];
   const state = {connected:false,health:{},endpoint:'http://127.0.0.1:8767',key:'',cases:Array.from({length:4},(_,i)=>({title:`소재 ${i+1}`,facts:{},assets:[],drafts:[],productions:[],selection_mode:'recommended'})),index:0,dirty:new Set(),version:new Map(),saving:new Map(),busy:new Map(),picked:new Map(),blobs:new Map(),loadingBlobs:new Set(),page:40,ranking:[],random:[],connection:0};
   let saveTimer;
@@ -46,9 +46,21 @@
     $('#health').textContent=!state.connected?'● 연결 안 됨':`● 로컬 연결 · 사진용 GPT ${h.gptConnected?'브라우저 감지':'연결 필요'} · 아스트라 준비 ${h.astraDirectReady===true?'가능':'연결 필요'}`;
     $('#health').title=h.astraStatus||'제작 준비와 구방식 프롬프트 요청의 연결 상태는 별개입니다.'; $('#astra-connection-status').textContent=state.connected?(h.astraStatus||'아스트라 자동 전달 연결 확인 필요'):'로컬 연결 후 아스트라 전달 상태를 확인합니다.';
   }
+  const storyFields=['product_change','hook_link'];
+  const storyStorageKey=c=>`order-test-story-v1:${state.endpoint}:${c.id}`;
+  function restoreLocalStory(c) {
+    try {const saved=JSON.parse(localStorage.getItem(storyStorageKey(c))||'null');if(saved&&storyFields.every(k=>typeof saved[k]==='string')){for(const k of storyFields)c[k]=saved[k];c._storyLocal=true;}}catch{}
+  }
+  function confirmStoryStorage(c,response,payload) {
+    if(!storyFields.some(k=>payload[k]!==undefined))return;
+    const fallback=storyFields.some(k=>payload[k]!==undefined&&response?.[k]!==payload[k]);
+    try {if(fallback)localStorage.setItem(storyStorageKey(c),JSON.stringify(Object.fromEntries(storyFields.map(k=>[k,payload[k]||'']))));else localStorage.removeItem(storyStorageKey(c));}
+    catch {if(fallback)throw new Error('새 관계 입력을 보관하지 못했습니다. 작업 서버를 새 버전으로 실행한 뒤 저장하세요. 입력은 현재 화면에 유지됩니다.');}
+    c._storyLocal=fallback;
+  }
   function updateSaveState() {
     const c=current();
-    $('#save-state').textContent=!state.connected?'연결 대기':state.saving.has(c.id)?'저장 중…':state.dirty.has(c.id)?'저장되지 않은 변경':'저장됨';
+    $('#save-state').textContent=!state.connected?'연결 대기':state.saving.has(c.id)?'저장 중…':state.dirty.has(c.id)?'저장되지 않은 변경':c._storyLocal?'저장됨 · 새 관계 입력은 이 브라우저 보관':'저장됨';
   }
   function updateControls() {
     const c=current(), busy=state.busy.has(c.id), enabled=state.connected&&!!c.id;
@@ -80,7 +92,7 @@
     const version=state.version.get(c.id); const payload={};
     for(const key of editable)if(c[key]!==undefined)payload[key]=c[key];
     const pending=api(`/api/cases/${c.id}`,payload,'PUT');state.saving.set(c.id,pending);updateSaveState();
-    try {await pending;if(version===state.version.get(c.id))state.dirty.delete(c.id);}
+    try {const response=await pending;confirmStoryStorage(c,response,payload);if(version===state.version.get(c.id))state.dirty.delete(c.id);}
     finally {state.saving.delete(c.id);updateSaveState();renderTabs();}
   }
   async function refresh(c) {
@@ -213,7 +225,7 @@
     if(!text(c.ending).trim())throw new Error('마무리를 입력하세요.');
     const picks=selectedAssets(c),asset_ids=Object.keys(kinds).map(kind=>picks[kind]);
     if(asset_ids.some((id,i)=>!id||!list(c.assets).some(a=>a.id===id&&a.kind===Object.keys(kinds)[i]))||new Set(asset_ids).size!==3)throw new Error('제품·인물·장소 사진을 한 장씩 지정하고 전달 선택하세요.');
-    return {order:c.order,asset_ids,frame:{opening:text(h.trigger).trim(),action:[usage,text(h.effect).trim()].join(' / '),reaction:c.reaction,ending:c.ending}};
+    return {order:c.order,asset_ids,frame:{opening:text(h.trigger).trim(),action:[usage,c.point?`제품 포인트: ${c.point}`:'',c.product_change?`제품이 만드는 변화: ${c.product_change}`:'',c.hook_link?`훅과의 연결: ${c.hook_link}`:'',text(h.effect).trim()].filter(Boolean).join(' / '),reaction:c.reaction,ending:c.ending}};
   }
   async function operation(label,fn,c=current()) {
     if(state.busy.has(c.id))return;
@@ -245,6 +257,9 @@
     return [
       [f('시댄스 2.5, 15초 영상, 480p, 9대16 기준')],
       [v('브랜드·제품',[c.brand,c.product].filter(Boolean).join(' ')),f(' 15초 CF(실사) - '),v('인물',c.person),f(', '),v('장소',c.place),f(', '),v('사용 동작',text(c.facts?.usage).trim()||h?.trigger),f('.')],
+      [f('제품 포인트: '),v('제품 포인트',c.point),f('.')],
+      [f('제품이 만드는 변화: '),v('제품이 만드는 변화',c.product_change),f('.')],
+      [f('훅과의 연결: '),v('훅과의 연결',c.hook_link),f('.')],
       [v('훅 이름',h?.title),f(': '),v('효과',h?.orderEffect||h?.effect||h?.summary),f('.')],
       [f('반응: '),v('반응',c.reaction),f('. 마무리: '),v('마무리',c.ending),f('. 광고 문법(훅→사용·효과→반응→마무리).')],
       [f('제품명: '),v('제품명',c.product),f(', 브랜드: '),v('브랜드',c.brand),f('. 톤: '),v('톤',c.tone),f('. BGM필수.')],
@@ -261,8 +276,8 @@
     const c=current(),h=hooks.find(h=>String(h.id)===String(c.selected_hook));
     if(!c.product?.trim())throw new Error('제품명을 먼저 입력하세요.');
     if(!h)throw new Error('사용할 훅을 먼저 선택하세요.');
+    if(!text(c.point).trim()||!text(c.product_change).trim()||!text(c.hook_link).trim())throw new Error('제품 포인트, 제품이 만드는 변화, 훅과의 연결을 채워 주세요. 제품이 어떻게 사건을 만드는지 적어 주세요.');
     const lines=orderSegments().map(row=>row.map(part=>part.value).join(''));
-    if(c.point)lines.push(`핵심 소구: ${c.point}`);
     if(c.audience)lines.push(`타깃: ${c.audience}`);
     if(c.description)lines.push(`제품 설명: ${c.description}`);
     const known=facts.filter(([key])=>key!=='usage'&&text(c.facts?.[key]).trim()).map(([key,label])=>`${label}: ${text(c.facts[key])}`);
@@ -293,7 +308,7 @@
       state.connection++;state.connected=false;state.endpoint=url.origin;state.key=$('#bridge-key').value.trim();if(!state.key)throw new Error('연결 키를 입력하세요.');
       const health=await api('/api/status');state.health=health;
       let response=await api('/api/cases');if(!Array.isArray(response.cases))throw new Error('소재 목록 응답 형식을 확인하세요.');
-      const cases=response.cases.sort((a,b)=>(a.created_at||'').localeCompare(b.created_at||''));
+      const cases=response.cases.sort((a,b)=>(a.created_at||'').localeCompare(b.created_at||''));cases.forEach(restoreLocalStory);
       while(cases.length<4)cases.push(await api('/api/cases',{title:`소재 ${cases.length+1}`}));
       cleanBlobs();state.picked.clear();state.cases=cases.slice(0,4);state.index=0;state.connected=true;
       let storageWarning='';try {if($('#remember').checked)localStorage.setItem('order-test-bridge',JSON.stringify({endpoint:state.endpoint,key:state.key}));else localStorage.removeItem('order-test-bridge');}catch{storageWarning=' 이 브라우저는 연결 설정 저장을 허용하지 않습니다.';}
