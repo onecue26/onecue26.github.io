@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>광고주 입력 자료 · 테스트 소재 목록</title>
+<link rel="stylesheet" href="order-test-advertiser-inputs.css">
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script defer src="config.js"></script><script defer src="asset-access.js"></script><script defer src="order-test-advertiser-inputs-data.js"></script><script defer src="order-test-advertiser-inputs.js"></script>
+</head><body><header><div class="top"><a href="order-test.html">ONECUE · 별도 테스트</a><span id="account"></span></div><p class="eyebrow">ADVERTISER INPUTS</p><h1>입력한 자료 그대로,<br>테스트 소재를 한곳에.</h1><p class="lead">원큐에 저장된 의뢰와 이번 5개 제품의 보유 자료를 모았습니다. 없는 값은 비워두며, 같은 제품도 요청이 다르면 별도 의뢰로 남깁니다.</p>
+<div class="counts"><span id="count-site">기존 원큐 · 로그인 확인 중</span><span id="count-extra">이번 추가 · 5개</span><span id="count-visible"></span></div>
+<div id="status" role="status" aria-live="polite">이번 5개를 먼저 표시하고 기존 로그인 상태를 확인합니다.</div>
+<div class="toolbar"><label class="search">자료 검색<input id="search" type="search" placeholder="제품명 · 브랜드 · 원하는 내용 · 입력자"></label><label>자료 출처<select id="source"><option value="all">모두 보기</option><option value="site">기존 원큐 의뢰</option><option value="additional_five">이번 5개 제품</option></select></label><button id="reload" type="button">기존 자료 새로 읽기</button></div>
+<p class="hint">기존 의뢰는 현재 원큐 계정에 허용된 자료만 조회합니다. 입력 내용·첨부 사진은 이 페이지를 위해 공개 파일로 옮기지 않습니다. DB 저장·수정이나 영상 생성은 하지 않습니다.</p></header>
+<main><div id="list" aria-live="polite"></div><p id="empty" hidden>검색 결과가 없습니다.</p></main>
+<dialog id="photo-view"><button id="close-photo" type="button" aria-label="사진 닫기">닫기 ×</button><img id="photo-large" alt=""><p id="photo-caption"></p></dialog>
+<footer><a href="order-test-five-products.html">5종 영상 비교</a> · <a href="order-test.html#creative-core">핵심 제작 원칙</a><p>원본 입력 조회용 임시 페이지 · 누락 값 추정 없음 · 새 생성 없음</p></footer></body></html>
