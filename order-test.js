@@ -252,13 +252,13 @@
     throw new Error(`작업 확인 시간이 초과됐습니다. 중복 요청 전 서버 상태를 확인하세요. 작업 ID: ${taskId}`);
   }
   async function copy(value) {if(!value){notice('복사할 내용이 없습니다.',true);return;}try{await navigator.clipboard.writeText(value);notice('클립보드에 복사했습니다.');}catch{notice('클립보드 접근이 차단됐습니다. 텍스트를 선택해 직접 복사하세요.',true);}}
-  const directorRequest = "아스트라 연출 설계 요청: 위 오더의 제품 포인트·핵심 행동·변화·반응·마무리를 유지하면서 장면 구성, 카메라, 전환과 리듬을 설계하고 이유를 짧게 설명한다. 공통 컷 수나 초 배분은 고정하지 않는다. 제품 사용과 변화가 같은 행동으로 이어지도록 설계한다. 영상에서 확인할 핵심 판단 기준 3개와 제품 외형 보존 기준을 각각 관찰 가능한 통과·실패 조건으로 작성한다. 미리 성공했다고 평가하지 않는다. 결과는 연출안·설계 이유·최종 모델용 프롬프트 초안·판단 기준으로 구분한다. 오더 작성·제작 준비 단계는 기획 검토만 하며 이미지·영상 생성, 업로드, 유료 실행과 발주는 하지 않는다. 실제 제작은 Dan의 별도 승인 뒤에만 진행한다.";
+  const directorRequest = "아스트라 연출 설계 요청: 테스트는 Seedance 2.5 / 480p / draft:true이며 실제 도구 설정에 반영한다. Draft 미지원·누락·보정 시 일반 모드로 바꿔 제출하지 말고 보고한다. 위 오더의 제품 포인트·핵심 행동·변화·반응·마무리를 유지하면서 장면 구성, 카메라, 전환과 리듬을 설계하고 이유를 짧게 설명한다. 공통 컷 수나 초 배분은 고정하지 않는다. 제품 사용과 변화가 같은 행동으로 이어지도록 설계한다. 영상에서 확인할 핵심 판단 기준 3개와 제품 외형 보존 기준을 각각 관찰 가능한 통과·실패 조건으로 작성한다. 미리 성공했다고 평가하지 않는다. 결과는 연출안·설계 이유·최종 모델용 프롬프트 초안·판단 기준으로 구분한다. 오더 작성·제작 준비 단계는 기획 검토만 하며 이미지·영상 생성, 업로드, 유료 실행과 발주는 하지 않는다. 실제 제작은 Dan의 별도 승인 뒤에만 진행한다.";
   const withDirectorRequest = order => text(order).includes("아스트라 연출 설계 요청:") ? order : `${order}\n\n${directorRequest}`;
   function orderSegments() {
     const c=current(),h=hooks.find(h=>String(h.id)===String(c.selected_hook));
     const f=value=>({value}),v=(label,value)=>({label,value:value||`[${label} 입력 필요]`});
     return [
-      [f('시댄스 2.5, 15초 영상, 480p, 9대16 기준')],
+      [f('시댄스 2.5, 15초 영상, 480p, Draft 켜기(draft:true), 9대16, 소리 포함 기준')],
       [v('브랜드·제품',[c.brand,c.product].filter(Boolean).join(' ')),f(' 15초 CF(실사) - '),v('인물',c.person),f(', '),v('장소',c.place),f(', '),v('사용 동작',text(c.facts?.usage).trim()||h?.trigger),f('.')],
       [f('제품 포인트: '),v('제품 포인트',c.point),f('.')],
       [f('제품이 만드는 변화: '),v('제품이 만드는 변화',c.product_change),f('.')],
