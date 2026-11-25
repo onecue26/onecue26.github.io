@@ -217,16 +217,13 @@
     if(state.health.astraDirectReady!==true)throw new Error('아스트라 제작 준비 연결이 필요합니다.');
     if(!text(c.product).trim())throw new Error('제품명을 먼저 입력하세요.');
     const h=hooks.find(h=>String(h.id)===String(c.selected_hook));
-    if(!h)throw new Error('제품에 사용할 확인된 훅을 선택하세요. 보류된 훅으로는 준비할 수 없습니다. 저장 오더는 유지됩니다.');
-    if(!text(h.trigger).trim()||!text(h.effect).trim())throw new Error('선택한 훅의 시작 동작과 효과를 확인하세요.');
+    if(c.selected_hook&&!h)throw new Error('보류된 훅을 강제하지 않습니다. 선택을 해제하면 제작자가 제품에 맞춰 판단합니다.');
+    if(h&&(!text(h?.trigger).trim()||!text(h?.effect).trim()))throw new Error('선택한 훅의 근거가 부족합니다. 선택을 해제하거나 확인된 훅을 사용하세요.');
     if(!text(c.order).trim())throw new Error('제작 오더를 먼저 작성하세요.');
     const usage=text(c.facts?.usage).trim();
-    if(!usage)throw new Error('제품의 실제 사용 동작을 사용 방법 칸에 입력하세요.');
-    if(!text(c.reaction).trim())throw new Error('반응을 입력하세요.');
-    if(!text(c.ending).trim())throw new Error('마무리를 입력하세요.');
     const picks=selectedAssets(c),asset_ids=Object.keys(kinds).map(kind=>picks[kind]);
     if(asset_ids.some((id,i)=>!id||!list(c.assets).some(a=>a.id===id&&a.kind===Object.keys(kinds)[i]))||new Set(asset_ids).size!==3)throw new Error('제품·인물·장소 사진을 한 장씩 지정하고 전달 선택하세요.');
-    return {order:withDirectorRequest(c.order),asset_ids,frame:{opening:text(h.trigger).trim(),action:[usage,c.point?`제품 포인트: ${c.point}`:'',c.product_change?`제품이 만드는 변화: ${c.product_change}`:'',c.hook_link?`훅과의 연결: ${c.hook_link}`:'',text(h.effect).trim()].filter(Boolean).join(' / '),reaction:c.reaction,ending:c.ending}};
+    return {order:withDirectorRequest(c.order),asset_ids,frame:{opening:text(h?.trigger).trim(),action:[usage,c.point?`제품 포인트: ${c.point}`:'',c.product_change?`제품이 만드는 변화: ${c.product_change}`:'',c.hook_link?`훅과의 연결: ${c.hook_link}`:'',text(h?.effect).trim()].filter(Boolean).join(' / '),reaction:c.reaction,ending:c.ending}};
   }
   async function operation(label,fn,c=current()) {
     if(state.busy.has(c.id))return;
@@ -252,11 +249,11 @@
     throw new Error(`작업 확인 시간이 초과됐습니다. 중복 요청 전 서버 상태를 확인하세요. 작업 ID: ${taskId}`);
   }
   async function copy(value) {if(!value){notice('복사할 내용이 없습니다.',true);return;}try{await navigator.clipboard.writeText(value);notice('클립보드에 복사했습니다.');}catch{notice('클립보드 접근이 차단됐습니다. 텍스트를 선택해 직접 복사하세요.',true);}}
-  const directorRequest = "아스트라 연출 설계 요청: 테스트는 Seedance 2.5 / 480p / draft:true이며 실제 도구 설정에 반영한다. Draft 미지원·누락·보정 시 일반 모드로 바꿔 제출하지 말고 보고한다. 위 오더의 제품 포인트·핵심 행동·변화·반응·마무리를 유지하면서 장면 구성, 카메라, 전환과 리듬을 설계하고 이유를 짧게 설명한다. 공통 컷 수나 초 배분은 고정하지 않는다. 제품 사용과 변화가 같은 행동으로 이어지도록 설계한다. 영상에서 확인할 핵심 판단 기준 3개와 제품 외형 보존 기준을 각각 관찰 가능한 통과·실패 조건으로 작성한다. 미리 성공했다고 평가하지 않는다. 결과는 연출안·설계 이유·최종 모델용 프롬프트 초안·판단 기준으로 구분한다. 오더 작성·제작 준비 단계는 기획 검토만 하며 이미지·영상 생성, 업로드, 유료 실행과 발주는 하지 않는다. 실제 제작은 Dan의 별도 승인 뒤에만 진행한다.";
+  const directorRequest = "아스트라 연출 설계 요청: 테스트는 Seedance 2.5 / 480p / draft:true이며 실제 도구 설정에 반영한다. Draft 미지원·누락·보정 시 일반 모드로 바꿔 제출하지 말고 보고한다. 위 오더의 제품 포인트·핵심 행동·변화·반응·마무리를 유지하면서 장면 구성, 카메라, 전환과 리듬을 설계하고 이유를 짧게 설명한다. 공통 컷 수나 초 배분은 고정하지 않는다. 제품 사용과 변화가 같은 행동으로 이어지도록 설계한다. 음식·상황·인물·훅·반응·마무리가 미지정이면 제품 근거와 광고 목표로 제작자가 선택하고 이유를 남긴다. 브랜드·제품과 핵심 포인트를 짧은 한국어 음성으로도 전달하고 BGM이 가리지 않게 한다. 제품을 다른 상품으로 바꿔도 그대로인 볼거리나 음식만 기억되는 기획은 다시 고친다. 제품사실과 저자 연출안을 구분하며 효능·우위·후기는 발명하지 않는다. product_strategy에 제품포인트·메시지·선택맥락·선택이유·탈락대안·훅인과·음성대사·전달채널·앵커필요를 기록한다. 영상에서 확인할 제품 정체성·사용인과·음성메시지·제품에 종속된 볼거리·외형보존의 5개 판단 기준을 각각 관찰 가능한 통과·실패 조건으로 작성한다. 미리 성공했다고 평가하지 않는다. 결과는 연출안·설계 이유·최종 모델용 프롬프트 초안·판단 기준으로 구분한다. 오더 작성·제작 준비 단계는 기획 검토만 하며 이미지·영상 생성, 업로드, 유료 실행과 발주는 하지 않는다. 실제 제작은 Dan의 별도 승인 뒤에만 진행한다.";
   const withDirectorRequest = order => text(order).includes("아스트라 연출 설계 요청:") ? order : `${order}\n\n${directorRequest}`;
   function orderSegments() {
     const c=current(),h=hooks.find(h=>String(h.id)===String(c.selected_hook));
-    const f=value=>({value}),v=(label,value)=>({label,value:value||`[${label} 입력 필요]`});
+    const f=value=>({value}),v=(label,value)=>({label,value:value||`[${label} 미지정 · 제품 근거로 제작자 판단]`});
     return [
       [f('시댄스 2.5, 15초 영상, 480p, Draft 켜기(draft:true), 9대16, 소리 포함 기준')],
       [v('브랜드·제품',[c.brand,c.product].filter(Boolean).join(' ')),f(' 15초 CF(실사) - '),v('인물',c.person),f(', '),v('장소',c.place),f(', '),v('사용 동작',text(c.facts?.usage).trim()||h?.trigger),f('.')],
