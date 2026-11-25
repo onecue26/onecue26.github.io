@@ -209,7 +209,7 @@
       const result=entry?.result&&typeof entry.result==='object'?entry.result:entry;
       const prepared=result?.mode==='prepare'&&result?.status==='prepared'&&result?.submitted_count===0;
       const count=Number.isInteger(result?.submitted_count)?String(result.submitted_count):'미확인';
-      return `<article class="draft"><h3>아스트라 제작 준비 ${records.length-i} · ${prepared?'준비됨':esc(result?.status||entry?.status||'상태 확인 필요')}</h3><p>${prepared?'영상 제출 0회 · 실제 유료 생성은 Dan 새 승인 필요':`기록상 제출 수: ${esc(count)} · 준비 완료 여부를 확인하세요.`}</p>${result?.prompt?`<pre>${esc(text(result.prompt))}</pre><button class="quiet" data-copy-production="${records.length-1-i}">준비 프롬프트 복사</button>`:''}${result?.rationale_ko?`<p>${esc(text(result.rationale_ko))}</p>`:''}${result?.error||entry?.error?`<p>${esc(text(result?.error||entry?.error))}</p>`:''}<details><summary>준비 기록 · 연결 정보</summary><p>세션: ${esc(text(result?.thread_id)||'미확인')}<br>턴: ${esc(text(result?.turn_id)||'미확인')}<br>모드: ${esc(text(result?.mode)||'미확인')}<br>상태: ${esc(text(result?.status)||entry?.status||'미확인')}<br>제출 수: ${esc(count)}</p><small>${esc(entry?.created_at||result?.created_at||'')}</small></details></article>`;
+      return `<article class="draft"><h3>아스트라 제작 준비 ${records.length-i} · ${prepared?'준비됨':esc(result?.status||entry?.status||'상태 확인 필요')}</h3><p>${prepared?'영상 제출 0회 · 실제 유료 생성은 Dan 새 승인 필요':`기록상 제출 수: ${esc(count)} · 준비 완료 여부를 확인하세요.`}</p>${result?.prompt?`<pre>${esc(text(result.prompt))}</pre><button class="quiet" data-copy-production="${records.length-1-i}">준비 프롬프트 복사</button>`:''}${result?.rationale_ko?`<p>${esc(text(result.rationale_ko))}</p>`:''}${list(result?.storyboard).length?`<details open><summary>아스트라 연출 설계</summary>${list(result.storyboard).map(b=>`<p><b>${esc(text(b.beat))}</b> · ${esc(text(b.visual))}<br><small>${esc(text(b.purpose))} · 연결: ${esc(text(b.transition))}</small></p>`).join('')}</details>`:''}${list(result?.acceptance_criteria).length?`<details open><summary>생성 후 판단 기준 · 아직 검증 전</summary>${list(result.acceptance_criteria).map(c=>`<p><b>${esc(text(c.target))}</b><br>통과: ${esc(text(c.pass_if))}<br>실패: ${esc(text(c.fail_if))}</p>`).join('')}</details>`:''}${result?.error||entry?.error?`<p>${esc(text(result?.error||entry?.error))}</p>`:''}<details><summary>준비 기록 · 연결 정보</summary><p>세션: ${esc(text(result?.thread_id)||'미확인')}<br>턴: ${esc(text(result?.turn_id)||'미확인')}<br>모드: ${esc(text(result?.mode)||'미확인')}<br>상태: ${esc(text(result?.status)||entry?.status||'미확인')}<br>제출 수: ${esc(count)}</p><small>${esc(entry?.created_at||result?.created_at||'')}</small></details></article>`;
     }).join('')||'<p class="empty">아직 아스트라 제작 준비 기록이 없습니다. 구방식 프롬프트 기록과 별도로 보관됩니다.</p>';
   }
   function astraPreparePayload(c) {
@@ -225,7 +225,7 @@
     if(!text(c.ending).trim())throw new Error('마무리를 입력하세요.');
     const picks=selectedAssets(c),asset_ids=Object.keys(kinds).map(kind=>picks[kind]);
     if(asset_ids.some((id,i)=>!id||!list(c.assets).some(a=>a.id===id&&a.kind===Object.keys(kinds)[i]))||new Set(asset_ids).size!==3)throw new Error('제품·인물·장소 사진을 한 장씩 지정하고 전달 선택하세요.');
-    return {order:c.order,asset_ids,frame:{opening:text(h.trigger).trim(),action:[usage,c.point?`제품 포인트: ${c.point}`:'',c.product_change?`제품이 만드는 변화: ${c.product_change}`:'',c.hook_link?`훅과의 연결: ${c.hook_link}`:'',text(h.effect).trim()].filter(Boolean).join(' / '),reaction:c.reaction,ending:c.ending}};
+    return {order:withDirectorRequest(c.order),asset_ids,frame:{opening:text(h.trigger).trim(),action:[usage,c.point?`제품 포인트: ${c.point}`:'',c.product_change?`제품이 만드는 변화: ${c.product_change}`:'',c.hook_link?`훅과의 연결: ${c.hook_link}`:'',text(h.effect).trim()].filter(Boolean).join(' / '),reaction:c.reaction,ending:c.ending}};
   }
   async function operation(label,fn,c=current()) {
     if(state.busy.has(c.id))return;
@@ -251,6 +251,8 @@
     throw new Error(`작업 확인 시간이 초과됐습니다. 중복 요청 전 서버 상태를 확인하세요. 작업 ID: ${taskId}`);
   }
   async function copy(value) {if(!value){notice('복사할 내용이 없습니다.',true);return;}try{await navigator.clipboard.writeText(value);notice('클립보드에 복사했습니다.');}catch{notice('클립보드 접근이 차단됐습니다. 텍스트를 선택해 직접 복사하세요.',true);}}
+  const directorRequest = "아스트라 연출 설계 요청: 위 오더의 제품 포인트·핵심 행동·변화·반응·마무리를 유지하면서 장면 구성, 카메라, 전환과 리듬을 설계하고 이유를 짧게 설명한다. 공통 컷 수나 초 배분은 고정하지 않는다. 제품 사용과 변화가 같은 행동으로 이어지도록 설계한다. 영상에서 확인할 핵심 판단 기준 3개와 제품 외형 보존 기준을 각각 관찰 가능한 통과·실패 조건으로 작성한다. 미리 성공했다고 평가하지 않는다. 결과는 연출안·설계 이유·최종 모델용 프롬프트 초안·판단 기준으로 구분한다. 오더 작성·제작 준비 단계는 기획 검토만 하며 이미지·영상 생성, 업로드, 유료 실행과 발주는 하지 않는다. 실제 제작은 Dan의 별도 승인 뒤에만 진행한다.";
+  const withDirectorRequest = order => text(order).includes("아스트라 연출 설계 요청:") ? order : `${order}\n\n${directorRequest}`;
   function orderSegments() {
     const c=current(),h=hooks.find(h=>String(h.id)===String(c.selected_hook));
     const f=value=>({value}),v=(label,value)=>({label,value:value||`[${label} 입력 필요]`});
@@ -264,7 +266,8 @@
       [f('반응: '),v('반응',c.reaction),f('. 마무리: '),v('마무리',c.ending),f('. 광고 문법(훅→사용·효과→반응→마무리).')],
       [f('제품명: '),v('제품명',c.product),f(', 브랜드: '),v('브랜드',c.brand),f('. 톤: '),v('톤',c.tone),f('. BGM필수.')],
       [f('시트: 제품/인물/장소 (첨부 순서 동일). 제품 외형·표기 유지.')],
-      [f('글자 후반 합성. '),v('카피',c.copy?`“${c.copy}”`:'지정 카피 없음 · 임의 카피 생성 금지')]
+      [f('글자 후반 합성. '),v('카피',c.copy?`“${c.copy}”`:'지정 카피 없음 · 임의 카피 생성 금지')],
+      [f(directorRequest)]
     ];
   }
   function renderOrderFrame() {
