@@ -97,7 +97,8 @@
   }
   async function refresh(c) {
     const fresh=await api(`/api/cases/${c.id}`);
-    for(const key of ['assets','drafts','productions','research'])c[key]=fresh[key]|| (key==='research'?null:[]);
+    if(fresh.selected_assets){c.selected_assets=fresh.selected_assets;state.picked.delete(c.id);}
+    for(const key of ['assets','drafts','productions','research','selected_assets'])c[key]=fresh[key]|| (key==='research'?null:[]);
     if(current().id===c.id){renderAssets();renderResearch();renderDrafts();renderTabs();}
   }
   function renderCase() {
@@ -114,7 +115,7 @@
   }
   function selectedAssets(c=current()) {
     if(!state.picked.has(c.id)) {
-      const picks={}; for(const kind of Object.keys(kinds)) {const asset=list(c.assets).find(a=>a.kind===kind);if(asset)picks[kind]=asset.id;}
+      const picks={...(c.selected_assets||{})}; for(const kind of Object.keys(kinds)) {const asset=list(c.assets).find(a=>a.kind===kind);if(asset&&!picks[kind])picks[kind]=asset.id;}
       state.picked.set(c.id,picks);
     }
     return state.picked.get(c.id);
@@ -122,7 +123,7 @@
   function renderAssets() {
     const c=current(),picks=selectedAssets(c);
     for(const kind of Object.keys(kinds))if(!list(c.assets).some(a=>a.id===picks[kind]&&a.kind===kind))delete picks[kind];
-    $('#assets').innerHTML=list(c.assets).length?c.assets.map(a=>`<div class="asset"><img data-asset="${esc(a.id)}" alt="${esc(a.filename||'등록 사진')}" ${state.blobs.has(a.id)?`src="${esc(state.blobs.get(a.id))}"`:''}><p title="${esc(a.filename)}">${esc(a.filename||a.id)}</p><select data-role="${esc(a.id)}" aria-label="${esc(a.filename)} 역할"><option value="">역할 미지정</option>${Object.entries(kinds).map(([key,label])=>`<option value="${key}" ${a.kind===key?'selected':''}>${label}</option>`).join('')}</select>${a.kind?`<label class="check"><input type="radio" name="pick-${esc(a.kind)}" data-pick="${esc(a.id)}" data-kind="${esc(a.kind)}" ${picks[a.kind]===a.id?'checked':''}>${kinds[a.kind]||'사진'} 전달 선택</label>`:''}</div>`).join(''):'<p class="empty">등록한 사진이 없습니다.<br>실제 제품사진부터 올려 주세요.</p>';
+    $('#assets').innerHTML=list(c.assets).length?c.assets.map(a=>`<div class="asset"><img data-asset="${esc(a.id)}" alt="${esc(a.filename||'등록 사진')}" ${state.blobs.has(a.id)?`src="${esc(state.blobs.get(a.id))}"`:''}><p title="${esc(a.filename)}">${esc(a.filename||a.id)}</p><small class="asset-quality">${a.provenance?.type==='local_ai_upscale'?'AI 확대본 · 작은 글씨 대조 필요':'원본 사진'} · ${Number(a.width)||'?'} × ${Number(a.height)||'?'} px</small>${a.kind==='product'?`<button class="quiet photo-quality-button" data-upscale="${esc(a.id)}" data-mutate>${a.provenance?.type==='local_ai_upscale'?'원본과 비교':'제품 영역 확인 · AI 2K'}</button>`:''}<select data-role="${esc(a.id)}" aria-label="${esc(a.filename)} 역할"><option value="">역할 미지정</option>${Object.entries(kinds).map(([key,label])=>`<option value="${key}" ${a.kind===key?'selected':''}>${label}</option>`).join('')}</select>${a.kind?`<label class="check"><input type="radio" name="pick-${esc(a.kind)}" data-pick="${esc(a.id)}" data-kind="${esc(a.kind)}" ${picks[a.kind]===a.id?'checked':''}>${kinds[a.kind]||'사진'} 전달 선택</label>`:''}</div>`).join(''):'<p class="empty">등록한 사진이 없습니다.<br>실제 제품사진부터 올려 주세요.</p>';
     for(const a of list(c.assets))loadAsset(a);
     updateControls();
   }
@@ -245,7 +246,7 @@
       if(t.status==='failed'){if(action==='astra_prepare')try{await refresh(c);}catch{}throw new Error(t.error||'작업 실패');}
       if(t.status==='completed'){await refresh(c);return t.result;}
       if(!['queued','running'].includes(t.status))throw new Error(`알 수 없는 작업 상태: ${t.status}`);
-      state.busy.set(c.id,`${action==='astra_prepare'?'아스트라 제작 준비 · 생성 없음':action==='draft'?'프롬프트만 받기 · 구방식':action==='collect'?'제품 정보 수집':'GPT 앵커 생성'} · ${t.status==='queued'?'대기 중':'진행 중'} · ${taskId.slice(0,8)}`);updateControls();
+      state.busy.set(c.id,`${action==='astra_prepare'?'아스트라 제작 준비 · 생성 없음':action==='draft'?'프롬프트만 받기 · 구방식':action==='collect'?'제품 정보 수집':action==='upscale'?'로컬 AI 2K 확대 · 영상 생성 없음':'GPT 앵커 생성'} · ${t.status==='queued'?'대기 중':'진행 중'} · ${taskId.slice(0,8)}`);updateControls();
       await new Promise(resolve=>setTimeout(resolve,1500));
     }
     throw new Error(`작업 확인 시간이 초과됐습니다. 중복 요청 전 서버 상태를 확인하세요. 작업 ID: ${taskId}`);
@@ -336,8 +337,99 @@
   $('#upload-button').addEventListener('click',()=>$('#upload-input').click());
   $('#prepare-anchors').addEventListener('click',prepareAnchors);
   $('#upload-input').addEventListener('change',e=>{const files=[...e.target.files];e.target.value='';if(!files.length)return;operation('사진 업로드',async c=>{let done=0;try{for(const file of files){if(!['image/png','image/jpeg','image/webp','image/gif'].includes(file.type))throw new Error(`${file.name}: PNG/JPEG/WebP/GIF 사진만 지원합니다.`);if(file.size>16*1024*1024)throw new Error(`${file.name}: 사진은 16MB 이하로 올려 주세요.`);const data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=()=>reject(new Error('사진 읽기 실패'));reader.readAsDataURL(file);});await api(`/api/cases/${c.id}/upload`,{filename:file.name,data});done++;}}finally{await refresh(c);if(done)notice(`${done}장 업로드 완료. 역할을 지정하세요.`);}});});
-  $('#assets').addEventListener('change',e=>{if(e.target.dataset.role){const id=e.target.dataset.role,kind=e.target.value||null;operation('사진 역할 지정',async c=>{await api(`/api/cases/${c.id}/assign`,{id,kind});if(kind)selectedAssets(c)[kind]=id;await refresh(c);});}if(e.target.dataset.pick){selectedAssets()[e.target.dataset.kind]=e.target.dataset.pick;notice('GPT 전달 사진을 선택했습니다. 이 선택은 현재 브라우저 세션에 유지됩니다.');}});
-  $('#anchors').addEventListener('click',e=>{const button=e.target.closest('[data-generate]');if(!button)return;const kind=button.dataset.generate;operation('GPT 앵커 생성',async c=>{if(!state.health.gptConnected)throw new Error('GPT 브라우저 연결이 필요합니다.');const prompt=c.anchor_prompts?.[kind]?.trim();if(!prompt)throw new Error(`${kinds[kind]} 앵커 요청 문장을 입력하세요.`);const picks=selectedAssets(c);const attachment_ids=kind==='product'?(picks.product?[picks.product]:[]):[];if(kind==='product'&&!attachment_ids.length)throw new Error('제품 원본사진을 업로드하고 제품 역할로 지정·선택하세요.');const result=await task(c,'anchors',{kind,prompt,attachment_ids});if(result?.asset){selectedAssets(c)[kind]=result.asset.id;if(current().id===c.id)renderAssets();}});});
+
+  let photo=null;
+  async function chooseAsset(c,id,kind='product') {
+    await api(`/api/cases/${c.id}/select_asset`,{id,kind});
+    state.picked.delete(c.id);await refresh(c);
+  }
+  async function photoURL(a) {
+    if(state.blobs.has(a.id))return state.blobs.get(a.id);
+    const connection=state.connection,blob=await api(a.url,undefined,undefined,true);
+    if(connection!==state.connection)throw new Error('연결이 변경됐습니다. 사진을 다시 여세요.');
+    const url=URL.createObjectURL(blob);state.blobs.set(a.id,url);return url;
+  }
+  function cropBox() {
+    const w=photo.image.naturalWidth,h=photo.image.naturalHeight;
+    const x=Math.max(0,Math.min(w-1,Math.round(Number($('#crop-x').value)||0)));
+    const y=Math.max(0,Math.min(h-1,Math.round(Number($('#crop-y').value)||0)));
+    const cw=Math.max(1,Math.min(w-x,Math.round(Number($('#crop-width').value)||w)));
+    const ch=Math.max(1,Math.min(h-y,Math.round(Number($('#crop-height').value)||h)));
+    return [x,y,x+cw,y+ch];
+  }
+  function setCrop(box) {
+    ['x','y','width','height'].forEach((key,i)=>$('#crop-'+key).value=i<2?box[i]:box[i]-box[i-2]);
+    paintCrop();
+  }
+  function paintCrop() {
+    if(!photo)return;
+    const img=photo.image,can=$('#crop-canvas'),ctx=can.getContext('2d'),scale=Math.min(1,1000/img.naturalWidth,650/img.naturalHeight);
+    can.width=Math.round(img.naturalWidth*scale);can.height=Math.round(img.naturalHeight*scale);
+    ctx.drawImage(img,0,0,can.width,can.height);ctx.fillStyle='rgba(16,30,22,.58)';ctx.fillRect(0,0,can.width,can.height);
+    const [l,t,r,b]=cropBox();ctx.drawImage(img,l,t,r-l,b-t,l*scale,t*scale,(r-l)*scale,(b-t)*scale);
+    ctx.strokeStyle='#d6f56b';ctx.lineWidth=3;ctx.strokeRect(l*scale,t*scale,(r-l)*scale,(b-t)*scale);
+    const out=document.createElement('canvas'),previewScale=Math.min(1,1000/(r-l),1000/(b-t));out.width=Math.max(1,Math.round((r-l)*previewScale));out.height=Math.max(1,Math.round((b-t)*previewScale));out.getContext('2d').drawImage(img,l,t,r-l,b-t,0,0,out.width,out.height);
+    $('#photo-original-preview').src=out.toDataURL('image/png');
+    $('#photo-source-size').textContent=`원본 제품 영역 ${r-l} × ${b-t} px · 긴 변 ${Math.max(r-l,b-t)} px`;
+    $('#photo-quality-warning').textContent=Math.min(r-l,b-t)<200||Math.max(r-l,b-t)<400?'제품 영역의 실제 픽셀이 매우 적습니다. 2K로 확대해도 라벨의 정확한 작은 글씨는 복구를 보장할 수 없습니다. 가능하면 더 큰 원본을 찾으세요.':'작은 글씨·뚜껑·제품 윤곽을 원본과 대조하세요. 2K 출력 크기와 원본의 실제 디테일은 다릅니다.';
+    if(photo.result){photo.result=null;$('#photo-result-panel').hidden=true;$('#photo-use').disabled=true;}
+  }
+  async function showResult(a) {
+    photo.result=a;$('#photo-result-preview').src=await photoURL(a);
+    const p=a.provenance||{};
+    $('#photo-result-size').textContent=`AI 확대본 ${a.width} × ${a.height} px · ${p.model||'RealESRGAN x4plus'} · 원본 별도 보존`;
+    $('#photo-result-panel').hidden=false;$('#photo-use').disabled=false;
+    $('#photo-feedback').textContent='확대본을 준비했습니다. 라벨과 제품 모양을 대조한 뒤 전달 사진으로 선택하세요. 자동 교체하지 않습니다.';
+  }
+  async function openPhoto(id) {
+    const c=current(),a=list(c.assets).find(a=>a.id===id);if(!a)return;
+    try {
+      const derived=a.provenance?.type==='local_ai_upscale';
+      const source=derived?list(c.assets).find(x=>x.id===a.provenance.source_asset_id):a;
+      if(!source)throw new Error('비교할 원본 사진을 찾지 못했습니다.');
+      const image=new Image();image.src=await photoURL(source);await image.decode();
+      photo={c,source,image,result:null,running:false};
+      $('#photo-result-panel').hidden=true;$('#photo-use').disabled=true;
+      $('#photo-dialog').showModal();
+      $('#photo-heading').textContent=derived?'원본과 AI 확대본 비교':'제품 영역 확인 · 로컬 AI 2K';
+      setCrop(derived?a.provenance.crop_box:[0,0,image.naturalWidth,image.naturalHeight]);
+      const ready=state.health.local_upscale?.ready===true;
+      $('#photo-run').disabled=!ready;$('#photo-crop-controls').hidden=derived;$('#photo-run').hidden=derived;
+      $('#photo-feedback').textContent=ready?'제품 전체와 뚜껑이 들어가도록 드래그하거나 숫자로 영역을 조절하세요. 이 PC에서 확대하며 유료 생성은 하지 않습니다.':'로컬 AI 확대기 연결을 확인해 주세요. 연결 설정에서 상태를 새로 확인할 수 있습니다.';
+      if(derived)await showResult(a);
+    }catch(e){notice(`사진 준비 실패: ${message(e)}`,true);}
+  }
+  $('#assets').addEventListener('click',e=>{const b=e.target.closest('[data-upscale]');if(b&&!b.disabled)openPhoto(b.dataset.upscale);});
+  $('#photo-close').addEventListener('click',()=>{if(!photo?.running)$('#photo-dialog').close();});
+  $('#photo-dialog').addEventListener('cancel',e=>{if(photo?.running)e.preventDefault();});
+  $('#photo-dialog').addEventListener('close',()=>{photo=null;});
+  for(const key of ['x','y','width','height'])$('#crop-'+key).addEventListener('change',paintCrop);
+  $('#photo-reset').addEventListener('click',()=>setCrop([0,0,photo.image.naturalWidth,photo.image.naturalHeight]));
+  const cropPoint=e=>{const rect=$('#crop-canvas').getBoundingClientRect();return [Math.round(Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width))*photo.image.naturalWidth),Math.round(Math.max(0,Math.min(1,(e.clientY-rect.top)/rect.height))*photo.image.naturalHeight)];};
+  $('#crop-canvas').addEventListener('pointerdown',e=>{if(!photo||photo.running||$('#photo-crop-controls').hidden)return;e.preventDefault();photo.drag=cropPoint(e);e.target.setPointerCapture(e.pointerId);});
+  $('#crop-canvas').addEventListener('pointermove',e=>{if(!photo?.drag||photo.running)return;const a=photo.drag,b=cropPoint(e);setCrop([Math.min(a[0],b[0]),Math.min(a[1],b[1]),Math.max(a[0],b[0]),Math.max(a[1],b[1])]);});
+  for(const event of ['pointerup','pointercancel'])$('#crop-canvas').addEventListener(event,()=>{if(photo)photo.drag=null;});
+  $('#photo-run').addEventListener('click',()=>{
+    if(!photo||photo.running)return;const p=photo,box=cropBox();p.running=true;
+    $('#photo-dialog').querySelectorAll('button,input').forEach(el=>el.disabled=true);
+    $('#photo-feedback').textContent='이 PC에서 AI 확대 중입니다. 원본은 보존하며 완료 후 직접 선택할 수 있습니다.';
+    operation('로컬 AI 2K 확대',async c=>{
+      try{const result=await task(c,'upscale',{asset_id:p.source.id,crop_box:box});if(photo===p)await showResult(result.asset);}
+      catch(e){if(photo===p)$('#photo-feedback').textContent=`확대 실패: ${message(e)} 원본과 기존 선택은 유지됩니다.`;throw e;}
+      finally{p.running=false;$('#photo-dialog').querySelectorAll('button,input').forEach(el=>el.disabled=false);$('#photo-use').disabled=!p.result;}
+    },p.c);
+  });
+  $('#photo-use').addEventListener('click',()=>{
+    if(!photo?.result||photo.running)return;const p=photo;p.running=true;$('#photo-use').disabled=true;
+    operation('확대본 전달 선택',async c=>{try{await chooseAsset(c,p.result.id);$('#photo-dialog').close();}finally{p.running=false;$('#photo-use').disabled=false;}},p.c);
+  });
+
+  $('#assets').addEventListener('change',e=>{
+    if(e.target.dataset.role){const id=e.target.dataset.role,kind=e.target.value||null;operation('사진 역할 지정',async c=>{await api(`/api/cases/${c.id}/assign`,{id,kind});state.picked.delete(c.id);await refresh(c);});}
+    if(e.target.dataset.pick){const id=e.target.dataset.pick,kind=e.target.dataset.kind;operation('전달 사진 선택',async c=>{await chooseAsset(c,id,kind);});}
+  });
+
+  $('#anchors').addEventListener('click',e=>{const button=e.target.closest('[data-generate]');if(!button)return;const kind=button.dataset.generate;operation('GPT 앵커 생성',async c=>{if(!state.health.gptConnected)throw new Error('GPT 브라우저 연결이 필요합니다.');const prompt=c.anchor_prompts?.[kind]?.trim();if(!prompt)throw new Error(`${kinds[kind]} 앵커 요청 문장을 입력하세요.`);const picks=selectedAssets(c);const attachment_ids=kind==='product'?(picks.product?[picks.product]:[]):[];if(kind==='product'&&!attachment_ids.length)throw new Error('제품 원본사진을 업로드하고 제품 역할로 지정·선택하세요.');const result=await task(c,'anchors',{kind,prompt,attachment_ids});if(result?.asset){await chooseAsset(c,result.asset.id,kind);}});});
   $('#modes').addEventListener('click',e=>{const button=e.target.closest('[data-mode]');if(!button||button.disabled)return;current().selection_mode=button.dataset.mode;if(button.dataset.mode==='random')shuffle();rankHooks();renderHooks();changed();});
   $('#hook-search').addEventListener('input',()=>{state.page=40;renderHooks();});$('#family-filter').addEventListener('change',()=>{state.page=40;renderHooks();});$('#category-filter').addEventListener('change',()=>{state.page=40;renderHooks();});
   $('#refresh-hooks').addEventListener('click',()=>{rankHooks();if(current().selection_mode==='random')shuffle();renderHooks();});$('#more-hooks').addEventListener('click',()=>{state.page+=40;renderHooks();});

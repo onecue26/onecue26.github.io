@@ -7,12 +7,12 @@
   <title>ORDER / STUDIO — 소재 워크벤치</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="order-test.css?v=product-point-1121">
+  <link rel="stylesheet" href="order-test.css?v=local-product2k-1125">
   <script src="order-test-reference-sources.js?v=ad-expanded-1120b" defer></script><script src="order-test-hls.min.js?v=1.7.4" defer></script><script src="order-test-reference-player.js?v=ad-expanded-1120b" defer></script><script src="order-test-hooks.js?v=ad-expanded-1120b" defer></script>
   <script src="order-test-ad-audit.js?v=ad-expanded-1120b" defer></script>
   <script src="order-test-library.js?v=ad-expanded-1120b" defer></script>
   <script src="order-test-examples.js?v=ad-expanded-1120b" defer></script>
-  <script src="order-test.js?v=director-plan-1125" defer></script>
+  <script src="order-test.js?v=local-product2k-1125" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -113,7 +113,7 @@ Let the model choose the number of cuts, lenses and shot sizes within each beat,
           <details id="research-panel"><summary>수집 결과 · 출처 검토</summary><div id="research-content" class="research">아직 수집한 정보가 없습니다.</div><button id="apply-facts" data-mutate>빈 입력칸에만 적용</button></details>
         </section>
         <section class="panel"><div class="section-head"><span class="step">02</span><div><p class="eyebrow">확인한 사실</p><h2>제품 사실 8</h2></div></div><p class="hint">검증한 정보만 입력하세요. 비어 있는 사실은 오더에서 생략됩니다.</p><fieldset id="facts-fields" class="facts-grid" disabled></fieldset></section>
-        <section class="panel"><div class="section-head"><span class="step">03</span><div><p class="eyebrow">기준 사진</p><h2>제품 · 인물 · 장소</h2></div></div><p class="hint">사진을 여러 장 올리고 역할을 지정하세요. 각 역할에서 한 장씩 선택해 GPT에 전달합니다.</p>
+        <section class="panel"><div class="section-head"><span class="step">03</span><div><p class="eyebrow">기준 사진</p><h2 id="product-photos">제품 · 인물 · 장소</h2></div></div><p class="hint">찾거나 업로드한 사진에 역할을 지정하세요. 제품 사진은 「제품 영역 확인 · AI 2K」로 크게 준비하고 원본과 비교할 수 있습니다. 각 역할에서 한 장씩 전달 선택하며, 선택은 저장됩니다. 원본과 확대본은 별도로 보존합니다.</p>
           <button id="upload-button" class="upload-button" data-mutate><span>＋</span> 제품사진 / 기존 사진 여러 장 업로드</button><input id="upload-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>
           <div id="assets" class="assets"></div><button id="prepare-anchors" class="wide quiet" data-mutate>제품 정보로 앵커 문장 준비</button><p class="hint">빈 요청 칸만 채웁니다. 문장을 수정한 뒤 각 생성 버튼으로 요청하세요. 인물·장소는 위에서 먼저 입력해 주세요.</p><div id="anchors" class="anchors"></div>
         </section>
@@ -142,5 +142,6 @@ Let the model choose the number of cuts, lenses and shot sizes within each beat,
   </main>
   <dialog id="settings"><form id="connection-form"><div class="dialog-head"><div><p class="eyebrow">로컬 연결</p><h2>작업 환경 연결</h2></div><button type="button" id="settings-close" class="quiet" aria-label="설정 닫기">✕</button></div><p class="hint">서버에서 발급한 브리지 주소와 키를 입력하세요. 브라우저와 제작 세션의 사용 가능 상태를 확인합니다.</p><label>브리지 주소<input id="bridge-url" type="url" required placeholder="http://127.0.0.1:8767" autocomplete="off"></label><label>연결 키<input id="bridge-key" type="password" required autocomplete="off" placeholder="서버 발급 키"></label><label class="check"><input id="remember" type="checkbox">이 기기에 연결 키 저장</label><p class="hint">선택한 경우에만 localStorage의 order-test-bridge에 저장됩니다. 공유 기기에서는 해제하세요. 연결 링크의 키는 읽은 즉시 주소창에서 제거됩니다.</p><p id="connection-feedback" role="status"></p><div class="dialog-actions"><button type="button" id="disconnect" class="quiet">연결 해제 · 저장 키 삭제</button><button type="submit" class="lime" id="connect">연결 확인</button></div></form></dialog>
   <dialog id="replace-dialog"><form method="dialog"><h2>현재 오더를 다시 만들까요?</h2><p>직접 편집한 현재 오더가 새 오더로 바뀝니다.</p><div class="dialog-actions"><button value="cancel" class="quiet">취소</button><button value="replace" class="lime">다시 만들기</button></div></form></dialog>
+  <dialog id="photo-dialog" aria-labelledby="photo-heading"><div class="dialog-head"><div><p class="eyebrow">사진 준비 · 원본 보존</p><h2 id="photo-heading">제품 영역 확인 · 로컬 AI 2K</h2></div><button id="photo-close" type="button" class="quiet" aria-label="사진 준비 닫기">✕</button></div><p id="photo-feedback" class="hint" role="status"></p><div id="photo-crop-controls"><p class="hint">사진에서 제품 전체를 드래그하세요. 배경을 줄이되 뚜껑과 바닥을 자르지 마세요.</p><canvas id="crop-canvas" aria-label="제품 영역 드래그 선택"></canvas><div class="crop-fields"><label>왼쪽(px)<input id="crop-x" type="number" min="0" step="1"></label><label>위쪽(px)<input id="crop-y" type="number" min="0" step="1"></label><label>너비(px)<input id="crop-width" type="number" min="1" step="1"></label><label>높이(px)<input id="crop-height" type="number" min="1" step="1"></label></div><button id="photo-reset" class="quiet" type="button">원본 전체 영역</button></div><div class="photo-compare"><figure><figcaption id="photo-source-size">원본 제품 영역</figcaption><img id="photo-original-preview" alt="선택한 제품 영역 원본"></figure><figure id="photo-result-panel" hidden><figcaption id="photo-result-size">AI 2K 확대본</figcaption><img id="photo-result-preview" alt="로컬 AI로 확대한 제품 사진"></figure></div><p id="photo-quality-warning" class="hint"></p><p class="hint">AI는 흐릿한 획을 추정할 수 있습니다. 출력이 2K여도 원본에 없던 정확한 글자가 보장되는 것은 아닙니다. 실제 영상의 라벨 유지 여부는 별도로 확인해야 합니다.</p><div class="dialog-actions"><button id="photo-run" type="button" class="quiet">로컬 AI로 긴 변 2K 준비</button><button id="photo-use" type="button" class="lime" disabled>이 확대본을 제품 전달 사진으로 선택</button></div></dialog>
 </body>
 </html>
